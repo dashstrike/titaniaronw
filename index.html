@@ -1061,7 +1061,7 @@
     if(!data.length){list.innerHTML='<div class="empty-note">No registered users.</div>';return;}
     list.innerHTML=data.map(profile=>{
       const self=profile.id===currentAuthUser.id;
-      return `<div class="admin-user-row" data-admin-user="${escapeAttr(profile.id)}"><div class="admin-user-ident"><div class="admin-user-name">${escapeHtml(profile.display_name||'Unnamed user')}${self?' · You':''}</div><div class="admin-user-email">${escapeHtml(profile.email||'')}</div></div><select data-admin-role ${self?'disabled':''}>${['pending','viewer','leader','admin'].map(role=>`<option value="${role}" ${profile.role===role?'selected':''}>${role}</option>`).join('')}</select><label class="admin-approved"><input type="checkbox" data-admin-approved ${profile.approved?'checked':''} ${self?'disabled':''}> Approved</label><button class="btn small" data-admin-save ${self?'disabled':''}>Save</button></div>`;
+      return `<div class="admin-user-row" data-admin-user="${escapeAttr(profile.id)}"><div class="admin-user-ident"><div class="admin-user-name">${escapeHtml(profile.display_name||'Unnamed user')}${self?' · You':''}</div><div class="admin-user-email">${escapeHtml(maskEmail(profile.email||''))}</div></div><select data-admin-role ${self?'disabled':''}>${['pending','viewer','leader','admin'].map(role=>`<option value="${role}" ${profile.role===role?'selected':''}>${role}</option>`).join('')}</select><label class="admin-approved"><input type="checkbox" data-admin-approved ${profile.approved?'checked':''} ${self?'disabled':''}> Approved</label><button class="btn small" data-admin-save ${self?'disabled':''}>Save</button></div>`;
     }).join('');
     list.querySelectorAll('[data-admin-save]').forEach(button=>button.addEventListener('click',async()=>{
       const row=button.closest('[data-admin-user]');
@@ -2376,6 +2376,16 @@ Their team assignments and membership history will also be removed. Use Mark Ina
   function teamsMatch(a,b){const first=state.assignments[a].filter(Boolean).slice().sort();const second=state.assignments[b].filter(Boolean).slice().sort();return first.length>0&&first.length===second.length&&first.every((value,index)=>value===second[index]);}
   function dungeonMatches(eliteKey){return DUNGEON_KEYS.filter(key=>teamsMatch(eliteKey,key));}
   function classColor(cls){return CLASS_COLORS[cls]||CLASS_COLORS.Unknown;}
+  function maskEmail(value){
+    const email=stringValue(value).trim();
+    const at=email.indexOf('@');
+    if(at<=0)return email;
+    const local=email.slice(0,at);
+    const domain=email.slice(at+1);
+    const visible=local.length<=2?1:Math.min(3,local.length);
+    const masked=local.slice(0,visible)+'*'.repeat(Math.max(3,local.length-visible));
+    return `${masked}@${domain}`;
+  }
   function formatNumber(value){return Number(value||0).toLocaleString();}
   function stringValue(value){return value===null||value===undefined?'':String(value);}
   function toInt(value,min,max){let number=Number.parseInt(value,10);if(!Number.isFinite(number))number=min;return Math.max(min,Math.min(max,number));}
