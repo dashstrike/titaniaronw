@@ -158,3 +158,19 @@ That means another Leader/Admin saved a newer version first. Reload the newest p
 Once the Supabase website is fully tested, the live website does not require `Code.gs` or Google Sheets for storage.
 
 Keep your old Sheet as a backup until you are comfortable with the new system.
+
+## Credits
+
+Titania Guild Management Tool is based on and adapted from
+[RO World Planner](https://github.com/cajancharles/roworldplanner),
+originally created by [CharlesPlaysGG](https://github.com/cajancharles).
+
+The original project provided the foundation for the guild lineup planner,
+including its team-management and drag-and-drop concepts.
+
+This version has been independently modified and extended for the Titania guild,
+including custom Guild League and Polarity Zone layouts, Supabase authentication,
+public lineup views, raid-leader controls, user permissions, and other features.
+
+Original project: https://github.com/cajancharles/roworldplanner
+
