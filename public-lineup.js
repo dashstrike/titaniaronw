@@ -54,19 +54,17 @@ function applyTheme(theme){
 }
 async function loadLineup(){
   const content=document.getElementById('content');
-  if(!state)content.innerHTML='<div class="loading"><div class="spinner"></div>Loading lineup…</div>';
+  if(!state)content.innerHTML='<div class="loading"><div class="spinner"></div>Loading live lineup…</div>';
   try{
     const cfg=window.TITANIA_CONFIG||{};
-    const url=cfg.supabaseUrl||cfg.SUPABASE_URL;
-    const key=cfg.supabasePublishableKey||cfg.SUPABASE_PUBLISHABLE_KEY;
-    if(!url||!key)throw new Error('Supabase configuration is missing.');
-    if(!client)client=window.supabase.createClient(url,key,{auth:{persistSession:false,autoRefreshToken:false,detectSessionInUrl:false}});
+    if(!cfg.supabaseUrl||!cfg.supabasePublishableKey)throw new Error('Supabase configuration is missing.');
+    if(!client)client=window.supabase.createClient(cfg.supabaseUrl,cfg.supabasePublishableKey,{auth:{persistSession:false,autoRefreshToken:false,detectSessionInUrl:false}});
     const {data,error}=await client.rpc('get_public_lineup');
     if(error)throw error;
     state=normalize(data||{});members=new Map(state.roster.map(m=>[m.name,m]));
     render();
   }catch(err){
-    content.innerHTML=`<div class="error-box"><b>Could not load lineup</b>${esc(err&&err.message?err.message:String(err))}<br><br><span class="error-note">Make sure <code>public_view_setup.sql</code> has been run in Supabase.</span></div>`;
+    content.innerHTML=`<div class="error-box"><b>Could not load public lineup</b>${esc(err&&err.message?err.message:String(err))}<br><br><span style="font-size:10px">Make sure <code>public_view_setup.sql</code> has been run in Supabase.</span></div>`;
   }
 }
 function normalize(raw){
@@ -75,30 +73,29 @@ function normalize(raw){
   return {roster,assignments,raidLeaders:raw.raidLeaders||{},raidModes:raw.raidModes||{},finishedDungeons:Array.isArray(raw.finishedDungeons)?raw.finishedDungeons.map(Number):[],revision:num(raw.revision),updatedAt:str(raw.updatedAt)};
 }
 function render(){
-  const title=VIEW==='guild'?'Guild League':'Polarity Zone';
+  const title=VIEW==='guild'?'Guild League Public Lineup':'Polarity Zone Public Lineup';
+  document.getElementById('pageTitle').textContent=title;
   document.title=`Titania · ${title}`;
-  const updated=state.updatedAt?formatDateTime(state.updatedAt):'Live';
-  document.getElementById('content').innerHTML=`<section class="lineup-sheet">
-    <div class="sheet-head">
-      <div><div class="sheet-brand">TITANIA GUILD MANAGEMENT TOOL</div><div class="sheet-event">${esc(title)}</div></div>
-      <div class="sheet-meta">Dark Lord Server<br>Updated ${esc(updated)}</div>
-    </div>
-    ${VIEW==='guild'?renderGuild():renderPolarity()}
-  </section>`;
+  const keys=VIEW==='guild'?[...MAIN_RAIDS,...SUB_RAIDS].flatMap(r=>r.keys):[...STAR_RAIDS,...DUNGEONS].flatMap(r=>r.keys);
+  const assigned=assignedSet(keys);const full=keys.filter(k=>slots(k).every(Boolean)).length;const noHealer=keys.filter(k=>teamNoHealer(k)).length;
+  document.getElementById('stats').innerHTML=stat(assigned.size,'Members Slotted')+stat(`${full}/${keys.length}`,'Full Teams')+stat(noHealer,'No Healer')+stat(state.revision,'Revision');
+  document.getElementById('updatedAt').textContent=state.updatedAt?`Updated ${formatDateTime(state.updatedAt)}`:'Live lineup';
+  document.getElementById('content').innerHTML=VIEW==='guild'?renderGuild():renderPolarity();
 }
 function renderGuild(){
-  return section('⚔ Main Battlefield','main')+
+  return section('⚔ Main Battlefield','main','3 raids · 4 teams each')+
     MAIN_RAIDS.map(r=>raidBlock(r,'main',false)).join('')+
-    section('◈ Sub Battlefield','sub')+
+    section('◈ Sub Battlefield','sub','5 raids · Teams 1–18')+
     SUB_RAIDS.map(r=>raidBlock(r,'sub',false)).join('');
 }
 function renderPolarity(){
-  let html=section('★ Star Dungeon','star');
+  let html=section('★ Star Dungeon','star','2 raid teams · Teams 1–10');
   html+=STAR_RAIDS.map(r=>raidBlock(r,'star',true)).join('');
   DUNGEONS.forEach(d=>{
     const leader=str(state.raidLeaders[d.id])||'Not assigned';
     const finished=state.finishedDungeons.includes(d.dungeon);
-    html+=`<div class="raid-block dungeon-block"><div class="raid-head"><div class="raid-name">NORMAL DUNGEON ${d.dungeon} · TEAM <b>${esc(leader)}</b></div>${finished?'<span class="finished">✓ Run Finished</span>':''}<div class="raid-line"></div></div><div class="team-grid">${d.keys.map((k,i)=>teamCard(k,'normal',`Team ${i+1}`)).join('')}</div></div>`;
+    html+=`<div class="section-head"><div class="section-title normal">↪ Normal Dungeon ${d.dungeon}</div><div class="section-line"></div>${finished?'<span class="finished">✓ Run Finished</span>':''}</div>`;
+    html+=`<div class="raid-block"><div class="raid-head"><div class="raid-name">NORMAL DUNGEON ${d.dungeon} · TEAM <b>${esc(leader)}</b></div><div class="raid-line"></div><div class="leader">Raid Leader <b>${esc(leader)}</b></div></div><div class="team-grid">${d.keys.map((k,i)=>teamCard(k,'normal',`Team ${i+1}`)).join('')}</div></div>`;
   });
   return html;
 }
@@ -106,7 +103,7 @@ function raidBlock(raid,kind,five){
   const leader=str(state.raidLeaders[raid.id])||'Not assigned';
   const mode=MAIN_RAIDS.some(r=>r.id===raid.id)?(str(state.raidModes[raid.id]).toUpperCase()==='DEF'?'DEF':'ATK'):'';
   const raidTitle=kind==='star'?`RAID TEAM — <b>${esc(leader)}</b>`:`${esc(raid.label.toUpperCase())} · TEAM <b>${esc(leader)}</b>`;
-  return `<div class="raid-block"><div class="raid-head"><div class="raid-name">${raidTitle}</div>${mode?`<span class="mode ${mode.toLowerCase()}">${mode==='DEF'?'🛡':'⚔'} ${mode}</span>`:''}<div class="raid-line"></div></div><div class="team-grid ${five?'five':''}">${raid.keys.map(k=>teamCard(k,kind)).join('')}</div></div>`;
+  return `<div class="raid-block"><div class="raid-head"><div class="raid-name">${raidTitle}</div>${mode?`<span class="mode ${mode.toLowerCase()}">${mode==='DEF'?'🛡':'⚔'} ${mode}</span>`:''}<div class="raid-line"></div><div class="leader">Raid Leader <b>${esc(leader)}</b></div></div><div class="team-grid ${five?'five':''}">${raid.keys.map(k=>teamCard(k,kind)).join('')}</div></div>`;
 }
 function teamCard(key,kind,label){
   const s=slots(key),filled=s.filter(Boolean).length,noHealer=teamNoHealer(key);
@@ -115,10 +112,12 @@ function teamCard(key,kind,label){
 function slotHtml(name,index){
   if(!name)return `<div class="slot ${index===0?'leader-slot':''}"><span class="crown">${index===0?'♛':''}</span><span class="empty">${index===0?'Empty team leader':'Empty slot'}</span></div>`;
   const m=members.get(name)||{name,cls:'Unknown',gr:0};const c=CLASS_COLORS[m.cls]||CLASS_COLORS.Unknown;
-  return `<div class="slot ${index===0?'leader-slot':''}"><span class="${index===0?'crown':'dot'}" style="${index===0?'':'background:'+c+';color:'+c}">${index===0?'♛':''}</span><div class="member"><div class="member-name">${esc(name)}</div></div><span class="member-job" style="color:${c}">${esc(m.cls)}</span></div>`;
+  return `<div class="slot ${index===0?'leader-slot':''}"><span class="${index===0?'crown':'dot'}" style="${index===0?'':'background:'+c+';color:'+c}">${index===0?'♛':''}</span><div class="member"><div class="member-name">${esc(name)}</div><div class="member-class" style="color:${c}">${esc(m.cls)}</div></div><span class="gr">${fmt(m.gr)}</span></div>`;
 }
-function section(title,kind){return `<div class="section-head"><div class="section-title ${kind}">${title}</div><div class="section-line"></div></div>`;}
+function section(title,kind,note){return `<div class="section-head"><div class="section-title ${kind}">${title}</div><div class="section-line"></div><div class="section-note">${esc(note)}</div></div>`;}
+function stat(v,l){return `<div class="stat"><b>${esc(String(v))}</b><span>${esc(l)}</span></div>`;}
 function slots(key){const a=Array.isArray(state.assignments[key])?state.assignments[key].slice(0,TEAM_SIZE):[];while(a.length<TEAM_SIZE)a.push(null);return a.map(v=>str(v)||null);}
+function assignedSet(keys){const s=new Set();keys.forEach(k=>slots(k).forEach(n=>{if(n)s.add(n)}));return s;}
 function teamNoHealer(key){const names=slots(key).filter(Boolean);return names.length>0&&!names.some(n=>HEALERS.has((members.get(n)||{}).cls));}
 function teamLabel(key){const m=/_([0-9]+)$/.exec(key);return `Team ${m?m[1]:'?'}`;}
 function fmt(v){return Number(v||0).toLocaleString();}
