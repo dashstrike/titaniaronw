@@ -1,6 +1,6 @@
 # Titania Guild Management - GitHub Pages + Supabase
 
-This package converts the current Titania Apps Script web app into a normal static website hosted on GitHub Pages with Supabase providing:
+Titania Guild Management is a browser-based guild planning tool hosted on GitHub Pages, with Supabase providing:
 
 - Email/password registration and login
 - Password reset
@@ -10,7 +10,9 @@ This package converts the current Titania Apps Script web app into a normal stat
 - Row Level Security (RLS)
 - Revision conflict protection for concurrent edits
 - Direct Raid Leader and ATK/DEF saves
-- The existing Titania UI, roster, Guild League, Polarity Zone, print/export/import and drag/drop logic
+- Guild League and Polarity Zone planning
+- Public read-only lineup pages with per-event publish controls
+- Print/share, export/import, and drag/drop team management
 
 ## Important security rule
 
@@ -21,7 +23,7 @@ This package converts the current Titania Apps Script web app into a normal stat
 
 These are intended for browser applications when RLS is enabled.
 
-**Never put a Supabase secret key or `service_role` key in GitHub, `config.js`, HTML, or browser JavaScript.**
+**Never put a Supabase secret key, `service_role` key, database password, SMTP password, or other private credential in GitHub, `config.js`, HTML, or browser JavaScript.**
 
 ---
 
@@ -29,7 +31,7 @@ These are intended for browser applications when RLS is enabled.
 
 1. Sign in to Supabase and create a new project.
 2. Open the project's SQL Editor.
-3. Paste the entire contents of `supabase_setup.sql` and run it once.
+3. Run the required SQL setup files for the application.
 4. Open Project Settings / API and copy:
    - Project URL
    - Publishable key
@@ -51,15 +53,17 @@ Create a repository such as:
 
 `titania-guild-management`
 
-Upload the contents of this folder to the repository root:
+Upload the website files to the repository root, including:
 
 - `index.html`
 - `config.js`
-- `supabase_setup.sql`
+- Public lineup pages such as `guild-league.html` and `polarity-zone.html`
 - `.nojekyll`
 - `README.md`
+- Any required SQL setup files
+- Website assets such as the Titania logo
 
-Do not upload any Supabase secret/service-role keys.
+Do not upload any Supabase secret/service-role keys or SMTP credentials.
 
 ## Step 4 - Turn on GitHub Pages
 
@@ -116,61 +120,61 @@ Roles:
 - `leader` - can edit roster, assignments, raid leaders and modes
 - `admin` - same as Leader plus user approval/role management
 
-## Step 8 - Move your existing Titania data
+## Public lineup pages
 
-The safest migration method is to use your current Apps Script application's existing Export button.
+The project includes separate read-only public pages for Guild League and Polarity Zone.
 
-1. Open the current Apps Script version.
-2. Click Export and keep the generated JSON backup.
-3. Open the new Supabase website as an Admin/Leader.
-4. Click Import.
-5. Select the JSON backup.
-6. Confirm the import.
-7. Wait until the header shows `Saved`.
-8. Reload the site and verify Guild League, Polarity Zone, roster, raid leaders and membership history.
+Visitors do not need to register or sign in to view an event that has been published.
 
-Keep the old Google Sheet / Apps Script version untouched until you have verified the new website.
+Leader/Admin users can control each event separately with the **Public View: ON / OFF** switch inside the management app.
+
+- **ON** - the event lineup is available on its public page.
+- **OFF** - the lineup remains private and the public page displays a not-published message.
+
+The public access function is designed to expose only the lineup information required by the public pages rather than the full private planner state.
 
 ## Database approach
 
-To minimize migration risk, this first Supabase version stores the planner as one transactional JSONB document in `public.planner_state` while authentication/roles live in `public.profiles`.
+The planner is stored as one transactional JSONB document in `public.planner_state`, while authentication and user roles live separately in Supabase Auth and `public.profiles`.
 
-This deliberately preserves the application's existing state model and revision logic instead of rewriting all Guild League / Polarity Zone functions at once.
+This preserves the application's existing planner state model and revision logic.
 
-The database functions are:
+Core database functions include:
 
 - `save_planner_state` - full autosave with revision checking
 - `save_raid_leader_setting` - direct Raid Leader save
 - `save_raid_mode_setting` - direct ATK/DEF save
+- Public lineup functions used by the read-only Guild League and Polarity Zone pages
 
-This can be normalized into separate members/assignments/history tables later if needed without changing the visible design.
+The planner data can be normalized into separate members, assignments, history, and audit tables later if needed without changing the visible design.
 
 ## Account recovery
 
 The Login screen includes `Forgot password?`. Supabase emails a recovery link back to the website, where the user can set a new password.
 
+For production use, configure a custom SMTP provider in Supabase rather than relying on the limited built-in test email service.
+
 ## If saving says REVISION_CONFLICT
 
-That means another Leader/Admin saved a newer version first. Reload the newest planner when prompted. This is the same concurrency protection concept the Apps Script version used.
+That means another Leader/Admin saved a newer version first. Reload the newest planner when prompted to avoid overwriting another user's changes.
 
-## Files no longer needed after migration
+## Security
 
-Once the Supabase website is fully tested, the live website does not require `Code.gs` or Google Sheets for storage.
+The GitHub repository may safely contain the Supabase **Project URL** and **publishable key** when Row Level Security is correctly configured.
 
-Keep your old Sheet as a backup until you are comfortable with the new system.
+Never commit:
+
+- Supabase secret or `service_role` keys
+- Database passwords or connection strings containing passwords
+- SMTP passwords or SMTP keys
+- Gmail App Passwords
+- GitHub Personal Access Tokens
+- Any other privileged credential
 
 ## Credits
 
-Titania Guild Management Tool is based on and adapted from
-[RO World Planner](https://github.com/cajancharles/roworldplanner),
-originally created by [CharlesPlaysGG](https://github.com/cajancharles).
+Titania Guild Management Tool is based on and adapted from [RO World Planner](https://github.com/cajancharles/roworldplanner), originally created by [CharlesPlaysGG](https://github.com/cajancharles).
 
-The original project provided the foundation for the guild lineup planner,
-including its team-management and drag-and-drop concepts.
+The original project provided the foundation for the guild lineup planner and team-management concepts. This Titania version has been independently modified and extended with custom Guild League and Polarity Zone layouts, Supabase authentication and storage, user roles, public lineup views, raid-leader controls, publish controls, and other guild-specific features.
 
-This version has been independently modified and extended for the Titania guild,
-including custom Guild League and Polarity Zone layouts, Supabase authentication,
-public lineup views, raid-leader controls, user permissions, and other features.
-
-Original project: https://github.com/cajancharles/roworldplanner
-
+Please retain the original project's MIT license and copyright notice where required by its license terms.
