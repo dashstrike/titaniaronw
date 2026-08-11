@@ -2,6 +2,7 @@
 
 const VIEW = document.body.dataset.view || 'guild';
 const TEAM_SIZE = 5;
+
 const MAIN_RAIDS = [
   {id:'raid_1',label:'Raid 1',keys:['main_1','main_2','main_3','main_4']},
   {id:'raid_2',label:'Raid 2',keys:['main_5','main_6','main_7','main_8']},
@@ -19,7 +20,9 @@ const STAR_RAIDS = [
   {id:'pz_star_2',label:'Raid Team',keys:['elite_6','elite_7','elite_8','elite_9','elite_10']}
 ];
 const DUNGEONS = Array.from({length:5},(_,i)=>({
-  id:`pz_dungeon_${i+1}`,dungeon:i+1,label:`Normal Dungeon ${i+1}`,
+  id:`pz_dungeon_${i+1}`,
+  dungeon:i+1,
+  label:`Normal Dungeon ${i+1}`,
   keys:Array.from({length:8},(_,j)=>`dungeon${i+1}_${j+1}`)
 }));
 const HEALERS = new Set(['Acolyte','Priest','High Priest']);
@@ -30,11 +33,15 @@ const CLASS_COLORS = {
   Thief:'#a579f2',Assassin:'#a579f2','Assassin Cross':'#a579f2',Merchant:'#df9056',Blacksmith:'#df9056',Whitesmith:'#df9056',Alchemist:'#df9056',Creator:'#df9056',
   Gunslinger:'#b27d69',Rebel:'#b27d69','Night Watch':'#b27d69',Druid:'#32947e',Kanos:'#32947e',Alithea:'#32947e',Unknown:'#8b93b0'
 };
-let client=null,state=null,members=new Map();
+
+let client = null;
+let state = null;
+let members = new Map();
 
 document.addEventListener('DOMContentLoaded',()=>{
   setupTheme();
-  document.getElementById('refreshBtn').addEventListener('click',loadLineup);
+  const refresh = document.getElementById('refreshBtn');
+  if(refresh) refresh.addEventListener('click',loadLineup);
   loadLineup();
   setInterval(loadLineup,60000);
 });
@@ -42,86 +49,158 @@ document.addEventListener('DOMContentLoaded',()=>{
 function setupTheme(){
   let theme='';
   try{theme=localStorage.getItem('titania_public_theme')||'';}catch(_e){}
-  if(!theme)theme=window.matchMedia&&window.matchMedia('(prefers-color-scheme: light)').matches?'light':'dark';
+  if(!theme) theme=window.matchMedia&&window.matchMedia('(prefers-color-scheme: light)').matches?'light':'dark';
   applyTheme(theme);
-  document.getElementById('themeBtn').addEventListener('click',()=>applyTheme(document.documentElement.dataset.theme==='light'?'dark':'light'));
+  const btn=document.getElementById('themeBtn');
+  if(btn) btn.addEventListener('click',()=>applyTheme(document.documentElement.dataset.theme==='light'?'dark':'light'));
 }
+
 function applyTheme(theme){
   document.documentElement.dataset.theme=theme;
   const btn=document.getElementById('themeBtn');
-  if(btn)btn.innerHTML=theme==='light'?'<span class="theme-icon">☾</span> Dark':'<span class="theme-icon">☀</span> Light';
+  if(btn) btn.innerHTML=theme==='light'?'<span class="theme-icon">☾</span> Dark':'<span class="theme-icon">☀</span> Light';
   try{localStorage.setItem('titania_public_theme',theme);}catch(_e){}
 }
+
 async function loadLineup(){
   const content=document.getElementById('content');
-  if(!state)content.innerHTML='<div class="loading"><div class="spinner"></div>Loading live lineup…</div>';
+  if(!content) return;
+  if(!state) content.innerHTML='<div class="loading"><div class="spinner"></div>Loading lineup…</div>';
   try{
     const cfg=window.TITANIA_CONFIG||{};
-    if(!cfg.supabaseUrl||!cfg.supabasePublishableKey)throw new Error('Supabase configuration is missing.');
-    if(!client)client=window.supabase.createClient(cfg.supabaseUrl,cfg.supabasePublishableKey,{auth:{persistSession:false,autoRefreshToken:false,detectSessionInUrl:false}});
+    const url=cfg.supabaseUrl||cfg.SUPABASE_URL;
+    const key=cfg.supabasePublishableKey||cfg.SUPABASE_PUBLISHABLE_KEY;
+    if(!url||!key) throw new Error('Supabase configuration is missing.');
+    if(!window.supabase) throw new Error('Supabase library did not load.');
+    if(!client) client=window.supabase.createClient(url,key,{auth:{persistSession:false,autoRefreshToken:false,detectSessionInUrl:false}});
     const {data,error}=await client.rpc('get_public_lineup');
-    if(error)throw error;
-    state=normalize(data||{});members=new Map(state.roster.map(m=>[m.name,m]));
+    if(error) throw error;
+    state=normalize(data||{});
+    members=new Map(state.roster.map(m=>[m.name,m]));
     render();
   }catch(err){
-    content.innerHTML=`<div class="error-box"><b>Could not load public lineup</b>${esc(err&&err.message?err.message:String(err))}<br><br><span style="font-size:10px">Make sure <code>public_view_setup.sql</code> has been run in Supabase.</span></div>`;
+    content.innerHTML=`<div class="error-box"><b>Could not load lineup</b>${esc(err&&err.message?err.message:String(err))}<br><br><span class="error-note">Make sure <code>public_view_setup.sql</code> has been run in Supabase.</span></div>`;
   }
 }
+
 function normalize(raw){
-  const roster=Array.isArray(raw.roster)?raw.roster.map(m=>({name:str(m.name),cls:str(m.cls)||'Unknown',gr:num(m.gr)})).filter(m=>m.name):[];
+  const roster=Array.isArray(raw.roster)
+    ? raw.roster.map(m=>({name:str(m.name),cls:str(m.cls)||'Unknown'})).filter(m=>m.name)
+    : [];
   const assignments=raw.assignments&&typeof raw.assignments==='object'?raw.assignments:{};
-  return {roster,assignments,raidLeaders:raw.raidLeaders||{},raidModes:raw.raidModes||{},finishedDungeons:Array.isArray(raw.finishedDungeons)?raw.finishedDungeons.map(Number):[],revision:num(raw.revision),updatedAt:str(raw.updatedAt)};
+  return {
+    roster,
+    assignments,
+    raidLeaders:raw.raidLeaders||{},
+    raidModes:raw.raidModes||{},
+    finishedDungeons:Array.isArray(raw.finishedDungeons)?raw.finishedDungeons.map(Number):[],
+    revision:num(raw.revision),
+    updatedAt:str(raw.updatedAt)
+  };
 }
+
 function render(){
-  const title=VIEW==='guild'?'Guild League Public Lineup':'Polarity Zone Public Lineup';
-  document.getElementById('pageTitle').textContent=title;
+  const content=document.getElementById('content');
+  if(!content) return;
+  const title=VIEW==='guild'?'Guild League':'Polarity Zone';
   document.title=`Titania · ${title}`;
-  const keys=VIEW==='guild'?[...MAIN_RAIDS,...SUB_RAIDS].flatMap(r=>r.keys):[...STAR_RAIDS,...DUNGEONS].flatMap(r=>r.keys);
-  const assigned=assignedSet(keys);const full=keys.filter(k=>slots(k).every(Boolean)).length;const noHealer=keys.filter(k=>teamNoHealer(k)).length;
-  document.getElementById('stats').innerHTML=stat(assigned.size,'Members Slotted')+stat(`${full}/${keys.length}`,'Full Teams')+stat(noHealer,'No Healer')+stat(state.revision,'Revision');
-  document.getElementById('updatedAt').textContent=state.updatedAt?`Updated ${formatDateTime(state.updatedAt)}`:'Live lineup';
-  document.getElementById('content').innerHTML=VIEW==='guild'?renderGuild():renderPolarity();
+  const updated=state.updatedAt?formatDateTime(state.updatedAt):'Live';
+  content.innerHTML=`<section class="lineup-sheet">
+    <div class="sheet-head">
+      <div class="sheet-brand">${esc(title)}</div>
+      <div class="sheet-meta">Dark Lord Server<br>Updated ${esc(updated)}</div>
+    </div>
+    ${VIEW==='guild'?renderGuild():renderPolarity()}
+  </section>`;
 }
+
 function renderGuild(){
-  return section('⚔ Main Battlefield','main','3 raids · 4 teams each')+
+  return section('⚔ Main Battlefield','main')+
     MAIN_RAIDS.map(r=>raidBlock(r,'main',false)).join('')+
-    section('◈ Sub Battlefield','sub','5 raids · Teams 1–18')+
+    section('◈ Sub Battlefield','sub')+
     SUB_RAIDS.map(r=>raidBlock(r,'sub',false)).join('');
 }
+
 function renderPolarity(){
-  let html=section('★ Star Dungeon','star','2 raid teams · Teams 1–10');
+  let html=section('★ Star Dungeon','star');
   html+=STAR_RAIDS.map(r=>raidBlock(r,'star',true)).join('');
   DUNGEONS.forEach(d=>{
     const leader=str(state.raidLeaders[d.id])||'Not assigned';
     const finished=state.finishedDungeons.includes(d.dungeon);
-    html+=`<div class="section-head"><div class="section-title normal">↪ Normal Dungeon ${d.dungeon}</div><div class="section-line"></div>${finished?'<span class="finished">✓ Run Finished</span>':''}</div>`;
-    html+=`<div class="raid-block"><div class="raid-head"><div class="raid-name">NORMAL DUNGEON ${d.dungeon} · TEAM <b>${esc(leader)}</b></div><div class="raid-line"></div><div class="leader">Raid Leader <b>${esc(leader)}</b></div></div><div class="team-grid">${d.keys.map((k,i)=>teamCard(k,'normal',`Team ${i+1}`)).join('')}</div></div>`;
+    html+=`<div class="raid-block dungeon-block">
+      <div class="raid-head">
+        <div class="raid-name">NORMAL DUNGEON ${d.dungeon} · TEAM <b>${esc(leader)}</b></div>
+        ${finished?'<span class="finished">✓ Run Finished</span>':''}
+        <div class="raid-line"></div>
+      </div>
+      <div class="team-grid">${d.keys.map((k,i)=>teamCard(k,'normal',`Team ${i+1}`)).join('')}</div>
+    </div>`;
   });
   return html;
 }
+
 function raidBlock(raid,kind,five){
   const leader=str(state.raidLeaders[raid.id])||'Not assigned';
   const mode=MAIN_RAIDS.some(r=>r.id===raid.id)?(str(state.raidModes[raid.id]).toUpperCase()==='DEF'?'DEF':'ATK'):'';
   const raidTitle=kind==='star'?`RAID TEAM — <b>${esc(leader)}</b>`:`${esc(raid.label.toUpperCase())} · TEAM <b>${esc(leader)}</b>`;
-  return `<div class="raid-block"><div class="raid-head"><div class="raid-name">${raidTitle}</div>${mode?`<span class="mode ${mode.toLowerCase()}">${mode==='DEF'?'🛡':'⚔'} ${mode}</span>`:''}<div class="raid-line"></div><div class="leader">Raid Leader <b>${esc(leader)}</b></div></div><div class="team-grid ${five?'five':''}">${raid.keys.map(k=>teamCard(k,kind)).join('')}</div></div>`;
+  return `<div class="raid-block">
+    <div class="raid-head">
+      <div class="raid-name">${raidTitle}</div>
+      ${mode?`<span class="mode ${mode.toLowerCase()}">${mode==='DEF'?'🛡':'⚔'} ${mode}</span>`:''}
+      <div class="raid-line"></div>
+    </div>
+    <div class="team-grid ${five?'five':''}">${raid.keys.map(k=>teamCard(k,kind)).join('')}</div>
+  </div>`;
 }
+
 function teamCard(key,kind,label){
-  const s=slots(key),filled=s.filter(Boolean).length,noHealer=teamNoHealer(key);
-  return `<article class="team-card ${kind}"><div class="team-head"><div class="team-name">${esc(label||teamLabel(key))}</div><div class="team-count">${filled}/${TEAM_SIZE}</div></div>${s.map((name,i)=>slotHtml(name,i)).join('')}${noHealer?'<div class="no-healer">⚠ No healer</div>':''}</article>`;
+  const s=slots(key);
+  const filled=s.filter(Boolean).length;
+  const noHealer=teamNoHealer(key);
+  return `<article class="team-card ${kind}">
+    <div class="team-head"><div class="team-name">${esc(label||teamLabel(key))}</div><div class="team-count">${filled}/${TEAM_SIZE}</div></div>
+    ${s.map((name,i)=>slotHtml(name,i)).join('')}
+    ${noHealer?'<div class="no-healer">⚠ No healer</div>':''}
+  </article>`;
 }
+
 function slotHtml(name,index){
-  if(!name)return `<div class="slot ${index===0?'leader-slot':''}"><span class="crown">${index===0?'♛':''}</span><span class="empty">${index===0?'Empty team leader':'Empty slot'}</span></div>`;
-  const m=members.get(name)||{name,cls:'Unknown',gr:0};const c=CLASS_COLORS[m.cls]||CLASS_COLORS.Unknown;
-  return `<div class="slot ${index===0?'leader-slot':''}"><span class="${index===0?'crown':'dot'}" style="${index===0?'':'background:'+c+';color:'+c}">${index===0?'♛':''}</span><div class="member"><div class="member-name">${esc(name)}</div><div class="member-class" style="color:${c}">${esc(m.cls)}</div></div><span class="gr">${fmt(m.gr)}</span></div>`;
+  if(!name){
+    return `<div class="slot ${index===0?'leader-slot':''}"><span class="crown">${index===0?'♛':''}</span><span class="empty">${index===0?'Empty team leader':'Empty slot'}</span></div>`;
+  }
+  const m=members.get(name)||{name,cls:'Unknown'};
+  const c=CLASS_COLORS[m.cls]||CLASS_COLORS.Unknown;
+  return `<div class="slot ${index===0?'leader-slot':''}">
+    <span class="${index===0?'crown':'dot'}" style="${index===0?'':'background:'+c+';color:'+c}">${index===0?'♛':''}</span>
+    <div class="member"><div class="member-name">${esc(name)}</div></div>
+    <span class="job-class" style="color:${c}">${esc(m.cls)}</span>
+  </div>`;
 }
-function section(title,kind,note){return `<div class="section-head"><div class="section-title ${kind}">${title}</div><div class="section-line"></div><div class="section-note">${esc(note)}</div></div>`;}
-function stat(v,l){return `<div class="stat"><b>${esc(String(v))}</b><span>${esc(l)}</span></div>`;}
-function slots(key){const a=Array.isArray(state.assignments[key])?state.assignments[key].slice(0,TEAM_SIZE):[];while(a.length<TEAM_SIZE)a.push(null);return a.map(v=>str(v)||null);}
-function assignedSet(keys){const s=new Set();keys.forEach(k=>slots(k).forEach(n=>{if(n)s.add(n)}));return s;}
-function teamNoHealer(key){const names=slots(key).filter(Boolean);return names.length>0&&!names.some(n=>HEALERS.has((members.get(n)||{}).cls));}
-function teamLabel(key){const m=/_([0-9]+)$/.exec(key);return `Team ${m?m[1]:'?'}`;}
-function fmt(v){return Number(v||0).toLocaleString();}
-function formatDateTime(v){const d=new Date(v);return Number.isNaN(d.getTime())?'':d.toLocaleString(undefined,{year:'numeric',month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'});}
+
+function section(title,kind){
+  return `<div class="section-head"><div class="section-title ${kind}">${title}</div><div class="section-line"></div></div>`;
+}
+
+function slots(key){
+  const a=Array.isArray(state.assignments[key])?state.assignments[key].slice(0,TEAM_SIZE):[];
+  while(a.length<TEAM_SIZE)a.push(null);
+  return a.map(v=>str(v)||null);
+}
+
+function teamNoHealer(key){
+  const names=slots(key).filter(Boolean);
+  return names.length>0&&!names.some(n=>HEALERS.has((members.get(n)||{}).cls));
+}
+
+function teamLabel(key){
+  const m=/_([0-9]+)$/.exec(key);
+  return `Team ${m?m[1]:'?'}`;
+}
+
+function formatDateTime(v){
+  const d=new Date(v);
+  return Number.isNaN(d.getTime())?'':d.toLocaleString(undefined,{year:'numeric',month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'});
+}
 function str(v){return v==null?'':String(v);}
 function num(v){const n=Number(v);return Number.isFinite(n)?n:0;}
 function esc(v){return str(v).replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));}
