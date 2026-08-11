@@ -200,6 +200,9 @@
       background:var(--panel);border:1px solid var(--line-soft);border-radius:10px;
       font-size:12.5px;color:var(--muted);line-height:1.5;
     }
+    .event-action-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:0 0 14px;padding:0 2px;}
+    .event-action-row[hidden]{display:none!important;}
+    .event-action-row .btn{min-height:34px;}
     .hint-bar svg{width:15px;height:15px;color:var(--violet);flex:none;margin-top:2px;}
     .hint-bar b{color:var(--text);}
     .section-head{display:flex;align-items:center;gap:12px;margin:0 0 14px;}
@@ -718,15 +721,10 @@
         <div class="actions" id="topActions">
           <span class="save-flag" id="saveFlag"><span class="dot"></span><span id="saveFlagText">Loading</span></span>
           <button class="btn" id="autoFillBtn">⚡ Auto-fill</button>
-          <button class="btn" id="printBtn">🖨 Print/Share</button>
-          <button class="btn public-toggle off" id="publicToggleBtn" type="button" hidden title="Publish or hide this event on the public lineup page"><span class="publish-switch" aria-hidden="true"></span><span id="publicToggleText">Public Lineup: OFF</span></button>
-          <button class="btn" id="exportBtn">⬇ Export</button>
-          <button class="btn" id="importBtn">⬆ Import</button>
           <button class="btn icon-only" id="helpBtn" title="Help" aria-label="Help">?</button>
           <button class="btn" id="accountBtn" type="button" hidden>👤 <span id="accountName">Account</span> <span class="account-role" id="accountRole"></span></button>
           <button class="btn" id="adminUsersBtn" type="button" hidden>⚙ Users</button>
           <button class="btn" id="logoutBtn" type="button" hidden>Sign Out</button>
-          <button class="btn danger" id="clearBtn">Clear all</button>
         </div>
       </header>
 
@@ -747,6 +745,13 @@
         </aside>
         <main class="main">
           <div class="hint-bar" id="hintBar"></div>
+          <div class="event-action-row" id="eventActionRow" hidden>
+            <button class="btn public-toggle off" id="publicToggleBtn" type="button" title="Publish or hide this event on the public lineup page"><span class="publish-switch" aria-hidden="true"></span><span id="publicToggleText">Public View: OFF</span></button>
+            <button class="btn" id="printBtn">🖨 Print/Share</button>
+            <button class="btn" id="exportBtn">⬇ Export</button>
+            <button class="btn" id="importBtn">⬆ Import</button>
+            <button class="btn danger" id="clearBtn">Clear all</button>
+          </div>
           <div id="teamsWrap"></div>
         </main>
       </div>
@@ -1437,9 +1442,8 @@
   function renderActionState(){
     const nonTeamMode=currentEvent==='dashboard'||currentEvent==='manage_members';
     document.getElementById('autoFillBtn').hidden=nonTeamMode;
-    document.getElementById('printBtn').hidden=nonTeamMode;
-    document.getElementById('clearBtn').hidden=nonTeamMode;
-    document.getElementById('publicToggleBtn').hidden=nonTeamMode;
+    const eventActionRow=document.getElementById('eventActionRow');
+    if(eventActionRow)eventActionRow.hidden=nonTeamMode;
     if(!nonTeamMode){
       document.getElementById('autoFillBtn').title=currentEvent==='polarity_zone'?'Fill the Elite Battlefield only':'Fill Main and Sub teams by highest Gear Rating';
       renderPublicToggle();
@@ -1466,7 +1470,7 @@
     button.classList.toggle('on',published);
     button.classList.toggle('off',!published);
     button.setAttribute('aria-pressed',published?'true':'false');
-    text.textContent=`Public Lineup: ${published?'ON':'OFF'}`;
+    text.textContent=`Public View: ${published?'ON':'OFF'}`;
     button.title=published
       ?`${currentEventPublicLabel()} is visible on the public lineup page. Click to hide it.`
       :`${currentEventPublicLabel()} is private. Click to publish it publicly.`;
@@ -1482,7 +1486,7 @@
     if(next&&!confirm(`Publish the ${label} lineup?\n\nAnyone with the public link will be able to view this lineup.`))return;
     state.publicVisibility[key]=next;
     commitMutation(`${label} public lineup ${next?'published':'hidden'}`);
-    showToast(next?'Public lineup published':'Public lineup hidden',next?`${label} is now visible on the public page.`:`${label} is now private. Public visitors will see that no lineup is published.`);
+    showToast(next?'Public view published':'Public view hidden',next?`${label} is now visible on the public page.`:`${label} is now private. Public visitors will see that no lineup is published.`);
   }
 
   function renderHint(){
