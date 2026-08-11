@@ -66,12 +66,14 @@ button{font:inherit}
 .loading,.error-box{max-width:720px;margin:90px auto;padding:24px;border:1px solid var(--lineSoft);background:var(--sheet);border-radius:12px;text-align:center;color:var(--muted);box-shadow:var(--shadow);font-size:14px}
 .spinner{width:28px;height:28px;border:3px solid var(--line);border-top-color:var(--violet);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 10px}@keyframes spin{to{transform:rotate(360deg)}}
 .error-box b{display:block;color:var(--red);margin-bottom:7px;font-size:16px}.error-note{font-size:12px}
+.unpublished-box{min-height:420px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:50px 20px;color:var(--muted)}
+.unpublished-icon{font-size:38px;margin-bottom:12px;opacity:.8}.unpublished-box h2{margin:0 0 10px;color:var(--text);font-family:'Cinzel',serif;font-size:24px;letter-spacing:.5px}.unpublished-box p{margin:0;font-size:15px;line-height:1.7}
 @media(max-width:1200px){.team-grid.five{grid-template-columns:repeat(3,minmax(0,1fr))}.team-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:720px){.viewerbar{padding:8px 10px}.mini-brand{width:100%;justify-content:center}.nav{width:100%;justify-content:center}.content{width:calc(100% - 12px);margin-top:8px}.lineup-sheet{padding:14px 10px 20px}.sheet-head{align-items:flex-start;flex-direction:column}.sheet-brand{font-size:28px}.sheet-meta{text-align:left}.team-grid,.team-grid.five{grid-template-columns:1fr}.raid-head{flex-wrap:wrap}.raid-line{display:none}.job-class{max-width:48%}}
 @media print{.viewerbar{display:none!important}body{background:#fff!important}.content{width:100%!important;margin:0!important}.lineup-sheet{box-shadow:none!important;border:none!important;border-radius:0!important;padding:0!important;background:#fff!important;color:#14172a!important}.team-card,.raid-head{break-inside:avoid;page-break-inside:avoid}}
 
 </style>
-<meta name="titania-public-build" content="2026-08-11-v5-self-contained">
+<meta name="titania-public-build" content="2026-08-11-v6-publish-control">
 </head>
 <body data-view="guild">
 <div class="page">
@@ -162,7 +164,7 @@ async function loadLineup(){
     if(!url||!key) throw new Error('Supabase configuration is missing.');
     if(!window.supabase) throw new Error('Supabase library did not load.');
     if(!client) client=window.supabase.createClient(url,key,{auth:{persistSession:false,autoRefreshToken:false,detectSessionInUrl:false}});
-    const {data,error}=await client.rpc('get_public_lineup');
+    const {data,error}=await client.rpc('get_public_lineup',{p_view:'guild'});
     if(error) throw error;
     state=normalize(data||{});
     members=new Map(state.roster.map(m=>[m.name,m]));
@@ -178,6 +180,7 @@ function normalize(raw){
     : [];
   const assignments=raw.assignments&&typeof raw.assignments==='object'?raw.assignments:{};
   return {
+    published:raw.published===true,
     roster,
     assignments,
     raidLeaders:raw.raidLeaders||{},
@@ -194,6 +197,16 @@ function render(){
   const title=VIEW==='guild'?'Guild League':'Polarity Zone';
   document.title=`Titania · ${title}`;
   const updated=state.updatedAt?formatDateTime(state.updatedAt):'Live';
+  if(!state.published){
+    content.innerHTML=`<section class="lineup-sheet">
+      <div class="sheet-head">
+        <div class="sheet-brand">${esc(title)}</div>
+        <div class="sheet-meta">Dark Lord Server</div>
+      </div>
+      <div class="unpublished-box"><div class="unpublished-icon">🔒</div><h2>Lineup Not Published Yet</h2><p>The Titania ${esc(title)} lineup is currently private.<br>Please check back later.</p></div>
+    </section>`;
+    return;
+  }
   content.innerHTML=`<section class="lineup-sheet">
     <div class="sheet-head">
       <div class="sheet-brand">${esc(title)}</div>

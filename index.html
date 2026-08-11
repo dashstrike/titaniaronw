@@ -104,6 +104,13 @@
     .btn.teal{background:linear-gradient(135deg,#3fd6c4,#2ba895);border:none;color:#04211d;}
     .btn.small{padding:6px 10px;font-size:11.5px;border-radius:7px;}
     .btn.icon-only{width:34px;padding:8px;}
+    .public-toggle{gap:8px;padding-left:10px;padding-right:11px;}
+    .public-toggle .publish-switch{width:30px;height:16px;border-radius:999px;background:#3a425b;position:relative;flex:none;box-shadow:inset 0 0 0 1px #ffffff10;transition:.18s ease;}
+    .public-toggle .publish-switch::after{content:'';position:absolute;width:12px;height:12px;left:2px;top:2px;border-radius:50%;background:#aeb5ca;transition:.18s ease;}
+    .public-toggle.on{border-color:#4fd67a66;color:#8fe89f;background:#102019;}
+    .public-toggle.on .publish-switch{background:#2a9c4f;}
+    .public-toggle.on .publish-switch::after{left:16px;background:#eaffef;}
+    .public-toggle.off{color:#a8afc4;}
     .save-flag{font-size:10.5px;color:var(--muted-2);display:flex;align-items:center;gap:5px;min-width:64px;}
     .save-flag .dot{width:6px;height:6px;border-radius:50%;background:var(--muted-2);}
     .save-flag.ok{color:var(--green);}
@@ -535,6 +542,7 @@
     body.readonly-mode #autoFillBtn,
     body.readonly-mode #importBtn,
     body.readonly-mode #clearBtn,
+    body.readonly-mode #publicToggleBtn,
     body.readonly-mode .card-tools,
     body.readonly-mode .slot-remove,
     body.readonly-mode [data-raid-mode-toggle],
@@ -711,6 +719,7 @@
           <span class="save-flag" id="saveFlag"><span class="dot"></span><span id="saveFlagText">Loading</span></span>
           <button class="btn" id="autoFillBtn">⚡ Auto-fill</button>
           <button class="btn" id="printBtn">🖨 Print/Share</button>
+          <button class="btn public-toggle off" id="publicToggleBtn" type="button" hidden title="Publish or hide this event on the public lineup page"><span class="publish-switch" aria-hidden="true"></span><span id="publicToggleText">Public Lineup: OFF</span></button>
           <button class="btn" id="exportBtn">⬇ Export</button>
           <button class="btn" id="importBtn">⬆ Import</button>
           <button class="btn icon-only" id="helpBtn" title="Help" aria-label="Help">?</button>
@@ -830,6 +839,7 @@
     raidLeaders:createDefaultRaidLeaders(),
     raidModes:createDefaultRaidModes(),
     membershipHistory:[],
+    publicVisibility:{guildLeague:false,polarityZone:false},
     revision:0,
     updatedAt:'',
     spreadsheetName:''
@@ -1099,6 +1109,7 @@
     document.getElementById('addMemberBtn').addEventListener('click',()=>openMemberModal(null));
     document.getElementById('autoFillBtn').addEventListener('click',autoFillCurrent);
     document.getElementById('printBtn').addEventListener('click',openPrintView);
+    document.getElementById('publicToggleBtn').addEventListener('click',togglePublicVisibility);
     document.getElementById('exportBtn').addEventListener('click',exportLineup);
     document.getElementById('importBtn').addEventListener('click',()=>document.getElementById('importFileInput').click());
     document.getElementById('importFileInput').addEventListener('change',event=>{
@@ -1262,6 +1273,11 @@
     return out;
   }
 
+  function normalizePublicVisibility(raw){
+    const source=raw&&typeof raw==='object'?raw:{};
+    return {guildLeague:source.guildLeague===true,polarityZone:source.polarityZone===true};
+  }
+
   function normalizeClientState(input){
     const rawRoster = Array.isArray(input.roster)?input.roster:(Array.isArray(input.m)?input.m:[]);
     const roster=[];
@@ -1326,7 +1342,8 @@
       if(!action)return;
       membershipHistory.push({id,memberId,memberName,action,effectiveDate:normalizeDateValue(raw.effectiveDate||raw.date),reason:stringValue(raw.reason).trim().slice(0,300),changedAt:normalizeTimestampValue(raw.changedAt||raw.createdAt)});
     });
-    return {roster,assignments,finishedDungeons,raidLeaders,raidModes,membershipHistory:membershipHistory.slice(-CONFIG.maxHistory),revision:0,updatedAt:'',spreadsheetName:''};
+    const publicVisibility=normalizePublicVisibility(input.publicVisibility);
+    return {roster,assignments,finishedDungeons,raidLeaders,raidModes,membershipHistory:membershipHistory.slice(-CONFIG.maxHistory),publicVisibility,revision:0,updatedAt:'',spreadsheetName:''};
   }
 
   function enforceUnique(assignments,keys){
@@ -1422,9 +1439,50 @@
     document.getElementById('autoFillBtn').hidden=nonTeamMode;
     document.getElementById('printBtn').hidden=nonTeamMode;
     document.getElementById('clearBtn').hidden=nonTeamMode;
+    document.getElementById('publicToggleBtn').hidden=nonTeamMode;
     if(!nonTeamMode){
       document.getElementById('autoFillBtn').title=currentEvent==='polarity_zone'?'Fill the Elite Battlefield only':'Fill Main and Sub teams by highest Gear Rating';
+      renderPublicToggle();
     }
+  }
+
+  function currentPublicVisibilityKey(){
+    return currentEvent==='polarity_zone'?'polarityZone':'guildLeague';
+  }
+
+  function currentEventPublicLabel(){
+    return currentEvent==='polarity_zone'?'Polarity Zone':'Guild League';
+  }
+
+  function isCurrentEventPublished(){
+    return Boolean(state.publicVisibility&&state.publicVisibility[currentPublicVisibilityKey()]);
+  }
+
+  function renderPublicToggle(){
+    const button=document.getElementById('publicToggleBtn');
+    const text=document.getElementById('publicToggleText');
+    if(!button||!text)return;
+    const published=isCurrentEventPublished();
+    button.classList.toggle('on',published);
+    button.classList.toggle('off',!published);
+    button.setAttribute('aria-pressed',published?'true':'false');
+    text.textContent=`Public Lineup: ${published?'ON':'OFF'}`;
+    button.title=published
+      ?`${currentEventPublicLabel()} is visible on the public lineup page. Click to hide it.`
+      :`${currentEventPublicLabel()} is private. Click to publish it publicly.`;
+  }
+
+  function togglePublicVisibility(){
+    if(!userCanEdit()){showToast('Read-only access','Your account cannot change public visibility.','warn');return;}
+    if(currentEvent!=='guild_league'&&currentEvent!=='polarity_zone')return;
+    const key=currentPublicVisibilityKey();
+    const label=currentEventPublicLabel();
+    if(!state.publicVisibility||typeof state.publicVisibility!=='object')state.publicVisibility={guildLeague:false,polarityZone:false};
+    const next=!Boolean(state.publicVisibility[key]);
+    if(next&&!confirm(`Publish the ${label} lineup?\n\nAnyone with the public link will be able to view this lineup.`))return;
+    state.publicVisibility[key]=next;
+    commitMutation(`${label} public lineup ${next?'published':'hidden'}`);
+    showToast(next?'Public lineup published':'Public lineup hidden',next?`${label} is now visible on the public page.`:`${label} is now private. Public visitors will see that no lineup is published.`);
   }
 
   function renderHint(){
@@ -2158,7 +2216,7 @@ Their team assignments and membership history will also be removed. Use Mark Ina
     if(saveInFlight){saveQueued=true;return;}
     if(!dirty&&!saveQueued)return;
     saveInFlight=true;saveQueued=false;dirty=false;
-    const snapshot={roster:state.roster,assignments:state.assignments,finishedDungeons:state.finishedDungeons,raidLeaders:state.raidLeaders,raidModes:state.raidModes,membershipHistory:state.membershipHistory};
+    const snapshot={roster:state.roster,assignments:state.assignments,finishedDungeons:state.finishedDungeons,raidLeaders:state.raidLeaders,raidModes:state.raidModes,membershipHistory:state.membershipHistory,publicVisibility:state.publicVisibility};
     const baseRevision=state.revision;
     try{
       const result=await callServer('savePlannerState',snapshot,baseRevision);
