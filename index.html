@@ -817,7 +817,7 @@
   ]);
   const ALL_GUILD_RAIDS = Object.freeze([...MAIN_RAIDS,...SUB_RAIDS]);
   const ELITE_KEYS = Object.freeze(Array.from({length:CONFIG.eliteTeams},(_,i)=>`elite_${i+1}`));
-  const POLARITY_DUNGEON_TEAM_COUNTS = Object.freeze([5,5,4,4]);
+  const POLARITY_DUNGEON_TEAM_COUNTS = Object.freeze([5,5,5,5]);
   function dungeonTeamCount(d){return POLARITY_DUNGEON_TEAM_COUNTS[d-1]||0;}
   function dungeonKeys(d){return Array.from({length:dungeonTeamCount(d)},(_,i)=>`dungeon${d}_${i+1}`);}
   const DUNGEON_KEYS = Object.freeze(Array.from({length:CONFIG.dungeonCount},(_,i)=>dungeonKeys(i+1)).flat());
