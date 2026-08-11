@@ -115,7 +115,7 @@ function teamCard(key,kind,label){
 function slotHtml(name,index){
   if(!name)return `<div class="slot ${index===0?'leader-slot':''}"><span class="crown">${index===0?'♛':''}</span><span class="empty">${index===0?'Empty team leader':'Empty slot'}</span></div>`;
   const m=members.get(name)||{name,cls:'Unknown',gr:0};const c=CLASS_COLORS[m.cls]||CLASS_COLORS.Unknown;
-  return `<div class="slot ${index===0?'leader-slot':''}"><span class="${index===0?'crown':'dot'}" style="${index===0?'':'background:'+c+';color:'+c}">${index===0?'♛':''}</span><div class="member"><div class="member-name">${esc(name)}</div><div class="member-class" style="color:${c}">${esc(m.cls)}</div></div><span class="gr">${fmt(m.gr)}</span></div>`;
+  return `<div class="slot ${index===0?'leader-slot':''}"><span class="${index===0?'crown':'dot'}" style="${index===0?'':'background:'+c+';color:'+c}">${index===0?'♛':''}</span><div class="member"><div class="member-name">${esc(name)}</div></div><span class="member-job" style="color:${c}">${esc(m.cls)}</span></div>`;
 }
 function section(title,kind){return `<div class="section-head"><div class="section-title ${kind}">${title}</div><div class="section-line"></div></div>`;}
 function slots(key){const a=Array.isArray(state.assignments[key])?state.assignments[key].slice(0,TEAM_SIZE):[];while(a.length<TEAM_SIZE)a.push(null);return a.map(v=>str(v)||null);}
