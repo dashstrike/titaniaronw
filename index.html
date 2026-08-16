@@ -339,6 +339,9 @@
     .dash-manage-name{width:150px;flex:none;color:var(--text);font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
     .dash-row-class{flex:1;max-width:180px;}
     .dash-row-gr{width:110px;flex:none;}
+    .dash-last-updated{width:205px;flex:none;display:flex;flex-direction:column;gap:2px;min-width:0;color:var(--muted);}
+    .dash-last-updated-label{font-size:9px;font-weight:800;letter-spacing:.55px;text-transform:uppercase;color:var(--muted-2);}
+    .dash-last-updated-value{font-size:10.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
     .dash-status-filters{display:flex;align-items:center;gap:6px;flex-wrap:wrap;}
     .member-state-badge{display:inline-flex;align-items:center;gap:5px;width:fit-content;font-size:9px;font-weight:800;letter-spacing:.65px;text-transform:uppercase;padding:3px 7px;border-radius:20px;border:1px solid transparent;}
     .member-state-badge.active{color:#8fe89f;background:#4fd67a1b;border-color:#4fd67a55;}
@@ -434,7 +437,7 @@
       .body-wrap{flex-direction:column}.member-list{min-height:130px;padding-bottom:20px}.class-breakdown{display:none}.main{padding:18px 16px 60px;width:100%}.topbar{position:relative}.brand,.actions{margin:0}.event-tabs{order:2}.stats{order:4}.actions{order:3}
     }
     @media(max-width:680px){
-      .topbar{padding:12px}.brand{min-width:0;width:100%;justify-content:center}.brand-logo{width:54px;height:47px}.brand-text h1{font-size:15px;letter-spacing:1.2px}.brand-text p{text-align:center}.event-tabs{width:100%;justify-content:center}.event-tab{flex:1;justify-content:center;padding:8px 7px;font-size:11.5px}.actions{justify-content:center;width:100%}.save-flag{width:100%;justify-content:center}.team-grid{grid-template-columns:1fr}.section-head{flex-wrap:wrap}.section-line{min-width:30px}.form-grid{grid-template-columns:1fr}.dash-manage-name{width:90px}.dash-status-info{width:125px}.dash-row-class{max-width:120px}.dash-row-gr{width:80px}.dash-manage-actions{width:100%;margin-left:28px;justify-content:flex-end}.dash-bar-name{width:80px}.dash-bar-avg{display:none}.history-row{grid-template-columns:1fr 110px}.history-date,.history-reason{grid-column:2}.print-content{padding:20px 16px}.print-doc-head{align-items:flex-start;flex-direction:column}.print-doc-meta{text-align:left}
+      .topbar{padding:12px}.brand{min-width:0;width:100%;justify-content:center}.brand-logo{width:54px;height:47px}.brand-text h1{font-size:15px;letter-spacing:1.2px}.brand-text p{text-align:center}.event-tabs{width:100%;justify-content:center}.event-tab{flex:1;justify-content:center;padding:8px 7px;font-size:11.5px}.actions{justify-content:center;width:100%}.save-flag{width:100%;justify-content:center}.team-grid{grid-template-columns:1fr}.section-head{flex-wrap:wrap}.section-line{min-width:30px}.form-grid{grid-template-columns:1fr}.dash-manage-name{width:90px}.dash-status-info{width:125px}.dash-row-class{max-width:120px}.dash-row-gr{width:80px}.dash-last-updated{width:100%;margin-left:28px}.dash-manage-actions{width:100%;margin-left:28px;justify-content:flex-end}.dash-bar-name{width:80px}.dash-bar-avg{display:none}.history-row{grid-template-columns:1fr 110px}.history-date,.history-reason{grid-column:2}.print-content{padding:20px 16px}.print-doc-head{align-items:flex-start;flex-direction:column}.print-doc-meta{text-align:left}
     }
     @page{size:A4 landscape;margin:8mm;}
     @media(max-width:640px){.main-raid-grid,.pz-star-raid-grid,.pz-normal-raid-grid,.pz-dungeon-team-grid{grid-template-columns:1fr}.main-raid-line{display:none}.raid-leader-control{width:100%;margin-left:0;flex-wrap:wrap}.raid-leader-drop{width:100%;max-width:none}.pz-dungeon-group-head{flex-wrap:wrap}.pz-dungeon-group-head .raid-leader-control{margin-left:0}.pz-dungeon-group-actions{width:100%}}
@@ -1312,7 +1315,9 @@
       const inactiveSince=status==='inactive'?normalizeDateValue(raw.inactiveSince||raw.leftDate||raw.departureDate):'';
       const lastReturned=normalizeDateValue(raw.lastReturned||raw.returnedDate||raw.reactivatedOn);
       const inactiveReason=status==='inactive'?stringValue(raw.inactiveReason||raw.reason).trim().slice(0,300):'';
-      const member={id,name,cls,gr,status,inactiveSince,lastReturned,inactiveReason,notes};
+      const updatedAt=normalizeTimestampValue(raw.updatedAt||raw.lastUpdatedAt||raw.modifiedAt);
+      const updatedBy=stringValue(raw.updatedBy||raw.lastUpdatedBy).trim().slice(0,120);
+      const member={id,name,cls,gr,status,inactiveSince,lastReturned,inactiveReason,notes,updatedAt,updatedBy};
       roster.push(member);
       memberByLower.set(name.toLowerCase(),member);
       memberByIdMap.set(id,member);
@@ -1965,6 +1970,12 @@
 
   function closeMemberModal(){document.getElementById('memberModal').hidden=true;document.getElementById('memberStatusNotice').hidden=true;editingMemberName=null;}
 
+  function touchMember(member){
+    if(!member)return;
+    member.updatedAt=new Date().toISOString();
+    member.updatedBy=stringValue(currentProfile&&currentProfile.display_name).trim()||stringValue(currentProfile&&currentProfile.email).trim()||'Unknown user';
+  }
+
   function saveMemberFromModal(){
     const wasEditing=Boolean(editingMemberName);
     const name=document.getElementById('memberNameInput').value.trim();
@@ -1985,7 +1996,7 @@
     }
     if(editingMemberName){
       const member=memberByName[editingMemberName];if(!member)return;
-      const oldName=member.name;member.name=name.slice(0,120);member.cls=CLASSES.includes(cls)?cls:'Unknown';member.gr=gr;member.notes=notes;
+      const oldName=member.name;member.name=name.slice(0,120);member.cls=CLASSES.includes(cls)?cls:'Unknown';member.gr=gr;member.notes=notes;touchMember(member);
       if(oldName!==member.name){
         ALL_KEYS.forEach(key=>state.assignments[key]=state.assignments[key].map(value=>value===oldName?member.name:value));
         ALL_RAIDS.forEach(raid=>{if(state.raidLeaders[raid.id]===oldName)state.raidLeaders[raid.id]=member.name;});
@@ -1994,7 +2005,7 @@
       }
     }else{
       if(state.roster.length>=CONFIG.maxMembers){showToast('Roster full',`The roster limit is ${CONFIG.maxMembers} members.`,'err');return;}
-      state.roster.push({id:makeId('member'),name:name.slice(0,120),cls:CLASSES.includes(cls)?cls:'Unknown',gr,status:'active',inactiveSince:'',lastReturned:'',inactiveReason:'',notes});
+      const member={id:makeId('member'),name:name.slice(0,120),cls:CLASSES.includes(cls)?cls:'Unknown',gr,status:'active',inactiveSince:'',lastReturned:'',inactiveReason:'',notes,updatedAt:'',updatedBy:''};touchMember(member);state.roster.push(member);
     }
     closeMemberModal();
     commitMutation(wasEditing?'Member updated':'Member added');
@@ -2076,7 +2087,7 @@
   function markMemberInactiveRecord(member,date,reason){
     if(!member||member.status==='inactive')return;
     ALL_KEYS.forEach(key=>state.assignments[key]=state.assignments[key].map(value=>value===member.name?null:value));
-    member.status='inactive';member.inactiveSince=date;member.inactiveReason=reason;
+    member.status='inactive';member.inactiveSince=date;member.inactiveReason=reason;touchMember(member);
     appendMembershipHistory(member,'inactive',date,reason);
     dashboardSelected.delete(member.name);
     if(selectedMember===member.name)selectedMember=null;
@@ -2087,7 +2098,7 @@
 
   function reactivateMemberRecord(member,date,reason){
     if(!member||isActiveMember(member))return;
-    member.status='active';member.lastReturned=date;member.inactiveSince='';member.inactiveReason='';
+    member.status='active';member.lastReturned=date;member.inactiveSince='';member.inactiveReason='';touchMember(member);
     appendMembershipHistory(member,'reactivated',date,reason);
     clearSelections(false);
     commitMutation('Member reactivated');
@@ -2175,7 +2186,7 @@
     return `${sectionHeader('🛠 Manage Members','',`${rows.length} shown · ${activeCount} active · ${inactiveCount} inactive`)}
       <div class="dash-manage-toolbar"><input class="edit-input" id="dashSearch" placeholder="Search members…" value="${escapeAttr(dashboardSearch)}" style="width:210px"><div class="dash-status-filters">${['Active','Inactive','All'].map(status=>`<button class="pill ${dashboardGuildStatusFilter===status?'active':''}" data-dashboard-status="${status}">${status}</button>`).join('')}</div><label class="dash-selectall"><input type="checkbox" id="dashSelectAll" ${allVisible?'checked':''}> Select all shown</label><span class="dash-selected-count">${selectedCount} selected</span><button class="btn primary small" id="dashAddMember">+ Add member</button></div>
       ${selectedCount?`<div class="dash-bulk-bar"><span class="dash-bulk-label">Class</span><select class="edit-input" id="dashBulkClass">${CLASSES.map(cls=>`<option value="${escapeAttr(cls)}">${escapeHtml(cls)}</option>`).join('')}</select><button class="btn small" id="dashBulkClassBtn">Apply to ${selectedCount}</button><span class="dash-bulk-label">Set GR</span><input type="number" class="edit-input" id="dashBulkSet" min="0" placeholder="25000"><button class="btn small" id="dashBulkSetBtn">Set for ${selectedCount}</button><span class="dash-bulk-label">Adjust GR</span><input type="number" class="edit-input" id="dashBulkAdjust" placeholder="500 or -500"><button class="btn small" id="dashBulkAdjustBtn">Adjust ${selectedCount}</button><button class="btn small danger" id="dashBulkDeleteBtn">Permanently delete ${selectedCount}</button></div>`:''}
-      <div class="dash-panel dash-manage-table" id="dashManageTable">${rows.length?rows.map(member=>{const inactive=member.status==='inactive';const detail=inactive?`Since ${formatDate(member.inactiveSince)||'date not recorded'}${member.inactiveReason?` · ${member.inactiveReason}`:''}`:(member.lastReturned?`Returned ${formatDate(member.lastReturned)}`:'Available for teams');return `<div class="dash-manage-row ${inactive?'inactive':''} ${dashboardSelected.has(member.name)?'checked':''}"><input type="checkbox" class="dash-row-check" data-name="${escapeAttr(member.name)}" ${dashboardSelected.has(member.name)?'checked':''}><span class="class-dot" style="background:${classColor(member.cls)};color:${classColor(member.cls)}"></span><span class="dash-manage-name" title="${escapeAttr(member.name)}">${escapeHtml(member.name)}</span><span class="dash-status-info" title="${escapeAttr(detail)}"><span class="member-state-badge ${inactive?'inactive':'active'}">${inactive?'Inactive':'Active'}</span><span class="dash-status-detail">${escapeHtml(detail)}</span></span><select class="edit-input dash-row-class" data-name="${escapeAttr(member.name)}">${CLASSES.map(cls=>`<option value="${escapeAttr(cls)}" ${cls===member.cls?'selected':''}>${escapeHtml(cls)}</option>`).join('')}</select><input type="number" class="edit-input dash-row-gr" data-name="${escapeAttr(member.name)}" value="${member.gr}" min="0"><div class="dash-manage-actions"><button class="icon-btn dash-row-edit" data-name="${escapeAttr(member.name)}" title="Edit member details">✎</button>${inactive?`<button class="btn small status-action active" data-reactivate-member="${escapeAttr(member.name)}">Reactivate</button>`:`<button class="btn small status-action inactive" data-inactivate-member="${escapeAttr(member.name)}">Mark Inactive</button>`}<button class="icon-btn del dash-row-del" data-name="${escapeAttr(member.name)}" title="Permanently delete member">🗑</button></div></div>`;}).join(''):'<div class="empty-note">No members match this search and status filter.</div>'}</div>`;
+      <div class="dash-panel dash-manage-table" id="dashManageTable">${rows.length?rows.map(member=>{const inactive=member.status==='inactive';const detail=inactive?`Since ${formatDate(member.inactiveSince)||'date not recorded'}${member.inactiveReason?` · ${member.inactiveReason}`:''}`:(member.lastReturned?`Returned ${formatDate(member.lastReturned)}`:'Available for teams');const updateValue=member.updatedAt?formatMemberUpdate(member.updatedAt):'No edit recorded';const updateTitle=member.updatedBy?`${updateValue} · ${member.updatedBy}`:updateValue;return `<div class="dash-manage-row ${inactive?'inactive':''} ${dashboardSelected.has(member.name)?'checked':''}"><input type="checkbox" class="dash-row-check" data-name="${escapeAttr(member.name)}" ${dashboardSelected.has(member.name)?'checked':''}><span class="class-dot" style="background:${classColor(member.cls)};color:${classColor(member.cls)}"></span><span class="dash-manage-name" title="${escapeAttr(member.name)}">${escapeHtml(member.name)}</span><span class="dash-status-info" title="${escapeAttr(detail)}"><span class="member-state-badge ${inactive?'inactive':'active'}">${inactive?'Inactive':'Active'}</span><span class="dash-status-detail">${escapeHtml(detail)}</span></span><select class="edit-input dash-row-class" data-name="${escapeAttr(member.name)}">${CLASSES.map(cls=>`<option value="${escapeAttr(cls)}" ${cls===member.cls?'selected':''}>${escapeHtml(cls)}</option>`).join('')}</select><input type="number" class="edit-input dash-row-gr" data-name="${escapeAttr(member.name)}" value="${member.gr}" min="0"><span class="dash-last-updated" title="${escapeAttr(updateTitle)}"><span class="dash-last-updated-label">Last update</span><span class="dash-last-updated-value">${escapeHtml(updateValue)}${member.updatedBy?` · ${escapeHtml(member.updatedBy)}`:''}</span></span><div class="dash-manage-actions"><button class="icon-btn dash-row-edit" data-name="${escapeAttr(member.name)}" title="Edit member details">✎</button>${inactive?`<button class="btn small status-action active" data-reactivate-member="${escapeAttr(member.name)}">Reactivate</button>`:`<button class="btn small status-action inactive" data-inactivate-member="${escapeAttr(member.name)}">Mark Inactive</button>`}<button class="icon-btn del dash-row-del" data-name="${escapeAttr(member.name)}" title="Permanently delete member">🗑</button></div></div>`;}).join(''):'<div class="empty-note">No members match this search and status filter.</div>'}</div>`;
   }
 
   function rerenderManageMembers(){
@@ -2195,12 +2206,12 @@
     root.querySelectorAll('.dash-row-edit').forEach(button=>button.addEventListener('click',()=>openMemberModal(button.dataset.name)));
     root.querySelectorAll('[data-inactivate-member]').forEach(button=>button.addEventListener('click',()=>openStatusModal(button.dataset.inactivateMember,'inactive')));
     root.querySelectorAll('[data-reactivate-member]').forEach(button=>button.addEventListener('click',()=>openStatusModal(button.dataset.reactivateMember,'reactivate')));
-    root.querySelectorAll('.dash-row-class').forEach(select=>select.addEventListener('change',()=>{const member=memberByName[select.dataset.name];if(member){member.cls=select.value;commitMutation('Member class updated');}}));
-    root.querySelectorAll('.dash-row-gr').forEach(input=>input.addEventListener('change',()=>{const member=memberByName[input.dataset.name];if(member){member.gr=toInt(input.value,0,999999999);commitMutation('Member Gear Rating updated');}}));
+    root.querySelectorAll('.dash-row-class').forEach(select=>select.addEventListener('change',()=>{const member=memberByName[select.dataset.name];if(member){member.cls=select.value;touchMember(member);commitMutation('Member class updated');}}));
+    root.querySelectorAll('.dash-row-gr').forEach(input=>input.addEventListener('change',()=>{const member=memberByName[input.dataset.name];if(member){member.gr=toInt(input.value,0,999999999);touchMember(member);commitMutation('Member Gear Rating updated');}}));
     root.querySelectorAll('.dash-row-del').forEach(button=>button.addEventListener('click',()=>deleteMember(button.dataset.name)));
-    const classButton=root.querySelector('#dashBulkClassBtn');if(classButton)classButton.addEventListener('click',()=>{const cls=document.getElementById('dashBulkClass').value;state.roster.forEach(member=>{if(dashboardSelected.has(member.name))member.cls=cls;});commitMutation('Bulk class update complete');});
-    const setButton=root.querySelector('#dashBulkSetBtn');if(setButton)setButton.addEventListener('click',()=>{const value=toInt(document.getElementById('dashBulkSet').value,0,999999999);state.roster.forEach(member=>{if(dashboardSelected.has(member.name))member.gr=value;});commitMutation('Bulk Gear Rating set');});
-    const adjustButton=root.querySelector('#dashBulkAdjustBtn');if(adjustButton)adjustButton.addEventListener('click',()=>{const delta=Number.parseInt(document.getElementById('dashBulkAdjust').value,10)||0;state.roster.forEach(member=>{if(dashboardSelected.has(member.name))member.gr=Math.max(0,Math.min(999999999,member.gr+delta));});commitMutation('Bulk Gear Rating adjusted');});
+    const classButton=root.querySelector('#dashBulkClassBtn');if(classButton)classButton.addEventListener('click',()=>{const cls=document.getElementById('dashBulkClass').value;state.roster.forEach(member=>{if(dashboardSelected.has(member.name)){member.cls=cls;touchMember(member);}});commitMutation('Bulk class update complete');});
+    const setButton=root.querySelector('#dashBulkSetBtn');if(setButton)setButton.addEventListener('click',()=>{const value=toInt(document.getElementById('dashBulkSet').value,0,999999999);state.roster.forEach(member=>{if(dashboardSelected.has(member.name)){member.gr=value;touchMember(member);}});commitMutation('Bulk Gear Rating set');});
+    const adjustButton=root.querySelector('#dashBulkAdjustBtn');if(adjustButton)adjustButton.addEventListener('click',()=>{const delta=Number.parseInt(document.getElementById('dashBulkAdjust').value,10)||0;state.roster.forEach(member=>{if(dashboardSelected.has(member.name)){member.gr=Math.max(0,Math.min(999999999,member.gr+delta));touchMember(member);}});commitMutation('Bulk Gear Rating adjusted');});
     const deleteButton=root.querySelector('#dashBulkDeleteBtn');if(deleteButton)deleteButton.addEventListener('click',()=>{
       if(!confirm(`Permanently delete ${dashboardSelected.size} selected members?
 
@@ -2364,6 +2375,7 @@ Their team assignments and membership history will also be removed. Use Mark Ina
   }
   function normalizeTimestampValue(value){const parsed=new Date(stringValue(value));return Number.isNaN(parsed.getTime())?new Date().toISOString():parsed.toISOString();}
   function formatDate(value){const iso=normalizeDateValue(value);if(!iso)return '';const date=new Date(`${iso}T00:00:00`);return date.toLocaleDateString(undefined,{year:'numeric',month:'short',day:'numeric'});}
+  function formatMemberUpdate(value){const date=new Date(value);if(Number.isNaN(date.getTime()))return 'No edit recorded';return date.toLocaleString(undefined,{year:'numeric',month:'short',day:'numeric',hour:'numeric',minute:'2-digit'});}
 
   function currentTeamKeys(){return currentEvent==='polarity_zone'?POLARITY_KEYS:GUILD_KEYS;}
   function scopeKeys(key){if(key.startsWith('elite_'))return ELITE_KEYS;if(key.startsWith('dungeon'))return DUNGEON_KEYS;return GUILD_KEYS;}
