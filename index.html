@@ -208,6 +208,9 @@
     .event-action-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:0 0 14px;padding:0 2px;}
     .event-action-row[hidden]{display:none!important;}
     .event-action-row .btn{min-height:34px;}
+    .event-last-updated{margin-left:auto;display:flex;align-items:center;gap:7px;min-height:34px;padding:0 4px;color:var(--muted);font-family:'IBM Plex Mono',monospace;white-space:nowrap;}
+    .event-last-updated-label{font-size:10px;font-weight:800;letter-spacing:.55px;text-transform:uppercase;color:var(--muted-2);}
+    .event-last-updated-value{font-size:11px;color:var(--muted);}
     .hint-bar svg{width:15px;height:15px;color:var(--violet);flex:none;margin-top:2px;}
     .hint-bar b{color:var(--text);}
     .section-head{display:flex;align-items:center;gap:12px;margin:0 0 14px;}
@@ -325,6 +328,8 @@
     .dash-bar-avg{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--amber);flex:none;width:92px;text-align:right;}
     .dash-rank{font-family:'IBM Plex Mono',monospace;font-size:11.5px;color:var(--muted-2);flex:none;width:24px;}
     .dash-manage-toolbar{display:flex;flex-wrap:wrap;align-items:center;gap:12px;margin-bottom:10px;}
+    .dash-manage-sort{display:flex;align-items:center;gap:6px;flex-wrap:wrap;}
+    .dash-manage-sort-label{font-size:10px;color:var(--muted-2);font-weight:800;letter-spacing:.5px;text-transform:uppercase;}
     .edit-input{min-width:0;padding:7px 9px;border-radius:7px;border:1px solid var(--line-soft);background:var(--bg);color:var(--text);font-size:12.5px;outline:none;}
     .edit-input:focus{border-color:var(--violet);}
     .dash-selectall{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--muted);cursor:pointer;user-select:none;}
@@ -437,7 +442,7 @@
       .body-wrap{flex-direction:column}.member-list{min-height:130px;padding-bottom:20px}.class-breakdown{display:none}.main{padding:18px 16px 60px;width:100%}.topbar{position:relative}.brand,.actions{margin:0}.event-tabs{order:2}.stats{order:4}.actions{order:3}
     }
     @media(max-width:680px){
-      .topbar{padding:12px}.brand{min-width:0;width:100%;justify-content:center}.brand-logo{width:54px;height:47px}.brand-text h1{font-size:15px;letter-spacing:1.2px}.brand-text p{text-align:center}.event-tabs{width:100%;justify-content:center}.event-tab{flex:1;justify-content:center;padding:8px 7px;font-size:11.5px}.actions{justify-content:center;width:100%}.save-flag{width:100%;justify-content:center}.team-grid{grid-template-columns:1fr}.section-head{flex-wrap:wrap}.section-line{min-width:30px}.form-grid{grid-template-columns:1fr}.dash-manage-name{width:90px}.dash-status-info{width:125px}.dash-row-class{max-width:120px}.dash-row-gr{width:80px}.dash-last-updated{width:100%;margin-left:28px}.dash-manage-actions{width:100%;margin-left:28px;justify-content:flex-end}.dash-bar-name{width:80px}.dash-bar-avg{display:none}.history-row{grid-template-columns:1fr 110px}.history-date,.history-reason{grid-column:2}.print-content{padding:20px 16px}.print-doc-head{align-items:flex-start;flex-direction:column}.print-doc-meta{text-align:left}
+      .topbar{padding:12px}.brand{min-width:0;width:100%;justify-content:center}.brand-logo{width:54px;height:47px}.brand-text h1{font-size:15px;letter-spacing:1.2px}.brand-text p{text-align:center}.event-tabs{width:100%;justify-content:center}.event-tab{flex:1;justify-content:center;padding:8px 7px;font-size:11.5px}.actions{justify-content:center;width:100%}.save-flag{width:100%;justify-content:center}.team-grid{grid-template-columns:1fr}.section-head{flex-wrap:wrap}.section-line{min-width:30px}.form-grid{grid-template-columns:1fr}.dash-manage-name{width:90px}.dash-status-info{width:125px}.dash-row-class{max-width:120px}.dash-row-gr{width:80px}.dash-last-updated{width:100%;margin-left:28px}.dash-manage-actions{width:100%;margin-left:28px;justify-content:flex-end}.event-last-updated{width:100%;margin-left:0;justify-content:flex-end}.dash-bar-name{width:80px}.dash-bar-avg{display:none}.history-row{grid-template-columns:1fr 110px}.history-date,.history-reason{grid-column:2}.print-content{padding:20px 16px}.print-doc-head{align-items:flex-start;flex-direction:column}.print-doc-meta{text-align:left}
     }
     @page{size:A4 landscape;margin:8mm;}
     @media(max-width:640px){.main-raid-grid,.pz-star-raid-grid,.pz-normal-raid-grid,.pz-dungeon-team-grid{grid-template-columns:1fr}.main-raid-line{display:none}.raid-leader-control{width:100%;margin-left:0;flex-wrap:wrap}.raid-leader-drop{width:100%;max-width:none}.pz-dungeon-group-head{flex-wrap:wrap}.pz-dungeon-group-head .raid-leader-control{margin-left:0}.pz-dungeon-group-actions{width:100%}}
@@ -762,6 +767,7 @@
             <button class="btn" id="exportBtn">⬇ Export</button>
             <button class="btn" id="importBtn">⬆ Import</button>
             <button class="btn danger" id="clearBtn">Clear all</button>
+            <span class="event-last-updated" id="eventLastUpdated"><span class="event-last-updated-label">Last update</span><span class="event-last-updated-value">—</span></span>
           </div>
           <div id="teamsWrap"></div>
         </main>
@@ -876,6 +882,8 @@
   let editingMemberName = null;
   let dashboardSearch = '';
   let dashboardGuildStatusFilter = 'Active';
+  let dashboardSortBy = 'name';
+  let dashboardSortDir = 'asc';
   let dashboardSelected = new Set();
   let statusModalMemberName = null;
   let statusModalMode = 'inactive';
@@ -1459,7 +1467,17 @@
     if(!nonTeamMode){
       document.getElementById('autoFillBtn').title=currentEvent==='polarity_zone'?'Fill the Elite Battlefield only':'Fill Main and Sub teams by highest Gear Rating';
       renderPublicToggle();
+      renderEventLastUpdated();
     }
+  }
+
+  function renderEventLastUpdated(){
+    const wrap=document.getElementById('eventLastUpdated');
+    if(!wrap)return;
+    const value=wrap.querySelector('.event-last-updated-value');
+    if(!value)return;
+    value.textContent=state.updatedAt?formatMemberUpdate(state.updatedAt):'No saved update';
+    wrap.title=state.updatedAt?`Planner last saved ${formatMemberUpdate(state.updatedAt)}`:'No saved update recorded yet';
   }
 
   function currentPublicVisibilityKey(){
@@ -1755,6 +1773,7 @@
         state.raidModes[raidId]=stringValue(result&&result.mode).toUpperCase()==='DEF'?'DEF':'ATK';
         state.revision=toInt(result&&result.revision,state.revision,Number.MAX_SAFE_INTEGER);
         state.updatedAt=stringValue(result&&result.updatedAt);
+        renderEventLastUpdated();
         setSaveFlag('ok','Saved');
       }catch(error){
         state.raidModes[raidId]=previous;renderAll();setSaveFlag('err','Save failed');showToast('ATK/DEF save failed',errorMessage(error),'err');
@@ -1781,6 +1800,7 @@
           state.raidLeaders[raid.id]=stringValue(result&&result.memberName)||name;
           state.revision=toInt(result&&result.revision,state.revision,Number.MAX_SAFE_INTEGER);
           state.updatedAt=stringValue(result&&result.updatedAt);
+          renderEventLastUpdated();
           setSaveFlag('ok','Saved');
           showToast('Raid Leader updated',`${raid.label}: ${state.raidLeaders[raid.id]}`);
         }).catch(error=>{
@@ -2175,7 +2195,21 @@
       if(dashboardGuildStatusFilter==='Active'&&member.status==='inactive')return false;
       if(dashboardGuildStatusFilter==='Inactive'&&member.status!=='inactive')return false;
       return !term||member.name.toLowerCase().includes(term);
-    }).slice().sort((a,b)=>a.name.localeCompare(b.name));
+    }).slice().sort(compareDashboardMembers);
+  }
+
+  function compareDashboardMembers(a,b){
+    if(dashboardSortBy==='updated'){
+      const aTime=a.updatedAt?Date.parse(a.updatedAt):0;
+      const bTime=b.updatedAt?Date.parse(b.updatedAt):0;
+      const aValid=Number.isFinite(aTime)&&aTime>0;
+      const bValid=Number.isFinite(bTime)&&bTime>0;
+      if(aValid!==bValid)return aValid?-1:1;
+      if(aValid&&bValid&&aTime!==bTime)return dashboardSortDir==='asc'?aTime-bTime:bTime-aTime;
+      return a.name.localeCompare(b.name,undefined,{sensitivity:'base'});
+    }
+    const result=a.name.localeCompare(b.name,undefined,{sensitivity:'base'});
+    return dashboardSortDir==='desc'?-result:result;
   }
 
   function renderManageMembersHtml(){
@@ -2184,7 +2218,7 @@
     const selectedCount=dashboardSelected.size;const allVisible=rows.length&&rows.every(member=>dashboardSelected.has(member.name));
     const activeCount=activeRoster().length;const inactiveCount=state.roster.length-activeCount;
     return `${sectionHeader('🛠 Manage Members','',`${rows.length} shown · ${activeCount} active · ${inactiveCount} inactive`)}
-      <div class="dash-manage-toolbar"><input class="edit-input" id="dashSearch" placeholder="Search members…" value="${escapeAttr(dashboardSearch)}" style="width:210px"><div class="dash-status-filters">${['Active','Inactive','All'].map(status=>`<button class="pill ${dashboardGuildStatusFilter===status?'active':''}" data-dashboard-status="${status}">${status}</button>`).join('')}</div><label class="dash-selectall"><input type="checkbox" id="dashSelectAll" ${allVisible?'checked':''}> Select all shown</label><span class="dash-selected-count">${selectedCount} selected</span><button class="btn primary small" id="dashAddMember">+ Add member</button></div>
+      <div class="dash-manage-toolbar"><input class="edit-input" id="dashSearch" placeholder="Search members…" value="${escapeAttr(dashboardSearch)}" style="width:210px"><div class="dash-status-filters">${['Active','Inactive','All'].map(status=>`<button class="pill ${dashboardGuildStatusFilter===status?'active':''}" data-dashboard-status="${status}">${status}</button>`).join('')}</div><div class="dash-manage-sort"><span class="dash-manage-sort-label">Sort</span><button class="pill ${dashboardSortBy==='name'?'active':''}" data-dashboard-sort="name">Name${dashboardSortBy==='name'?(dashboardSortDir==='asc'?' ↑':' ↓'):''}</button><button class="pill ${dashboardSortBy==='updated'?'active':''}" data-dashboard-sort="updated">Last Update${dashboardSortBy==='updated'?(dashboardSortDir==='asc'?' ↑':' ↓'):''}</button></div><label class="dash-selectall"><input type="checkbox" id="dashSelectAll" ${allVisible?'checked':''}> Select all shown</label><span class="dash-selected-count">${selectedCount} selected</span><button class="btn primary small" id="dashAddMember">+ Add member</button></div>
       ${selectedCount?`<div class="dash-bulk-bar"><span class="dash-bulk-label">Class</span><select class="edit-input" id="dashBulkClass">${CLASSES.map(cls=>`<option value="${escapeAttr(cls)}">${escapeHtml(cls)}</option>`).join('')}</select><button class="btn small" id="dashBulkClassBtn">Apply to ${selectedCount}</button><span class="dash-bulk-label">Set GR</span><input type="number" class="edit-input" id="dashBulkSet" min="0" placeholder="25000"><button class="btn small" id="dashBulkSetBtn">Set for ${selectedCount}</button><span class="dash-bulk-label">Adjust GR</span><input type="number" class="edit-input" id="dashBulkAdjust" placeholder="500 or -500"><button class="btn small" id="dashBulkAdjustBtn">Adjust ${selectedCount}</button><button class="btn small danger" id="dashBulkDeleteBtn">Permanently delete ${selectedCount}</button></div>`:''}
       <div class="dash-panel dash-manage-table" id="dashManageTable">${rows.length?rows.map(member=>{const inactive=member.status==='inactive';const detail=inactive?`Since ${formatDate(member.inactiveSince)||'date not recorded'}${member.inactiveReason?` · ${member.inactiveReason}`:''}`:(member.lastReturned?`Returned ${formatDate(member.lastReturned)}`:'Available for teams');const updateValue=member.updatedAt?formatMemberUpdate(member.updatedAt):'No edit recorded';const updateTitle=member.updatedBy?`${updateValue} · ${member.updatedBy}`:updateValue;return `<div class="dash-manage-row ${inactive?'inactive':''} ${dashboardSelected.has(member.name)?'checked':''}"><input type="checkbox" class="dash-row-check" data-name="${escapeAttr(member.name)}" ${dashboardSelected.has(member.name)?'checked':''}><span class="class-dot" style="background:${classColor(member.cls)};color:${classColor(member.cls)}"></span><span class="dash-manage-name" title="${escapeAttr(member.name)}">${escapeHtml(member.name)}</span><span class="dash-status-info" title="${escapeAttr(detail)}"><span class="member-state-badge ${inactive?'inactive':'active'}">${inactive?'Inactive':'Active'}</span><span class="dash-status-detail">${escapeHtml(detail)}</span></span><select class="edit-input dash-row-class" data-name="${escapeAttr(member.name)}">${CLASSES.map(cls=>`<option value="${escapeAttr(cls)}" ${cls===member.cls?'selected':''}>${escapeHtml(cls)}</option>`).join('')}</select><input type="number" class="edit-input dash-row-gr" data-name="${escapeAttr(member.name)}" value="${member.gr}" min="0"><span class="dash-last-updated" title="${escapeAttr(updateTitle)}"><span class="dash-last-updated-label">Last update</span><span class="dash-last-updated-value">${escapeHtml(updateValue)}${member.updatedBy?` · ${escapeHtml(member.updatedBy)}`:''}</span></span><div class="dash-manage-actions"><button class="icon-btn dash-row-edit" data-name="${escapeAttr(member.name)}" title="Edit member details">✎</button>${inactive?`<button class="btn small status-action active" data-reactivate-member="${escapeAttr(member.name)}">Reactivate</button>`:`<button class="btn small status-action inactive" data-inactivate-member="${escapeAttr(member.name)}">Mark Inactive</button>`}<button class="icon-btn del dash-row-del" data-name="${escapeAttr(member.name)}" title="Permanently delete member">🗑</button></div></div>`;}).join(''):'<div class="empty-note">No members match this search and status filter.</div>'}</div>`;
   }
@@ -2199,6 +2233,12 @@
     const search=root.querySelector('#dashSearch');
     if(search) search.addEventListener('input',()=>{dashboardSearch=search.value;rerenderManageMembers();const next=document.getElementById('dashSearch');if(next){next.focus();next.setSelectionRange(next.value.length,next.value.length);}});
     root.querySelectorAll('[data-dashboard-status]').forEach(button=>button.addEventListener('click',()=>{dashboardGuildStatusFilter=button.dataset.dashboardStatus;dashboardSelected.clear();rerenderManageMembers();}));
+    root.querySelectorAll('[data-dashboard-sort]').forEach(button=>button.addEventListener('click',()=>{
+      const key=button.dataset.dashboardSort;
+      if(dashboardSortBy===key)dashboardSortDir=dashboardSortDir==='asc'?'desc':'asc';
+      else{dashboardSortBy=key;dashboardSortDir=key==='updated'?'desc':'asc';}
+      rerenderManageMembers();
+    }));
     const selectAll=root.querySelector('#dashSelectAll');
     if(selectAll) selectAll.addEventListener('change',()=>{dashboardVisibleMembers().forEach(member=>selectAll.checked?dashboardSelected.add(member.name):dashboardSelected.delete(member.name));rerenderManageMembers();});
     const add=root.querySelector('#dashAddMember');if(add)add.addEventListener('click',()=>openMemberModal(null));
@@ -2245,6 +2285,7 @@ Their team assignments and membership history will also be removed. Use Mark Ina
       const result=await callServer('savePlannerState',snapshot,baseRevision);
       state.revision=toInt(result&&result.revision,baseRevision+1,Number.MAX_SAFE_INTEGER);
       state.updatedAt=stringValue(result&&result.updatedAt);
+      renderEventLastUpdated();
       setSaveFlag('ok','Saved');
     }catch(error){
       dirty=true;setSaveFlag('err','Save failed');
