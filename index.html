@@ -861,6 +861,10 @@
     raidModes:createDefaultRaidModes(),
     membershipHistory:[],
     publicVisibility:{guildLeague:false,polarityZone:false},
+    eventUpdates:{
+      guildLeague:{updatedAt:'',updatedBy:''},
+      polarityZone:{updatedAt:'',updatedBy:''}
+    },
     revision:0,
     updatedAt:'',
     updatedBy:'',
@@ -1245,7 +1249,7 @@
     assignments.elite_1=['Kairo','Astra','YRDRY','Lumi','Nyx'];
     assignments.dungeon1_1=['Kairo','Astra','YRDRY','Lumi','Nyx'];
     const membershipHistory=[{id:'history_preview_1',memberId:'member_preview_former',memberName:'FormerMember',action:'inactive',effectiveDate:'2026-07-20',reason:'Left Guild',changedAt:'2026-07-20T10:00:00.000Z'}];
-    return {version:'preview',spreadsheetName:'Preview Sheet',roster,assignments,finishedDungeons:[],raidLeaders:createDefaultRaidLeaders(),raidModes:createDefaultRaidModes(),membershipHistory,revision:1,updatedAt:new Date().toISOString()};
+    return {version:'preview',spreadsheetName:'Preview Sheet',roster,assignments,finishedDungeons:[],raidLeaders:createDefaultRaidLeaders(),raidModes:createDefaultRaidModes(),membershipHistory,eventUpdates:{guildLeague:{updatedAt:'',updatedBy:''},polarityZone:{updatedAt:'',updatedBy:''}},revision:1,updatedAt:new Date().toISOString()};
   }
 
   function createDefaultRaidLeaders(){
@@ -1378,7 +1382,21 @@
       membershipHistory.push({id,memberId,memberName,action,effectiveDate:normalizeDateValue(raw.effectiveDate||raw.date),reason:stringValue(raw.reason).trim().slice(0,300),changedAt:normalizeTimestampValue(raw.changedAt||raw.createdAt)});
     });
     const publicVisibility=normalizePublicVisibility(input.publicVisibility);
-    return {roster,assignments,finishedDungeons,raidLeaders,raidModes,membershipHistory:membershipHistory.slice(-CONFIG.maxHistory),publicVisibility,revision:0,updatedAt:'',spreadsheetName:''};
+    const rawEventUpdates=input.eventUpdates&&typeof input.eventUpdates==='object'?input.eventUpdates:(input.eu&&typeof input.eu==='object'?input.eu:{});
+    const legacyUpdatedAt=normalizeTimestampValue(input.updatedAt);
+    const legacyUpdatedBy=stringValue(input.updatedBy).trim().slice(0,120);
+    const normalizeEventUpdate=(raw)=>{
+      const source=raw&&typeof raw==='object'?raw:{};
+      return {
+        updatedAt:normalizeTimestampValue(source.updatedAt||source.at)||legacyUpdatedAt,
+        updatedBy:stringValue(source.updatedBy||source.by).trim().slice(0,120)||legacyUpdatedBy
+      };
+    };
+    const eventUpdates={
+      guildLeague:normalizeEventUpdate(rawEventUpdates.guildLeague),
+      polarityZone:normalizeEventUpdate(rawEventUpdates.polarityZone)
+    };
+    return {roster,assignments,finishedDungeons,raidLeaders,raidModes,membershipHistory:membershipHistory.slice(-CONFIG.maxHistory),publicVisibility,eventUpdates,revision:0,updatedAt:'',spreadsheetName:''};
   }
 
   function enforceUnique(assignments,keys){
@@ -1485,15 +1503,42 @@
     return stringValue(currentProfile&&currentProfile.display_name).trim()||stringValue(currentProfile&&currentProfile.email).trim()||'Unknown user';
   }
 
+  function eventUpdateKey(eventName=currentEvent){
+    if(eventName==='guild_league')return'guildLeague';
+    if(eventName==='polarity_zone')return'polarityZone';
+    return'';
+  }
+
+  function ensureEventUpdates(){
+    if(!state.eventUpdates||typeof state.eventUpdates!=='object')state.eventUpdates={};
+    if(!state.eventUpdates.guildLeague||typeof state.eventUpdates.guildLeague!=='object')state.eventUpdates.guildLeague={updatedAt:'',updatedBy:''};
+    if(!state.eventUpdates.polarityZone||typeof state.eventUpdates.polarityZone!=='object')state.eventUpdates.polarityZone={updatedAt:'',updatedBy:''};
+  }
+
+  function touchEventUpdate(scope=currentEvent){
+    ensureEventUpdates();
+    const stamp={updatedAt:new Date().toISOString(),updatedBy:currentEditorName()};
+    if(scope==='both'){
+      state.eventUpdates.guildLeague={...stamp};
+      state.eventUpdates.polarityZone={...stamp};
+      return;
+    }
+    const key=eventUpdateKey(scope);
+    if(key)state.eventUpdates[key]={...stamp};
+  }
+
   function renderEventLastUpdated(){
     const wrap=document.getElementById('eventLastUpdated');
     if(!wrap)return;
     const value=wrap.querySelector('.event-last-updated-value');
     if(!value)return;
-    const updateTime=state.updatedAt?formatMemberUpdate(state.updatedAt):'';
-    const updater=stringValue(state.updatedBy).trim();
-    value.textContent=updateTime?`${updateTime}${updater?` · ${updater}`:''}`:'No saved update';
-    wrap.title=updateTime?`Planner last saved ${updateTime}${updater?` by ${updater}`:''}`:'No saved update recorded yet';
+    ensureEventUpdates();
+    const key=eventUpdateKey();
+    const entry=key&&state.eventUpdates[key]?state.eventUpdates[key]:{};
+    const updateTime=entry.updatedAt?formatMemberUpdate(entry.updatedAt):'';
+    const updater=stringValue(entry.updatedBy).trim();
+    value.textContent=updateTime?`${updateTime}${updater?` · ${updater}`:''}`:'No event update recorded';
+    wrap.title=updateTime?`${currentEventPublicLabel()} lineup last updated ${updateTime}${updater?` by ${updater}`:''}`:'No event-specific lineup update recorded yet';
   }
 
   function currentPublicVisibilityKey(){
@@ -1531,7 +1576,7 @@
     const next=!Boolean(state.publicVisibility[key]);
     if(next&&!confirm(`Publish the ${label} lineup?\n\nAnyone with the public link will be able to view this lineup.`))return;
     state.publicVisibility[key]=next;
-    commitMutation(`${label} public lineup ${next?'published':'hidden'}`);
+    commitMutation(`${label} public lineup ${next?'published':'hidden'}`,'none');
     showToast(next?'Public view published':'Public view hidden',next?`${label} is now visible on the public page.`:`${label} is now private. Public visitors will see that no lineup is published.`);
   }
 
@@ -1790,8 +1835,9 @@
         state.revision=toInt(result&&result.revision,state.revision,Number.MAX_SAFE_INTEGER);
         state.updatedAt=stringValue(result&&result.updatedAt);
         state.updatedBy=currentEditorName();
+        touchEventUpdate('guild_league');
         renderEventLastUpdated();
-        setSaveFlag('ok','Saved');
+        queueSave();
       }catch(error){
         state.raidModes[raidId]=previous;renderAll();setSaveFlag('err','Save failed');showToast('ATK/DEF save failed',errorMessage(error),'err');
       }finally{quickSaveInFlight=Math.max(0,quickSaveInFlight-1);}
@@ -1818,8 +1864,9 @@
           state.revision=toInt(result&&result.revision,state.revision,Number.MAX_SAFE_INTEGER);
           state.updatedAt=stringValue(result&&result.updatedAt);
           state.updatedBy=currentEditorName();
+          touchEventUpdate(raid.polarity?'polarity_zone':'guild_league');
           renderEventLastUpdated();
-          setSaveFlag('ok','Saved');
+          queueSave();
           showToast('Raid Leader updated',`${raid.label}: ${state.raidLeaders[raid.id]}`);
         }).catch(error=>{
           state.raidLeaders[raid.id]=previous;validateRaidLeaders();rebuildIndex();renderAll();setSaveFlag('err','Save failed');showToast('Raid Leader save failed',errorMessage(error),'err');
@@ -2279,8 +2326,10 @@ Their team assignments and membership history will also be removed. Use Mark Ina
   }
 
 
-  function commitMutation(message){
+  function commitMutation(message,eventScope='auto'){
     if(!userCanEdit()){showToast('Read-only access','Your account cannot make changes.','warn');reloadFromServer();return;}
+    if(eventScope==='both')touchEventUpdate('both');
+    else if(eventScope!=='none'&&(currentEvent==='guild_league'||currentEvent==='polarity_zone'))touchEventUpdate(currentEvent);
     validateRaidLeaders();
     rebuildIndex();
     renderAll();
@@ -2297,7 +2346,7 @@ Their team assignments and membership history will also be removed. Use Mark Ina
     if(saveInFlight){saveQueued=true;return;}
     if(!dirty&&!saveQueued)return;
     saveInFlight=true;saveQueued=false;dirty=false;
-    const snapshot={roster:state.roster,assignments:state.assignments,finishedDungeons:state.finishedDungeons,raidLeaders:state.raidLeaders,raidModes:state.raidModes,membershipHistory:state.membershipHistory,publicVisibility:state.publicVisibility};
+    const snapshot={roster:state.roster,assignments:state.assignments,finishedDungeons:state.finishedDungeons,raidLeaders:state.raidLeaders,raidModes:state.raidModes,membershipHistory:state.membershipHistory,publicVisibility:state.publicVisibility,eventUpdates:state.eventUpdates};
     const baseRevision=state.revision;
     try{
       const result=await callServer('savePlannerState',snapshot,baseRevision);
@@ -2333,7 +2382,7 @@ Their team assignments and membership history will also be removed. Use Mark Ina
   }
 
   function exportLineup(){
-    const payload={type:'tempest-lineup-export',version:6,exportedAt:new Date().toISOString(),source:'Titania Supabase website',m:state.roster,a:state.assignments,fd:state.finishedDungeons,rl:state.raidLeaders,rm:state.raidModes,mh:state.membershipHistory};
+    const payload={type:'tempest-lineup-export',version:7,exportedAt:new Date().toISOString(),source:'Titania Supabase website',m:state.roster,a:state.assignments,fd:state.finishedDungeons,rl:state.raidLeaders,rm:state.raidModes,mh:state.membershipHistory,eu:state.eventUpdates};
     const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});const url=URL.createObjectURL(blob);const link=document.createElement('a');link.href=url;link.download=`guild-lineup-${new Date().toISOString().slice(0,10)}.json`;document.body.appendChild(link);link.click();link.remove();URL.revokeObjectURL(url);showToast('Lineup exported','Roster status, membership history, Guild League, Polarity Zone, and finished-dungeon marks were included.');
   }
 
@@ -2345,7 +2394,7 @@ Their team assignments and membership history will also be removed. Use Mark Ina
       const imported=normalizeClientState(data);
       const when=data.exportedAt?new Date(data.exportedAt).toLocaleString():'an unknown time';
       if(!confirm(`Import the lineup exported on ${when}?\n\nThis will replace the current roster, Guild Status records, membership history, and both event lineups in the Titania database.`))return;
-      state.roster=imported.roster;state.assignments=imported.assignments;state.finishedDungeons=imported.finishedDungeons;state.raidLeaders=imported.raidLeaders;state.raidModes=imported.raidModes;state.membershipHistory=imported.membershipHistory;dashboardSelected.clear();clearSelections(false);commitMutation('Lineup imported');showToast('Lineup imported','The roster, raid leaders, status history, and event data are being saved to Supabase.');
+      state.roster=imported.roster;state.assignments=imported.assignments;state.finishedDungeons=imported.finishedDungeons;state.raidLeaders=imported.raidLeaders;state.raidModes=imported.raidModes;state.membershipHistory=imported.membershipHistory;dashboardSelected.clear();clearSelections(false);commitMutation('Lineup imported','both');showToast('Lineup imported','The roster, raid leaders, status history, and event data are being saved to Supabase.');
     };
     reader.onerror=()=>showToast('Import failed','The file could not be read.','err');reader.readAsText(file);
   }
