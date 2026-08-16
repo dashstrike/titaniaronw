@@ -863,6 +863,7 @@
     publicVisibility:{guildLeague:false,polarityZone:false},
     revision:0,
     updatedAt:'',
+    updatedBy:'',
     spreadsheetName:''
   };
   let memberByName = Object.create(null);
@@ -1102,6 +1103,7 @@
       state = normalizeClientState(loaded || {});
       state.revision = toInt(loaded && loaded.revision,0,Number.MAX_SAFE_INTEGER);
       state.updatedAt = stringValue(loaded && loaded.updatedAt);
+      state.updatedBy = stringValue(loaded && loaded.updatedBy);
       state.spreadsheetName = stringValue(loaded && loaded.spreadsheetName);
       rebuildIndex();
       setSaveFlag('ok','Loaded');
@@ -1188,10 +1190,18 @@
   async function callServer(method,...args){
     if(!supabaseClient)throw new Error('Supabase is not configured.');
     if(method==='getPlannerState'){
-      const {data,error}=await supabaseClient.from('planner_state').select('state,revision,updated_at').eq('id',1).single();
+      const {data,error}=await supabaseClient.from('planner_state').select('state,revision,updated_at,updated_by').eq('id',1).single();
       if(error)throw error;
       const payload=data&&data.state&&typeof data.state==='object'?data.state:{};
-      return {...payload,revision:Number(data.revision||0),updatedAt:data.updated_at||'',spreadsheetName:'Titania Guild Management'};
+      let updatedBy='';
+      const updaterId=stringValue(data&&data.updated_by).trim();
+      if(updaterId){
+        const {data:updaterProfile,error:profileError}=await supabaseClient.from('profiles').select('display_name,email').eq('id',updaterId).maybeSingle();
+        if(!profileError&&updaterProfile){
+          updatedBy=stringValue(updaterProfile.display_name).trim()||stringValue(updaterProfile.email).trim();
+        }
+      }
+      return {...payload,revision:Number(data.revision||0),updatedAt:data.updated_at||'',updatedBy,spreadsheetName:'Titania Guild Management'};
     }
     if(method==='savePlannerState'){
       if(!userCanEdit())throw new Error('READ_ONLY: Your account cannot edit the planner.');
@@ -1471,13 +1481,19 @@
     }
   }
 
+  function currentEditorName(){
+    return stringValue(currentProfile&&currentProfile.display_name).trim()||stringValue(currentProfile&&currentProfile.email).trim()||'Unknown user';
+  }
+
   function renderEventLastUpdated(){
     const wrap=document.getElementById('eventLastUpdated');
     if(!wrap)return;
     const value=wrap.querySelector('.event-last-updated-value');
     if(!value)return;
-    value.textContent=state.updatedAt?formatMemberUpdate(state.updatedAt):'No saved update';
-    wrap.title=state.updatedAt?`Planner last saved ${formatMemberUpdate(state.updatedAt)}`:'No saved update recorded yet';
+    const updateTime=state.updatedAt?formatMemberUpdate(state.updatedAt):'';
+    const updater=stringValue(state.updatedBy).trim();
+    value.textContent=updateTime?`${updateTime}${updater?` · ${updater}`:''}`:'No saved update';
+    wrap.title=updateTime?`Planner last saved ${updateTime}${updater?` by ${updater}`:''}`:'No saved update recorded yet';
   }
 
   function currentPublicVisibilityKey(){
@@ -1773,6 +1789,7 @@
         state.raidModes[raidId]=stringValue(result&&result.mode).toUpperCase()==='DEF'?'DEF':'ATK';
         state.revision=toInt(result&&result.revision,state.revision,Number.MAX_SAFE_INTEGER);
         state.updatedAt=stringValue(result&&result.updatedAt);
+        state.updatedBy=currentEditorName();
         renderEventLastUpdated();
         setSaveFlag('ok','Saved');
       }catch(error){
@@ -1800,6 +1817,7 @@
           state.raidLeaders[raid.id]=stringValue(result&&result.memberName)||name;
           state.revision=toInt(result&&result.revision,state.revision,Number.MAX_SAFE_INTEGER);
           state.updatedAt=stringValue(result&&result.updatedAt);
+          state.updatedBy=currentEditorName();
           renderEventLastUpdated();
           setSaveFlag('ok','Saved');
           showToast('Raid Leader updated',`${raid.label}: ${state.raidLeaders[raid.id]}`);
@@ -2285,6 +2303,7 @@ Their team assignments and membership history will also be removed. Use Mark Ina
       const result=await callServer('savePlannerState',snapshot,baseRevision);
       state.revision=toInt(result&&result.revision,baseRevision+1,Number.MAX_SAFE_INTEGER);
       state.updatedAt=stringValue(result&&result.updatedAt);
+      state.updatedBy=currentEditorName();
       renderEventLastUpdated();
       setSaveFlag('ok','Saved');
     }catch(error){
@@ -2304,7 +2323,7 @@ Their team assignments and membership history will also be removed. Use Mark Ina
   async function reloadFromServer(){
     document.getElementById('loadingOverlay').hidden=false;document.getElementById('loadingText').textContent='Reloading latest Supabase data…';
     try{
-      const loaded=await callServer('getPlannerState');state=normalizeClientState(loaded||{});state.revision=toInt(loaded&&loaded.revision,0,Number.MAX_SAFE_INTEGER);state.updatedAt=stringValue(loaded&&loaded.updatedAt);state.spreadsheetName=stringValue(loaded&&loaded.spreadsheetName);dirty=false;saveQueued=false;clearSelections(false);renderAll();setSaveFlag('ok','Loaded');
+      const loaded=await callServer('getPlannerState');state=normalizeClientState(loaded||{});state.revision=toInt(loaded&&loaded.revision,0,Number.MAX_SAFE_INTEGER);state.updatedAt=stringValue(loaded&&loaded.updatedAt);state.updatedBy=stringValue(loaded&&loaded.updatedBy);state.spreadsheetName=stringValue(loaded&&loaded.spreadsheetName);dirty=false;saveQueued=false;clearSelections(false);renderAll();setSaveFlag('ok','Loaded');
     }catch(error){showToast('Reload failed',errorMessage(error),'err');}
     finally{document.getElementById('loadingOverlay').hidden=true;}
   }
