@@ -242,6 +242,7 @@
     .raid-leader-drop.dragover{border-color:#f0b429;background:#1b1a11;box-shadow:0 0 0 2px #f0b42922;}
     .raid-leader-drop.invalid{border-color:#ff6b7a;box-shadow:0 0 0 2px #ff6b7a22;}
     .main-raid-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;}
+    .main-raid-grid.five{grid-template-columns:repeat(5,minmax(0,1fr));}
     .pz-star-raid-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:14px;}
     .pz-normal-raid-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;}
     .pz-dungeon-group{display:flex;flex-direction:column;gap:12px;margin:0 0 24px;}
@@ -410,6 +411,7 @@
     .print-raid-mode.def{color:#245b8f;background:#e5f1ff;border:1px solid #9dc7ef;}
     .print-raid-leader{color:#8a6400;font-weight:600;text-align:right;}
     .print-main-raid-grid{grid-template-columns:repeat(4,minmax(0,1fr));}
+    .print-main-raid-grid.five{grid-template-columns:repeat(5,minmax(0,1fr));}
     .print-team-card{border:1px solid #d9dcec;border-radius:10px;padding:10px 12px;background:#f8f9fd;break-inside:avoid;page-break-inside:avoid;}
     .print-team-card.no-healer{border-color:#e58a99;background:#fdf1f3;}
     .print-team-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:7px;}
@@ -815,11 +817,10 @@
   ]);
   const SUB_KEYS = Object.freeze(Array.from({length:CONFIG.subTeams},(_,i)=>`sub_${i+1}`));
   const SUB_RAIDS = Object.freeze([
-    Object.freeze({id:'sub_raid_1',label:'Raid 1',keys:Object.freeze(['sub_1','sub_2','sub_3','sub_4']),defaultLeaderTeam:'sub_1'}),
-    Object.freeze({id:'sub_raid_2',label:'Raid 2',keys:Object.freeze(['sub_5','sub_6','sub_7','sub_8']),defaultLeaderTeam:'sub_5'}),
+    Object.freeze({id:'sub_raid_1',label:'Raid 1',keys:Object.freeze(['sub_1','sub_2','sub_3','sub_4','sub_17']),defaultLeaderTeam:'sub_1'}),
+    Object.freeze({id:'sub_raid_2',label:'Raid 2',keys:Object.freeze(['sub_5','sub_6','sub_7','sub_8','sub_18']),defaultLeaderTeam:'sub_5'}),
     Object.freeze({id:'sub_raid_3',label:'Raid 3',keys:Object.freeze(['sub_9','sub_10','sub_11','sub_12']),defaultLeaderTeam:'sub_9'}),
-    Object.freeze({id:'sub_raid_4',label:'Raid 4',keys:Object.freeze(['sub_13','sub_14','sub_15','sub_16']),defaultLeaderTeam:'sub_13'}),
-    Object.freeze({id:'sub_raid_5',label:'Raid 5',keys:Object.freeze(['sub_17','sub_18']),defaultLeaderTeam:'sub_17'})
+    Object.freeze({id:'sub_raid_4',label:'Raid 4',keys:Object.freeze(['sub_13','sub_14','sub_15','sub_16']),defaultLeaderTeam:'sub_13'})
   ]);
   const ALL_GUILD_RAIDS = Object.freeze([...MAIN_RAIDS,...SUB_RAIDS]);
   const ELITE_KEYS = Object.freeze(Array.from({length:CONFIG.eliteTeams},(_,i)=>`elite_${i+1}`));
@@ -1652,7 +1653,7 @@
       }
       wrap.innerHTML=html;
     }else{
-      wrap.innerHTML=sectionHeader('⚔ Main Battlefield','main-bf',`3 raids · 4 teams each`)+`<div class="main-raids">${MAIN_RAIDS.map(mainRaidHtml).join('')}</div>`+sectionHeader('◈ Sub Battlefield','sub-bf',`5 raids · Teams 1–${CONFIG.subTeams}`)+`<div class="main-raids sub-raids">${SUB_RAIDS.map(mainRaidHtml).join('')}</div>`;
+      wrap.innerHTML=sectionHeader('⚔ Main Battlefield','main-bf',`3 raids · 4 teams each`)+`<div class="main-raids">${MAIN_RAIDS.map(mainRaidHtml).join('')}</div>`+sectionHeader('◈ Sub Battlefield','sub-bf',`4 raids · Teams 1–${CONFIG.subTeams}`)+`<div class="main-raids sub-raids">${SUB_RAIDS.map(mainRaidHtml).join('')}</div>`;
     }
     wireTeamInteractions();
   }
@@ -1670,7 +1671,8 @@
       modeToggle=`<button class="raid-mode-toggle ${raidMode.toLowerCase()}" data-raid-mode-toggle="${raid.id}" type="button" title="Switch this raid between ATK and DEF">${modeIcon} ${raidMode}</button>`;
     }
     const title=isPolarityRaid?`RAID TEAM — ${displayLeader}`:`${raid.label.toUpperCase()} · TEAM ${displayLeader}`;
-    const gridClass=raid.kind==='star'?'pz-star-raid-grid':raid.kind==='normal'?'pz-normal-raid-grid':'main-raid-grid';
+    let gridClass=raid.kind==='star'?'pz-star-raid-grid':raid.kind==='normal'?'pz-normal-raid-grid':'main-raid-grid';
+    if(!isPolarityRaid&&raid.keys.length===5)gridClass+=' five';
     return `<div class="main-raid-block" data-raid="${raid.id}"><div class="main-raid-head"><div class="main-raid-title">${escapeHtml(title)}</div>${modeToggle}<div class="main-raid-line"></div><label class="raid-leader-control"><b>Raid Leader</b><span class="raid-leader-drop ${selectedLeader?'':'empty'}" data-raid-leader-drop="${raid.id}" role="button" tabindex="0" title="Drag any member from this raid here to make them Raid Leader">${crownIcon()}<span class="raid-leader-drop-name">${escapeHtml(dropText)}</span></span></label></div><div class="${gridClass}">${raid.keys.map(teamCardHtml).join('')}</div></div>`;
   }
 
@@ -2336,7 +2338,8 @@ Their team assignments and membership history will also be removed. Use Mark Ina
       html+=`<div class="print-section-title">Sub Battlefield</div>`;
       SUB_RAIDS.forEach(raid=>{
         const leaderName=stringValue(state.raidLeaders&&state.raidLeaders[raid.id]).trim()||'Not assigned';
-        html+=`<div class="print-raid-block"><div class="print-raid-head"><span>${escapeHtml(raid.label.toUpperCase())} · TEAM ${escapeHtml(leaderName)}</span></div><div class="print-team-grid print-main-raid-grid">${raid.keys.map(appendTeamCard).join('')}</div></div>`;
+        const printGridClass=raid.keys.length===5?'print-main-raid-grid five':'print-main-raid-grid';
+        html+=`<div class="print-raid-block"><div class="print-raid-head"><span>${escapeHtml(raid.label.toUpperCase())} · TEAM ${escapeHtml(leaderName)}</span></div><div class="print-team-grid ${printGridClass}">${raid.keys.map(appendTeamCard).join('')}</div></div>`;
       });
     }
     return html+'<div class="print-footer-note">Generated from Titania Guild Management Tool · Dark Lord Server.</div>';
