@@ -2373,7 +2373,13 @@ Their team assignments and membership history will also be removed. Use Mark Ina
   function isHealer(cls){return HEALERS.includes(cls);}
   function teamKind(key){if(key.startsWith('main_'))return'main-bf';if(key.startsWith('sub_'))return'sub-bf';if(key.startsWith('dungeon'))return'dungeon-bf';return'elite-bf';}
   function teamLabel(key){const match=key.match(/_(\d+)$/);return`Team ${match?match[1]:'?'}`;}
+  function subDisplayTeamLabel(key){
+    const orderedKeys=SUB_RAIDS.flatMap(raid=>raid.keys);
+    const index=orderedKeys.indexOf(key);
+    return index>=0?`Team ${index+1}`:teamLabel(key);
+  }
   function displayTeamLabel(key){
+    if(key.startsWith('sub_'))return subDisplayTeamLabel(key);
     if(currentEvent==='polarity_zone'&&key.startsWith('dungeon')){
       const index=DUNGEON_KEYS.indexOf(key);
       if(index>=0)return`Team ${index+1}`;
@@ -2381,7 +2387,7 @@ Their team assignments and membership history will also be removed. Use Mark Ina
     return teamLabel(key);
   }
   function dungeonNumber(key){const match=/^dungeon(\d+)_/.exec(key);return match?Number.parseInt(match[1],10):null;}
-  function teamLongLabel(key){if(key.startsWith('main_'))return`Main ${teamLabel(key)}`;if(key.startsWith('sub_'))return`Sub ${teamLabel(key)}`;if(key.startsWith('elite_'))return`Elite ${teamLabel(key)}`;return`Dungeon ${dungeonNumber(key)} ${teamLabel(key)}`;}
+  function teamLongLabel(key){if(key.startsWith('main_'))return`Main ${teamLabel(key)}`;if(key.startsWith('sub_'))return`Sub ${subDisplayTeamLabel(key)}`;if(key.startsWith('elite_'))return`Elite ${teamLabel(key)}`;return`Dungeon ${dungeonNumber(key)} ${teamLabel(key)}`;}
   function teamsMatch(a,b){const first=state.assignments[a].filter(Boolean).slice().sort();const second=state.assignments[b].filter(Boolean).slice().sort();return first.length>0&&first.length===second.length&&first.every((value,index)=>value===second[index]);}
   function dungeonMatches(eliteKey){return DUNGEON_KEYS.filter(key=>teamsMatch(eliteKey,key));}
   function classColor(cls){return CLASS_COLORS[cls]||CLASS_COLORS.Unknown;}

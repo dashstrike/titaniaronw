@@ -299,6 +299,11 @@ function teamNoHealer(key){
 }
 
 function teamLabel(key){
+  if(key.startsWith('sub_')){
+    const orderedKeys=SUB_RAIDS.flatMap(raid=>raid.keys);
+    const index=orderedKeys.indexOf(key);
+    if(index>=0)return `Team ${index+1}`;
+  }
   const m=/_([0-9]+)$/.exec(key);
   return `Team ${m?m[1]:'?'}`;
 }
