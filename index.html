@@ -1024,6 +1024,10 @@
   let saveQueued = false;
   let dirty = false;
   let quickSaveInFlight = 0;
+  let syncedStateSnapshot = null;
+  let syncPollTimer = null;
+  let syncCheckInFlight = false;
+  let syncListenersWired = false;
 
   document.addEventListener('DOMContentLoaded', bootstrapWebsite);
 
@@ -1237,8 +1241,10 @@
       state.updatedBy = stringValue(loaded && loaded.updatedBy);
       state.spreadsheetName = stringValue(loaded && loaded.spreadsheetName);
       rebuildIndex();
+      syncedStateSnapshot = plannerSnapshot(state);
       setSaveFlag('ok','Loaded');
       renderAll();
+      startPlannerAutoSync();
     }catch(error){
       setSaveFlag('err','Load failed');
       document.getElementById('loadingText').textContent = errorMessage(error);
@@ -2474,6 +2480,197 @@ Their team assignments and membership history will also be removed. Use Mark Ina
   }
 
 
+
+  function cloneJson(value){
+    return JSON.parse(JSON.stringify(value));
+  }
+
+  function sameJson(a,b){
+    return JSON.stringify(a===undefined?null:a)===JSON.stringify(b===undefined?null:b);
+  }
+
+  function plannerSnapshot(source=state){
+    const value=source&&typeof source==='object'?source:{};
+    return cloneJson({
+      roster:Array.isArray(value.roster)?value.roster:[],
+      assignments:value.assignments&&typeof value.assignments==='object'?value.assignments:createEmptyAssignments(),
+      finishedDungeons:Array.isArray(value.finishedDungeons)?value.finishedDungeons:[],
+      raidLeaders:value.raidLeaders&&typeof value.raidLeaders==='object'?value.raidLeaders:createDefaultRaidLeaders(),
+      raidModes:value.raidModes&&typeof value.raidModes==='object'?value.raidModes:createDefaultRaidModes(),
+      membershipHistory:Array.isArray(value.membershipHistory)?value.membershipHistory:[],
+      publicVisibility:value.publicVisibility&&typeof value.publicVisibility==='object'?value.publicVisibility:{guildLeague:false,polarityZone:false},
+      eventUpdates:value.eventUpdates&&typeof value.eventUpdates==='object'?value.eventUpdates:{guildLeague:{updatedAt:'',updatedBy:''},polarityZone:{updatedAt:'',updatedBy:''}}
+    });
+  }
+
+  function mergeRosterThreeWay(baseRoster,localRoster,remoteRoster){
+    const baseById=new Map((baseRoster||[]).map(member=>[stringValue(member&&member.id),member]));
+    const localById=new Map((localRoster||[]).map(member=>[stringValue(member&&member.id),member]));
+    const remoteById=new Map((remoteRoster||[]).map(member=>[stringValue(member&&member.id),cloneJson(member)]));
+    const deletedLocally=new Set();
+    baseById.forEach((_base,id)=>{if(id&&!localById.has(id))deletedLocally.add(id);});
+    deletedLocally.forEach(id=>remoteById.delete(id));
+    const fields=['name','cls','gr','status','inactiveSince','lastReturned','inactiveReason','notes','updatedAt','updatedBy'];
+    baseById.forEach((baseMember,id)=>{
+      if(!id)return;
+      const localMember=localById.get(id);
+      const remoteMember=remoteById.get(id);
+      if(!localMember||!remoteMember)return;
+      const merged={...remoteMember,id};
+      fields.forEach(field=>{if(!sameJson(localMember[field],baseMember[field]))merged[field]=cloneJson(localMember[field]);});
+      remoteById.set(id,merged);
+    });
+    localById.forEach((localMember,id)=>{
+      if(!id||baseById.has(id))return;
+      remoteById.set(id,cloneJson(localMember));
+    });
+    const ordered=[];
+    const used=new Set();
+    (remoteRoster||[]).forEach(member=>{
+      const id=stringValue(member&&member.id);
+      if(id&&remoteById.has(id)&&!used.has(id)){ordered.push(remoteById.get(id));used.add(id);}
+    });
+    (localRoster||[]).forEach(member=>{
+      const id=stringValue(member&&member.id);
+      if(id&&remoteById.has(id)&&!used.has(id)){ordered.push(remoteById.get(id));used.add(id);}
+    });
+    return ordered.slice(0,CONFIG.maxMembers);
+  }
+
+  function mergeHistoryThreeWay(baseHistory,localHistory,remoteHistory){
+    const baseById=new Map((baseHistory||[]).map(item=>[stringValue(item&&item.id),item]));
+    const localById=new Map((localHistory||[]).map(item=>[stringValue(item&&item.id),item]));
+    const remoteById=new Map((remoteHistory||[]).map(item=>[stringValue(item&&item.id),cloneJson(item)]));
+    baseById.forEach((_base,id)=>{if(id&&!localById.has(id))remoteById.delete(id);});
+    localById.forEach((localItem,id)=>{
+      if(!id)return;
+      const baseItem=baseById.get(id);
+      if(!baseItem||!sameJson(localItem,baseItem))remoteById.set(id,cloneJson(localItem));
+    });
+    const ordered=[];
+    const used=new Set();
+    (remoteHistory||[]).forEach(item=>{const id=stringValue(item&&item.id);if(id&&remoteById.has(id)&&!used.has(id)){ordered.push(remoteById.get(id));used.add(id);}});
+    (localHistory||[]).forEach(item=>{const id=stringValue(item&&item.id);if(id&&remoteById.has(id)&&!used.has(id)){ordered.push(remoteById.get(id));used.add(id);}});
+    return ordered.slice(-CONFIG.maxHistory);
+  }
+
+  function mergePlannerSnapshots(baseInput,localInput,remoteInput){
+    const base=plannerSnapshot(baseInput);
+    const local=plannerSnapshot(localInput);
+    const remote=plannerSnapshot(remoteInput);
+    const merged=plannerSnapshot(remote);
+
+    merged.roster=mergeRosterThreeWay(base.roster,local.roster,remote.roster);
+
+    ALL_KEYS.forEach(key=>{
+      if(!Array.isArray(merged.assignments[key]))merged.assignments[key]=new Array(CONFIG.teamSize).fill(null);
+      for(let i=0;i<CONFIG.teamSize;i++){
+        const baseValue=base.assignments[key]&&base.assignments[key][i]!==undefined?base.assignments[key][i]:null;
+        const localValue=local.assignments[key]&&local.assignments[key][i]!==undefined?local.assignments[key][i]:null;
+        if(!sameJson(localValue,baseValue))merged.assignments[key][i]=localValue||null;
+      }
+    });
+
+    const baseFinished=new Set(base.finishedDungeons||[]);
+    const localFinished=new Set(local.finishedDungeons||[]);
+    const mergedFinished=new Set(remote.finishedDungeons||[]);
+    localFinished.forEach(value=>{if(!baseFinished.has(value))mergedFinished.add(value);});
+    baseFinished.forEach(value=>{if(!localFinished.has(value))mergedFinished.delete(value);});
+    merged.finishedDungeons=[...mergedFinished].sort((a,b)=>a-b);
+
+    ALL_RAIDS.forEach(raid=>{
+      const id=raid.id;
+      if(!sameJson(local.raidLeaders[id],base.raidLeaders[id]))merged.raidLeaders[id]=local.raidLeaders[id]||'';
+    });
+    MAIN_RAIDS.forEach(raid=>{
+      const id=raid.id;
+      if(!sameJson(local.raidModes[id],base.raidModes[id]))merged.raidModes[id]=local.raidModes[id];
+    });
+
+    merged.membershipHistory=mergeHistoryThreeWay(base.membershipHistory,local.membershipHistory,remote.membershipHistory);
+    const localRosterIds=new Set((local.roster||[]).map(member=>stringValue(member&&member.id)));
+    const locallyDeletedMemberIds=new Set((base.roster||[]).map(member=>stringValue(member&&member.id)).filter(id=>id&&!localRosterIds.has(id)));
+    if(locallyDeletedMemberIds.size)merged.membershipHistory=merged.membershipHistory.filter(entry=>!locallyDeletedMemberIds.has(stringValue(entry&&entry.memberId)));
+
+    ['guildLeague','polarityZone'].forEach(key=>{
+      if(!sameJson(local.publicVisibility[key],base.publicVisibility[key]))merged.publicVisibility[key]=local.publicVisibility[key]===true;
+      if(!sameJson(local.eventUpdates[key],base.eventUpdates[key]))merged.eventUpdates[key]=cloneJson(local.eventUpdates[key]);
+    });
+
+    const baseRosterById=new Map((base.roster||[]).map(member=>[stringValue(member&&member.id),member]));
+    const mergedRosterById=new Map((merged.roster||[]).map(member=>[stringValue(member&&member.id),member]));
+    const renameMap=new Map();
+    baseRosterById.forEach((baseMember,id)=>{
+      const mergedMember=mergedRosterById.get(id);
+      const oldName=stringValue(baseMember&&baseMember.name).trim();
+      const newName=stringValue(mergedMember&&mergedMember.name).trim();
+      if(oldName&&newName&&oldName.toLowerCase()!==newName.toLowerCase())renameMap.set(oldName.toLowerCase(),newName);
+    });
+    if(renameMap.size){
+      ALL_KEYS.forEach(key=>{
+        merged.assignments[key]=merged.assignments[key].map(name=>{
+          const text=stringValue(name).trim();
+          return text&&renameMap.has(text.toLowerCase())?renameMap.get(text.toLowerCase()):name;
+        });
+      });
+      Object.keys(merged.raidLeaders).forEach(id=>{
+        const text=stringValue(merged.raidLeaders[id]).trim();
+        if(text&&renameMap.has(text.toLowerCase()))merged.raidLeaders[id]=renameMap.get(text.toLowerCase());
+      });
+    }
+
+    return plannerSnapshot(normalizeClientState(merged));
+  }
+
+  function revisionConflict(error){
+    return errorMessage(error).includes('REVISION_CONFLICT');
+  }
+
+  function applyPlannerMetadata(target,revision,updatedAt,updatedBy,spreadsheetName){
+    target.revision=toInt(revision,0,Number.MAX_SAFE_INTEGER);
+    target.updatedAt=stringValue(updatedAt);
+    target.updatedBy=stringValue(updatedBy);
+    target.spreadsheetName=stringValue(spreadsheetName)||'Titania Guild Management';
+    return target;
+  }
+
+  function userIsEditingInline(){
+    const active=document.activeElement;
+    if(!active||!document.getElementById('app').contains(active))return false;
+    return /^(INPUT|SELECT|TEXTAREA)$/.test(active.tagName);
+  }
+
+  async function syncRemoteIfIdle(){
+    if(syncCheckInFlight||!supabaseClient||!currentAuthUser||!currentProfile||!currentProfile.approved)return;
+    if(document.hidden||dirty||saveQueued||saveInFlight||quickSaveInFlight>0||userIsEditingInline())return;
+    syncCheckInFlight=true;
+    try{
+      const loaded=await callServer('getPlannerState');
+      const remoteRevision=toInt(loaded&&loaded.revision,0,Number.MAX_SAFE_INTEGER);
+      if(remoteRevision<=state.revision)return;
+      const next=normalizeClientState(loaded||{});
+      applyPlannerMetadata(next,remoteRevision,loaded&&loaded.updatedAt,loaded&&loaded.updatedBy,loaded&&loaded.spreadsheetName);
+      state=next;
+      syncedStateSnapshot=plannerSnapshot(state);
+      clearSelections(false);
+      renderAll();
+      setSaveFlag('ok','Synced');
+    }catch(_error){
+      // Background sync is intentionally silent; normal save/load errors remain visible.
+    }finally{
+      syncCheckInFlight=false;
+    }
+  }
+
+  function startPlannerAutoSync(){
+    if(syncPollTimer)clearInterval(syncPollTimer);
+    syncPollTimer=setInterval(syncRemoteIfIdle,15000);
+    if(syncListenersWired)return;
+    syncListenersWired=true;
+    window.addEventListener('focus',()=>setTimeout(syncRemoteIfIdle,120));
+    document.addEventListener('visibilitychange',()=>{if(!document.hidden)setTimeout(syncRemoteIfIdle,120);});
+  }
+
   function commitMutation(message,eventScope='auto'){
     if(!userCanEdit()){showToast('Read-only access','Your account cannot make changes.','warn');reloadFromServer();return;}
     if(eventScope==='both')touchEventUpdate('both');
@@ -2494,33 +2691,70 @@ Their team assignments and membership history will also be removed. Use Mark Ina
     if(saveInFlight){saveQueued=true;return;}
     if(!dirty&&!saveQueued)return;
     saveInFlight=true;saveQueued=false;dirty=false;
-    const snapshot={roster:state.roster,assignments:state.assignments,finishedDungeons:state.finishedDungeons,raidLeaders:state.raidLeaders,raidModes:state.raidModes,membershipHistory:state.membershipHistory,publicVisibility:state.publicVisibility,eventUpdates:state.eventUpdates};
-    const baseRevision=state.revision;
+
+    const localAtStart=plannerSnapshot(state);
+    const baseAtStart=syncedStateSnapshot?plannerSnapshot(syncedStateSnapshot):plannerSnapshot(localAtStart);
+    const originalSpreadsheetName=state.spreadsheetName;
+    let snapshotToSave=plannerSnapshot(localAtStart);
+    let baseRevision=state.revision;
+    let result=null;
+    let mergedOtherUserChanges=false;
+
     try{
-      const result=await callServer('savePlannerState',snapshot,baseRevision);
-      state.revision=toInt(result&&result.revision,baseRevision+1,Number.MAX_SAFE_INTEGER);
-      state.updatedAt=stringValue(result&&result.updatedAt);
-      state.updatedBy=currentEditorName();
+      for(let attempt=0;attempt<5;attempt++){
+        try{
+          result=await callServer('savePlannerState',snapshotToSave,baseRevision);
+          break;
+        }catch(error){
+          if(!revisionConflict(error)||attempt===4)throw error;
+          const loaded=await callServer('getPlannerState');
+          const remoteState=normalizeClientState(loaded||{});
+          snapshotToSave=mergePlannerSnapshots(baseAtStart,localAtStart,plannerSnapshot(remoteState));
+          baseRevision=toInt(loaded&&loaded.revision,0,Number.MAX_SAFE_INTEGER);
+          mergedOtherUserChanges=true;
+        }
+      }
+      if(!result)throw new Error('Save did not complete.');
+
+      const savedRevision=toInt(result&&result.revision,baseRevision+1,Number.MAX_SAFE_INTEGER);
+      const savedUpdatedAt=stringValue(result&&result.updatedAt);
+      const savedUpdatedBy=currentEditorName();
+      const savedSnapshot=plannerSnapshot(snapshotToSave);
+      const localNow=plannerSnapshot(state);
+      const newerLocalChanges=dirty||saveQueued||!sameJson(localNow,localAtStart);
+
+      syncedStateSnapshot=plannerSnapshot(savedSnapshot);
+      if(newerLocalChanges){
+        const rebased=mergePlannerSnapshots(localAtStart,localNow,savedSnapshot);
+        state=normalizeClientState(rebased);
+        applyPlannerMetadata(state,savedRevision,savedUpdatedAt,savedUpdatedBy,originalSpreadsheetName);
+        dirty=true;saveQueued=true;
+      }else{
+        state=normalizeClientState(savedSnapshot);
+        applyPlannerMetadata(state,savedRevision,savedUpdatedAt,savedUpdatedBy,originalSpreadsheetName);
+      }
+      rebuildIndex();
+      if(mergedOtherUserChanges)renderAll();
       renderEventLastUpdated();
-      setSaveFlag('ok','Saved');
+      setSaveFlag('ok',mergedOtherUserChanges?'Merged & saved':'Saved');
+      if(mergedOtherUserChanges)showToast('Changes merged','A newer edit from another user was found. Both sets of changes were merged and saved.');
     }catch(error){
       dirty=true;setSaveFlag('err','Save failed');
       const message=errorMessage(error);
       showToast('Save failed',message,'err');
-      if(message.includes('REVISION_CONFLICT')){
-        const reload=confirm('Another session saved newer data. Reload the newest version now? Your unsaved local changes will be discarded.');
-        if(reload) await reloadFromServer();
+      if(revisionConflict(error)){
+        showToast('Sync conflict','The data changed repeatedly while saving. Wait a moment, then try your edit again.','warn');
       }
     }finally{
       saveInFlight=false;
-      if(saveQueued){setTimeout(flushSave,50);}
+      if(saveQueued||dirty){setTimeout(flushSave,80);}
     }
   }
 
   async function reloadFromServer(){
     document.getElementById('loadingOverlay').hidden=false;document.getElementById('loadingText').textContent='Reloading latest Supabase data…';
     try{
-      const loaded=await callServer('getPlannerState');state=normalizeClientState(loaded||{});state.revision=toInt(loaded&&loaded.revision,0,Number.MAX_SAFE_INTEGER);state.updatedAt=stringValue(loaded&&loaded.updatedAt);state.updatedBy=stringValue(loaded&&loaded.updatedBy);state.spreadsheetName=stringValue(loaded&&loaded.spreadsheetName);dirty=false;saveQueued=false;clearSelections(false);renderAll();setSaveFlag('ok','Loaded');
+      const loaded=await callServer('getPlannerState');state=normalizeClientState(loaded||{});state.revision=toInt(loaded&&loaded.revision,0,Number.MAX_SAFE_INTEGER);state.updatedAt=stringValue(loaded&&loaded.updatedAt);state.updatedBy=stringValue(loaded&&loaded.updatedBy);state.spreadsheetName=stringValue(loaded&&loaded.spreadsheetName);syncedStateSnapshot=plannerSnapshot(state);dirty=false;saveQueued=false;clearSelections(false);renderAll();setSaveFlag('ok','Loaded');
     }catch(error){showToast('Reload failed',errorMessage(error),'err');}
     finally{document.getElementById('loadingOverlay').hidden=true;}
   }
