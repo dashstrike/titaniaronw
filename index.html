@@ -1858,7 +1858,7 @@
   function renderTeams(){
     const wrap=document.getElementById('teamsWrap');
     if(currentEvent==='polarity_zone'){
-      let html=sectionHeader('★ STAR DUNGEON','elite-bf',`2 raid teams · Teams 1–${CONFIG.eliteTeams}`)+`<div class="main-raids polarity-star-raids">${POLARITY_STAR_RAIDS.map(mainRaidHtml).join('')}</div>`;
+      let html=sectionHeader('★ STAR DUNGEON','elite-bf',`2 raid teams · Parties 1–${CONFIG.eliteTeams}`)+`<div class="main-raids polarity-star-raids">${POLARITY_STAR_RAIDS.map(mainRaidHtml).join('')}</div>`;
       for(let dungeon=1;dungeon<=CONFIG.dungeonCount;dungeon++){
         const keys=dungeonKeys(dungeon);const assigned=assignedNamesSet(keys).size;const finished=state.finishedDungeons.includes(dungeon);
         const raid=POLARITY_NORMAL_RAIDS.find(item=>item.dungeon===dungeon);
@@ -1870,7 +1870,7 @@
       }
       wrap.innerHTML=html;
     }else{
-      wrap.innerHTML=sectionHeader('⚔ Main Battlefield','main-bf',`3 raids · 4 teams each`)+`<div class="main-raids">${MAIN_RAIDS.map(mainRaidHtml).join('')}</div>`+sectionHeader('◈ Sub Battlefield','sub-bf',`4 raids · Teams 1–${CONFIG.subTeams}`)+`<div class="main-raids sub-raids">${SUB_RAIDS.map(mainRaidHtml).join('')}</div>`;
+      wrap.innerHTML=sectionHeader('⚔ Main Battlefield','main-bf',`3 raids · 4 teams each`)+`<div class="main-raids">${MAIN_RAIDS.map(mainRaidHtml).join('')}</div>`+sectionHeader('◈ Sub Battlefield','sub-bf',`4 raids · Parties 1–${CONFIG.subTeams}`)+`<div class="main-raids sub-raids">${SUB_RAIDS.map(mainRaidHtml).join('')}</div>`;
     }
     wireTeamInteractions();
   }
@@ -2875,17 +2875,17 @@ Their team assignments and membership history will also be removed. Use Mark Ina
   function teamHasNoHealer(key){const names=state.assignments[key].filter(Boolean);return names.length>0&&!names.some(name=>memberByName[name]&&isHealer(memberByName[name].cls));}
   function isHealer(cls){return HEALERS.includes(cls);}
   function teamKind(key){if(key.startsWith('main_'))return'main-bf';if(key.startsWith('sub_'))return'sub-bf';if(key.startsWith('dungeon'))return'dungeon-bf';return'elite-bf';}
-  function teamLabel(key){const match=key.match(/_(\d+)$/);return`Team ${match?match[1]:'?'}`;}
+  function teamLabel(key){const match=key.match(/_(\d+)$/);return`Party ${match?match[1]:'?'}`;}
   function subDisplayTeamLabel(key){
     const orderedKeys=SUB_RAIDS.flatMap(raid=>raid.keys);
     const index=orderedKeys.indexOf(key);
-    return index>=0?`Team ${index+1}`:teamLabel(key);
+    return index>=0?`Party ${index+1}`:teamLabel(key);
   }
   function displayTeamLabel(key){
     if(key.startsWith('sub_'))return subDisplayTeamLabel(key);
     if(currentEvent==='polarity_zone'&&key.startsWith('dungeon')){
       const index=DUNGEON_KEYS.indexOf(key);
-      if(index>=0)return`Team ${index+1}`;
+      if(index>=0)return`Party ${index+1}`;
     }
     return teamLabel(key);
   }
