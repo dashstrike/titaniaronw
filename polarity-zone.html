@@ -45,7 +45,7 @@ button{font:inherit}
 .sheet-meta{text-align:right;font-size:13px;color:var(--muted);line-height:1.65;font-family:'IBM Plex Mono',monospace}
 .section-head{display:flex;align-items:center;gap:10px;margin:22px 0 11px}
 .section-title{font-family:'Cinzel',serif;font-weight:700;font-size:23px;letter-spacing:1px;text-transform:uppercase;white-space:nowrap}
-.section-title.main{color:#a99df8}.section-title.sub{color:var(--teal)}.section-title.star{color:var(--amber)}
+.section-title.main{color:#a99df8}.section-title.sub{color:var(--teal)}.section-title.star{color:var(--amber)}.section-title.normal{color:var(--dungeon)}
 .section-line{height:1px;background:linear-gradient(90deg,var(--line),transparent);flex:1}
 .raid-block{margin-bottom:16px;break-inside:avoid}.raid-block.dungeon-block{margin-top:20px}
 .raid-head{display:flex;align-items:center;gap:9px;padding:10px 12px;border-left:3px solid var(--violet);background:var(--panel2);margin-bottom:10px;min-height:42px}
@@ -61,7 +61,7 @@ button{font:inherit}
 .team-card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:13px 14px;min-width:0;break-inside:avoid}
 .team-card.main{border-top:2px solid #8b7cf6}.team-card.sub{border-top:2px solid #3fd6c4}.team-card.star{border-top:2px solid #f0b429}.team-card.normal{border-top:2px solid var(--dungeon)}
 .team-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:6px}
-.team-name{font-size:17px;font-weight:700}.team-count{font:600 12.5px 'IBM Plex Mono',monospace;color:var(--muted)}
+.team-name{font-size:17px;font-weight:700}.team-count{display:inline-flex;align-items:center;justify-content:center;max-width:72%;padding:4px 9px;border:1px solid color-mix(in srgb,var(--amber) 58%,var(--line));border-radius:999px;background:color-mix(in srgb,var(--amber) 12%,var(--panel2));font-family:'Lexend','IBM Plex Sans',Arial,sans-serif;font-size:17px;font-weight:800;line-height:1.15;letter-spacing:.15px;color:var(--amber);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .slot{display:flex;align-items:center;gap:8px;padding:7px;border-bottom:1px solid var(--lineSoft);min-height:44px}
 .slot:last-of-type{border-bottom:none}.slot.leader-slot{background:var(--leaderSlot);border-radius:6px;border-bottom-color:transparent}
 .crown{color:var(--amber);font-size:13px;width:14px;flex:none}.dot{width:9px;height:9px;border-radius:50%;flex:none;box-shadow:0 0 4px currentColor}
@@ -75,10 +75,10 @@ button{font:inherit}
 .unpublished-icon{font-size:38px;margin-bottom:12px;opacity:.8}.unpublished-box h2{margin:0 0 10px;color:var(--text);font-family:'Cinzel',serif;font-size:27px;letter-spacing:.5px}.unpublished-box p{margin:0;font-size:17px;line-height:1.7}
 @media(max-width:1200px){.team-grid.five{grid-template-columns:repeat(3,minmax(0,1fr))}.team-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:720px){.viewerbar{padding:8px 10px}.mini-brand{width:100%;justify-content:center}.nav{width:100%;justify-content:center}.content{width:calc(100% - 12px);margin-top:8px}.lineup-sheet{padding:14px 10px 20px}.sheet-head{align-items:flex-start;flex-direction:column}.sheet-brand{font-size:32px}.sheet-meta{text-align:left}.team-grid,.team-grid.five{grid-template-columns:1fr}.raid-head{flex-wrap:wrap}.raid-line{display:none}.job-class{max-width:48%}}
-@media print{.viewerbar{display:none!important}body{background:#fff!important}.content{width:100%!important;margin:0!important}.lineup-sheet{box-shadow:none!important;border:none!important;border-radius:0!important;padding:0!important;background:#fff!important;color:#14172a!important}.team-card,.raid-head{break-inside:avoid;page-break-inside:avoid}}
+@media print{.viewerbar{display:none!important}body{background:#fff!important}.content{width:100%!important;margin:0!important}.lineup-sheet{box-shadow:none!important;border:none!important;border-radius:0!important;padding:0!important;background:#fff!important;color:#14172a!important}.team-grid{grid-template-columns:repeat(5,minmax(0,1fr))!important;gap:8px!important}.team-card,.raid-head{break-inside:avoid;page-break-inside:avoid}}
 
 </style>
-<meta name="titania-public-build" content="2026-08-22-v7-party-labels">
+<meta name="titania-public-build" content="2026-08-22-v9-polarity-5-party-normal-label">
 </head>
 <body data-view="polarity">
 <div class="page">
@@ -230,6 +230,7 @@ function renderGuild(){
 function renderPolarity(){
   let html=section('★ Star Dungeon','star');
   html+=STAR_RAIDS.map(r=>raidBlock(r,'star',true)).join('');
+  html+=section('🗝 Normal Dungeon','normal');
   DUNGEONS.forEach(d=>{
     const leader=str(state.raidLeaders[d.id])||'Not assigned';
     const finished=state.finishedDungeons.includes(d.dungeon);
@@ -239,7 +240,7 @@ function renderPolarity(){
         ${finished?'<span class="finished">✓ Run Finished</span>':''}
         <div class="raid-line"></div>
       </div>
-      <div class="team-grid">${d.keys.map((k,i)=>teamCard(k,'normal',`Party ${i+1}`)).join('')}</div>
+      <div class="team-grid five">${d.keys.map((k,i)=>teamCard(k,'normal',`Party ${i+1}`)).join('')}</div>
     </div>`;
   });
   return html;
@@ -265,7 +266,7 @@ function teamCard(key,kind,label){
   const raid=[...MAIN_RAIDS,...SUB_RAIDS,...STAR_RAIDS,...DUNGEONS].find(item=>item.keys.includes(key));
   const raidLeaderName=raid?(str(state.raidLeaders[raid.id])||'Not assigned'):'Not assigned';
   return `<article class="team-card ${kind}">
-    <div class="team-head"><div class="team-name">${esc(label||teamLabel(key))}</div><div class="team-count">TEAM ${esc(raidLeaderName)}</div></div>
+    <div class="team-head"><div class="team-name">${esc(label||teamLabel(key))}</div><div class="team-count" title="Raid Leader: ${esc(raidLeaderName)}">RAID LEADER · ${esc(raidLeaderName)}</div></div>
     ${s.map((name,i)=>slotHtml(name,i)).join('')}
     ${noHealer?'<div class="no-healer">⚠ No healer</div>':''}
   </article>`;
