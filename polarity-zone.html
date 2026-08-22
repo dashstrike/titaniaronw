@@ -78,7 +78,7 @@ button{font:inherit}
 @media print{.viewerbar{display:none!important}body{background:#fff!important}.content{width:100%!important;margin:0!important}.lineup-sheet{box-shadow:none!important;border:none!important;border-radius:0!important;padding:0!important;background:#fff!important;color:#14172a!important}.team-card,.raid-head{break-inside:avoid;page-break-inside:avoid}}
 
 </style>
-<meta name="titania-public-build" content="2026-08-11-v6-publish-control">
+<meta name="titania-public-build" content="2026-08-22-v7-party-labels">
 </head>
 <body data-view="polarity">
 <div class="page">
@@ -105,22 +105,21 @@ const MAIN_RAIDS = [
   {id:'raid_3',label:'Raid 3',keys:['main_9','main_10','main_11','main_12']}
 ];
 const SUB_RAIDS = [
-  {id:'sub_raid_1',label:'Raid 1',keys:['sub_1','sub_2','sub_3','sub_4']},
-  {id:'sub_raid_2',label:'Raid 2',keys:['sub_5','sub_6','sub_7','sub_8']},
+  {id:'sub_raid_1',label:'Raid 1',keys:['sub_1','sub_2','sub_3','sub_4','sub_17']},
+  {id:'sub_raid_2',label:'Raid 2',keys:['sub_5','sub_6','sub_7','sub_8','sub_18']},
   {id:'sub_raid_3',label:'Raid 3',keys:['sub_9','sub_10','sub_11','sub_12']},
-  {id:'sub_raid_4',label:'Raid 4',keys:['sub_13','sub_14','sub_15','sub_16']},
-  {id:'sub_raid_5',label:'Raid 5',keys:['sub_17','sub_18']}
+  {id:'sub_raid_4',label:'Raid 4',keys:['sub_13','sub_14','sub_15','sub_16']}
 ];
 const STAR_RAIDS = [
   {id:'pz_star_1',label:'Raid Team',keys:['elite_1','elite_2','elite_3','elite_4','elite_5']},
   {id:'pz_star_2',label:'Raid Team',keys:['elite_6','elite_7','elite_8','elite_9','elite_10']}
 ];
-const DUNGEONS = [
-  {id:'pz_dungeon_1',dungeon:1,label:'Normal Dungeon 1',keys:['dungeon1_1','dungeon1_2','dungeon1_3','dungeon1_4','dungeon1_5']},
-  {id:'pz_dungeon_2',dungeon:2,label:'Normal Dungeon 2',keys:['dungeon2_1','dungeon2_2','dungeon2_3','dungeon2_4','dungeon2_5']},
-  {id:'pz_dungeon_3',dungeon:3,label:'Normal Dungeon 3',keys:['dungeon3_1','dungeon3_2','dungeon3_3','dungeon3_4','dungeon3_5']},
-  {id:'pz_dungeon_4',dungeon:4,label:'Normal Dungeon 4',keys:['dungeon4_1','dungeon4_2','dungeon4_3','dungeon4_4','dungeon4_5']}
-];
+const DUNGEONS = Array.from({length:4},(_,i)=>({
+  id:`pz_dungeon_${i+1}`,
+  dungeon:i+1,
+  label:`Normal Dungeon ${i+1}`,
+  keys:Array.from({length:5},(_,j)=>`dungeon${i+1}_${j+1}`)
+}));
 const HEALERS = new Set(['Acolyte','Priest','High Priest']);
 const CLASS_COLORS = {
   Swordman:'#e2776b',Knight:'#e2776b','Lord Knight':'#e2776b',Crusader:'#e2776b',Paladin:'#e2776b',
@@ -169,7 +168,7 @@ async function loadLineup(){
     if(!url||!key) throw new Error('Supabase configuration is missing.');
     if(!window.supabase) throw new Error('Supabase library did not load.');
     if(!client) client=window.supabase.createClient(url,key,{auth:{persistSession:false,autoRefreshToken:false,detectSessionInUrl:false}});
-    const {data,error}=await client.rpc('get_public_lineup',{p_view:'polarity'});
+    const {data,error}=await client.rpc('get_public_lineup',{p_view:VIEW});
     if(error) throw error;
     state=normalize(data||{});
     members=new Map(state.roster.map(m=>[m.name,m]));
@@ -225,7 +224,7 @@ function renderGuild(){
   return section('⚔ Main Battlefield','main')+
     MAIN_RAIDS.map(r=>raidBlock(r,'main',false)).join('')+
     section('◈ Sub Battlefield','sub')+
-    SUB_RAIDS.map(r=>raidBlock(r,'sub',false)).join('');
+    SUB_RAIDS.map(r=>raidBlock(r,'sub',r.keys.length===5)).join('');
 }
 
 function renderPolarity(){
@@ -240,16 +239,10 @@ function renderPolarity(){
         ${finished?'<span class="finished">✓ Run Finished</span>':''}
         <div class="raid-line"></div>
       </div>
-      <div class="team-grid ${d.keys.length===5?'five':''}">${d.keys.map((k)=>teamCard(k,'normal',displayDungeonTeamLabel(k))).join('')}</div>
+      <div class="team-grid">${d.keys.map((k,i)=>teamCard(k,'normal',`Party ${i+1}`)).join('')}</div>
     </div>`;
   });
   return html;
-}
-
-function displayDungeonTeamLabel(key){
-  const all=DUNGEONS.flatMap(d=>d.keys);
-  const index=all.indexOf(key);
-  return `Team ${index>=0?index+1:'?'}`;
 }
 
 function raidBlock(raid,kind,five){
@@ -306,8 +299,13 @@ function teamNoHealer(key){
 }
 
 function teamLabel(key){
+  if(key.startsWith('sub_')){
+    const orderedKeys=SUB_RAIDS.flatMap(raid=>raid.keys);
+    const index=orderedKeys.indexOf(key);
+    if(index>=0)return `Party ${index+1}`;
+  }
   const m=/_([0-9]+)$/.exec(key);
-  return `Team ${m?m[1]:'?'}`;
+  return `Party ${m?m[1]:'?'}`;
 }
 
 function formatDateTime(v){

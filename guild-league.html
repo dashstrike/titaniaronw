@@ -78,7 +78,7 @@ button{font:inherit}
 @media print{.viewerbar{display:none!important}body{background:#fff!important}.content{width:100%!important;margin:0!important}.lineup-sheet{box-shadow:none!important;border:none!important;border-radius:0!important;padding:0!important;background:#fff!important;color:#14172a!important}.team-card,.raid-head{break-inside:avoid;page-break-inside:avoid}}
 
 </style>
-<meta name="titania-public-build" content="2026-08-11-v6-publish-control">
+<meta name="titania-public-build" content="2026-08-22-v7-party-labels">
 </head>
 <body data-view="guild">
 <div class="page">
@@ -114,11 +114,11 @@ const STAR_RAIDS = [
   {id:'pz_star_1',label:'Raid Team',keys:['elite_1','elite_2','elite_3','elite_4','elite_5']},
   {id:'pz_star_2',label:'Raid Team',keys:['elite_6','elite_7','elite_8','elite_9','elite_10']}
 ];
-const DUNGEONS = Array.from({length:5},(_,i)=>({
+const DUNGEONS = Array.from({length:4},(_,i)=>({
   id:`pz_dungeon_${i+1}`,
   dungeon:i+1,
   label:`Normal Dungeon ${i+1}`,
-  keys:Array.from({length:8},(_,j)=>`dungeon${i+1}_${j+1}`)
+  keys:Array.from({length:5},(_,j)=>`dungeon${i+1}_${j+1}`)
 }));
 const HEALERS = new Set(['Acolyte','Priest','High Priest']);
 const CLASS_COLORS = {
@@ -168,7 +168,7 @@ async function loadLineup(){
     if(!url||!key) throw new Error('Supabase configuration is missing.');
     if(!window.supabase) throw new Error('Supabase library did not load.');
     if(!client) client=window.supabase.createClient(url,key,{auth:{persistSession:false,autoRefreshToken:false,detectSessionInUrl:false}});
-    const {data,error}=await client.rpc('get_public_lineup',{p_view:'guild'});
+    const {data,error}=await client.rpc('get_public_lineup',{p_view:VIEW});
     if(error) throw error;
     state=normalize(data||{});
     members=new Map(state.roster.map(m=>[m.name,m]));
@@ -239,7 +239,7 @@ function renderPolarity(){
         ${finished?'<span class="finished">✓ Run Finished</span>':''}
         <div class="raid-line"></div>
       </div>
-      <div class="team-grid">${d.keys.map((k,i)=>teamCard(k,'normal',`Team ${i+1}`)).join('')}</div>
+      <div class="team-grid">${d.keys.map((k,i)=>teamCard(k,'normal',`Party ${i+1}`)).join('')}</div>
     </div>`;
   });
   return html;
@@ -302,10 +302,10 @@ function teamLabel(key){
   if(key.startsWith('sub_')){
     const orderedKeys=SUB_RAIDS.flatMap(raid=>raid.keys);
     const index=orderedKeys.indexOf(key);
-    if(index>=0)return `Team ${index+1}`;
+    if(index>=0)return `Party ${index+1}`;
   }
   const m=/_([0-9]+)$/.exec(key);
-  return `Team ${m?m[1]:'?'}`;
+  return `Party ${m?m[1]:'?'}`;
 }
 
 function formatDateTime(v){
