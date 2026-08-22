@@ -320,6 +320,31 @@
     body[data-event="siege"] .print-team-card.siege-party{border-left:3px solid #ef5a6f;}
 
 
+    /* Dashboard class analytics: bars 3/4 + pie 1/4 */
+    .dash-class-analytics-grid{display:grid;grid-template-columns:minmax(0,3fr) minmax(230px,1fr);gap:14px;align-items:stretch;margin-bottom:8px;}
+    .dash-class-analytics-grid .dash-panel{margin-bottom:0;}
+    .dash-class-bars{min-width:0;}
+    .dash-class-pie-panel{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;min-width:0;padding:16px 12px;overflow:visible;}
+    .dash-class-pie-title{font-size:11px;color:var(--muted);font-weight:700;letter-spacing:.75px;text-transform:uppercase;margin-bottom:8px;text-align:center;}
+    .dash-class-pie-wrap{position:relative;width:min(100%,280px);aspect-ratio:1;display:flex;align-items:center;justify-content:center;}
+    .dash-class-pie{width:100%;height:100%;overflow:visible;filter:drop-shadow(0 6px 14px #00000030);}
+    .dash-class-pie-slice{stroke:#141a2b;stroke-width:1.6;cursor:pointer;transform-origin:110px 110px;transition:transform .12s ease,filter .12s ease,opacity .12s ease;}
+    .dash-class-pie-slice:hover,.dash-class-pie-slice.is-hovered{transform:scale(1.035);filter:brightness(1.15);}
+    .dash-class-pie.has-hover .dash-class-pie-slice:not(.is-hovered){opacity:.7;}
+    .dash-class-pie-tooltip{position:absolute;z-index:8;pointer-events:none;display:none;min-width:130px;max-width:210px;padding:8px 10px;border-radius:8px;background:#090d18f2;border:1px solid var(--line);box-shadow:0 8px 24px #00000088;color:var(--text);font-size:12px;line-height:1.35;white-space:nowrap;transform:translate(10px,-50%);}
+    .dash-class-pie-tooltip.show{display:block;}
+    .dash-class-pie-tooltip b{display:block;font-size:13px;margin-bottom:2px;}
+    .dash-class-pie-tooltip span{color:var(--muted);font-family:'IBM Plex Mono',monospace;font-size:11.5px;}
+    .dash-class-pie-note{margin-top:7px;color:var(--muted-2);font-size:11px;text-align:center;}
+    @media(max-width:1050px){.dash-class-analytics-grid{grid-template-columns:1fr;}.dash-class-pie-wrap{width:min(300px,75vw);}.dash-class-pie-panel{min-height:300px;}}
+
+    /* Dashboard Gear Rating leaders: two equal columns on desktop */
+    .dash-gr-rank-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px;align-items:start;}
+    .dash-gr-rank-col{min-width:0;}
+    .dash-gr-rank-col .section-head{margin-top:0;}
+    .dash-gr-rank-col .dash-panel{margin-bottom:0;}
+    @media(max-width:900px){.dash-gr-rank-grid{grid-template-columns:1fr;gap:8px;}}
+
     /* Dashboard */
     .dash-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-bottom:8px;}
     .dash-card{background:var(--panel);border:1px solid var(--line-soft);border-radius:12px;padding:14px 16px;display:flex;flex-direction:column;gap:4px;min-width:0;}
@@ -2549,12 +2574,13 @@
     active.forEach(member=>{const index=Math.min(3,Math.floor(member.gr/bucketSize));buckets[index].count++;});
     const maxBucket=Math.max(1,...buckets.map(bucket=>bucket.count));
     const topFive=withGR.slice(0,5);
+    const lowestFive=withGR.slice(-5).reverse();
     const analytics=total?`
       ${sectionHeader('Active Members by Class','',`${classRows.length} classes`)}
-      <div class="dash-panel">${classRows.map(row=>dashBarRow(row.cls,row.count,row.pct,row.avg,maxClass,classColor(row.cls))).join('')}</div>
+      <div class="dash-class-analytics-grid"><div class="dash-panel dash-class-bars">${classRows.map(row=>dashBarRow(row.cls,row.count,row.pct,row.avg,maxClass,classColor(row.cls))).join('')}</div>${dashClassPieHtml(classRows,total)}</div>
       ${sectionHeader('Active Gear Rating Spread','','')}
       <div class="dash-panel">${buckets.map((bucket,index)=>{const label=index===3?`${formatNumber(bucket.min)}+`:`${formatNumber(bucket.min)}–${formatNumber(bucket.max)}`;return `<div class="dash-bar-row"><span class="dash-bar-name">${label}</span><div class="dash-bar-track"><div class="dash-bar-fill" style="width:${bucket.count/maxBucket*100}%;background:var(--teal)"></div></div><span class="dash-bar-count">${bucket.count}</span><span class="dash-bar-pct">${Math.round(bucket.count/total*100)}%</span></div>`;}).join('')}</div>
-      ${topFive.length?`${sectionHeader('Top 5 Active Members by Gear Rating','','')}<div class="dash-panel">${topFive.map((member,index)=>`<div class="dash-bar-row"><span class="dash-rank">#${index+1}</span><span class="class-dot" style="background:${classColor(member.cls)};color:${classColor(member.cls)}"></span><span class="dash-bar-name" style="flex:1">${escapeHtml(member.name)}</span><span class="dash-bar-avg">${escapeHtml(member.cls)}</span><span class="dash-bar-count" style="width:80px">${formatNumber(member.gr)}</span></div>`).join('')}</div>`:''}`:`<div class="empty-note" style="padding:30px 10px">There are no active members. Open the Members tab to reactivate members.</div>`;
+      ${topFive.length?`<div class="dash-gr-rank-grid"><div class="dash-gr-rank-col">${sectionHeader('Top 5 Active Members by Gear Rating','','')}<div class="dash-panel">${topFive.map((member,index)=>`<div class="dash-bar-row"><span class="dash-rank">#${index+1}</span><span class="class-dot" style="background:${classColor(member.cls)};color:${classColor(member.cls)}"></span><span class="dash-bar-name" style="flex:1">${escapeHtml(member.name)}</span><span class="dash-bar-avg">${escapeHtml(member.cls)}</span><span class="dash-bar-count" style="width:80px">${formatNumber(member.gr)}</span></div>`).join('')}</div></div><div class="dash-gr-rank-col">${sectionHeader('Lowest 5 Active Members by Gear Rating','','')}<div class="dash-panel">${lowestFive.map((member,index)=>`<div class="dash-bar-row"><span class="dash-rank">#${index+1}</span><span class="class-dot" style="background:${classColor(member.cls)};color:${classColor(member.cls)}"></span><span class="dash-bar-name" style="flex:1">${escapeHtml(member.name)}</span><span class="dash-bar-avg">${escapeHtml(member.cls)}</span><span class="dash-bar-count" style="width:80px">${formatNumber(member.gr)}</span></div>`).join('')}</div></div></div>`:''}`:`<div class="empty-note" style="padding:30px 10px">There are no active members. Open the Members tab to reactivate members.</div>`;
     wrap.innerHTML=`
       ${sectionHeader('📊 Guild Dashboard','',`${active.length} active · ${inactive.length} inactive · ${records} records`)}
       <div class="dash-grid">
@@ -2562,6 +2588,7 @@
         ${top?dashCard('Highest Active GR',escapeHtml(top.name),`${formatNumber(top.gr)} · ${escapeHtml(top.cls)}`,true):''}${bottom?dashCard('Lowest Active GR',escapeHtml(bottom.name),`${formatNumber(bottom.gr)} · ${escapeHtml(bottom.cls)}`):''}
       </div>
       ${analytics}`;
+    wireDashboardClassPie();
   }
 
   function renderManageMembersTab(){
@@ -2571,6 +2598,79 @@
   }
 
   function dashCard(label,value,sub='',highlight=false){return `<div class="dash-card ${highlight?'highlight':''}"><div class="dash-card-label">${label}</div><div class="dash-card-value">${value}</div>${sub?`<div class="dash-card-sub">${sub}</div>`:''}</div>`;}
+  function dashboardPiePoint(cx,cy,radius,angle){
+    const radians=(angle-90)*Math.PI/180;
+    return{x:cx+(radius*Math.cos(radians)),y:cy+(radius*Math.sin(radians))};
+  }
+
+  function dashboardPieSlicePath(startAngle,endAngle){
+    const start=dashboardPiePoint(110,110,92,endAngle);
+    const end=dashboardPiePoint(110,110,92,startAngle);
+    const largeArc=endAngle-startAngle>180?1:0;
+    return`M 110 110 L ${start.x.toFixed(3)} ${start.y.toFixed(3)} A 92 92 0 ${largeArc} 0 ${end.x.toFixed(3)} ${end.y.toFixed(3)} Z`;
+  }
+
+  function dashClassPieHtml(rows,total){
+    if(!rows.length||!total)return'';
+    let angle=0;
+    const slices=rows.map((row,index)=>{
+      const start=angle;
+      const end=index===rows.length-1?360:angle+(row.count/total*360);
+      angle=end;
+      const color=classColor(row.cls);
+      const pct=row.count/total*100;
+      if(rows.length===1)return`<circle class="dash-class-pie-slice" cx="110" cy="110" r="92" fill="${escapeAttr(color)}" data-class="${escapeAttr(row.cls)}" data-count="${row.count}" data-pct="${pct.toFixed(1)}"><title>${escapeHtml(row.cls)} · ${pct.toFixed(1)}% · ${row.count} member${row.count===1?'':'s'}</title></circle>`;
+      return`<path class="dash-class-pie-slice" d="${dashboardPieSlicePath(start,end)}" fill="${escapeAttr(color)}" data-class="${escapeAttr(row.cls)}" data-count="${row.count}" data-pct="${pct.toFixed(1)}"><title>${escapeHtml(row.cls)} · ${pct.toFixed(1)}% · ${row.count} member${row.count===1?'':'s'}</title></path>`;
+    }).join('');
+    return`<div class="dash-panel dash-class-pie-panel"><div class="dash-class-pie-title">Class Distribution</div><div class="dash-class-pie-wrap"><svg class="dash-class-pie" viewBox="0 0 220 220" role="img" aria-label="Active members class distribution pie chart">${slices}</svg><div class="dash-class-pie-tooltip" id="dashClassPieTooltip"></div></div><div class="dash-class-pie-note">Hover a slice for class %</div></div>`;
+  }
+
+  function wireDashboardClassPie(){
+    const pie=document.querySelector('.dash-class-pie');
+    const wrap=document.querySelector('.dash-class-pie-wrap');
+    const tooltip=document.getElementById('dashClassPieTooltip');
+    if(!pie||!wrap||!tooltip)return;
+    const hide=()=>{
+      pie.classList.remove('has-hover');
+      pie.querySelectorAll('.dash-class-pie-slice.is-hovered').forEach(slice=>slice.classList.remove('is-hovered'));
+      tooltip.classList.remove('show');
+    };
+    pie.querySelectorAll('.dash-class-pie-slice').forEach(slice=>{
+      const show=event=>{
+        pie.classList.add('has-hover');
+        pie.querySelectorAll('.dash-class-pie-slice.is-hovered').forEach(other=>{if(other!==slice)other.classList.remove('is-hovered');});
+        slice.classList.add('is-hovered');
+        const cls=slice.dataset.class||'Unknown';
+        const count=Number(slice.dataset.count||0);
+        const pct=Number(slice.dataset.pct||0);
+        tooltip.innerHTML=`<b>${escapeHtml(cls)}</b><span>${pct.toFixed(1)}% · ${count} member${count===1?'':'s'}</span>`;
+        tooltip.classList.add('show');
+        move(event);
+      };
+      const move=event=>{
+        const rect=wrap.getBoundingClientRect();
+        let x=event.clientX-rect.left;
+        let y=event.clientY-rect.top;
+        const tipWidth=tooltip.offsetWidth||150;
+        const tipHeight=tooltip.offsetHeight||50;
+        if(x+tipWidth+20>rect.width)x=Math.max(0,x-tipWidth-20);
+        if(y-tipHeight/2<0)y=tipHeight/2;
+        if(y+tipHeight/2>rect.height)y=rect.height-tipHeight/2;
+        tooltip.style.left=`${x}px`;
+        tooltip.style.top=`${y}px`;
+      };
+      slice.addEventListener('mouseenter',show);
+      slice.addEventListener('mousemove',move);
+      slice.addEventListener('mouseleave',hide);
+      slice.addEventListener('focus',event=>{
+        const rect=slice.getBoundingClientRect();
+        show({clientX:rect.left+rect.width/2,clientY:rect.top+rect.height/2});
+      });
+      slice.addEventListener('blur',hide);
+      slice.setAttribute('tabindex','0');
+    });
+  }
+
   function dashBarRow(label,count,pct,avg,max,color){return `<div class="dash-bar-row"><span class="class-dot" style="background:${color};color:${color}"></span><span class="dash-bar-name">${escapeHtml(label)}</span><div class="dash-bar-track"><div class="dash-bar-fill" style="width:${count/max*100}%;background:${color}"></div></div><span class="dash-bar-count">${count}</span><span class="dash-bar-pct">${pct.toFixed(0)}%</span><span class="dash-bar-avg">avg ${formatNumber(avg)}</span></div>`;}
 
   function renderMembershipHistoryHtml(){
