@@ -1653,7 +1653,7 @@
     const eventActionRow=document.getElementById('eventActionRow');
     if(eventActionRow)eventActionRow.hidden=nonTeamMode;
     if(!nonTeamMode){
-      document.getElementById('autoFillBtn').title=currentEvent==='polarity_zone'?'Fill the Elite Battlefield only':'Fill Main and Sub teams by highest Gear Rating';
+      document.getElementById('autoFillBtn').title=currentEvent==='polarity_zone'?'Fill the Star Dungeon only':'Fill Main and Sub teams by highest Gear Rating';
       renderPublicToggle();
       renderEventLastUpdated();
     }
@@ -1757,7 +1757,7 @@
       bar.innerHTML=hintIcon()+`<div><b>Members:</b> add or edit members, change class and Gear Rating, mark members inactive when they leave, and reactivate them when they return. Every change autosaves to Supabase.</div>`;
       return;
     }
-    const extra=currentEvent==='polarity_zone'?` · <b>Bringing teams down:</b> drag a team's handle (or tap it, then tap a target card) from Elite onto an empty Normal Dungeon team. Elite is copied; Dungeon teams are moved.`:'';
+    const extra=currentEvent==='polarity_zone'?` · <b>Bringing teams down:</b> drag a team's handle (or tap it, then tap a target card) from Star onto an empty Normal Dungeon team. Star is copied; Normal Dungeon teams are moved.`:'';
     bar.innerHTML=hintIcon()+`<div><b>Desktop:</b> drag a member onto a slot — drag one filled slot onto another to swap them directly. · <b>Any device:</b> tap/click a member (or a filled slot) to select it, then tap another slot to place or swap. Click a filled slot's ✕ to remove. · Use <b>Print/Share</b> for a clean summary.${extra}</div>`;
   }
 
@@ -1772,7 +1772,7 @@
   }
 
   function renderFilters(){
-    const options=currentEvent==='polarity_zone'?['All','Elite','Dungeon','Unassigned']:['All','Main','Sub','Unassigned'];
+    const options=currentEvent==='polarity_zone'?['All','Star','Normal','Unassigned']:['All','Main','Sub','Unassigned'];
     if(!options.includes(statusFilter)) statusFilter='All';
     const row=document.getElementById('filterRow');
     row.innerHTML=options.map(option=>`<button class="pill ${option===statusFilter?'active':''}" data-filter="${option}">${option}</button>`).join('');
@@ -1861,8 +1861,8 @@
       const elite=findAssignments(name,ELITE_KEYS);
       const dungeon=findAssignments(name,DUNGEON_KEYS);
       const labels=[];const filters=[];const texts=[];
-      if(elite.length){labels.push('Elite');filters.push('Elite');texts.push(elite.map(item=>teamLongLabel(item.key)).join(', '));}
-      if(dungeon.length){labels.push('Dungeon');filters.push('Dungeon');texts.push(dungeon.map(item=>teamLongLabel(item.key)).join(', '));}
+      if(elite.length){labels.push('Star');filters.push('Star');texts.push('Star');}
+      if(dungeon.length){labels.push('Normal');filters.push('Normal');texts.push('Normal');}
       if(!labels.length){labels.push('Unassigned');filters.push('Unassigned');}
       return {assigned:elite.length>0||dungeon.length>0,labels,filters,assignmentText:texts.join(' · ')};
     }
@@ -1875,7 +1875,7 @@
     return {assigned:false,labels:['Unassigned'],filters:['Unassigned'],assignmentText:''};
   }
 
-  function statusTagClass(label){return label==='Main'?'tag-main':label==='Sub'?'tag-sub':label==='Elite'?'tag-elite':label==='Dungeon'?'tag-dungeon':'tag-unassigned';}
+  function statusTagClass(label){return label==='Main'?'tag-main':label==='Sub'?'tag-sub':label==='Star'?'tag-elite':label==='Normal'?'tag-dungeon':'tag-unassigned';}
 
   function findAssignments(name,keys){
     const found=[];
@@ -2163,8 +2163,8 @@
     const copied=source.startsWith('elite_');
     if(!copied) state.assignments[source]=new Array(CONFIG.teamSize).fill(null);
     clearSelections(false);
-    commitMutation(copied?'Elite team copied':'Dungeon team moved');
-    showToast(copied?'Team copied from Elite':'Team moved',`${teamLongLabel(source)} → ${teamLongLabel(target)}.`);
+    commitMutation(copied?'Star team copied':'Normal Dungeon team moved');
+    showToast(copied?'Team copied from Star':'Team moved',`${teamLongLabel(source)} → ${teamLongLabel(target)}.`);
   }
 
   function autoFillCurrent(){
@@ -2177,8 +2177,8 @@
       if(candidate){state.assignments[key][index]=candidate.name;used.add(candidate.name);}
     }));
     const eventName=currentEventPublicLabel();
-    commitMutation(currentEvent==='polarity_zone'?'Elite auto-filled':`${eventName} auto-filled`);
-    showToast('Auto-fill complete',currentEvent==='polarity_zone'?'Elite Battlefield remaining slots were filled by Gear Rating.':currentEvent==='siege'?`${eventName} remaining slots were filled by Gear Rating.`:`${eventName} Main and Sub remaining slots were filled by Gear Rating.`);
+    commitMutation(currentEvent==='polarity_zone'?'Star auto-filled':`${eventName} auto-filled`);
+    showToast('Auto-fill complete',currentEvent==='polarity_zone'?'Star Dungeon remaining slots were filled by Gear Rating.':currentEvent==='siege'?`${eventName} remaining slots were filled by Gear Rating.`:`${eventName} Main and Sub remaining slots were filled by Gear Rating.`);
   }
 
   function autoFillDungeon(dungeon){
@@ -2956,7 +2956,7 @@ Their team assignments and membership history will also be removed. Use Mark Ina
     return teamLabel(key);
   }
   function dungeonNumber(key){const match=/^dungeon(\d+)_/.exec(key);return match?Number.parseInt(match[1],10):null;}
-  function teamLongLabel(key){if(key.startsWith('main_')||key.startsWith('siege_main_'))return`Main ${teamLabel(key)}`;if(key.startsWith('sub_')||key.startsWith('siege_sub_'))return`Sub ${subDisplayTeamLabel(key)}`;if(key.startsWith('elite_'))return`Elite ${teamLabel(key)}`;return`Dungeon ${dungeonNumber(key)} ${teamLabel(key)}`;}
+  function teamLongLabel(key){if(key.startsWith('main_')||key.startsWith('siege_main_'))return`Main ${teamLabel(key)}`;if(key.startsWith('sub_')||key.startsWith('siege_sub_'))return`Sub ${subDisplayTeamLabel(key)}`;if(key.startsWith('elite_'))return`Star ${teamLabel(key)}`;return`Normal Dungeon ${dungeonNumber(key)} ${teamLabel(key)}`;}
   function teamsMatch(a,b){const first=state.assignments[a].filter(Boolean).slice().sort();const second=state.assignments[b].filter(Boolean).slice().sort();return first.length>0&&first.length===second.length&&first.every((value,index)=>value===second[index]);}
   function dungeonMatches(eliteKey){return DUNGEON_KEYS.filter(key=>teamsMatch(eliteKey,key));}
   function classColor(cls){return CLASS_COLORS[cls]||CLASS_COLORS.Unknown;}
