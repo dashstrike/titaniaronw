@@ -2805,8 +2805,10 @@ Their team assignments and membership history will also be removed. Use Mark Ina
     let html=`<div class="print-doc-head"><div><h1>Titania ${eventLabel}</h1><div class="print-sub">Guild lineup summary · Dark Lord Server</div></div><div class="print-doc-meta">${new Date().toLocaleDateString(undefined,{year:'numeric',month:'long',day:'numeric'})}<br>${assigned}/${totalSlots} unique members slotted</div></div>`;
 
     const appendTeamCard=key=>{
-      const slots=state.assignments[key];const filled=slots.filter(Boolean).length;const noHealer=teamHasNoHealer(key);
-      let card=`<div class="print-team-card ${noHealer?'no-healer':''}"><div class="print-team-head"><b>${escapeHtml(displayTeamLabel(key))}</b><span>${filled}/${CONFIG.teamSize}</span></div>`;
+      const slots=state.assignments[key];const noHealer=teamHasNoHealer(key);
+      const raid=ALL_RAIDS.find(item=>item.keys.includes(key));
+      const raidLeaderName=raid?(stringValue(state.raidLeaders&&state.raidLeaders[raid.id]).trim()||'Not assigned'):'Not assigned';
+      let card=`<div class="print-team-card ${noHealer?'no-healer':''}"><div class="print-team-head"><b>${escapeHtml(displayTeamLabel(key))}</b><span>TEAM ${escapeHtml(raidLeaderName)}</span></div>`;
       slots.forEach((name,index)=>{
         if(!name){card+=`<div class="print-slot-row p-empty"><span>${index===0?'♛':'·'}</span><span>${index===0?'Empty leader':'Empty slot'}</span></div>`;return;}
         const member=memberByName[name]||{cls:'Unknown'};card+=index===0
