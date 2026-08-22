@@ -78,7 +78,7 @@ button{font:inherit}
 @media print{.viewerbar{display:none!important}body{background:#fff!important}.content{width:100%!important;margin:0!important}.lineup-sheet{box-shadow:none!important;border:none!important;border-radius:0!important;padding:0!important;background:#fff!important;color:#14172a!important}.team-card,.raid-head{break-inside:avoid;page-break-inside:avoid}}
 
 </style>
-<meta name="titania-public-build" content="2026-08-22-v10-siege">
+<meta name="titania-public-build" content="2026-08-22-v11-siege-continuous">
 </head>
 <body data-view="siege">
 <div class="page">
@@ -106,10 +106,10 @@ const MAIN_RAIDS = [
   {id:'siege_raid_3',label:'Raid 3',keys:['siege_main_9','siege_main_10','siege_main_11','siege_main_12']}
 ];
 const SUB_RAIDS = [
-  {id:'siege_sub_raid_1',label:'Raid 1',keys:['siege_sub_1','siege_sub_2','siege_sub_3','siege_sub_4','siege_sub_17']},
-  {id:'siege_sub_raid_2',label:'Raid 2',keys:['siege_sub_5','siege_sub_6','siege_sub_7','siege_sub_8','siege_sub_18']},
-  {id:'siege_sub_raid_3',label:'Raid 3',keys:['siege_sub_9','siege_sub_10','siege_sub_11','siege_sub_12']},
-  {id:'siege_sub_raid_4',label:'Raid 4',keys:['siege_sub_13','siege_sub_14','siege_sub_15','siege_sub_16']}
+  {id:'siege_sub_raid_1',label:'Raid 4',keys:['siege_sub_1','siege_sub_2','siege_sub_3','siege_sub_4','siege_sub_17']},
+  {id:'siege_sub_raid_2',label:'Raid 5',keys:['siege_sub_5','siege_sub_6','siege_sub_7','siege_sub_8','siege_sub_18']},
+  {id:'siege_sub_raid_3',label:'Raid 6',keys:['siege_sub_9','siege_sub_10','siege_sub_11','siege_sub_12']},
+  {id:'siege_sub_raid_4',label:'Raid 7',keys:['siege_sub_13','siege_sub_14','siege_sub_15','siege_sub_16']}
 ];
 const STAR_RAIDS = [
   {id:'pz_star_1',label:'Raid Team',keys:['elite_1','elite_2','elite_3','elite_4','elite_5']},
@@ -222,10 +222,7 @@ function render(){
 }
 
 function renderGuild(){
-  return section('⚔ Main Battlefield','main')+
-    MAIN_RAIDS.map(r=>raidBlock(r,'main',false)).join('')+
-    section('◈ Sub Battlefield','sub')+
-    SUB_RAIDS.map(r=>raidBlock(r,'sub',r.keys.length===5)).join('');
+  return [...MAIN_RAIDS,...SUB_RAIDS].map(r=>raidBlock(r,r.keys[0].startsWith('siege_main_')?'main':'sub',r.keys.length===5)).join('');
 }
 
 function renderPolarity(){
@@ -248,12 +245,15 @@ function renderPolarity(){
 
 function raidBlock(raid,kind,five){
   const leader=str(state.raidLeaders[raid.id])||'Not assigned';
-  const mode=MAIN_RAIDS.some(r=>r.id===raid.id)?(str(state.raidModes[raid.id]).toUpperCase()==='DEF'?'DEF':'ATK'):'';
+  const isSiegeRaid=[...MAIN_RAIDS,...SUB_RAIDS].some(r=>r.id===raid.id);
+  const mode=isSiegeRaid?(str(state.raidModes[raid.id]).toUpperCase()==='DEF'?'DEF':'ATK'):'';
+  const modeLabel=mode==='DEF'?'RESPAWN':'CAPTURE';
+  const modeIcon=mode==='DEF'?'↻':'🏰';
   const raidTitle=kind==='star'?`RAID TEAM — <b>${esc(leader)}</b>`:`${esc(raid.label.toUpperCase())} · TEAM <b>${esc(leader)}</b>`;
   return `<div class="raid-block">
     <div class="raid-head">
       <div class="raid-name">${raidTitle}</div>
-      ${mode?`<span class="mode ${mode.toLowerCase()}">${mode==='DEF'?'🛡':'⚔'} ${mode}</span>`:''}
+      ${mode?`<span class="mode ${mode.toLowerCase()}">${modeIcon} ${modeLabel}</span>`:''}
       <div class="raid-line"></div>
     </div>
     <div class="team-grid ${five?'five':''}">${raid.keys.map(k=>teamCard(k,kind)).join('')}</div>
@@ -304,7 +304,7 @@ function teamLabel(key){
   if(key.startsWith('sub_')||key.startsWith('siege_sub_')){
     const orderedKeys=SUB_RAIDS.flatMap(raid=>raid.keys);
     const index=orderedKeys.indexOf(key);
-    if(index>=0)return `Party ${index+1}`;
+    if(index>=0)return `Party ${MAIN_RAIDS.flatMap(raid=>raid.keys).length+index+1}`;
   }
   const m=/_([0-9]+)$/.exec(key);
   return `Party ${m?m[1]:'?'}`;

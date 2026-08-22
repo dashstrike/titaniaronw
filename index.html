@@ -970,10 +970,10 @@
   ]);
   const SIEGE_SUB_KEYS = Object.freeze(Array.from({length:CONFIG.subTeams},(_,i)=>`siege_sub_${i+1}`));
   const SIEGE_SUB_RAIDS = Object.freeze([
-    Object.freeze({id:'siege_sub_raid_1',label:'Raid 1',keys:Object.freeze(['siege_sub_1','siege_sub_2','siege_sub_3','siege_sub_4','siege_sub_17']),defaultLeaderTeam:'siege_sub_1',siege:true}),
-    Object.freeze({id:'siege_sub_raid_2',label:'Raid 2',keys:Object.freeze(['siege_sub_5','siege_sub_6','siege_sub_7','siege_sub_8','siege_sub_18']),defaultLeaderTeam:'siege_sub_5',siege:true}),
-    Object.freeze({id:'siege_sub_raid_3',label:'Raid 3',keys:Object.freeze(['siege_sub_9','siege_sub_10','siege_sub_11','siege_sub_12']),defaultLeaderTeam:'siege_sub_9',siege:true}),
-    Object.freeze({id:'siege_sub_raid_4',label:'Raid 4',keys:Object.freeze(['siege_sub_13','siege_sub_14','siege_sub_15','siege_sub_16']),defaultLeaderTeam:'siege_sub_13',siege:true})
+    Object.freeze({id:'siege_sub_raid_1',label:'Raid 4',keys:Object.freeze(['siege_sub_1','siege_sub_2','siege_sub_3','siege_sub_4','siege_sub_17']),defaultLeaderTeam:'siege_sub_1',siege:true}),
+    Object.freeze({id:'siege_sub_raid_2',label:'Raid 5',keys:Object.freeze(['siege_sub_5','siege_sub_6','siege_sub_7','siege_sub_8','siege_sub_18']),defaultLeaderTeam:'siege_sub_5',siege:true}),
+    Object.freeze({id:'siege_sub_raid_3',label:'Raid 6',keys:Object.freeze(['siege_sub_9','siege_sub_10','siege_sub_11','siege_sub_12']),defaultLeaderTeam:'siege_sub_9',siege:true}),
+    Object.freeze({id:'siege_sub_raid_4',label:'Raid 7',keys:Object.freeze(['siege_sub_13','siege_sub_14','siege_sub_15','siege_sub_16']),defaultLeaderTeam:'siege_sub_13',siege:true})
   ]);
   const ALL_SIEGE_RAIDS = Object.freeze([...SIEGE_MAIN_RAIDS,...SIEGE_SUB_RAIDS]);
   const ALL_GUILD_STYLE_RAIDS = Object.freeze([...ALL_GUILD_RAIDS,...ALL_SIEGE_RAIDS]);
@@ -1905,10 +1905,10 @@
         html+=`<div class="pz-dungeon-group"><div class="pz-dungeon-group-head"><span class="pz-dungeon-group-title">🗝 Normal Dungeon ${dungeon}</span><span class="pz-dungeon-group-team">TEAM ${escapeHtml(displayLeader)}</span><span class="pz-dungeon-group-line"></span><label class="raid-leader-control"><b>Raid Leader</b><span class="raid-leader-drop ${selectedLeader?'':'empty'}" data-raid-leader-drop="${raid?raid.id:''}" role="button" tabindex="0" title="Drag any member from Normal Dungeon ${dungeon} here to make them Raid Leader">${crownIcon()}<span class="raid-leader-drop-name">${escapeHtml(dropText)}</span></span></label>${finished?'<span class="dungeon-finished-badge">✅ Run Finished</span>':`<span class="pz-dungeon-member-count">${assigned}/${keys.length*CONFIG.teamSize} members</span>`}<span class="pz-dungeon-group-actions"><button class="btn small" data-autofill-dungeon="${dungeon}">⚡ Auto-fill</button><button class="btn small dungeon-finish-btn ${finished?'active':''}" data-finish-dungeon="${dungeon}">${finished?'↺ Reopen':'🏁 Mark Finished'}</button></span></div><div class="pz-dungeon-team-grid ${gridClass}">${keys.map(teamCardHtml).join('')}</div></div>`;
       }
       wrap.innerHTML=html;
+    }else if(currentEvent==='siege'){
+      wrap.innerHTML=`<div class="main-raids siege-raids">${ALL_SIEGE_RAIDS.map(mainRaidHtml).join('')}</div>`;
     }else{
-      const mainRaids=currentEvent==='siege'?SIEGE_MAIN_RAIDS:MAIN_RAIDS;
-      const subRaids=currentEvent==='siege'?SIEGE_SUB_RAIDS:SUB_RAIDS;
-      wrap.innerHTML=sectionHeader('⚔ Main Battlefield','main-bf',`3 raids · 4 teams each`)+`<div class="main-raids">${mainRaids.map(mainRaidHtml).join('')}</div>`+sectionHeader('◈ Sub Battlefield','sub-bf',`4 raids · Parties 1–${CONFIG.subTeams}`)+`<div class="main-raids sub-raids">${subRaids.map(mainRaidHtml).join('')}</div>`;
+      wrap.innerHTML=sectionHeader('⚔ Main Battlefield','main-bf',`3 raids · 4 teams each`)+`<div class="main-raids">${MAIN_RAIDS.map(mainRaidHtml).join('')}</div>`+sectionHeader('◈ Sub Battlefield','sub-bf',`4 raids · Parties 1–${CONFIG.subTeams}`)+`<div class="main-raids sub-raids">${SUB_RAIDS.map(mainRaidHtml).join('')}</div>`;
     }
     wireTeamInteractions();
   }
@@ -1917,13 +1917,17 @@
     const selectedLeader=stringValue(state.raidLeaders&&state.raidLeaders[raid.id]).trim();
     const displayLeader=selectedLeader||'Not assigned';
     const dropText=selectedLeader||'Drag member here';
-    const isMainRaid=MAIN_RAIDS.some(item=>item.id===raid.id)||SIEGE_MAIN_RAIDS.some(item=>item.id===raid.id);
+    const isGuildMainRaid=MAIN_RAIDS.some(item=>item.id===raid.id);
+    const isSiegeRaid=ALL_SIEGE_RAIDS.some(item=>item.id===raid.id);
     const isPolarityRaid=Boolean(raid.polarity);
     let modeToggle='';
-    if(isMainRaid){
+    if(isGuildMainRaid||isSiegeRaid){
       const raidMode=state.raidModes&&state.raidModes[raid.id]==='DEF'?'DEF':'ATK';
-      const modeIcon=raidMode==='DEF'?'🛡':'⚔';
-      modeToggle=`<button class="raid-mode-toggle ${raidMode.toLowerCase()}" data-raid-mode-toggle="${raid.id}" type="button" title="Switch this raid between ATK and DEF">${modeIcon} ${raidMode}</button>`;
+      const siegeModeLabel=raidMode==='DEF'?'RESPAWN':'CAPTURE';
+      const modeIcon=isSiegeRaid?(raidMode==='DEF'?'↻':'🏰'):(raidMode==='DEF'?'🛡':'⚔');
+      const modeLabel=isSiegeRaid?siegeModeLabel:raidMode;
+      const modeTitle=isSiegeRaid?'Switch this raid between CAPTURE and RESPAWN':'Switch this raid between ATK and DEF';
+      modeToggle=`<button class="raid-mode-toggle ${raidMode.toLowerCase()}" data-raid-mode-toggle="${raid.id}" type="button" title="${modeTitle}">${modeIcon} ${modeLabel}</button>`;
     }
     const title=isPolarityRaid?`RAID TEAM — ${displayLeader}`:`${raid.label.toUpperCase()} · TEAM ${displayLeader}`;
     let gridClass=raid.kind==='star'?'pz-star-raid-grid':raid.kind==='normal'?'pz-normal-raid-grid':'main-raid-grid';
@@ -1993,14 +1997,14 @@
     wrap.querySelectorAll('[data-raid-mode-toggle]').forEach(button=>button.addEventListener('click',async event=>{
       event.preventDefault();event.stopPropagation();
       const raidId=button.dataset.raidModeToggle;
-      const siegeRaid=SIEGE_MAIN_RAIDS.some(raid=>raid.id===raidId);
+      const siegeRaid=ALL_SIEGE_RAIDS.some(raid=>raid.id===raidId);
       if(!MAIN_RAIDS.some(raid=>raid.id===raidId)&&!siegeRaid)return;
       if(!state.raidModes||typeof state.raidModes!=='object')state.raidModes=createDefaultRaidModes();
       const previous=state.raidModes[raidId]==='DEF'?'DEF':'ATK';
       const next=previous==='DEF'?'ATK':'DEF';
       state.raidModes[raidId]=next;
       if(siegeRaid){
-        commitMutation('Siege raid mode updated');
+        commitMutation('Siege raid objective updated');
         return;
       }
       renderAll();
@@ -2174,7 +2178,7 @@
     }));
     const eventName=currentEventPublicLabel();
     commitMutation(currentEvent==='polarity_zone'?'Elite auto-filled':`${eventName} auto-filled`);
-    showToast('Auto-fill complete',currentEvent==='polarity_zone'?'Elite Battlefield remaining slots were filled by Gear Rating.':`${eventName} Main and Sub remaining slots were filled by Gear Rating.`);
+    showToast('Auto-fill complete',currentEvent==='polarity_zone'?'Elite Battlefield remaining slots were filled by Gear Rating.':currentEvent==='siege'?`${eventName} remaining slots were filled by Gear Rating.`:`${eventName} Main and Sub remaining slots were filled by Gear Rating.`);
   }
 
   function autoFillDungeon(dungeon){
@@ -2631,7 +2635,7 @@ Their team assignments and membership history will also be removed. Use Mark Ina
       const id=raid.id;
       if(!sameJson(local.raidLeaders[id],base.raidLeaders[id]))merged.raidLeaders[id]=local.raidLeaders[id]||'';
     });
-    [...MAIN_RAIDS,...SIEGE_MAIN_RAIDS].forEach(raid=>{
+    [...MAIN_RAIDS,...ALL_SIEGE_RAIDS].forEach(raid=>{
       const id=raid.id;
       if(!sameJson(local.raidModes[id],base.raidModes[id]))merged.raidModes[id]=local.raidModes[id];
     });
@@ -2880,18 +2884,25 @@ Their team assignments and membership history will also be removed. Use Mark Ina
         const leaderName=raid?stringValue(state.raidLeaders&&state.raidLeaders[raid.id]).trim()||'Not assigned':'Not assigned';
         html+=`<div class="print-raid-block"><div class="print-raid-head"><span>NORMAL DUNGEON ${dungeon} · TEAM ${escapeHtml(leaderName)}</span></div><div class="print-team-grid print-polarity-grid">${dungeonKeys(dungeon).map(appendTeamCard).join('')}</div></div>`;
       }
+    }else if(currentEvent==='siege'){
+      ALL_SIEGE_RAIDS.forEach(raid=>{
+        const leaderName=stringValue(state.raidLeaders&&state.raidLeaders[raid.id]).trim()||'Not assigned';
+        const raidMode=state.raidModes&&state.raidModes[raid.id]==='DEF'?'DEF':'ATK';
+        const modeLabel=raidMode==='DEF'?'RESPAWN':'CAPTURE';
+        const modeIcon=raidMode==='DEF'?'↻':'🏰';
+        const printGridClass=raid.keys.length===5?'print-main-raid-grid five':'print-main-raid-grid';
+        html+=`<div class="print-raid-block"><div class="print-raid-head"><span>${escapeHtml(raid.label.toUpperCase())} · TEAM ${escapeHtml(leaderName)} <span class="print-raid-mode ${raidMode.toLowerCase()}">${modeIcon} ${modeLabel}</span></span></div><div class="print-team-grid ${printGridClass}">${raid.keys.map(appendTeamCard).join('')}</div></div>`;
+      });
     }else{
-      const mainRaids=currentEvent==='siege'?SIEGE_MAIN_RAIDS:MAIN_RAIDS;
-      const subRaids=currentEvent==='siege'?SIEGE_SUB_RAIDS:SUB_RAIDS;
       html+=`<div class="print-section-title">Main Battlefield</div>`;
-      mainRaids.forEach(raid=>{
+      MAIN_RAIDS.forEach(raid=>{
         const leaderName=stringValue(state.raidLeaders&&state.raidLeaders[raid.id]).trim()||'Not assigned';
         const raidMode=state.raidModes&&state.raidModes[raid.id]==='DEF'?'DEF':'ATK';
         const modeIcon=raidMode==='DEF'?'🛡':'⚔';
         html+=`<div class="print-raid-block"><div class="print-raid-head"><span>${escapeHtml(raid.label.toUpperCase())} · TEAM ${escapeHtml(leaderName)} <span class="print-raid-mode ${raidMode.toLowerCase()}">${modeIcon} ${raidMode}</span></span></div><div class="print-team-grid print-main-raid-grid">${raid.keys.map(appendTeamCard).join('')}</div></div>`;
       });
       html+=`<div class="print-section-title">Sub Battlefield</div>`;
-      subRaids.forEach(raid=>{
+      SUB_RAIDS.forEach(raid=>{
         const leaderName=stringValue(state.raidLeaders&&state.raidLeaders[raid.id]).trim()||'Not assigned';
         const printGridClass=raid.keys.length===5?'print-main-raid-grid five':'print-main-raid-grid';
         html+=`<div class="print-raid-block"><div class="print-raid-head"><span>${escapeHtml(raid.label.toUpperCase())} · TEAM ${escapeHtml(leaderName)}</span></div><div class="print-team-grid ${printGridClass}">${raid.keys.map(appendTeamCard).join('')}</div></div>`;
@@ -2930,9 +2941,11 @@ Their team assignments and membership history will also be removed. Use Mark Ina
   function teamKind(key){if(key.startsWith('main_')||key.startsWith('siege_main_'))return'main-bf';if(key.startsWith('sub_')||key.startsWith('siege_sub_'))return'sub-bf';if(key.startsWith('dungeon'))return'dungeon-bf';return'elite-bf';}
   function teamLabel(key){const match=key.match(/_(\d+)$/);return`Party ${match?match[1]:'?'}`;}
   function subDisplayTeamLabel(key){
-    const orderedKeys=key.startsWith('siege_sub_')?SIEGE_SUB_RAIDS.flatMap(raid=>raid.keys):SUB_RAIDS.flatMap(raid=>raid.keys);
+    const siege=key.startsWith('siege_sub_');
+    const orderedKeys=siege?SIEGE_SUB_RAIDS.flatMap(raid=>raid.keys):SUB_RAIDS.flatMap(raid=>raid.keys);
     const index=orderedKeys.indexOf(key);
-    return index>=0?`Party ${index+1}`:teamLabel(key);
+    const offset=siege?SIEGE_MAIN_KEYS.length:0;
+    return index>=0?`Party ${offset+index+1}`:teamLabel(key);
   }
   function displayTeamLabel(key){
     if(key.startsWith('sub_')||key.startsWith('siege_sub_'))return subDisplayTeamLabel(key);
