@@ -83,7 +83,7 @@
     .event-tab.active.db{color:#7ee8db;}
     .event-tab.active.mm{color:#9f8cff;}
     .event-tab.active.gl{color:#c6bdfb;}
-    .event-tab.active.sg{color:#ffb4be;background:linear-gradient(180deg,#22131a,#1a1418);box-shadow:0 1px 0 #3d2430 inset,0 0 0 1px #4f2b34;}
+    .event-tab.active.sg{color:#ff8f9e;}
     .event-tab.active.pz{color:#ffd166;}
     .stats{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;}
     .stat-chip{
@@ -311,35 +311,11 @@
     .team-card.dungeon-bf.run-finished::after{content:'';position:absolute;inset:0;border-radius:14px;pointer-events:none;background:repeating-linear-gradient(135deg,transparent 0 7px,#00000055 7px 14px);}
     .team-card.dungeon-bf.run-finished:hover{opacity:.7;}
 
-    /* Siege theme: crimson/gold so it feels distinct from Guild League and Polarity */
-    .body-wrap[data-event="siege"] .hint-bar svg{color:#ff6b7a;}
-    .body-wrap[data-event="siege"] .event-last-updated-label{color:#8f6670;}
-    .body-wrap[data-event="siege"] .event-last-updated-value{color:#e6b1b7;}
-    .body-wrap[data-event="siege"] .main-raid-head{background:linear-gradient(180deg,#171423,#14111a);border-color:#3c2430;box-shadow:inset 0 0 0 1px #ff6b7a14;}
-    .body-wrap[data-event="siege"] .main-raid-title{color:#ffb4be;}
-    .body-wrap[data-event="siege"] .main-raid-line{background:linear-gradient(90deg,#4b2832,transparent);}
-    .body-wrap[data-event="siege"] .raid-mode-toggle.atk{color:#ffb4be;border-color:#7e3946;background:#241218;box-shadow:0 0 0 1px #ff6b7a14 inset;}
-    .body-wrap[data-event="siege"] .raid-mode-toggle.def{color:#ffd5a3;border-color:#8d5a21;background:#23180e;}
-    .body-wrap[data-event="siege"] .raid-leader-control b{color:#ff9fae;}
-    .body-wrap[data-event="siege"] .raid-leader-drop{border-color:#5d3341;background:#13101a;}
-    .body-wrap[data-event="siege"] .raid-leader-drop svg{color:#ff8f8f;}
-    .body-wrap[data-event="siege"] .raid-leader-drop.dragover{border-color:#ff6b7a;background:#23121a;box-shadow:0 0 0 2px #ff6b7a22;}
-    .body-wrap[data-event="siege"] .team-card{border-color:#2f2537;background:linear-gradient(180deg,#141a2b 0%,#12192a 100%);}
-    .body-wrap[data-event="siege"] .team-card.main-bf{box-shadow:inset 3px 0 0 #ff6b7a;}
-    .body-wrap[data-event="siege"] .team-card.sub-bf{box-shadow:inset 3px 0 0 #ff9966;}
-    .body-wrap[data-event="siege"] .team-name{color:#fff2f4;}
-    .body-wrap[data-event="siege"] .slot.leader{border-color:#ffb34766;background:#21170d;}
-    .body-wrap[data-event="siege"] .leader-icon{color:#ffb347;}
-    .body-wrap[data-event="siege"] .slot.dragover,.body-wrap[data-event="siege"] .slot.slot-selected{border-color:#ff6b7a;box-shadow:0 0 0 2px #ff6b7a22;background:#21141a;}
-    .body-wrap[data-event="siege"] .team-drag-handle.team-selected{color:#ff8f8f;background:#22131a;box-shadow:0 0 0 1px #ff6b7a33;}
+    /* Siege identity: keep standard raid/header styling; only Party cards use a red accent. */
+    .body-wrap[data-event="siege"] .team-card.main-bf,
+    .body-wrap[data-event="siege"] .team-card.sub-bf{box-shadow:inset 3px 0 0 #ef5a6f;}
+    body[data-event="siege"] .print-team-card.siege-party{border-left:3px solid #ef5a6f;}
 
-    /* Siege Print/Share theme */
-    body[data-event="siege"] .print-section-title{color:#a93446;}
-    body[data-event="siege"] .print-raid-head{border-left-color:#d64b61;background:#fff0f2;color:#5a2430;}
-    body[data-event="siege"] .print-raid-mode.atk{color:#a93446;background:#ffe6ea;border-color:#e7a1ad;}
-    body[data-event="siege"] .print-raid-mode.def{color:#8a5a14;background:#fff4dc;border-color:#e7c681;}
-    body[data-event="siege"] .print-team-card{border-color:#e6ccd2;background:#fffafb;}
-    body[data-event="siege"] .print-team-card.no-healer{border-color:#e58a99;background:#fdf1f3;}
 
     /* Dashboard */
     .dash-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-bottom:8px;}
@@ -2893,7 +2869,7 @@ Their team assignments and membership history will also be removed. Use Mark Ina
       const slots=state.assignments[key];const noHealer=teamHasNoHealer(key);
       const raid=ALL_RAIDS.find(item=>item.keys.includes(key));
       const raidLeaderName=raid?(stringValue(state.raidLeaders&&state.raidLeaders[raid.id]).trim()||'Not assigned'):'Not assigned';
-      let card=`<div class="print-team-card ${noHealer?'no-healer':''}"><div class="print-team-head"><b>${escapeHtml(displayTeamLabel(key))}</b><span title="Team ${escapeAttr(raidLeaderName)}">TEAM ${escapeHtml(raidLeaderName)}</span></div>`;
+      let card=`<div class="print-team-card ${currentEvent==='siege'?'siege-party ':''}${noHealer?'no-healer':''}"><div class="print-team-head"><b>${escapeHtml(displayTeamLabel(key))}</b><span title="Team ${escapeAttr(raidLeaderName)}">TEAM ${escapeHtml(raidLeaderName)}</span></div>`;
       slots.forEach((name,index)=>{
         if(!name){card+=`<div class="print-slot-row p-empty"><span>${index===0?'♛':'·'}</span><span>${index===0?'Empty leader':'Empty slot'}</span></div>`;return;}
         const member=memberByName[name]||{cls:'Unknown'};card+=index===0
