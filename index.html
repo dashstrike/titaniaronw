@@ -183,6 +183,7 @@
     .tag-sub{background:#3fd6c42c;color:#7ee8db;}
     .tag-elite{background:#f0b42928;color:#ffd166;}
     .tag-dungeon{background:#ff8f5e28;color:#ffb08a;}
+    .tag-siege{background:#ef5a6f24;color:#ff9caa;}
     .tag-unassigned{background:#5f688930;color:var(--muted);}
     .assigned-flag{font-size:10.5px;color:var(--muted-2);font-style:italic;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:120px;}
     .card-tools{display:flex;gap:2px;flex:none;}
@@ -1926,6 +1927,15 @@
   }
 
   function memberStatus(name){
+    if(currentEvent==='siege'){
+      const found=findAssignments(name,SIEGE_KEYS);
+      if(found.length){
+        const raid=raidForTeam(found[0].key);
+        const raidLabel=raid?raid.label:'Raid ?';
+        return {assigned:true,labels:[raidLabel],filters:[found[0].key.startsWith('siege_main_')?'Main':'Sub'],assignmentText:''};
+      }
+      return {assigned:false,labels:['Unassigned'],filters:['Unassigned'],assignmentText:''};
+    }
     if(currentEvent==='polarity_zone'){
       const elite=findAssignments(name,ELITE_KEYS);
       const dungeon=findAssignments(name,DUNGEON_KEYS);
@@ -1944,7 +1954,7 @@
     return {assigned:false,labels:['Unassigned'],filters:['Unassigned'],assignmentText:''};
   }
 
-  function statusTagClass(label){return label==='Main'?'tag-main':label==='Sub'?'tag-sub':label==='Star'?'tag-elite':label==='Normal'?'tag-dungeon':'tag-unassigned';}
+  function statusTagClass(label){return label==='Main'?'tag-main':label==='Sub'?'tag-sub':label==='Star'?'tag-elite':label==='Normal'?'tag-dungeon':label.startsWith('Raid ')?'tag-siege':'tag-unassigned';}
 
   function findAssignments(name,keys){
     const found=[];
