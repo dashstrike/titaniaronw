@@ -2,7 +2,7 @@
 <html lang="en" data-theme="dark">
 <head>
   <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Titania · Guild League</title>
+  <title>Titania · Siege</title>
   <link rel="icon" href="favicon.ico?v=20260811-2" sizes="any">
   <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png?v=20260811-2">
   <link rel="icon" type="image/png" sizes="192x192" href="favicon-192.png?v=20260811-2">
@@ -80,13 +80,13 @@ button{font:inherit}
 </style>
 <meta name="titania-public-build" content="2026-08-22-v10-siege">
 </head>
-<body data-view="guild">
+<body data-view="siege">
 <div class="page">
   <header class="viewerbar">
     <div class="mini-brand"><img class="logo" src="titania-logo.webp" alt="Titania guild logo"><div><b>TITANIA</b><span>Dark Lord Server</span></div></div>
     <nav class="nav">
-      <a class="active" href="guild-league.html">🛡 Guild League</a>
-      <a href="siege.html">🏰 Siege</a>
+      <a href="guild-league.html">🛡 Guild League</a>
+      <a class="active" href="siege.html">🏰 Siege</a>
       <a href="polarity-zone.html">⚡ Polarity Zone</a>
       <button class="tool-btn" id="refreshBtn">↻ Refresh</button>
       <button class="tool-btn" id="themeBtn">☀ Light</button>
@@ -101,15 +101,15 @@ const VIEW = document.body.dataset.view || 'guild';
 const TEAM_SIZE = 5;
 
 const MAIN_RAIDS = [
-  {id:'raid_1',label:'Raid 1',keys:['main_1','main_2','main_3','main_4']},
-  {id:'raid_2',label:'Raid 2',keys:['main_5','main_6','main_7','main_8']},
-  {id:'raid_3',label:'Raid 3',keys:['main_9','main_10','main_11','main_12']}
+  {id:'siege_raid_1',label:'Raid 1',keys:['siege_main_1','siege_main_2','siege_main_3','siege_main_4']},
+  {id:'siege_raid_2',label:'Raid 2',keys:['siege_main_5','siege_main_6','siege_main_7','siege_main_8']},
+  {id:'siege_raid_3',label:'Raid 3',keys:['siege_main_9','siege_main_10','siege_main_11','siege_main_12']}
 ];
 const SUB_RAIDS = [
-  {id:'sub_raid_1',label:'Raid 1',keys:['sub_1','sub_2','sub_3','sub_4','sub_17']},
-  {id:'sub_raid_2',label:'Raid 2',keys:['sub_5','sub_6','sub_7','sub_8','sub_18']},
-  {id:'sub_raid_3',label:'Raid 3',keys:['sub_9','sub_10','sub_11','sub_12']},
-  {id:'sub_raid_4',label:'Raid 4',keys:['sub_13','sub_14','sub_15','sub_16']}
+  {id:'siege_sub_raid_1',label:'Raid 1',keys:['siege_sub_1','siege_sub_2','siege_sub_3','siege_sub_4','siege_sub_17']},
+  {id:'siege_sub_raid_2',label:'Raid 2',keys:['siege_sub_5','siege_sub_6','siege_sub_7','siege_sub_8','siege_sub_18']},
+  {id:'siege_sub_raid_3',label:'Raid 3',keys:['siege_sub_9','siege_sub_10','siege_sub_11','siege_sub_12']},
+  {id:'siege_sub_raid_4',label:'Raid 4',keys:['siege_sub_13','siege_sub_14','siege_sub_15','siege_sub_16']}
 ];
 const STAR_RAIDS = [
   {id:'pz_star_1',label:'Raid Team',keys:['elite_1','elite_2','elite_3','elite_4','elite_5']},

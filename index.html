@@ -83,6 +83,7 @@
     .event-tab.active.db{color:#7ee8db;}
     .event-tab.active.mm{color:#9f8cff;}
     .event-tab.active.gl{color:#c6bdfb;}
+    .event-tab.active.sg{color:#c6bdfb;}
     .event-tab.active.pz{color:#ffd166;}
     .stats{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;}
     .stat-chip{
@@ -832,10 +833,10 @@
       <div class="modal-body">
         <div class="guide-step"><div class="guide-step-num">1</div><div><b>Shared storage</b> — roster and lineup edits are saved securely in Supabase, so approved guild leaders can work from the same data.</div></div>
         <div class="guide-step"><div class="guide-step-num">2</div><div><b>Place members</b> — drag an unassigned member onto a slot, or tap/click the member and then a slot. Tap two filled slots to swap them.</div></div>
-        <div class="guide-step"><div class="guide-step-num">3</div><div><b>Polarity Zone raids</b> — STAR and Normal Dun are grouped into raid rows. Drag any member from a raid into its Raid Leader box, just like Guild League. Team-handle transfer still works: STAR is copied; Normal Dun teams are moved.</div></div>
+        <div class="guide-step"><div class="guide-step-num">3</div><div><b>Polarity Zone raids</b> — STAR and Normal Dun are grouped into raid rows. Drag any member from a raid into its Raid Leader box, just like Guild League or Siege. Team-handle transfer still works: STAR is copied; Normal Dun teams are moved.</div></div>
         <div class="guide-step"><div class="guide-step-num">4</div><div><b>People leaving or returning</b> — use <b>Mark Inactive</b> instead of deleting a member. Inactive members leave every current team and disappear from the Member Pool. Reactivate them from Dashboard when they return.</div></div>
         <div class="guide-step"><div class="guide-step-num">5</div><div><b>Website access</b> — approved users sign in through this site. Leaders/Admins can edit; Viewers are read-only.</div></div>
-        <div class="guide-note">Export/import contains the full roster, Guild Status, membership history, Guild League, Polarity Zone, and finished-dungeon marks.</div>
+        <div class="guide-note">Export/import contains the full roster, Guild Status, membership history, Guild League, Siege, Polarity Zone, and finished-dungeon marks.</div>
       </div>
       <div class="modal-foot"><button class="btn primary" id="guideDone">Got it</button></div>
     </div>
@@ -859,6 +860,7 @@
           <button class="event-tab" data-event="dashboard">📊 Dashboard</button>
           <button class="event-tab" data-event="manage_members">🛠 Members</button>
           <button class="event-tab" data-event="guild_league">🛡️ Guild League</button>
+          <button class="event-tab" data-event="siege">🏰 Siege</button>
           <button class="event-tab" data-event="polarity_zone">⚡ Polarity Zone</button>
         </nav>
         <div class="stats" id="statsRow"></div>
@@ -960,6 +962,21 @@
     Object.freeze({id:'sub_raid_4',label:'Raid 4',keys:Object.freeze(['sub_13','sub_14','sub_15','sub_16']),defaultLeaderTeam:'sub_13'})
   ]);
   const ALL_GUILD_RAIDS = Object.freeze([...MAIN_RAIDS,...SUB_RAIDS]);
+  const SIEGE_MAIN_KEYS = Object.freeze(Array.from({length:CONFIG.mainTeams},(_,i)=>`siege_main_${i+1}`));
+  const SIEGE_MAIN_RAIDS = Object.freeze([
+    Object.freeze({id:'siege_raid_1',label:'Raid 1',keys:Object.freeze(['siege_main_1','siege_main_2','siege_main_3','siege_main_4']),defaultLeaderTeam:'siege_main_1',siege:true}),
+    Object.freeze({id:'siege_raid_2',label:'Raid 2',keys:Object.freeze(['siege_main_5','siege_main_6','siege_main_7','siege_main_8']),defaultLeaderTeam:'siege_main_5',siege:true}),
+    Object.freeze({id:'siege_raid_3',label:'Raid 3',keys:Object.freeze(['siege_main_9','siege_main_10','siege_main_11','siege_main_12']),defaultLeaderTeam:'siege_main_9',siege:true})
+  ]);
+  const SIEGE_SUB_KEYS = Object.freeze(Array.from({length:CONFIG.subTeams},(_,i)=>`siege_sub_${i+1}`));
+  const SIEGE_SUB_RAIDS = Object.freeze([
+    Object.freeze({id:'siege_sub_raid_1',label:'Raid 1',keys:Object.freeze(['siege_sub_1','siege_sub_2','siege_sub_3','siege_sub_4','siege_sub_17']),defaultLeaderTeam:'siege_sub_1',siege:true}),
+    Object.freeze({id:'siege_sub_raid_2',label:'Raid 2',keys:Object.freeze(['siege_sub_5','siege_sub_6','siege_sub_7','siege_sub_8','siege_sub_18']),defaultLeaderTeam:'siege_sub_5',siege:true}),
+    Object.freeze({id:'siege_sub_raid_3',label:'Raid 3',keys:Object.freeze(['siege_sub_9','siege_sub_10','siege_sub_11','siege_sub_12']),defaultLeaderTeam:'siege_sub_9',siege:true}),
+    Object.freeze({id:'siege_sub_raid_4',label:'Raid 4',keys:Object.freeze(['siege_sub_13','siege_sub_14','siege_sub_15','siege_sub_16']),defaultLeaderTeam:'siege_sub_13',siege:true})
+  ]);
+  const ALL_SIEGE_RAIDS = Object.freeze([...SIEGE_MAIN_RAIDS,...SIEGE_SUB_RAIDS]);
+  const ALL_GUILD_STYLE_RAIDS = Object.freeze([...ALL_GUILD_RAIDS,...ALL_SIEGE_RAIDS]);
   const ELITE_KEYS = Object.freeze(Array.from({length:CONFIG.eliteTeams},(_,i)=>`elite_${i+1}`));
   const POLARITY_DUNGEON_TEAM_COUNTS = Object.freeze([5,5,5,5]);
   function dungeonTeamCount(d){return POLARITY_DUNGEON_TEAM_COUNTS[d-1]||0;}
@@ -975,10 +992,11 @@
     return Object.freeze({id:`pz_dungeon_${dungeon}`,label:`Normal Dungeon ${dungeon}`,keys:Object.freeze(keys),defaultLeaderTeam:keys[0],polarity:true,kind:'normal',dungeon});
   }));
   const ALL_POLARITY_RAIDS = Object.freeze([...POLARITY_STAR_RAIDS,...POLARITY_NORMAL_RAIDS]);
-  const ALL_RAIDS = Object.freeze([...ALL_GUILD_RAIDS,...ALL_POLARITY_RAIDS]);
+  const ALL_RAIDS = Object.freeze([...ALL_GUILD_RAIDS,...ALL_SIEGE_RAIDS,...ALL_POLARITY_RAIDS]);
   const GUILD_KEYS = Object.freeze([...MAIN_KEYS,...SUB_KEYS]);
+  const SIEGE_KEYS = Object.freeze([...SIEGE_MAIN_KEYS,...SIEGE_SUB_KEYS]);
   const POLARITY_KEYS = Object.freeze([...ELITE_KEYS,...DUNGEON_KEYS]);
-  const ALL_KEYS = Object.freeze([...GUILD_KEYS,...POLARITY_KEYS]);
+  const ALL_KEYS = Object.freeze([...GUILD_KEYS,...SIEGE_KEYS,...POLARITY_KEYS]);
   const TEAM_KEY_SET = new Set(ALL_KEYS);
 
   let state = {
@@ -988,9 +1006,10 @@
     raidLeaders:createDefaultRaidLeaders(),
     raidModes:createDefaultRaidModes(),
     membershipHistory:[],
-    publicVisibility:{guildLeague:false,polarityZone:false},
+    publicVisibility:{guildLeague:false,siege:false,polarityZone:false},
     eventUpdates:{
       guildLeague:{updatedAt:'',updatedBy:''},
+      siege:{updatedAt:'',updatedBy:''},
       polarityZone:{updatedAt:'',updatedBy:''}
     },
     revision:0,
@@ -1384,7 +1403,7 @@
     assignments.elite_1=['Kairo','Astra','YRDRY','Lumi','Nyx'];
     assignments.dungeon1_1=['Kairo','Astra','YRDRY','Lumi','Nyx'];
     const membershipHistory=[{id:'history_preview_1',memberId:'member_preview_former',memberName:'FormerMember',action:'inactive',effectiveDate:'2026-07-20',reason:'Left Guild',changedAt:'2026-07-20T10:00:00.000Z'}];
-    return {version:'preview',spreadsheetName:'Preview Sheet',roster,assignments,finishedDungeons:[],raidLeaders:createDefaultRaidLeaders(),raidModes:createDefaultRaidModes(),membershipHistory,eventUpdates:{guildLeague:{updatedAt:'',updatedBy:''},polarityZone:{updatedAt:'',updatedBy:''}},revision:1,updatedAt:new Date().toISOString()};
+    return {version:'preview',spreadsheetName:'Preview Sheet',roster,assignments,finishedDungeons:[],raidLeaders:createDefaultRaidLeaders(),raidModes:createDefaultRaidModes(),membershipHistory,eventUpdates:{guildLeague:{updatedAt:'',updatedBy:''},siege:{updatedAt:'',updatedBy:''},polarityZone:{updatedAt:'',updatedBy:''}},revision:1,updatedAt:new Date().toISOString()};
   }
 
   function createDefaultRaidLeaders(){
@@ -1395,14 +1414,14 @@
 
   function createDefaultRaidModes(){
     const out={};
-    ALL_GUILD_RAIDS.forEach(raid=>{out[raid.id]='ATK';});
+    ALL_GUILD_STYLE_RAIDS.forEach(raid=>{out[raid.id]='ATK';});
     return out;
   }
 
   function normalizeRaidModes(raw){
     const source=raw&&typeof raw==='object'?raw:{};
     const out=createDefaultRaidModes();
-    ALL_GUILD_RAIDS.forEach(raid=>{
+    ALL_GUILD_STYLE_RAIDS.forEach(raid=>{
       const mode=stringValue(source[raid.id]).trim().toUpperCase();
       out[raid.id]=mode==='DEF'?'DEF':'ATK';
     });
@@ -1447,7 +1466,7 @@
 
   function normalizePublicVisibility(raw){
     const source=raw&&typeof raw==='object'?raw:{};
-    return {guildLeague:source.guildLeague===true,polarityZone:source.polarityZone===true};
+    return {guildLeague:source.guildLeague===true,siege:source.siege===true,polarityZone:source.polarityZone===true};
   }
 
   function normalizeClientState(input){
@@ -1491,6 +1510,7 @@
       }
     });
     enforceUnique(assignments,GUILD_KEYS);
+    enforceUnique(assignments,SIEGE_KEYS);
     enforceUnique(assignments,ELITE_KEYS);
     enforceUnique(assignments,DUNGEON_KEYS);
     const rawFinished=Array.isArray(input.finishedDungeons)?input.finishedDungeons:(Array.isArray(input.fd)?input.fd:[]);
@@ -1518,17 +1538,20 @@
     });
     const publicVisibility=normalizePublicVisibility(input.publicVisibility);
     const rawEventUpdates=input.eventUpdates&&typeof input.eventUpdates==='object'?input.eventUpdates:(input.eu&&typeof input.eu==='object'?input.eu:{});
-    const legacyUpdatedAt=normalizeTimestampValue(input.updatedAt);
+    const legacyUpdatedAt=stringValue(input.updatedAt).trim()?normalizeTimestampValue(input.updatedAt):'';
     const legacyUpdatedBy=stringValue(input.updatedBy).trim().slice(0,120);
-    const normalizeEventUpdate=(raw)=>{
+    const normalizeEventUpdate=(raw,useLegacy=true)=>{
       const source=raw&&typeof raw==='object'?raw:{};
+      const rawAt=stringValue(source.updatedAt||source.at).trim();
+      const rawBy=stringValue(source.updatedBy||source.by).trim().slice(0,120);
       return {
-        updatedAt:normalizeTimestampValue(source.updatedAt||source.at)||legacyUpdatedAt,
-        updatedBy:stringValue(source.updatedBy||source.by).trim().slice(0,120)||legacyUpdatedBy
+        updatedAt:rawAt?normalizeTimestampValue(rawAt):(useLegacy?legacyUpdatedAt:''),
+        updatedBy:rawBy||(useLegacy?legacyUpdatedBy:'')
       };
     };
     const eventUpdates={
       guildLeague:normalizeEventUpdate(rawEventUpdates.guildLeague),
+      siege:normalizeEventUpdate(rawEventUpdates.siege,false),
       polarityZone:normalizeEventUpdate(rawEventUpdates.polarityZone)
     };
     return {roster,assignments,finishedDungeons,raidLeaders,raidModes,membershipHistory:membershipHistory.slice(-CONFIG.maxHistory),publicVisibility,eventUpdates,revision:0,updatedAt:'',spreadsheetName:''};
@@ -1576,13 +1599,14 @@
       button.classList.toggle('db',active&&currentEvent==='dashboard');
       button.classList.toggle('mm',active&&currentEvent==='manage_members');
       button.classList.toggle('gl',active&&currentEvent==='guild_league');
+      button.classList.toggle('sg',active&&currentEvent==='siege');
       button.classList.toggle('pz',active&&currentEvent==='polarity_zone');
       button.setAttribute('aria-current',active?'page':'false');
     });
   }
 
   function setEvent(eventName){
-    if(!['dashboard','manage_members','guild_league','polarity_zone'].includes(eventName)) return;
+    if(!['dashboard','manage_members','guild_league','siege','polarity_zone'].includes(eventName)) return;
     currentEvent=eventName;
     try{localStorage.setItem('roworld_sheets_event_v1',eventName);}catch(error){}
     statusFilter='All';
@@ -1593,7 +1617,7 @@
   function readStoredEvent(){
     try{
       const value=localStorage.getItem('roworld_sheets_event_v1');
-      if(['dashboard','manage_members','guild_league','polarity_zone'].includes(value)) return value;
+      if(['dashboard','manage_members','guild_league','siege','polarity_zone'].includes(value)) return value;
     }catch(error){}
     return 'guild_league';
   }
@@ -1604,9 +1628,10 @@
     const inactiveCount=state.roster.length-active.length;
     if(currentEvent==='dashboard'){
       const guildAssigned=assignedNamesSet(GUILD_KEYS).size;
+      const siegeAssigned=assignedNamesSet(SIEGE_KEYS).size;
       const polarityAssigned=assignedNamesSet(POLARITY_KEYS).size;
       const healers=active.filter(member=>isHealer(member.cls)).length;
-      row.innerHTML=statChip(active.length,'Active')+statChip(inactiveCount,'Inactive',inactiveCount>0)+statChip(`${guildAssigned}/150`,'Guild Slotted')+statChip(`${polarityAssigned}/250`,'PZ Slotted')+statChip(healers,'Healers');
+      row.innerHTML=statChip(active.length,'Active')+statChip(inactiveCount,'Inactive',inactiveCount>0)+statChip(`${guildAssigned}/150`,'Guild Slotted')+statChip(`${siegeAssigned}/150`,'Siege Slotted')+statChip(`${polarityAssigned}/250`,'PZ Slotted')+statChip(healers,'Healers');
       return;
     }
     if(currentEvent==='manage_members'){
@@ -1640,6 +1665,7 @@
 
   function eventUpdateKey(eventName=currentEvent){
     if(eventName==='guild_league')return'guildLeague';
+    if(eventName==='siege')return'siege';
     if(eventName==='polarity_zone')return'polarityZone';
     return'';
   }
@@ -1647,14 +1673,16 @@
   function ensureEventUpdates(){
     if(!state.eventUpdates||typeof state.eventUpdates!=='object')state.eventUpdates={};
     if(!state.eventUpdates.guildLeague||typeof state.eventUpdates.guildLeague!=='object')state.eventUpdates.guildLeague={updatedAt:'',updatedBy:''};
+    if(!state.eventUpdates.siege||typeof state.eventUpdates.siege!=='object')state.eventUpdates.siege={updatedAt:'',updatedBy:''};
     if(!state.eventUpdates.polarityZone||typeof state.eventUpdates.polarityZone!=='object')state.eventUpdates.polarityZone={updatedAt:'',updatedBy:''};
   }
 
   function touchEventUpdate(scope=currentEvent){
     ensureEventUpdates();
     const stamp={updatedAt:new Date().toISOString(),updatedBy:currentEditorName()};
-    if(scope==='both'){
+    if(scope==='all'||scope==='both'){
       state.eventUpdates.guildLeague={...stamp};
+      state.eventUpdates.siege={...stamp};
       state.eventUpdates.polarityZone={...stamp};
       return;
     }
@@ -1677,11 +1705,15 @@
   }
 
   function currentPublicVisibilityKey(){
-    return currentEvent==='polarity_zone'?'polarityZone':'guildLeague';
+    if(currentEvent==='polarity_zone')return'polarityZone';
+    if(currentEvent==='siege')return'siege';
+    return'guildLeague';
   }
 
   function currentEventPublicLabel(){
-    return currentEvent==='polarity_zone'?'Polarity Zone':'Guild League';
+    if(currentEvent==='polarity_zone')return'Polarity Zone';
+    if(currentEvent==='siege')return'Siege';
+    return'Guild League';
   }
 
   function isCurrentEventPublished(){
@@ -1704,10 +1736,10 @@
 
   function togglePublicVisibility(){
     if(!userCanEdit()){showToast('Read-only access','Your account cannot change public visibility.','warn');return;}
-    if(currentEvent!=='guild_league'&&currentEvent!=='polarity_zone')return;
+    if(currentEvent!=='guild_league'&&currentEvent!=='siege'&&currentEvent!=='polarity_zone')return;
     const key=currentPublicVisibilityKey();
     const label=currentEventPublicLabel();
-    if(!state.publicVisibility||typeof state.publicVisibility!=='object')state.publicVisibility={guildLeague:false,polarityZone:false};
+    if(!state.publicVisibility||typeof state.publicVisibility!=='object')state.publicVisibility={guildLeague:false,siege:false,polarityZone:false};
     const next=!Boolean(state.publicVisibility[key]);
     if(next&&!confirm(`Publish the ${label} lineup?\n\nAnyone with the public link will be able to view this lineup.`))return;
     state.publicVisibility[key]=next;
@@ -1834,8 +1866,10 @@
       if(!labels.length){labels.push('Unassigned');filters.push('Unassigned');}
       return {assigned:elite.length>0||dungeon.length>0,labels,filters,assignmentText:texts.join(' · ')};
     }
-    const main=findAssignments(name,MAIN_KEYS);
-    const sub=findAssignments(name,SUB_KEYS);
+    const mainKeys=currentEvent==='siege'?SIEGE_MAIN_KEYS:MAIN_KEYS;
+    const subKeys=currentEvent==='siege'?SIEGE_SUB_KEYS:SUB_KEYS;
+    const main=findAssignments(name,mainKeys);
+    const sub=findAssignments(name,subKeys);
     if(main.length) return {assigned:true,labels:['Main'],filters:['Main'],assignmentText:main.map(item=>teamLongLabel(item.key)).join(', ')};
     if(sub.length) return {assigned:true,labels:['Sub'],filters:['Sub'],assignmentText:sub.map(item=>teamLongLabel(item.key)).join(', ')};
     return {assigned:false,labels:['Unassigned'],filters:['Unassigned'],assignmentText:''};
@@ -1872,7 +1906,9 @@
       }
       wrap.innerHTML=html;
     }else{
-      wrap.innerHTML=sectionHeader('⚔ Main Battlefield','main-bf',`3 raids · 4 teams each`)+`<div class="main-raids">${MAIN_RAIDS.map(mainRaidHtml).join('')}</div>`+sectionHeader('◈ Sub Battlefield','sub-bf',`4 raids · Parties 1–${CONFIG.subTeams}`)+`<div class="main-raids sub-raids">${SUB_RAIDS.map(mainRaidHtml).join('')}</div>`;
+      const mainRaids=currentEvent==='siege'?SIEGE_MAIN_RAIDS:MAIN_RAIDS;
+      const subRaids=currentEvent==='siege'?SIEGE_SUB_RAIDS:SUB_RAIDS;
+      wrap.innerHTML=sectionHeader('⚔ Main Battlefield','main-bf',`3 raids · 4 teams each`)+`<div class="main-raids">${mainRaids.map(mainRaidHtml).join('')}</div>`+sectionHeader('◈ Sub Battlefield','sub-bf',`4 raids · Parties 1–${CONFIG.subTeams}`)+`<div class="main-raids sub-raids">${subRaids.map(mainRaidHtml).join('')}</div>`;
     }
     wireTeamInteractions();
   }
@@ -1881,7 +1917,7 @@
     const selectedLeader=stringValue(state.raidLeaders&&state.raidLeaders[raid.id]).trim();
     const displayLeader=selectedLeader||'Not assigned';
     const dropText=selectedLeader||'Drag member here';
-    const isMainRaid=MAIN_RAIDS.some(item=>item.id===raid.id);
+    const isMainRaid=MAIN_RAIDS.some(item=>item.id===raid.id)||SIEGE_MAIN_RAIDS.some(item=>item.id===raid.id);
     const isPolarityRaid=Boolean(raid.polarity);
     let modeToggle='';
     if(isMainRaid){
@@ -1957,11 +1993,16 @@
     wrap.querySelectorAll('[data-raid-mode-toggle]').forEach(button=>button.addEventListener('click',async event=>{
       event.preventDefault();event.stopPropagation();
       const raidId=button.dataset.raidModeToggle;
-      if(!MAIN_RAIDS.some(raid=>raid.id===raidId))return;
+      const siegeRaid=SIEGE_MAIN_RAIDS.some(raid=>raid.id===raidId);
+      if(!MAIN_RAIDS.some(raid=>raid.id===raidId)&&!siegeRaid)return;
       if(!state.raidModes||typeof state.raidModes!=='object')state.raidModes=createDefaultRaidModes();
       const previous=state.raidModes[raidId]==='DEF'?'DEF':'ATK';
       const next=previous==='DEF'?'ATK':'DEF';
       state.raidModes[raidId]=next;
+      if(siegeRaid){
+        commitMutation('Siege raid mode updated');
+        return;
+      }
       renderAll();
       setSaveFlag('busy','Saving');quickSaveInFlight+=1;
       try{
@@ -1993,6 +2034,11 @@
         state.raidLeaders[raid.id]=name;
         clearSelections(false);
         validateRaidLeaders();rebuildIndex();renderAll();
+        if(raid.siege){
+          commitMutation('Siege Raid Leader updated');
+          showToast('Raid Leader updated',`${raid.label}: ${state.raidLeaders[raid.id]}`);
+          return true;
+        }
         setSaveFlag('busy','Saving');quickSaveInFlight+=1;
         callServer('saveRaidLeaderSetting',raid.id,name).then(result=>{
           state.raidLeaders[raid.id]=stringValue(result&&result.memberName)||name;
@@ -2118,7 +2164,7 @@
   }
 
   function autoFillCurrent(){
-    const keys=currentEvent==='polarity_zone'?ELITE_KEYS:GUILD_KEYS;
+    const keys=currentEvent==='polarity_zone'?ELITE_KEYS:currentTeamKeys();
     const used=assignedNamesSet(scopeKeys(keys[0]));
     const sorted=activeRoster().slice().sort((a,b)=>b.gr-a.gr||a.name.localeCompare(b.name));
     keys.forEach(key=>state.assignments[key].forEach((name,index)=>{
@@ -2126,8 +2172,9 @@
       const candidate=sorted.find(member=>!used.has(member.name));
       if(candidate){state.assignments[key][index]=candidate.name;used.add(candidate.name);}
     }));
-    commitMutation(currentEvent==='polarity_zone'?'Elite auto-filled':'Guild League auto-filled');
-    showToast('Auto-fill complete',currentEvent==='polarity_zone'?'Elite Battlefield remaining slots were filled by Gear Rating.':'Main and Sub remaining slots were filled by Gear Rating.');
+    const eventName=currentEventPublicLabel();
+    commitMutation(currentEvent==='polarity_zone'?'Elite auto-filled':`${eventName} auto-filled`);
+    showToast('Auto-fill complete',currentEvent==='polarity_zone'?'Elite Battlefield remaining slots were filled by Gear Rating.':`${eventName} Main and Sub remaining slots were filled by Gear Rating.`);
   }
 
   function autoFillDungeon(dungeon){
@@ -2158,8 +2205,8 @@
   }
 
   function clearCurrentEvent(){
-    const label=currentEvent==='polarity_zone'?'Polarity Zone':'Guild League';
-    if(!confirm(`Clear every ${label} team assignment? The roster and the other event will remain unchanged.`)) return;
+    const label=currentEventPublicLabel();
+    if(!confirm(`Clear every ${label} team assignment? The roster and the other events will remain unchanged.`)) return;
     currentTeamKeys().forEach(key=>{state.assignments[key]=new Array(CONFIG.teamSize).fill(null);});
     if(currentEvent==='polarity_zone') state.finishedDungeons=[];
     clearSelections(false);
@@ -2271,7 +2318,7 @@
     syncStatusOtherReason();
     document.getElementById('statusImpactText').innerHTML=reactivating
       ?'<b>After reactivation:</b> this member returns to the active Member Pool as unassigned. Previous team positions are not restored automatically.'
-      :'<b>After marking inactive:</b> this member is removed from every Guild League and Polarity Zone team, hidden from the Member Pool, and excluded from Auto-fill.';
+      :'<b>After marking inactive:</b> this member is removed from every Guild League, Siege, and Polarity Zone team, hidden from the Member Pool, and excluded from Auto-fill.';
     const save=document.getElementById('statusModalSave');
     save.textContent=reactivating?'Reactivate Member':'Mark Inactive';
     save.classList.toggle('teal',reactivating);
@@ -2500,8 +2547,8 @@ Their team assignments and membership history will also be removed. Use Mark Ina
       raidLeaders:value.raidLeaders&&typeof value.raidLeaders==='object'?value.raidLeaders:createDefaultRaidLeaders(),
       raidModes:value.raidModes&&typeof value.raidModes==='object'?value.raidModes:createDefaultRaidModes(),
       membershipHistory:Array.isArray(value.membershipHistory)?value.membershipHistory:[],
-      publicVisibility:value.publicVisibility&&typeof value.publicVisibility==='object'?value.publicVisibility:{guildLeague:false,polarityZone:false},
-      eventUpdates:value.eventUpdates&&typeof value.eventUpdates==='object'?value.eventUpdates:{guildLeague:{updatedAt:'',updatedBy:''},polarityZone:{updatedAt:'',updatedBy:''}}
+      publicVisibility:value.publicVisibility&&typeof value.publicVisibility==='object'?value.publicVisibility:{guildLeague:false,siege:false,polarityZone:false},
+      eventUpdates:value.eventUpdates&&typeof value.eventUpdates==='object'?value.eventUpdates:{guildLeague:{updatedAt:'',updatedBy:''},siege:{updatedAt:'',updatedBy:''},polarityZone:{updatedAt:'',updatedBy:''}}
     });
   }
 
@@ -2584,7 +2631,7 @@ Their team assignments and membership history will also be removed. Use Mark Ina
       const id=raid.id;
       if(!sameJson(local.raidLeaders[id],base.raidLeaders[id]))merged.raidLeaders[id]=local.raidLeaders[id]||'';
     });
-    MAIN_RAIDS.forEach(raid=>{
+    [...MAIN_RAIDS,...SIEGE_MAIN_RAIDS].forEach(raid=>{
       const id=raid.id;
       if(!sameJson(local.raidModes[id],base.raidModes[id]))merged.raidModes[id]=local.raidModes[id];
     });
@@ -2594,7 +2641,7 @@ Their team assignments and membership history will also be removed. Use Mark Ina
     const locallyDeletedMemberIds=new Set((base.roster||[]).map(member=>stringValue(member&&member.id)).filter(id=>id&&!localRosterIds.has(id)));
     if(locallyDeletedMemberIds.size)merged.membershipHistory=merged.membershipHistory.filter(entry=>!locallyDeletedMemberIds.has(stringValue(entry&&entry.memberId)));
 
-    ['guildLeague','polarityZone'].forEach(key=>{
+    ['guildLeague','siege','polarityZone'].forEach(key=>{
       if(!sameJson(local.publicVisibility[key],base.publicVisibility[key]))merged.publicVisibility[key]=local.publicVisibility[key]===true;
       if(!sameJson(local.eventUpdates[key],base.eventUpdates[key]))merged.eventUpdates[key]=cloneJson(local.eventUpdates[key]);
     });
@@ -2675,8 +2722,8 @@ Their team assignments and membership history will also be removed. Use Mark Ina
 
   function commitMutation(message,eventScope='auto'){
     if(!userCanEdit()){showToast('Read-only access','Your account cannot make changes.','warn');reloadFromServer();return;}
-    if(eventScope==='both')touchEventUpdate('both');
-    else if(eventScope!=='none'&&(currentEvent==='guild_league'||currentEvent==='polarity_zone'))touchEventUpdate(currentEvent);
+    if(eventScope==='all'||eventScope==='both')touchEventUpdate('all');
+    else if(eventScope!=='none'&&(currentEvent==='guild_league'||currentEvent==='siege'||currentEvent==='polarity_zone'))touchEventUpdate(currentEvent);
     validateRaidLeaders();
     rebuildIndex();
     renderAll();
@@ -2766,8 +2813,8 @@ Their team assignments and membership history will also be removed. Use Mark Ina
   }
 
   function exportLineup(){
-    const payload={type:'tempest-lineup-export',version:7,exportedAt:new Date().toISOString(),source:'Titania Supabase website',m:state.roster,a:state.assignments,fd:state.finishedDungeons,rl:state.raidLeaders,rm:state.raidModes,mh:state.membershipHistory,eu:state.eventUpdates};
-    const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});const url=URL.createObjectURL(blob);const link=document.createElement('a');link.href=url;link.download=`guild-lineup-${new Date().toISOString().slice(0,10)}.json`;document.body.appendChild(link);link.click();link.remove();URL.revokeObjectURL(url);showToast('Lineup exported','Roster status, membership history, Guild League, Polarity Zone, and finished-dungeon marks were included.');
+    const payload={type:'tempest-lineup-export',version:8,exportedAt:new Date().toISOString(),source:'Titania Supabase website',m:state.roster,a:state.assignments,fd:state.finishedDungeons,rl:state.raidLeaders,rm:state.raidModes,mh:state.membershipHistory,eu:state.eventUpdates};
+    const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});const url=URL.createObjectURL(blob);const link=document.createElement('a');link.href=url;link.download=`guild-lineup-${new Date().toISOString().slice(0,10)}.json`;document.body.appendChild(link);link.click();link.remove();URL.revokeObjectURL(url);showToast('Lineup exported','Roster status, membership history, Guild League, Siege, Polarity Zone, and finished-dungeon marks were included.');
   }
 
   function importLineupFile(file){
@@ -2777,8 +2824,8 @@ Their team assignments and membership history will also be removed. Use Mark Ina
       if(!data||(!Array.isArray(data.m)&&!Array.isArray(data.roster))){showToast('Import failed','This file does not contain a roster.','err');return;}
       const imported=normalizeClientState(data);
       const when=data.exportedAt?new Date(data.exportedAt).toLocaleString():'an unknown time';
-      if(!confirm(`Import the lineup exported on ${when}?\n\nThis will replace the current roster, Guild Status records, membership history, and both event lineups in the Titania database.`))return;
-      state.roster=imported.roster;state.assignments=imported.assignments;state.finishedDungeons=imported.finishedDungeons;state.raidLeaders=imported.raidLeaders;state.raidModes=imported.raidModes;state.membershipHistory=imported.membershipHistory;dashboardSelected.clear();clearSelections(false);commitMutation('Lineup imported','both');showToast('Lineup imported','The roster, raid leaders, status history, and event data are being saved to Supabase.');
+      if(!confirm(`Import the lineup exported on ${when}?\n\nThis will replace the current roster, Guild Status records, membership history, and all event lineups in the Titania database.`))return;
+      state.roster=imported.roster;state.assignments=imported.assignments;state.finishedDungeons=imported.finishedDungeons;state.raidLeaders=imported.raidLeaders;state.raidModes=imported.raidModes;state.membershipHistory=imported.membershipHistory;dashboardSelected.clear();clearSelections(false);commitMutation('Lineup imported','all');showToast('Lineup imported','The roster, raid leaders, status history, and event data are being saved to Supabase.');
     };
     reader.onerror=()=>showToast('Import failed','The file could not be read.','err');reader.readAsText(file);
   }
@@ -2803,7 +2850,7 @@ Their team assignments and membership history will also be removed. Use Mark Ina
   }
 
   function buildPrintContent(){
-    const keys=currentTeamKeys();const assigned=assignedNamesSet(keys).size;const totalSlots=keys.length*CONFIG.teamSize;const eventLabel=currentEvent==='polarity_zone'?'Polarity Zone':'Guild League';
+    const keys=currentTeamKeys();const assigned=assignedNamesSet(keys).size;const totalSlots=keys.length*CONFIG.teamSize;const eventLabel=currentEventPublicLabel();
     let html=`<div class="print-doc-head"><div><h1>Titania ${eventLabel}</h1><div class="print-sub">Guild lineup summary · Dark Lord Server</div></div><div class="print-doc-meta">${new Date().toLocaleDateString(undefined,{year:'numeric',month:'long',day:'numeric'})}<br>${assigned}/${totalSlots} unique members slotted</div></div>`;
 
     const appendTeamCard=key=>{
@@ -2834,15 +2881,17 @@ Their team assignments and membership history will also be removed. Use Mark Ina
         html+=`<div class="print-raid-block"><div class="print-raid-head"><span>NORMAL DUNGEON ${dungeon} · TEAM ${escapeHtml(leaderName)}</span></div><div class="print-team-grid print-polarity-grid">${dungeonKeys(dungeon).map(appendTeamCard).join('')}</div></div>`;
       }
     }else{
+      const mainRaids=currentEvent==='siege'?SIEGE_MAIN_RAIDS:MAIN_RAIDS;
+      const subRaids=currentEvent==='siege'?SIEGE_SUB_RAIDS:SUB_RAIDS;
       html+=`<div class="print-section-title">Main Battlefield</div>`;
-      MAIN_RAIDS.forEach(raid=>{
+      mainRaids.forEach(raid=>{
         const leaderName=stringValue(state.raidLeaders&&state.raidLeaders[raid.id]).trim()||'Not assigned';
         const raidMode=state.raidModes&&state.raidModes[raid.id]==='DEF'?'DEF':'ATK';
         const modeIcon=raidMode==='DEF'?'🛡':'⚔';
         html+=`<div class="print-raid-block"><div class="print-raid-head"><span>${escapeHtml(raid.label.toUpperCase())} · TEAM ${escapeHtml(leaderName)} <span class="print-raid-mode ${raidMode.toLowerCase()}">${modeIcon} ${raidMode}</span></span></div><div class="print-team-grid print-main-raid-grid">${raid.keys.map(appendTeamCard).join('')}</div></div>`;
       });
       html+=`<div class="print-section-title">Sub Battlefield</div>`;
-      SUB_RAIDS.forEach(raid=>{
+      subRaids.forEach(raid=>{
         const leaderName=stringValue(state.raidLeaders&&state.raidLeaders[raid.id]).trim()||'Not assigned';
         const printGridClass=raid.keys.length===5?'print-main-raid-grid five':'print-main-raid-grid';
         html+=`<div class="print-raid-block"><div class="print-raid-head"><span>${escapeHtml(raid.label.toUpperCase())} · TEAM ${escapeHtml(leaderName)}</span></div><div class="print-team-grid ${printGridClass}">${raid.keys.map(appendTeamCard).join('')}</div></div>`;
@@ -2872,21 +2921,21 @@ Their team assignments and membership history will also be removed. Use Mark Ina
   function formatDate(value){const iso=normalizeDateValue(value);if(!iso)return '';const date=new Date(`${iso}T00:00:00`);return date.toLocaleDateString(undefined,{year:'numeric',month:'short',day:'numeric'});}
   function formatMemberUpdate(value){const date=new Date(value);if(Number.isNaN(date.getTime()))return 'No edit recorded';return date.toLocaleString(undefined,{year:'numeric',month:'short',day:'numeric',hour:'numeric',minute:'2-digit'});}
 
-  function currentTeamKeys(){return currentEvent==='polarity_zone'?POLARITY_KEYS:GUILD_KEYS;}
-  function scopeKeys(key){if(key.startsWith('elite_'))return ELITE_KEYS;if(key.startsWith('dungeon'))return DUNGEON_KEYS;return GUILD_KEYS;}
-  function scopeId(key){if(key.startsWith('elite_'))return'elite';if(key.startsWith('dungeon'))return'dungeon';return'guild';}
+  function currentTeamKeys(){if(currentEvent==='polarity_zone')return POLARITY_KEYS;if(currentEvent==='siege')return SIEGE_KEYS;return GUILD_KEYS;}
+  function scopeKeys(key){if(key.startsWith('elite_'))return ELITE_KEYS;if(key.startsWith('dungeon'))return DUNGEON_KEYS;if(key.startsWith('siege_'))return SIEGE_KEYS;return GUILD_KEYS;}
+  function scopeId(key){if(key.startsWith('elite_'))return'elite';if(key.startsWith('dungeon'))return'dungeon';if(key.startsWith('siege_'))return'siege';return'guild';}
   function assignedNamesSet(keys){const set=new Set();(keys||currentTeamKeys()).forEach(key=>state.assignments[key].forEach(name=>{if(name)set.add(name);}));return set;}
   function teamHasNoHealer(key){const names=state.assignments[key].filter(Boolean);return names.length>0&&!names.some(name=>memberByName[name]&&isHealer(memberByName[name].cls));}
   function isHealer(cls){return HEALERS.includes(cls);}
-  function teamKind(key){if(key.startsWith('main_'))return'main-bf';if(key.startsWith('sub_'))return'sub-bf';if(key.startsWith('dungeon'))return'dungeon-bf';return'elite-bf';}
+  function teamKind(key){if(key.startsWith('main_')||key.startsWith('siege_main_'))return'main-bf';if(key.startsWith('sub_')||key.startsWith('siege_sub_'))return'sub-bf';if(key.startsWith('dungeon'))return'dungeon-bf';return'elite-bf';}
   function teamLabel(key){const match=key.match(/_(\d+)$/);return`Party ${match?match[1]:'?'}`;}
   function subDisplayTeamLabel(key){
-    const orderedKeys=SUB_RAIDS.flatMap(raid=>raid.keys);
+    const orderedKeys=key.startsWith('siege_sub_')?SIEGE_SUB_RAIDS.flatMap(raid=>raid.keys):SUB_RAIDS.flatMap(raid=>raid.keys);
     const index=orderedKeys.indexOf(key);
     return index>=0?`Party ${index+1}`:teamLabel(key);
   }
   function displayTeamLabel(key){
-    if(key.startsWith('sub_'))return subDisplayTeamLabel(key);
+    if(key.startsWith('sub_')||key.startsWith('siege_sub_'))return subDisplayTeamLabel(key);
     if(currentEvent==='polarity_zone'&&key.startsWith('dungeon')){
       const index=DUNGEON_KEYS.indexOf(key);
       if(index>=0)return`Party ${index+1}`;
@@ -2894,7 +2943,7 @@ Their team assignments and membership history will also be removed. Use Mark Ina
     return teamLabel(key);
   }
   function dungeonNumber(key){const match=/^dungeon(\d+)_/.exec(key);return match?Number.parseInt(match[1],10):null;}
-  function teamLongLabel(key){if(key.startsWith('main_'))return`Main ${teamLabel(key)}`;if(key.startsWith('sub_'))return`Sub ${subDisplayTeamLabel(key)}`;if(key.startsWith('elite_'))return`Elite ${teamLabel(key)}`;return`Dungeon ${dungeonNumber(key)} ${teamLabel(key)}`;}
+  function teamLongLabel(key){if(key.startsWith('main_')||key.startsWith('siege_main_'))return`Main ${teamLabel(key)}`;if(key.startsWith('sub_')||key.startsWith('siege_sub_'))return`Sub ${subDisplayTeamLabel(key)}`;if(key.startsWith('elite_'))return`Elite ${teamLabel(key)}`;return`Dungeon ${dungeonNumber(key)} ${teamLabel(key)}`;}
   function teamsMatch(a,b){const first=state.assignments[a].filter(Boolean).slice().sort();const second=state.assignments[b].filter(Boolean).slice().sort();return first.length>0&&first.length===second.length&&first.every((value,index)=>value===second[index]);}
   function dungeonMatches(eliteKey){return DUNGEON_KEYS.filter(key=>teamsMatch(eliteKey,key));}
   function classColor(cls){return CLASS_COLORS[cls]||CLASS_COLORS.Unknown;}
