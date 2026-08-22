@@ -333,6 +333,14 @@
     .body-wrap[data-event="siege"] .slot.dragover,.body-wrap[data-event="siege"] .slot.slot-selected{border-color:#ff6b7a;box-shadow:0 0 0 2px #ff6b7a22;background:#21141a;}
     .body-wrap[data-event="siege"] .team-drag-handle.team-selected{color:#ff8f8f;background:#22131a;box-shadow:0 0 0 1px #ff6b7a33;}
 
+    /* Siege Print/Share theme */
+    body[data-event="siege"] .print-section-title{color:#a93446;}
+    body[data-event="siege"] .print-raid-head{border-left-color:#d64b61;background:#fff0f2;color:#5a2430;}
+    body[data-event="siege"] .print-raid-mode.atk{color:#a93446;background:#ffe6ea;border-color:#e7a1ad;}
+    body[data-event="siege"] .print-raid-mode.def{color:#8a5a14;background:#fff4dc;border-color:#e7c681;}
+    body[data-event="siege"] .print-team-card{border-color:#e6ccd2;background:#fffafb;}
+    body[data-event="siege"] .print-team-card.no-healer{border-color:#e58a99;background:#fdf1f3;}
+
     /* Dashboard */
     .dash-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-bottom:8px;}
     .dash-card{background:var(--panel);border:1px solid var(--line-soft);border-radius:12px;padding:14px 16px;display:flex;flex-direction:column;gap:4px;min-width:0;}
@@ -1605,6 +1613,7 @@
     const fullWidthMode=currentEvent==='dashboard'||currentEvent==='manage_members';
     body.classList.toggle('dashboard-mode',fullWidthMode);
     body.dataset.event=currentEvent;
+    document.body.dataset.event=currentEvent;
     if(currentEvent==='dashboard'){
       renderDashboard();
     }else if(currentEvent==='manage_members'){
