@@ -2810,7 +2810,7 @@ Their team assignments and membership history will also be removed. Use Mark Ina
       const slots=state.assignments[key];const noHealer=teamHasNoHealer(key);
       const raid=ALL_RAIDS.find(item=>item.keys.includes(key));
       const raidLeaderName=raid?(stringValue(state.raidLeaders&&state.raidLeaders[raid.id]).trim()||'Not assigned'):'Not assigned';
-      let card=`<div class="print-team-card ${noHealer?'no-healer':''}"><div class="print-team-head"><b>${escapeHtml(displayTeamLabel(key))}</b><span title="Raid Leader: ${escapeAttr(raidLeaderName)}">RAID LEADER · ${escapeHtml(raidLeaderName)}</span></div>`;
+      let card=`<div class="print-team-card ${noHealer?'no-healer':''}"><div class="print-team-head"><b>${escapeHtml(displayTeamLabel(key))}</b><span title="Team ${escapeAttr(raidLeaderName)}">TEAM ${escapeHtml(raidLeaderName)}</span></div>`;
       slots.forEach((name,index)=>{
         if(!name){card+=`<div class="print-slot-row p-empty"><span>${index===0?'♛':'·'}</span><span>${index===0?'Empty leader':'Empty slot'}</span></div>`;return;}
         const member=memberByName[name]||{cls:'Unknown'};card+=index===0

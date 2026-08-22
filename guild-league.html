@@ -265,7 +265,7 @@ function teamCard(key,kind,label){
   const raid=[...MAIN_RAIDS,...SUB_RAIDS,...STAR_RAIDS,...DUNGEONS].find(item=>item.keys.includes(key));
   const raidLeaderName=raid?(str(state.raidLeaders[raid.id])||'Not assigned'):'Not assigned';
   return `<article class="team-card ${kind}">
-    <div class="team-head"><div class="team-name">${esc(label||teamLabel(key))}</div><div class="team-count" title="Raid Leader: ${esc(raidLeaderName)}">RAID LEADER · ${esc(raidLeaderName)}</div></div>
+    <div class="team-head"><div class="team-name">${esc(label||teamLabel(key))}</div><div class="team-count" title="Team ${esc(raidLeaderName)}">TEAM ${esc(raidLeaderName)}</div></div>
     ${s.map((name,i)=>slotHtml(name,i)).join('')}
     ${noHealer?'<div class="no-healer">⚠ No healer</div>':''}
   </article>`;
