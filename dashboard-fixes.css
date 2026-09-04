@@ -1,0 +1,24 @@
+/* Dashboard readability fixes */
+
+/* Keep class/job names on one line in Top 5 / Lowest 5 Gear Rating lists. */
+.dash-gr-rank-grid .dash-bar-avg {
+  width: 145px !important;
+  min-width: 145px !important;
+  white-space: nowrap !important;
+  overflow: visible !important;
+  text-overflow: clip !important;
+  line-height: 1.2;
+}
+
+/* Keep the Gear Rating value aligned at the far right. */
+.dash-gr-rank-grid .dash-bar-count {
+  flex: 0 0 80px;
+  white-space: nowrap;
+}
+
+@media (max-width: 900px) {
+  .dash-gr-rank-grid .dash-bar-avg {
+    width: 135px !important;
+    min-width: 135px !important;
+  }
+}
