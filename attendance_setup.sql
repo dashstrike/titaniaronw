@@ -8,7 +8,7 @@ create extension if not exists pgcrypto;
 
 create table if not exists public.attendance_events (
   id uuid primary key default gen_random_uuid(),
-  event_type text not null check (event_type in ('tuesday','guild_league','siege')),
+  event_type text not null,
   event_date date not null,
   title text not null default '',
   status text not null default 'upcoming' check (status in ('upcoming','open','closed')),
@@ -20,11 +20,49 @@ create table if not exists public.attendance_events (
   unique (event_type, event_date)
 );
 
--- Upgrade older attendance_events tables without deleting any records.
+-- Upgrade older attendance_events tables without deleting records.
 alter table public.attendance_events
   add column if not exists lineup_snapshot jsonb;
 alter table public.attendance_events
   add column if not exists closed_at timestamptz;
+
+-- Replace the old event_type CHECK constraint so existing rows can be migrated.
+do $$
+declare
+  r record;
+begin
+  for r in
+    select conname
+    from pg_constraint
+    where conrelid = 'public.attendance_events'::regclass
+      and contype = 'c'
+      and pg_get_constraintdef(oid) ilike '%event_type%'
+  loop
+    execute format('alter table public.attendance_events drop constraint %I', r.conname);
+  end loop;
+end $$;
+
+-- Migrate old database values to the new explicit event types.
+-- Old `tuesday` means Tuesday Guild League.
+update public.attendance_events
+set event_type = 'guild_league_tuesday',
+    title = 'Guild League (Tuesday)'
+where event_type = 'tuesday';
+
+-- Old `guild_league` means Thursday Guild League.
+update public.attendance_events
+set event_type = 'guild_league_thursday',
+    title = 'Guild League (Thursday)'
+where event_type = 'guild_league';
+
+-- Keep Siege title consistent too.
+update public.attendance_events
+set title = 'Siege'
+where event_type = 'siege' and title <> 'Siege';
+
+alter table public.attendance_events
+  add constraint attendance_events_event_type_check
+  check (event_type in ('guild_league_tuesday','guild_league_thursday','siege'));
 
 create table if not exists public.attendance_records (
   id uuid primary key default gen_random_uuid(),
@@ -52,7 +90,6 @@ create index if not exists attendance_records_event_idx
 create index if not exists attendance_records_member_idx
   on public.attendance_records(member_id);
 
--- Reuse the generic updated_at trigger function created by supabase_setup.sql.
 drop trigger if exists attendance_events_touch_updated_at on public.attendance_events;
 create trigger attendance_events_touch_updated_at
 before update on public.attendance_events
@@ -63,8 +100,6 @@ create trigger attendance_records_touch_updated_at
 before update on public.attendance_records
 for each row execute function public.touch_updated_at();
 
--- Stamp who changed PRE / ACTUAL attendance. This is server-side so the browser
--- cannot impersonate another updater.
 create or replace function public.stamp_attendance_record()
 returns trigger
 language plpgsql
@@ -106,7 +141,6 @@ for each row execute function public.stamp_attendance_record();
 alter table public.attendance_events enable row level security;
 alter table public.attendance_records enable row level security;
 
--- Approved users may read attendance.
 drop policy if exists attendance_events_select_approved on public.attendance_events;
 create policy attendance_events_select_approved
 on public.attendance_events
@@ -121,7 +155,6 @@ for select
 to authenticated
 using (public.current_user_approved());
 
--- Leaders/Admins may create and edit attendance.
 drop policy if exists attendance_events_insert_leaders on public.attendance_events;
 create policy attendance_events_insert_leaders
 on public.attendance_events
