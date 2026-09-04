@@ -87,13 +87,13 @@ const TITANIA_IS_PUBLIC_EVENT_PAGE = /\/(guild-league|siege)\.html$/i.test(windo
   else loadScript();
 })();
 
-/* Read-only PRE attendance on published Guild League / Siege pages. */
+/* Read-only attendance icons on published Guild League / Siege pages. */
 (function loadTitaniaPublicAttendance(){
   if (!TITANIA_IS_PUBLIC_EVENT_PAGE) return;
   if (!document.querySelector('link[data-titania-public-attendance]')) {
     const link = document.createElement('link');
     link.rel = 'stylesheet';
-    link.href = './public-attendance.css?v=20260904-1';
+    link.href = './public-attendance.css?v=20260904-2';
     link.setAttribute('data-titania-public-attendance', '1');
     document.head.appendChild(link);
   }
@@ -101,7 +101,7 @@ const TITANIA_IS_PUBLIC_EVENT_PAGE = /\/(guild-league|siege)\.html$/i.test(windo
   const loadScript = () => {
     if (document.querySelector('script[data-titania-public-attendance]')) return;
     const script = document.createElement('script');
-    script.src = './public-attendance.js?v=20260904-2';
+    script.src = './public-attendance.js?v=20260904-3';
     script.setAttribute('data-titania-public-attendance', '1');
     document.body.appendChild(script);
   };
