@@ -28,6 +28,16 @@ window.TITANIA_FEATURES = Object.freeze({
   document.head.appendChild(link);
 })();
 
+/* Small dashboard layout/readability fixes. */
+(function loadTitaniaDashboardFixes(){
+  if (document.querySelector('link[data-titania-dashboard-fixes]')) return;
+  const link = document.createElement('link');
+  link.rel = 'stylesheet';
+  link.href = './dashboard-fixes.css?v=20260904-1';
+  link.setAttribute('data-titania-dashboard-fixes', '1');
+  document.head.appendChild(link);
+})();
+
 /*
  * Reversible Polarity Zone hide switch.
  * This only hides UI/public access; saved Supabase Polarity data remains untouched.
