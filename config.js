@@ -55,7 +55,7 @@ const TITANIA_IS_PUBLIC_EVENT_PAGE = /\/(guild-league|siege)\.html$/i.test(windo
   const loadScript = () => {
     if (document.querySelector('script[data-titania-pre-attendance]')) return;
     const script = document.createElement('script');
-    script.src = './attendance-pre.js?v=20260904-5';
+    script.src = './attendance-pre.js?v=20260904-6';
     script.setAttribute('data-titania-pre-attendance', '1');
     document.body.appendChild(script);
   };
