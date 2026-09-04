@@ -325,7 +325,7 @@
     }catch(error){
       toast('Reset failed',String(error&&error.message||error),'err');
     }finally{
-      if(btn){btn.disabled=false;btn.textContent='↺ Reset PRE ?';}
+      if(btn){btn.disabled=false;btn.textContent='↺ Reset Pre-Attendance';}
     }
   }
 
@@ -338,7 +338,7 @@
       btn.type='button';
       btn.id='preResetAllBtn';
       btn.className='btn pre-reset-all-btn';
-      btn.textContent='↺ Reset PRE ?';
+      btn.textContent='↺ Reset Pre-Attendance';
       btn.title='Reset all pre-attendance for the upcoming event back to No Response';
       btn.addEventListener('click',resetAllPreAttendance);
       clearBtn.parentNode.insertBefore(btn,clearBtn);
