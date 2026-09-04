@@ -18,18 +18,22 @@ window.TITANIA_FEATURES = Object.freeze({
   polarityZone: false
 });
 
+const TITANIA_IS_MANAGEMENT_PAGE = /\/$|\/index\.html$/i.test(window.location.pathname);
+
 /* Load the responsive mobile navigation stylesheet without changing index.html. */
 (function loadTitaniaMobileNav(){
+  if (!TITANIA_IS_MANAGEMENT_PAGE) return;
   if (document.querySelector('link[data-titania-mobile-nav]')) return;
   const link = document.createElement('link');
   link.rel = 'stylesheet';
-  link.href = './mobile-nav.css?v=20260904';
+  link.href = './mobile-nav.css?v=20260904-2';
   link.setAttribute('data-titania-mobile-nav', '1');
   document.head.appendChild(link);
 })();
 
 /* Small dashboard layout/readability fixes. */
 (function loadTitaniaDashboardFixes(){
+  if (!TITANIA_IS_MANAGEMENT_PAGE) return;
   if (document.querySelector('link[data-titania-dashboard-fixes]')) return;
   const link = document.createElement('link');
   link.rel = 'stylesheet';
@@ -40,6 +44,7 @@ window.TITANIA_FEATURES = Object.freeze({
 
 /* Guild League / Siege pre-attendance badge UI. */
 (function loadTitaniaPreAttendance(){
+  if (!TITANIA_IS_MANAGEMENT_PAGE) return;
   if (!document.querySelector('link[data-titania-pre-attendance]')) {
     const link = document.createElement('link');
     link.rel = 'stylesheet';
@@ -51,8 +56,31 @@ window.TITANIA_FEATURES = Object.freeze({
   const loadScript = () => {
     if (document.querySelector('script[data-titania-pre-attendance]')) return;
     const script = document.createElement('script');
-    script.src = './attendance-pre.js?v=20260904-1';
+    script.src = './attendance-pre.js?v=20260904-2';
     script.setAttribute('data-titania-pre-attendance', '1');
+    document.body.appendChild(script);
+  };
+
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', loadScript, {once:true});
+  else loadScript();
+})();
+
+/* Attendance history / actual attendance tab. */
+(function loadTitaniaAttendancePage(){
+  if (!TITANIA_IS_MANAGEMENT_PAGE) return;
+  if (!document.querySelector('link[data-titania-attendance-page]')) {
+    const link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.href = './attendance-page.css?v=20260904-1';
+    link.setAttribute('data-titania-attendance-page', '1');
+    document.head.appendChild(link);
+  }
+
+  const loadScript = () => {
+    if (document.querySelector('script[data-titania-attendance-page]')) return;
+    const script = document.createElement('script');
+    script.src = './attendance-page.js?v=20260904-1';
+    script.setAttribute('data-titania-attendance-page', '1');
     document.body.appendChild(script);
   };
 
@@ -69,7 +97,7 @@ window.TITANIA_FEATURES = Object.freeze({
     if (!document.querySelector('link[data-titania-polarity-hidden]')) {
       const link = document.createElement('link');
       link.rel = 'stylesheet';
-      link.href = './polarity-hidden.css?v=20260904';
+      link.href = './polarity-hidden.css?v=20260904-2';
       link.setAttribute('data-titania-polarity-hidden', '1');
       document.head.appendChild(link);
     }
