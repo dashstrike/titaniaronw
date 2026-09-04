@@ -20,7 +20,6 @@ window.TITANIA_FEATURES = Object.freeze({
 
 const TITANIA_IS_MANAGEMENT_PAGE = /\/$|\/index\.html$/i.test(window.location.pathname);
 
-/* Load the responsive mobile navigation stylesheet without changing index.html. */
 (function loadTitaniaMobileNav(){
   if (!TITANIA_IS_MANAGEMENT_PAGE) return;
   if (document.querySelector('link[data-titania-mobile-nav]')) return;
@@ -31,7 +30,6 @@ const TITANIA_IS_MANAGEMENT_PAGE = /\/$|\/index\.html$/i.test(window.location.pa
   document.head.appendChild(link);
 })();
 
-/* Small dashboard layout/readability fixes. */
 (function loadTitaniaDashboardFixes(){
   if (!TITANIA_IS_MANAGEMENT_PAGE) return;
   if (document.querySelector('link[data-titania-dashboard-fixes]')) return;
@@ -56,7 +54,7 @@ const TITANIA_IS_MANAGEMENT_PAGE = /\/$|\/index\.html$/i.test(window.location.pa
   const loadScript = () => {
     if (document.querySelector('script[data-titania-pre-attendance]')) return;
     const script = document.createElement('script');
-    script.src = './attendance-pre.js?v=20260904-2';
+    script.src = './attendance-pre.js?v=20260904-3';
     script.setAttribute('data-titania-pre-attendance', '1');
     document.body.appendChild(script);
   };
@@ -79,25 +77,11 @@ const TITANIA_IS_MANAGEMENT_PAGE = /\/$|\/index\.html$/i.test(window.location.pa
   const loadScript = () => {
     if (document.querySelector('script[data-titania-attendance-page]')) return;
     const script = document.createElement('script');
-    script.src = './attendance-page.js?v=20260904-1';
+    script.src = './attendance-page.js?v=20260904-3';
     script.setAttribute('data-titania-attendance-page', '1');
     document.body.appendChild(script);
   };
 
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', loadScript, {once:true});
-  else loadScript();
-})();
-
-/* Correct attendance event labels: Tuesday and Thursday are both Guild League. */
-(function loadTitaniaAttendanceLabels(){
-  if (!TITANIA_IS_MANAGEMENT_PAGE) return;
-  const loadScript = () => {
-    if (document.querySelector('script[data-titania-attendance-labels]')) return;
-    const script = document.createElement('script');
-    script.src = './attendance-labels.js?v=20260904-1';
-    script.setAttribute('data-titania-attendance-labels', '1');
-    document.body.appendChild(script);
-  };
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', loadScript, {once:true});
   else loadScript();
 })();
