@@ -14,7 +14,30 @@
 .att-picker-card label.att-grow{flex:1 1 360px;}
 .att-picker-card label>span{font-size:10.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;font-weight:700;}
 .att-picker-card select,.att-picker-card input,.att-filterbar select,.att-filterbar input{background:#0f1424;border:1px solid var(--line);border-radius:8px;color:var(--text);padding:9px 10px;outline:none;font-size:13px;}
-.att-picker-card select:focus,.att-picker-card input:focus,.att-filterbar select:focus,.att-filterbar input:focus{border-color:var(--violet);box-shadow:0 0 0 1px var(--violet-glow);}
+.att-picker-card input[type="date"]{
+  min-width:190px;
+  min-height:42px;
+  padding:9px 12px;
+  font-family:'IBM Plex Mono',monospace;
+  font-size:14px;
+  font-weight:700;
+  letter-spacing:.2px;
+  color:var(--text);
+  background:#11182a;
+  border:2px solid #596584;
+  color-scheme:dark;
+}
+.att-picker-card input[type="date"]::-webkit-calendar-picker-indicator{
+  width:22px;
+  height:22px;
+  padding:2px;
+  cursor:pointer;
+  opacity:1;
+  filter:invert(1) brightness(1.65);
+}
+html[data-theme="light"] .att-picker-card input[type="date"]{color-scheme:light;background:#fff;border-color:#aeb6cd;color:#171a29;}
+html[data-theme="light"] .att-picker-card input[type="date"]::-webkit-calendar-picker-indicator{filter:none;}
+.att-picker-card select:focus,.att-picker-card input:focus,.att-filterbar select:focus,.att-filterbar input:focus{border-color:var(--violet);box-shadow:0 0 0 2px var(--violet-glow);}
 .att-quick{display:flex;gap:6px;flex-wrap:wrap;}
 .att-schema-note{font-size:12px;color:#ffd166;background:#f0b42910;border:1px solid #f0b42933;border-radius:8px;padding:8px 10px;}
 .att-event-head{border-radius:12px;padding:15px 16px;display:flex;align-items:center;justify-content:space-between;gap:16px;}
@@ -99,6 +122,7 @@
   .att-picker-row,.att-create-row{align-items:stretch;}
   .att-picker-card label,.att-picker-card label.att-grow{min-width:0;flex:1 1 100%;}
   .att-create-row .btn{width:100%;}
+  .att-picker-card input[type="date"]{width:100%;min-width:0;}
 }
 @media (max-width:480px){
   .att-page-head h1{font-size:19px;}
