@@ -30,6 +30,7 @@ declare
   v_event_updated_at text := '';
   v_event_updated_by text := '';
   v_finished_dungeons jsonb := '[]'::jsonb;
+  v_siege_raid_groups jsonb := '{}'::jsonb;
   v_pre_attendance jsonb := '{}'::jsonb;
   v_attendance_event_id uuid;
   v_today date := current_date;
@@ -46,6 +47,7 @@ begin
       'assignments', '{}'::jsonb,
       'raidLeaders', '{}'::jsonb,
       'raidModes', '{}'::jsonb,
+      'siegeRaidGroups', '{}'::jsonb,
       'finishedDungeons', '[]'::jsonb,
       'preAttendance', '{}'::jsonb,
       'revision', 0,
@@ -65,6 +67,7 @@ begin
       'assignments', '{}'::jsonb,
       'raidLeaders', '{}'::jsonb,
       'raidModes', '{}'::jsonb,
+      'siegeRaidGroups', '{}'::jsonb,
       'finishedDungeons', '[]'::jsonb,
       'preAttendance', '{}'::jsonb,
       'revision', 0,
@@ -83,6 +86,7 @@ begin
       v_update_key := 'siege';
       v_assignment_pattern := '^siege_(main_|sub_)';
       v_raid_pattern := '^siege_(raid_[0-9]+|sub_raid_[0-9]+)$';
+      v_siege_raid_groups := coalesce(v_state->'siegeRaidGroups', '{}'::jsonb);
     when 'polarity' then
       v_visibility_key := 'polarityZone';
       v_update_key := 'polarityZone';
@@ -101,6 +105,7 @@ begin
       'assignments', '{}'::jsonb,
       'raidLeaders', '{}'::jsonb,
       'raidModes', '{}'::jsonb,
+      'siegeRaidGroups', '{}'::jsonb,
       'finishedDungeons', '[]'::jsonb,
       'preAttendance', '{}'::jsonb,
       'revision', v_revision,
@@ -185,6 +190,7 @@ begin
     'assignments', v_assignments,
     'raidLeaders', v_raid_leaders,
     'raidModes', v_raid_modes,
+    'siegeRaidGroups', v_siege_raid_groups,
     'finishedDungeons', v_finished_dungeons,
     'preAttendance', v_pre_attendance,
     'attendanceEventType', coalesce(v_attendance_type, ''),
