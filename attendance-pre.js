@@ -10,6 +10,11 @@
     going:{label:'PRE ✓',className:'pre-going',next:'not_going'},
     not_going:{label:'PRE ✕',className:'pre-not-going',next:'no_response'}
   };
+  const EVENT_LABELS={
+    guild_league_tuesday:'Guild League (Tuesday)',
+    guild_league_thursday:'Guild League (Thursday)',
+    siege:'Siege'
+  };
 
   let cachedEventKey='';
   let cachedEventId='';
@@ -22,15 +27,24 @@
     return typeof supabaseClient!=='undefined'&&supabaseClient&&typeof state!=='undefined'&&state&&Array.isArray(state.roster);
   }
 
+  function daysUntil(targetDay){
+    const today=new Date().getDay();
+    return (targetDay-today+7)%7;
+  }
+
+  function nextGuildLeagueType(){
+    return daysUntil(2)<=daysUntil(4)?'guild_league_tuesday':'guild_league_thursday';
+  }
+
   function plannerEventType(){
     if(typeof currentEvent==='undefined')return '';
-    if(currentEvent==='guild_league')return 'guild_league';
+    if(currentEvent==='guild_league')return nextGuildLeagueType();
     if(currentEvent==='siege')return 'siege';
     return '';
   }
 
   function nextEventDate(eventType){
-    const targetDay=eventType==='guild_league'?4:eventType==='siege'?0:null;
+    const targetDay=eventType==='guild_league_tuesday'?2:eventType==='guild_league_thursday'?4:eventType==='siege'?0:null;
     if(targetDay===null)return '';
     const now=new Date();
     const date=new Date(now.getFullYear(),now.getMonth(),now.getDate());
@@ -93,7 +107,7 @@
       return cachedEventId;
     }
 
-    const title=eventType==='guild_league'?'Guild League':'Siege';
+    const title=EVENT_LABELS[eventType]||'Attendance';
     const insert=await supabaseClient.from('attendance_events').insert({event_type:eventType,event_date:eventDate,title,status:'upcoming'}).select('id').single();
     if(insert.error){
       if(String(insert.error.code||'')==='23505'){
