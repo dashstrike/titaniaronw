@@ -9,6 +9,15 @@ window.TITANIA_CONFIG = Object.freeze({
   appName: 'Titania Guild Management Tool'
 });
 
+/*
+ * Feature flags.
+ * Polarity Zone is temporarily hidden, not deleted.
+ * Change polarityZone to true to restore it everywhere.
+ */
+window.TITANIA_FEATURES = Object.freeze({
+  polarityZone: false
+});
+
 /* Load the responsive mobile navigation stylesheet without changing index.html. */
 (function loadTitaniaMobileNav(){
   if (document.querySelector('link[data-titania-mobile-nav]')) return;
@@ -17,4 +26,29 @@ window.TITANIA_CONFIG = Object.freeze({
   link.href = './mobile-nav.css?v=20260904';
   link.setAttribute('data-titania-mobile-nav', '1');
   document.head.appendChild(link);
+})();
+
+/*
+ * Reversible Polarity Zone hide switch.
+ * This only hides UI/public access; saved Supabase Polarity data remains untouched.
+ */
+(function applyTitaniaFeatureFlags(){
+  if (window.TITANIA_FEATURES && window.TITANIA_FEATURES.polarityZone === false) {
+    if (!document.querySelector('link[data-titania-polarity-hidden]')) {
+      const link = document.createElement('link');
+      link.rel = 'stylesheet';
+      link.href = './polarity-hidden.css?v=20260904';
+      link.setAttribute('data-titania-polarity-hidden', '1');
+      document.head.appendChild(link);
+    }
+
+    try {
+      const storedEvent = localStorage.getItem('roworld_sheets_event_v1');
+      if (storedEvent === 'polarity_zone') {
+        localStorage.setItem('roworld_sheets_event_v1', 'guild_league');
+      }
+    } catch (error) {
+      /* localStorage may be unavailable; safe to ignore */
+    }
+  }
 })();
