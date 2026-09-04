@@ -1,0 +1,19 @@
+/* Pre-attendance badge shown beside member names in Guild League / Siege party slots. */
+.slot-name-row{display:flex;align-items:center;gap:6px;min-width:0;}
+.slot-name-row .slot-name{min-width:0;flex:0 1 auto;}
+.pre-attendance-badge{
+  appearance:none;border:1px solid #4a526b;background:#20263a;color:#aeb5ca;
+  border-radius:999px;padding:2px 6px;line-height:1;font-size:9.5px;font-weight:800;
+  letter-spacing:.35px;white-space:nowrap;flex:none;cursor:pointer;
+  transition:background .12s ease,border-color .12s ease,color .12s ease,box-shadow .12s ease;
+}
+.pre-attendance-badge:hover{border-color:#8b7cf6;color:#fff;}
+.pre-attendance-badge.pre-going{background:#12301d;border-color:#3d9d5b;color:#8fe89f;}
+.pre-attendance-badge.pre-not-going{background:#35161d;border-color:#a94252;color:#ff9caa;}
+.pre-attendance-badge.pre-no-response{background:#20263a;border-color:#4a526b;color:#aeb5ca;}
+.pre-attendance-badge.pre-saving{opacity:.6;cursor:wait;}
+body.readonly-mode .pre-attendance-badge{cursor:default;}
+@media(max-width:520px){
+  .slot-name-row{gap:4px;}
+  .pre-attendance-badge{font-size:9px;padding:2px 5px;}
+}
