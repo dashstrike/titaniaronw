@@ -38,6 +38,28 @@ window.TITANIA_FEATURES = Object.freeze({
   document.head.appendChild(link);
 })();
 
+/* Guild League / Siege pre-attendance badge UI. */
+(function loadTitaniaPreAttendance(){
+  if (!document.querySelector('link[data-titania-pre-attendance]')) {
+    const link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.href = './attendance-pre.css?v=20260904-1';
+    link.setAttribute('data-titania-pre-attendance', '1');
+    document.head.appendChild(link);
+  }
+
+  const loadScript = () => {
+    if (document.querySelector('script[data-titania-pre-attendance]')) return;
+    const script = document.createElement('script');
+    script.src = './attendance-pre.js?v=20260904-1';
+    script.setAttribute('data-titania-pre-attendance', '1');
+    document.body.appendChild(script);
+  };
+
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', loadScript, {once:true});
+  else loadScript();
+})();
+
 /*
  * Reversible Polarity Zone hide switch.
  * This only hides UI/public access; saved Supabase Polarity data remains untouched.
