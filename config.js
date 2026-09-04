@@ -19,6 +19,7 @@ window.TITANIA_FEATURES = Object.freeze({
 });
 
 const TITANIA_IS_MANAGEMENT_PAGE = /\/$|\/index\.html$/i.test(window.location.pathname);
+const TITANIA_IS_PUBLIC_EVENT_PAGE = /\/(guild-league|siege)\.html$/i.test(window.location.pathname);
 
 (function loadTitaniaMobileNav(){
   if (!TITANIA_IS_MANAGEMENT_PAGE) return;
@@ -46,7 +47,7 @@ const TITANIA_IS_MANAGEMENT_PAGE = /\/$|\/index\.html$/i.test(window.location.pa
   if (!document.querySelector('link[data-titania-pre-attendance]')) {
     const link = document.createElement('link');
     link.rel = 'stylesheet';
-    link.href = './attendance-pre.css?v=20260904-1';
+    link.href = './attendance-pre.css?v=20260904-4';
     link.setAttribute('data-titania-pre-attendance', '1');
     document.head.appendChild(link);
   }
@@ -69,7 +70,7 @@ const TITANIA_IS_MANAGEMENT_PAGE = /\/$|\/index\.html$/i.test(window.location.pa
   if (!document.querySelector('link[data-titania-attendance-page]')) {
     const link = document.createElement('link');
     link.rel = 'stylesheet';
-    link.href = './attendance-page.css?v=20260904-1';
+    link.href = './attendance-page.css?v=20260904-2';
     link.setAttribute('data-titania-attendance-page', '1');
     document.head.appendChild(link);
   }
@@ -79,6 +80,29 @@ const TITANIA_IS_MANAGEMENT_PAGE = /\/$|\/index\.html$/i.test(window.location.pa
     const script = document.createElement('script');
     script.src = './attendance-page.js?v=20260904-3';
     script.setAttribute('data-titania-attendance-page', '1');
+    document.body.appendChild(script);
+  };
+
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', loadScript, {once:true});
+  else loadScript();
+})();
+
+/* Read-only PRE attendance on published Guild League / Siege pages. */
+(function loadTitaniaPublicAttendance(){
+  if (!TITANIA_IS_PUBLIC_EVENT_PAGE) return;
+  if (!document.querySelector('link[data-titania-public-attendance]')) {
+    const link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.href = './public-attendance.css?v=20260904-1';
+    link.setAttribute('data-titania-public-attendance', '1');
+    document.head.appendChild(link);
+  }
+
+  const loadScript = () => {
+    if (document.querySelector('script[data-titania-public-attendance]')) return;
+    const script = document.createElement('script');
+    script.src = './public-attendance.js?v=20260904-2';
+    script.setAttribute('data-titania-public-attendance', '1');
     document.body.appendChild(script);
   };
 
