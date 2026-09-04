@@ -1,7 +1,6 @@
 -- TITANIA ATTENDANCE FOUNDATION
--- Run this once in Supabase Dashboard > SQL Editor AFTER supabase_setup.sql.
--- This keeps attendance separate from planner_state so future attendance history
--- can grow without making the lineup JSON larger.
+-- Run this in Supabase Dashboard > SQL Editor AFTER supabase_setup.sql.
+-- Safe to rerun. Attendance is stored separately from planner_state.
 
 begin;
 
@@ -13,11 +12,19 @@ create table if not exists public.attendance_events (
   event_date date not null,
   title text not null default '',
   status text not null default 'upcoming' check (status in ('upcoming','open','closed')),
+  lineup_snapshot jsonb,
+  closed_at timestamptz,
   created_by uuid references auth.users(id) on delete set null default auth.uid(),
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now(),
   unique (event_type, event_date)
 );
+
+-- Upgrade older attendance_events tables without deleting any records.
+alter table public.attendance_events
+  add column if not exists lineup_snapshot jsonb;
+alter table public.attendance_events
+  add column if not exists closed_at timestamptz;
 
 create table if not exists public.attendance_records (
   id uuid primary key default gen_random_uuid(),
