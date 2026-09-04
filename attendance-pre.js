@@ -131,10 +131,12 @@
       cachedEventKey='';
       cachedEventId='';
       statusByMemberId=new Map();
+      ensureResetButton();
       scheduleDecorate();
       return;
     }
     if(!force&&key===cachedEventKey&&loadingKey!==key){
+      ensureResetButton();
       scheduleDecorate();
       return;
     }
@@ -165,6 +167,7 @@
       }
     }finally{
       loadingKey='';
+      ensureResetButton();
       scheduleDecorate();
     }
   }
@@ -186,6 +189,14 @@
     if(element.dataset[key]!==value)element.dataset[key]=value;
   }
 
+  function cleanupOldNameWrapper(slot){
+    const row=slot.querySelector('.slot-name-row');
+    if(!row)return;
+    const nameEl=row.querySelector('.slot-name');
+    if(nameEl)row.parentNode.insertBefore(nameEl,row);
+    row.remove();
+  }
+
   function decorateSlots(){
     decorateQueued=false;
     const type=plannerEventType();
@@ -199,27 +210,25 @@
 
     const maps=rosterMaps();
     teamsWrap.querySelectorAll('.slot.filled').forEach(slot=>{
+      cleanupOldNameWrapper(slot);
       const nameEl=slot.querySelector('.slot-name');
-      if(!nameEl)return;
+      const infoEl=slot.querySelector('.slot-info');
+      if(!nameEl||!infoEl)return;
       const name=nameEl.textContent.trim();
       const memberId=memberIdForName(name,maps);
       if(!memberId)return;
 
-      let row=nameEl.closest('.slot-name-row');
-      if(!row){
-        row=document.createElement('span');
-        row.className='slot-name-row';
-        nameEl.parentNode.insertBefore(row,nameEl);
-        row.appendChild(nameEl);
-      }
-
       const status=statusByMemberId.get(memberId)||'no_response';
       const meta=STATUS_META[status]||STATUS_META.no_response;
-      let badge=row.querySelector('.pre-attendance-badge');
+      let badge=slot.querySelector(':scope > .pre-attendance-badge');
 
       if(!badge){
-        row.insertAdjacentHTML('beforeend',badgeHtml(status,memberId,name));
+        infoEl.insertAdjacentHTML('afterend',badgeHtml(status,memberId,name));
         return;
+      }
+
+      if(badge.previousElementSibling!==infoEl){
+        infoEl.insertAdjacentElement('afterend',badge);
       }
 
       const desiredClass=`pre-attendance-badge ${meta.className}`;
@@ -285,6 +294,60 @@
     }
   }
 
+  async function resetAllPreAttendance(){
+    if(!canEdit()){
+      toast('Read-only access','Your account cannot reset pre-attendance.','warn');
+      return;
+    }
+    const key=currentKey();
+    if(!key)return;
+    const [eventType,eventDate]=key.split(':');
+    const label=EVENT_LABELS[eventType]||eventType;
+    if(!window.confirm(`Reset ALL pre-attendance for ${label} on ${eventDate} back to PRE ?\n\nThis will not change the party lineup or actual attendance.`))return;
+
+    const btn=document.getElementById('preResetAllBtn');
+    if(btn){btn.disabled=true;btn.textContent='Resetting…';}
+    try{
+      const eventRes=await supabaseClient.from('attendance_events').select('id').eq('event_type',eventType).eq('event_date',eventDate).maybeSingle();
+      if(eventRes.error)throw eventRes.error;
+      if(!eventRes.data||!eventRes.data.id){
+        statusByMemberId=new Map();
+        scheduleDecorate();
+        toast('PRE attendance reset','Everyone is already PRE ?.');
+        return;
+      }
+      const result=await supabaseClient.from('attendance_records').update({pre_status:'no_response'}).eq('event_id',eventRes.data.id);
+      if(result.error)throw result.error;
+      statusByMemberId=new Map();
+      cachedEventId=eventRes.data.id;
+      scheduleDecorate();
+      toast('PRE attendance reset',`${label} has been reset to PRE ? for all members.`);
+    }catch(error){
+      toast('Reset failed',String(error&&error.message||error),'err');
+    }finally{
+      if(btn){btn.disabled=false;btn.textContent='↺ Reset PRE ?';}
+    }
+  }
+
+  function ensureResetButton(){
+    const clearBtn=document.getElementById('clearBtn');
+    if(!clearBtn||!clearBtn.parentNode)return;
+    let btn=document.getElementById('preResetAllBtn');
+    if(!btn){
+      btn=document.createElement('button');
+      btn.type='button';
+      btn.id='preResetAllBtn';
+      btn.className='btn pre-reset-all-btn';
+      btn.textContent='↺ Reset PRE ?';
+      btn.title='Reset all pre-attendance for the upcoming event back to No Response';
+      btn.addEventListener('click',resetAllPreAttendance);
+      clearBtn.parentNode.insertBefore(btn,clearBtn);
+    }
+    const visible=!!plannerEventType();
+    btn.style.display=visible?'':'none';
+    btn.disabled=visible&&!canEdit();
+  }
+
   function wireClicks(){
     document.addEventListener('pointerdown',event=>{
       if(event.target.closest('.pre-attendance-badge'))event.stopPropagation();
@@ -305,8 +368,8 @@
     observer=new MutationObserver(()=>scheduleDecorate());
     observer.observe(teamsWrap,{subtree:true,childList:true});
 
-    // The main app changes body[data-event] whenever a tab is selected.
     const bodyObserver=new MutationObserver(()=>{
+      ensureResetButton();
       const key=currentKey();
       if(key&&key!==cachedEventKey)loadStatuses(true);
       else scheduleDecorate();
@@ -321,6 +384,7 @@
       if(canUseAttendance()&&document.getElementById('teamsWrap')){
         clearInterval(wait);
         wireClicks();
+        ensureResetButton();
         startObserver();
         loadStatuses(true);
       }else if(attempts>120){
