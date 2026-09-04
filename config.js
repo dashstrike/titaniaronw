@@ -47,7 +47,7 @@ const TITANIA_IS_PUBLIC_EVENT_PAGE = /\/(guild-league|siege)\.html$/i.test(windo
   if (!document.querySelector('link[data-titania-pre-attendance]')) {
     const link = document.createElement('link');
     link.rel = 'stylesheet';
-    link.href = './attendance-pre.css?v=20260904-4';
+    link.href = './attendance-pre.css?v=20260904-5';
     link.setAttribute('data-titania-pre-attendance', '1');
     document.head.appendChild(link);
   }
@@ -55,7 +55,7 @@ const TITANIA_IS_PUBLIC_EVENT_PAGE = /\/(guild-league|siege)\.html$/i.test(windo
   const loadScript = () => {
     if (document.querySelector('script[data-titania-pre-attendance]')) return;
     const script = document.createElement('script');
-    script.src = './attendance-pre.js?v=20260904-3';
+    script.src = './attendance-pre.js?v=20260904-5';
     script.setAttribute('data-titania-pre-attendance', '1');
     document.body.appendChild(script);
   };
