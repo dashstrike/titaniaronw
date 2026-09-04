@@ -1,11 +1,11 @@
-/* Read-only PRE attendance for published Guild League / Siege pages. */
+/* Read-only pre-attendance for published Guild League / Siege pages. */
 (function(){
   'use strict';
 
   const STATUS={
-    no_response:{label:'PRE ?',className:'pre-no-response'},
-    going:{label:'PRE ✓',className:'pre-going'},
-    not_going:{label:'PRE ✕',className:'pre-not-going'}
+    no_response:{label:'?',className:'pre-no-response'},
+    going:{label:'✓',className:'pre-going'},
+    not_going:{label:'✕',className:'pre-not-going'}
   };
 
   let cachedSignature='';
@@ -61,23 +61,34 @@
     document.querySelectorAll('.slot .member-name').forEach(nameEl=>{
       const name=nameEl.textContent.trim();
       if(!name)return;
-      let row=nameEl.closest('.member-name-row');
-      if(!row){
-        row=document.createElement('div');
-        row.className='member-name-row';
-        nameEl.parentNode.insertBefore(row,nameEl);
-        row.appendChild(nameEl);
+      const member=nameEl.closest('.member')||nameEl.parentElement;
+      if(!member)return;
+
+      /* The public page already renders one badge. Reuse it instead of creating a duplicate. */
+      let badge=member.querySelector(':scope > .public-pre-attendance');
+
+      /* Clean up badges created by older versions of this script. */
+      const oldRow=nameEl.closest('.member-name-row');
+      if(oldRow){
+        oldRow.querySelectorAll('.public-pre-attendance').forEach(oldBadge=>oldBadge.remove());
+        if(oldRow.parentNode){
+          oldRow.parentNode.insertBefore(nameEl,oldRow);
+          oldRow.remove();
+        }
       }
-      const status=statusByName.get(name)||'no_response';
-      const meta=STATUS[status];
-      let badge=row.querySelector('.public-pre-attendance');
+
       if(!badge){
         badge=document.createElement('span');
-        row.appendChild(badge);
+        badge.className='public-pre-attendance pre-no-response';
+        nameEl.insertAdjacentElement('afterend',badge);
       }
+
+      const status=statusByName.get(name)||'no_response';
+      const meta=STATUS[status];
       badge.className=`public-pre-attendance ${meta.className}`;
       badge.textContent=meta.label;
       badge.title=`Pre-attendance: ${status==='going'?'Going':status==='not_going'?'Not Going':'No Response'}`;
+      badge.setAttribute('aria-label',badge.title);
     });
   }
 
