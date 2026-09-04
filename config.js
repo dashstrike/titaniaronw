@@ -88,6 +88,20 @@ const TITANIA_IS_MANAGEMENT_PAGE = /\/$|\/index\.html$/i.test(window.location.pa
   else loadScript();
 })();
 
+/* Correct attendance event labels: Tuesday and Thursday are both Guild League. */
+(function loadTitaniaAttendanceLabels(){
+  if (!TITANIA_IS_MANAGEMENT_PAGE) return;
+  const loadScript = () => {
+    if (document.querySelector('script[data-titania-attendance-labels]')) return;
+    const script = document.createElement('script');
+    script.src = './attendance-labels.js?v=20260904-1';
+    script.setAttribute('data-titania-attendance-labels', '1');
+    document.body.appendChild(script);
+  };
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', loadScript, {once:true});
+  else loadScript();
+})();
+
 /*
  * Reversible Polarity Zone hide switch.
  * This only hides UI/public access; saved Supabase Polarity data remains untouched.
