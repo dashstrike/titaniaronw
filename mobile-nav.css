@@ -1,0 +1,101 @@
+/* Titania responsive top navigation
+   Small screens use icon-only planner tabs; full labels remain on wider screens. */
+
+@media (max-width: 720px) {
+  .topbar {
+    width: 100%;
+    padding: 10px 10px;
+    gap: 10px;
+    justify-content: center;
+    overflow: visible;
+  }
+
+  .brand {
+    width: 100%;
+    min-width: 0;
+    justify-content: center;
+    gap: 8px;
+  }
+
+  .brand-logo {
+    width: 44px;
+    height: 38px;
+  }
+
+  .brand-text {
+    min-width: 0;
+  }
+
+  .brand-text h1 {
+    font-size: 16px !important;
+    letter-spacing: 1.2px;
+    white-space: normal;
+    text-align: center;
+    line-height: 1.15;
+  }
+
+  .brand-text p {
+    font-size: 11px !important;
+    letter-spacing: 1px;
+    text-align: center;
+  }
+
+  .event-tabs {
+    width: 100%;
+    max-width: 430px;
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 4px;
+    padding: 4px;
+    margin: 0 auto;
+  }
+
+  .event-tab {
+    width: 100%;
+    min-width: 0;
+    height: 44px;
+    padding: 0 !important;
+    gap: 0;
+    justify-content: center;
+    overflow: hidden;
+    font-size: 0 !important;
+  }
+
+  .event-tab::before {
+    display: block;
+    font-size: 21px;
+    line-height: 1;
+  }
+
+  .event-tab[data-event="dashboard"]::before { content: "📊"; }
+  .event-tab[data-event="manage_members"]::before { content: "🛠"; }
+  .event-tab[data-event="guild_league"]::before { content: "🛡️"; }
+  .event-tab[data-event="siege"]::before { content: "🏰"; }
+  .event-tab[data-event="polarity_zone"]::before { content: "⚡"; }
+
+  .stats,
+  .actions {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+/* Very small phones: keep the five icons comfortably tappable. */
+@media (max-width: 420px) {
+  .topbar {
+    padding-left: 8px;
+    padding-right: 8px;
+  }
+
+  .event-tabs {
+    gap: 3px;
+  }
+
+  .event-tab {
+    height: 42px;
+  }
+
+  .event-tab::before {
+    font-size: 20px;
+  }
+}
