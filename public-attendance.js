@@ -8,7 +8,7 @@
     not_going:{label:'PRE ✕',className:'pre-not-going'}
   };
 
-  let cachedKey='';
+  let cachedSignature='';
   let statusByName=new Map();
   let loading=false;
   let queued=false;
@@ -17,24 +17,6 @@
     const view=document.body&&document.body.dataset?document.body.dataset.view:'';
     return view==='guild'||view==='siege';
   }
-
-  function eventMeta(){
-    const view=document.body.dataset.view;
-    const now=new Date();
-    const today=new Date(now.getFullYear(),now.getMonth(),now.getDate());
-    if(view==='siege'){
-      const delta=(0-today.getDay()+7)%7;
-      const date=new Date(today);date.setDate(date.getDate()+delta);
-      return {type:'siege',date:fmt(date)};
-    }
-    const tue=(2-today.getDay()+7)%7;
-    const thu=(4-today.getDay()+7)%7;
-    const target=tue<=thu?2:4;
-    const date=new Date(today);date.setDate(date.getDate()+((target-today.getDay()+7)%7));
-    return {type:target===2?'guild_league_tuesday':'guild_league_thursday',date:fmt(date)};
-  }
-
-  function fmt(d){return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;}
 
   function cfgClient(){
     if(typeof client!=='undefined'&&client)return client;
@@ -45,30 +27,32 @@
     return window.supabase.createClient(url,key,{auth:{persistSession:false,autoRefreshToken:false,detectSessionInUrl:false}});
   }
 
-  async function load(){
+  async function load(force){
     if(!isSupported()||loading)return;
-    const meta=eventMeta();
-    const key=`${meta.type}:${meta.date}`;
-    if(key===cachedKey){scheduleDecorate();return;}
     loading=true;
     try{
       const c=cfgClient();if(!c)return;
-      const {data,error}=await c.rpc('get_public_pre_attendance',{p_view:document.body.dataset.view});
+      const view=document.body.dataset.view;
+      const {data,error}=await c.rpc('get_public_lineup',{p_view:view});
       if(error)throw error;
-      cachedKey=key;
+      if(!data||data.published!==true){statusByName=new Map();cachedSignature='';scheduleDecorate();return;}
+      const signature=`${data.attendanceEventType||''}:${data.attendanceEventDate||''}:${JSON.stringify(data.preAttendance||{})}`;
+      if(!force&&signature===cachedSignature){scheduleDecorate();return;}
+      cachedSignature=signature;
       statusByName=new Map();
-      const rows=data&&typeof data==='object'&&data.statuses&&typeof data.statuses==='object'?data.statuses:{};
+      const rows=data.preAttendance&&typeof data.preAttendance==='object'?data.preAttendance:{};
       Object.entries(rows).forEach(([name,status])=>statusByName.set(String(name),STATUS[status]?status:'no_response'));
+      scheduleDecorate();
     }catch(error){
       console.warn('Public pre-attendance unavailable',error);
     }finally{
       loading=false;
-      scheduleDecorate();
     }
   }
 
   function scheduleDecorate(){
-    if(queued)return;queued=true;
+    if(queued)return;
+    queued=true;
     requestAnimationFrame(()=>{queued=false;decorate();});
   }
 
@@ -102,8 +86,10 @@
     const content=document.getElementById('content')||document.body;
     const observer=new MutationObserver(()=>scheduleDecorate());
     observer.observe(content,{childList:true,subtree:true});
-    load();
-    setInterval(load,60000);
+    load(true);
+    setInterval(()=>load(false),60000);
+    const refresh=document.getElementById('refreshBtn');
+    if(refresh)refresh.addEventListener('click',()=>setTimeout(()=>load(true),400));
   }
 
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});
