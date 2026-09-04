@@ -59,7 +59,7 @@
     width: 100%;
     max-width: 430px;
     display: grid;
-    grid-template-columns: repeat(5, minmax(0, 1fr));
+    grid-template-columns: repeat(6, minmax(0, 1fr));
     gap: 4px;
     padding: 4px;
     margin: 0 auto;
@@ -86,6 +86,7 @@
   .event-tab[data-event="manage_members"]::before { content: "🛠"; }
   .event-tab[data-event="guild_league"]::before { content: "🛡️"; }
   .event-tab[data-event="siege"]::before { content: "🏰"; }
+  .event-tab[data-event="attendance"]::before { content: "📋"; }
   .event-tab[data-event="polarity_zone"]::before { content: "⚡"; }
 
   .stats,
@@ -237,7 +238,7 @@
   }
 }
 
-/* Very small phones: keep the five icons comfortably tappable. */
+/* Very small phones: keep the icons comfortably tappable. */
 @media (max-width: 420px) {
   .topbar {
     padding-left: 8px;
