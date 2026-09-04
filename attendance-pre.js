@@ -16,6 +16,7 @@
   let statusByMemberId=new Map();
   let loadingKey='';
   let observer=null;
+  let decorateQueued=false;
 
   function canUseAttendance(){
     return typeof supabaseClient!=='undefined'&&supabaseClient&&typeof state!=='undefined'&&state&&Array.isArray(state.roster);
@@ -47,15 +48,27 @@
     return `${type}:${nextEventDate(type)}`;
   }
 
-  function memberIdForName(name){
+  function rosterMaps(){
+    const byName=new Map();
+    const byId=new Map();
+    (state.roster||[]).forEach(member=>{
+      if(!member)return;
+      const name=String(member.name||'').trim();
+      const id=String(member.id||member.name||'').trim();
+      if(name)byName.set(name.toLowerCase(),id||name.toLowerCase());
+      if(id)byId.set(id,name);
+    });
+    return {byName,byId};
+  }
+
+  function memberIdForName(name,maps){
     const lower=String(name||'').trim().toLowerCase();
-    const member=(state.roster||[]).find(item=>String(item&&item.name||'').trim().toLowerCase()===lower);
-    return member?String(member.id||member.name):lower;
+    return maps.byName.get(lower)||lower;
   }
 
   function memberNameForId(memberId){
-    const member=(state.roster||[]).find(item=>String(item&&item.id||'')===String(memberId));
-    return member?String(member.name||''):'';
+    const maps=rosterMaps();
+    return maps.byId.get(String(memberId))||'';
   }
 
   function toast(title,message,type){
@@ -69,10 +82,16 @@
   }
 
   async function ensureEventRow(eventType,eventDate){
-    if(cachedEventId&&cachedEventKey===`${eventType}:${eventDate}`)return cachedEventId;
+    const key=`${eventType}:${eventDate}`;
+    if(cachedEventId&&cachedEventKey===key)return cachedEventId;
+
     let query=await supabaseClient.from('attendance_events').select('id').eq('event_type',eventType).eq('event_date',eventDate).maybeSingle();
     if(query.error)throw query.error;
-    if(query.data&&query.data.id){cachedEventId=query.data.id;return cachedEventId;}
+    if(query.data&&query.data.id){
+      cachedEventKey=key;
+      cachedEventId=query.data.id;
+      return cachedEventId;
+    }
 
     const title=eventType==='guild_league'?'Guild League':'Siege';
     const insert=await supabaseClient.from('attendance_events').insert({event_type:eventType,event_date:eventDate,title,status:'upcoming'}).select('id').single();
@@ -80,11 +99,13 @@
       if(String(insert.error.code||'')==='23505'){
         query=await supabaseClient.from('attendance_events').select('id').eq('event_type',eventType).eq('event_date',eventDate).single();
         if(query.error)throw query.error;
+        cachedEventKey=key;
         cachedEventId=query.data.id;
         return cachedEventId;
       }
       throw insert.error;
     }
+    cachedEventKey=key;
     cachedEventId=insert.data.id;
     return cachedEventId;
   }
@@ -93,17 +114,24 @@
     if(!canUseAttendance())return;
     const key=currentKey();
     if(!key){
-      cachedEventKey='';cachedEventId='';statusByMemberId=new Map();
-      decorateSlots();
+      cachedEventKey='';
+      cachedEventId='';
+      statusByMemberId=new Map();
+      scheduleDecorate();
       return;
     }
-    if(!force&&key===cachedEventKey&&loadingKey!==key){decorateSlots();return;}
+    if(!force&&key===cachedEventKey&&loadingKey!==key){
+      scheduleDecorate();
+      return;
+    }
     if(loadingKey===key)return;
+
     loadingKey=key;
     cachedEventKey=key;
     cachedEventId='';
     statusByMemberId=new Map();
     const [eventType,eventDate]=key.split(':');
+
     try{
       const eventRes=await supabaseClient.from('attendance_events').select('id').eq('event_type',eventType).eq('event_date',eventDate).maybeSingle();
       if(eventRes.error)throw eventRes.error;
@@ -111,7 +139,9 @@
         cachedEventId=eventRes.data.id;
         const recordRes=await supabaseClient.from('attendance_records').select('member_id,pre_status').eq('event_id',cachedEventId);
         if(recordRes.error)throw recordRes.error;
-        (recordRes.data||[]).forEach(row=>statusByMemberId.set(String(row.member_id),STATUS_META[row.pre_status]?row.pre_status:'no_response'));
+        (recordRes.data||[]).forEach(row=>{
+          statusByMemberId.set(String(row.member_id),STATUS_META[row.pre_status]?row.pre_status:'no_response');
+        });
       }
     }catch(error){
       if(String(error&&error.code||'')==='42P01'){
@@ -121,7 +151,7 @@
       }
     }finally{
       loadingKey='';
-      decorateSlots();
+      scheduleDecorate();
     }
   }
 
@@ -134,17 +164,33 @@
     return String(value==null?'':value).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
   }
 
-  function decorateSlots(){
-    const type=plannerEventType();
-    document.querySelectorAll('.pre-attendance-badge').forEach(el=>{if(!type)el.remove();});
-    if(!type)return;
+  function setIfChanged(element,property,value){
+    if(element[property]!==value)element[property]=value;
+  }
 
-    document.querySelectorAll('#teamsWrap .slot.filled').forEach(slot=>{
+  function setDatasetIfChanged(element,key,value){
+    if(element.dataset[key]!==value)element.dataset[key]=value;
+  }
+
+  function decorateSlots(){
+    decorateQueued=false;
+    const type=plannerEventType();
+    const teamsWrap=document.getElementById('teamsWrap');
+    if(!teamsWrap)return;
+
+    if(!type){
+      teamsWrap.querySelectorAll('.pre-attendance-badge').forEach(el=>el.remove());
+      return;
+    }
+
+    const maps=rosterMaps();
+    teamsWrap.querySelectorAll('.slot.filled').forEach(slot=>{
       const nameEl=slot.querySelector('.slot-name');
       if(!nameEl)return;
       const name=nameEl.textContent.trim();
-      const memberId=memberIdForName(name);
+      const memberId=memberIdForName(name,maps);
       if(!memberId)return;
+
       let row=nameEl.closest('.slot-name-row');
       if(!row){
         row=document.createElement('span');
@@ -152,20 +198,42 @@
         nameEl.parentNode.insertBefore(row,nameEl);
         row.appendChild(nameEl);
       }
-      let badge=row.querySelector('.pre-attendance-badge');
+
       const status=statusByMemberId.get(memberId)||'no_response';
+      const meta=STATUS_META[status]||STATUS_META.no_response;
+      let badge=row.querySelector('.pre-attendance-badge');
+
       if(!badge){
         row.insertAdjacentHTML('beforeend',badgeHtml(status,memberId,name));
-        badge=row.querySelector('.pre-attendance-badge');
-      }else{
-        const meta=STATUS_META[status]||STATUS_META.no_response;
-        badge.className=`pre-attendance-badge ${meta.className}`;
-        badge.dataset.preMemberId=memberId;
-        badge.dataset.preMemberName=name;
-        badge.dataset.preStatus=status;
-        badge.textContent=meta.label;
+        return;
       }
+
+      const desiredClass=`pre-attendance-badge ${meta.className}`;
+      setIfChanged(badge,'className',desiredClass);
+      setDatasetIfChanged(badge,'preMemberId',memberId);
+      setDatasetIfChanged(badge,'preMemberName',name);
+      setDatasetIfChanged(badge,'preStatus',status);
+      setIfChanged(badge,'textContent',meta.label);
+
+      const desiredTitle=`Pre-attendance: ${status==='going'?'Going':status==='not_going'?'Not Going':'No Response'}. Click to change.`;
+      setIfChanged(badge,'title',desiredTitle);
     });
+  }
+
+  function scheduleDecorate(){
+    if(decorateQueued)return;
+    decorateQueued=true;
+    const run=()=>{
+      const key=currentKey();
+      if(key&&key!==cachedEventKey){
+        decorateQueued=false;
+        loadStatuses(true);
+        return;
+      }
+      decorateSlots();
+    };
+    if(typeof requestAnimationFrame==='function')requestAnimationFrame(run);
+    else setTimeout(run,0);
   }
 
   async function handleBadgeClick(badge){
@@ -193,7 +261,7 @@
       },{onConflict:'event_id,member_id'}).select('pre_status').single();
       if(result.error)throw result.error;
       statusByMemberId.set(memberId,result.data&&STATUS_META[result.data.pre_status]?result.data.pre_status:next);
-      decorateSlots();
+      scheduleDecorate();
     }catch(error){
       if(String(error&&error.code||'')==='42P01')toast('Attendance setup required','Run attendance_setup.sql in Supabase first.','warn');
       else toast('Attendance save failed',String(error&&error.message||error),'err');
@@ -210,31 +278,40 @@
     document.addEventListener('click',event=>{
       const badge=event.target.closest('.pre-attendance-badge');
       if(!badge)return;
-      event.preventDefault();event.stopPropagation();
+      event.preventDefault();
+      event.stopPropagation();
       handleBadgeClick(badge);
     },true);
   }
 
   function startObserver(){
-    const root=document.getElementById('app')||document.body;
-    observer=new MutationObserver(()=>{
-      decorateSlots();
+    const teamsWrap=document.getElementById('teamsWrap');
+    if(!teamsWrap)return;
+
+    observer=new MutationObserver(()=>scheduleDecorate());
+    observer.observe(teamsWrap,{subtree:true,childList:true});
+
+    // The main app changes body[data-event] whenever a tab is selected.
+    const bodyObserver=new MutationObserver(()=>{
       const key=currentKey();
       if(key&&key!==cachedEventKey)loadStatuses(true);
+      else scheduleDecorate();
     });
-    observer.observe(root,{subtree:true,childList:true,attributes:true,attributeFilter:['data-event']});
+    bodyObserver.observe(document.body,{attributes:true,attributeFilter:['data-event']});
   }
 
   function boot(){
     let attempts=0;
     const wait=setInterval(()=>{
       attempts++;
-      if(canUseAttendance()){
+      if(canUseAttendance()&&document.getElementById('teamsWrap')){
         clearInterval(wait);
         wireClicks();
         startObserver();
         loadStatuses(true);
-      }else if(attempts>120){clearInterval(wait);}
+      }else if(attempts>120){
+        clearInterval(wait);
+      }
     },250);
   }
 
