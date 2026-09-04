@@ -1,7 +1,8 @@
--- Titania Guild Management - add secure public support for the Siege lineup.
--- Run this once in Supabase SQL Editor after uploading the updated website files.
--- It replaces get_public_lineup(text) so Guild League, Siege, and Polarity Zone
--- each expose only their own published lineup data.
+-- Titania Guild Management - secure public lineup support for Guild League / Siege / Polarity.
+-- Run this in Supabase SQL Editor after attendance_setup.sql.
+-- Public pages receive only published lineup fields plus PRE-attendance status for members in that published lineup.
+
+begin;
 
 drop function if exists public.get_public_lineup(text);
 
@@ -29,6 +30,14 @@ declare
   v_event_updated_at text := '';
   v_event_updated_by text := '';
   v_finished_dungeons jsonb := '[]'::jsonb;
+  v_pre_attendance jsonb := '{}'::jsonb;
+  v_attendance_event_id uuid;
+  v_today date := current_date;
+  v_next_tuesday date;
+  v_next_thursday date;
+  v_next_sunday date;
+  v_attendance_type text;
+  v_attendance_date date;
 begin
   if v_view not in ('guild', 'siege', 'polarity') then
     return jsonb_build_object(
@@ -38,6 +47,7 @@ begin
       'raidLeaders', '{}'::jsonb,
       'raidModes', '{}'::jsonb,
       'finishedDungeons', '[]'::jsonb,
+      'preAttendance', '{}'::jsonb,
       'revision', 0,
       'updatedAt', ''
     );
@@ -56,6 +66,7 @@ begin
       'raidLeaders', '{}'::jsonb,
       'raidModes', '{}'::jsonb,
       'finishedDungeons', '[]'::jsonb,
+      'preAttendance', '{}'::jsonb,
       'revision', 0,
       'updatedAt', ''
     );
@@ -83,7 +94,6 @@ begin
   v_event_updated_at := coalesce(nullif(v_state #>> array['eventUpdates', v_update_key, 'updatedAt'], ''), v_row_updated_at::text, '');
   v_event_updated_by := coalesce(v_state #>> array['eventUpdates', v_update_key, 'updatedBy'], '');
 
-  -- When an event is private, return no lineup payload at all.
   if not v_published then
     return jsonb_build_object(
       'published', false,
@@ -92,6 +102,7 @@ begin
       'raidLeaders', '{}'::jsonb,
       'raidModes', '{}'::jsonb,
       'finishedDungeons', '[]'::jsonb,
+      'preAttendance', '{}'::jsonb,
       'revision', v_revision,
       'updatedAt', v_event_updated_at,
       'updatedBy', v_event_updated_by
@@ -111,7 +122,6 @@ begin
     where jsonb_typeof(e.value) = 'array'
   ) x;
 
-  -- Only expose name + class for members who are actually present in this event.
   select coalesce(jsonb_agg(jsonb_build_object(
       'name', m.item->>'name',
       'cls', coalesce(nullif(m.item->>'cls', ''), 'Unknown')
@@ -134,6 +144,41 @@ begin
     v_finished_dungeons := coalesce(v_state->'finishedDungeons', '[]'::jsonb);
   end if;
 
+  -- Resolve the same upcoming attendance event used by the management planner.
+  if v_view = 'guild' then
+    v_next_tuesday := v_today + ((2 - extract(dow from v_today)::int + 7) % 7);
+    v_next_thursday := v_today + ((4 - extract(dow from v_today)::int + 7) % 7);
+    if v_next_tuesday <= v_next_thursday then
+      v_attendance_type := 'guild_league_tuesday';
+      v_attendance_date := v_next_tuesday;
+    else
+      v_attendance_type := 'guild_league_thursday';
+      v_attendance_date := v_next_thursday;
+    end if;
+  elsif v_view = 'siege' then
+    v_next_sunday := v_today + ((0 - extract(dow from v_today)::int + 7) % 7);
+    v_attendance_type := 'siege';
+    v_attendance_date := v_next_sunday;
+  end if;
+
+  if v_attendance_type is not null and to_regclass('public.attendance_events') is not null and to_regclass('public.attendance_records') is not null then
+    select ae.id
+      into v_attendance_event_id
+    from public.attendance_events ae
+    where ae.event_type = v_attendance_type
+      and ae.event_date = v_attendance_date
+    limit 1;
+
+    if v_attendance_event_id is not null then
+      select coalesce(jsonb_object_agg(ar.member_name, ar.pre_status), '{}'::jsonb)
+        into v_pre_attendance
+      from public.attendance_records ar
+      where ar.event_id = v_attendance_event_id
+        and ar.member_name = any(v_used_names)
+        and ar.pre_status in ('no_response','going','not_going');
+    end if;
+  end if;
+
   return jsonb_build_object(
     'published', true,
     'roster', v_roster,
@@ -141,6 +186,9 @@ begin
     'raidLeaders', v_raid_leaders,
     'raidModes', v_raid_modes,
     'finishedDungeons', v_finished_dungeons,
+    'preAttendance', v_pre_attendance,
+    'attendanceEventType', coalesce(v_attendance_type, ''),
+    'attendanceEventDate', coalesce(v_attendance_date::text, ''),
     'revision', v_revision,
     'updatedAt', v_event_updated_at,
     'updatedBy', v_event_updated_by
@@ -150,3 +198,5 @@ $$;
 
 revoke all on function public.get_public_lineup(text) from public;
 grant execute on function public.get_public_lineup(text) to anon, authenticated;
+
+commit;
