@@ -87,6 +87,20 @@ const TITANIA_IS_PUBLIC_EVENT_PAGE = /\/(guild-league|siege)\.html$/i.test(windo
   else loadScript();
 })();
 
+/* Member profile links inside Manage Members. */
+(function loadTitaniaMemberLinks(){
+  if (!TITANIA_IS_MANAGEMENT_PAGE) return;
+  const loadScript = () => {
+    if (document.querySelector('script[data-titania-member-links]')) return;
+    const script = document.createElement('script');
+    script.src = './member-links.js?v=20260905-1';
+    script.setAttribute('data-titania-member-links', '1');
+    document.body.appendChild(script);
+  };
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', loadScript, {once:true});
+  else loadScript();
+})();
+
 /* Read-only attendance icons on published Guild League / Siege pages. */
 (function loadTitaniaPublicAttendance(){
   if (!TITANIA_IS_PUBLIC_EVENT_PAGE) return;
