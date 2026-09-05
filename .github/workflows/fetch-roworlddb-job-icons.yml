@@ -17,66 +17,61 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Download job icons from RoworldDB
+      - name: Download all job icons used by the RoworldDB SEA skill planner
         shell: bash
         run: |
           set -euo pipefail
-          mkdir -p assets/images/job
+          mkdir -p assets/images/job /tmp/roworlddb-jobs
 
-          download_icon() {
-            local slug="$1"
-            local icon="$2"
-            local out="assets/images/job/${slug}.png"
-            local root_url="https://www.roworlddb.com/media/images/job/${icon}.png"
-            local sea_url="https://www.roworlddb.com/sea/media/images/job/${icon}.png"
+          SOURCE_BASE='https://raw.githubusercontent.com/Third07/ragnarok-new-world-hub/main/public/sea/skill-simulator/data'
+          curl --fail --location --silent --show-error --retry 2 "$SOURCE_BASE/skills_index_en-US.json" -o /tmp/roworlddb-jobs/jobs.json
+          curl --fail --location --silent --show-error --retry 2 "$SOURCE_BASE/icon_paths.json" -o /tmp/roworlddb-jobs/icon_paths.json
 
-            echo "Fetching ${slug} (${icon})"
-            if ! curl --fail --location --silent --show-error --retry 2 \
+          python3 - <<'PY' > /tmp/roworlddb-jobs/jobs.tsv
+          import json, re
+
+          with open('/tmp/roworlddb-jobs/jobs.json', encoding='utf-8') as f:
+              jobs = json.load(f).get('jobs', {})
+          with open('/tmp/roworlddb-jobs/icon_paths.json', encoding='utf-8') as f:
+              icon_paths = json.load(f)
+
+          for job_id, job in jobs.items():
+              name = str(job.get('job_name') or '').strip()
+              icon = str(job.get('job_icon') or '').strip()
+              if not name or name == 'Not yet available' or not icon:
+                  continue
+              path = icon_paths.get(icon)
+              if not path:
+                  continue
+              slug = re.sub(r'[^a-z0-9]+', '-', name.lower()).strip('-')
+              print(f'{job_id}\t{name}\t{slug}\t{path}')
+          PY
+
+          : > assets/images/job/job-icons.json.tmp
+          printf '{\n' >> assets/images/job/job-icons.json.tmp
+          first=1
+
+          while IFS=$'\t' read -r job_id job_name slug icon_path; do
+            [ -n "$slug" ] || continue
+            ext="${icon_path##*.}"
+            out="assets/images/job/${slug}.${ext}"
+            url="https://www.roworlddb.com/media/images/${icon_path}"
+
+            echo "Fetching ${job_name}: ${url}"
+            curl --fail --location --silent --show-error --retry 2 \
               --user-agent 'Mozilla/5.0 Titania-Guild-Management' \
-              "$root_url" -o "$out"; then
-              curl --fail --location --silent --show-error --retry 2 \
-                --user-agent 'Mozilla/5.0 Titania-Guild-Management' \
-                "$sea_url" -o "$out"
-            fi
+              "$url" -o "$out"
 
             test -s "$out"
-            file "$out" | grep -qiE 'PNG image data|Web/P image|JPEG image data'
-          }
+            file "$out" | grep -qiE 'Web/P image|PNG image data|JPEG image data'
 
-          download_icon swordman icon_jsxq_1
-          download_icon knight icon_jsxq_7
-          download_icon lord-knight icon_jsxq_4008
-          download_icon crusader icon_jsxq_14
-          download_icon paladin icon_jsxq_4015
-          download_icon mage icon_jsxq_2
-          download_icon wizard icon_jsxq_11
-          download_icon high-wizard icon_jsxq_4012
-          download_icon archer icon_jsxq_3
-          download_icon hunter icon_jsxq_10
-          download_icon sniper icon_jsxq_4011
-          download_icon bard icon_jsxq_19
-          download_icon clown icon_jsxq_4020
-          download_icon dancer icon_jsxq_20
-          download_icon gypsy icon_jsxq_4021
-          download_icon acolyte icon_jsxq_4
-          download_icon priest icon_jsxq_9
-          download_icon high-priest icon_jsxq_4010
-          download_icon monk icon_jsxq_15
-          download_icon champion icon_jsxq_4016
-          download_icon thief icon_jsxq_6
-          download_icon assassin icon_jsxq_8
-          download_icon assassin-cross icon_jsxq_4009
-          download_icon merchant icon_jsxq_5
-          download_icon blacksmith icon_jsxq_12
-          download_icon whitesmith icon_jsxq_4013
-          download_icon alchemist icon_jsxq_18
-          download_icon creator icon_jsxq_4019
-          download_icon gunslinger icon_jsxq_24
-          download_icon rebel icon_jsxq_4215
-          download_icon night-watch icon_jsxq_4306
-          download_icon druid icon_jsxq_201
-          download_icon kanos icon_jsxq_203
-          download_icon alithea icon_jsxq_202
+            if [ "$first" -eq 0 ]; then printf ',\n' >> assets/images/job/job-icons.json.tmp; fi
+            first=0
+            printf '  "%s": "%s"' "$job_name" "${slug}.${ext}" >> assets/images/job/job-icons.json.tmp
+          done < /tmp/roworlddb-jobs/jobs.tsv
+
+          printf '\n}\n' >> assets/images/job/job-icons.json.tmp
+          mv assets/images/job/job-icons.json.tmp assets/images/job/job-icons.json
 
       - name: Commit downloaded icons
         shell: bash
