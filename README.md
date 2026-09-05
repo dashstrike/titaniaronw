@@ -31,16 +31,15 @@ These are intended for browser applications when RLS is enabled.
 
 1. Sign in to Supabase and create a new project.
 2. Open the project's SQL Editor.
-3. Run the SQL setup files in this order:
-   - `supabase_setup.sql`
-   - `attendance_setup.sql`
-   - `public_view_setup.sql`
+3. Run the entire `titania_setup.sql` file once.
 4. Open Project Settings / API and copy:
    - Project URL
    - Publishable key
 5. Put those two values into `config.js`.
 
-`public_view_setup.sql` is the canonical public-lineup database setup and defines the current `get_public_lineup(p_view text)` RPC used by Guild League, Siege, and Polarity Zone public pages. `siege_public_setup.sql` is retained as a legacy/compatibility copy and should not be required for a fresh setup after `public_view_setup.sql` has been run.
+`titania_setup.sql` is the canonical database setup. It contains the core profiles/planner schema, attendance tables, RLS policies, triggers, save RPCs, and the current `get_public_lineup(p_view text)` public-lineup RPC in one file.
+
+The older `supabase_setup.sql`, `attendance_setup.sql`, `public_view_setup.sql`, and `siege_public_setup.sql` files are retained only as historical/compatibility references. For a fresh setup, use only `titania_setup.sql`.
 
 ## Step 2 - Configure Supabase Auth
 
@@ -65,7 +64,7 @@ Upload the website files to the repository root, including:
 - Public lineup pages such as `guild-league.html` and `polarity-zone.html`
 - `.nojekyll`
 - `README.md`
-- Any required SQL setup files
+- `titania_setup.sql`
 - Website assets such as the Titania logo
 
 Do not upload any Supabase secret/service-role keys or SMTP credentials.
