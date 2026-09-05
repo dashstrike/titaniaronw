@@ -31,11 +31,16 @@ These are intended for browser applications when RLS is enabled.
 
 1. Sign in to Supabase and create a new project.
 2. Open the project's SQL Editor.
-3. Run the required SQL setup files for the application.
+3. Run the SQL setup files in this order:
+   - `supabase_setup.sql`
+   - `attendance_setup.sql`
+   - `public_view_setup.sql`
 4. Open Project Settings / API and copy:
    - Project URL
    - Publishable key
 5. Put those two values into `config.js`.
+
+`public_view_setup.sql` is the canonical public-lineup database setup and defines the current `get_public_lineup(p_view text)` RPC used by Guild League, Siege, and Polarity Zone public pages. `siege_public_setup.sql` is retained as a legacy/compatibility copy and should not be required for a fresh setup after `public_view_setup.sql` has been run.
 
 ## Step 2 - Configure Supabase Auth
 
@@ -122,7 +127,7 @@ Roles:
 
 ## Public lineup pages
 
-The project includes separate read-only public pages for Guild League and Polarity Zone.
+The project includes separate read-only public pages for Guild League, Siege, and Polarity Zone.
 
 Visitors do not need to register or sign in to view an event that has been published.
 
@@ -137,6 +142,8 @@ The public access function is designed to expose only the lineup information req
 
 The planner is stored as one transactional JSONB document in `public.planner_state`, while authentication and user roles live separately in Supabase Auth and `public.profiles`.
 
+Attendance is stored separately in `public.attendance_events` and `public.attendance_records` so historical event records and actual attendance do not need to be embedded into the planner JSON document.
+
 This preserves the application's existing planner state model and revision logic.
 
 Core database functions include:
@@ -144,7 +151,7 @@ Core database functions include:
 - `save_planner_state` - full autosave with revision checking
 - `save_raid_leader_setting` - direct Raid Leader save
 - `save_raid_mode_setting` - direct ATK/DEF save
-- Public lineup functions used by the read-only Guild League and Polarity Zone pages
+- `get_public_lineup(p_view text)` - safe published lineup access for Guild League, Siege, and Polarity Zone
 
 The planner data can be normalized into separate members, assignments, history, and audit tables later if needed without changing the visible design.
 
