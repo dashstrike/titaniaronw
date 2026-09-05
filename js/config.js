@@ -20,6 +20,7 @@ window.TITANIA_FEATURES = Object.freeze({
 
 const TITANIA_IS_MANAGEMENT_PAGE = /\/$|\/index\.html$/i.test(window.location.pathname);
 const TITANIA_IS_PUBLIC_EVENT_PAGE = /\/(guild-league|siege)\.html$/i.test(window.location.pathname);
+const TITANIA_IS_MEMBER_PAGE = /\/member\.html$/i.test(window.location.pathname);
 
 (function loadTitaniaMobileNav(){
   if (!TITANIA_IS_MANAGEMENT_PAGE) return;
@@ -95,6 +96,20 @@ const TITANIA_IS_PUBLIC_EVENT_PAGE = /\/(guild-league|siege)\.html$/i.test(windo
     const script = document.createElement('script');
     script.src = './js/member-links.js?v=20260905-2';
     script.setAttribute('data-titania-member-links', '1');
+    document.body.appendChild(script);
+  };
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', loadScript, {once:true});
+  else loadScript();
+})();
+
+/* Job/class artwork on member profile pages. */
+(function loadTitaniaMemberJobIcons(){
+  if (!TITANIA_IS_MEMBER_PAGE) return;
+  const loadScript = () => {
+    if (document.querySelector('script[data-titania-member-job-icons]')) return;
+    const script = document.createElement('script');
+    script.src = './js/member-job-icons.js?v=20260905-1';
+    script.setAttribute('data-titania-member-job-icons', '1');
     document.body.appendChild(script);
   };
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', loadScript, {once:true});
