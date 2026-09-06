@@ -19,12 +19,12 @@
   flex:0 0 auto!important;
   font-size:26px!important;
   line-height:1!important;
-  margin:0!important;
+  margin-left:12px!important;
   padding:0!important;
   position:static!important;
   top:auto!important;
   transform:none!important;
-  vertical-align:initial!important;
+  vertical-align:middle!important;
 }
 
 @media(max-width:720px){
@@ -40,5 +40,6 @@
 
   .party-star-public{
     font-size:23px!important;
+    margin-left:10px!important;
   }
 }
