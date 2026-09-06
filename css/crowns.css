@@ -1,3 +1,12 @@
+.leader-icon{
+  width:26px!important;
+  height:26px!important;
+  min-width:26px!important;
+  flex:0 0 26px!important;
+  display:inline-block!important;
+  vertical-align:middle!important;
+}
+
 .slot .crown,
 .member .crown,
 .member-card .crown,
@@ -16,6 +25,13 @@
 }
 
 @media(max-width:720px){
+  .leader-icon{
+    width:26px!important;
+    height:26px!important;
+    min-width:26px!important;
+    flex-basis:26px!important;
+  }
+
   .slot .crown,
   .member .crown,
   .member-card .crown,
