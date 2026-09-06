@@ -2,8 +2,8 @@
 document.write('<script src="./js/config.js?v=20260905-1"><\/script>');
 document.write('<script src="./js/job-icons-global.js?v=20260906-2"><\/script>');
 document.write('<link rel="stylesheet" href="./css/tooltips.css?v=20260906-1">');
-document.write('<script src="./js/tooltips-global.js?v=20260906-1"><\/script>');
-document.write('<link rel="stylesheet" href="./css/party-stars.css?v=20260906-7">');
+document.write('<script src="./js/tooltips-global.js?v=20260906-2"><\/script>');
+document.write('<link rel="stylesheet" href="./css/party-stars.css?v=20260906-8">');
 
 document.addEventListener('DOMContentLoaded',()=>{
   if(document.querySelector('script[data-titania-party-stars]'))return;
