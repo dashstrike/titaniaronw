@@ -1,0 +1,25 @@
+.party-star-toggle{
+  width:31px!important;
+  height:31px!important;
+  font-size:23px!important;
+  border-radius:8px!important;
+}
+
+.party-star-public{
+  font-size:26px!important;
+  margin-left:8px!important;
+  transform:translateY(-1px);
+}
+
+@media(max-width:720px){
+  .party-star-toggle{
+    width:29px!important;
+    height:29px!important;
+    font-size:21px!important;
+  }
+
+  .party-star-public{
+    font-size:23px!important;
+    margin-left:6px!important;
+  }
+}
