@@ -12,12 +12,15 @@
       if(!el.dataset.titaniaTooltip)el.dataset.titaniaTooltip=title.trim();
       el.removeAttribute('title');
     }
+    if(el.dataset.starTooltip&&!el.dataset.titaniaTooltip){
+      el.dataset.titaniaTooltip=el.dataset.starTooltip;
+    }
   }
 
   function prepareTree(root){
     if(!(root instanceof Element))return;
     prepareElement(root);
-    root.querySelectorAll('[title]').forEach(prepareElement);
+    root.querySelectorAll('[title],[data-star-tooltip]').forEach(prepareElement);
   }
 
   function ensureTooltip(){
@@ -53,7 +56,7 @@
 
   function show(target){
     if(!(target instanceof Element))return;
-    const text=String(target.dataset.titaniaTooltip||'').trim();
+    const text=String(target.dataset.titaniaTooltip||target.dataset.starTooltip||'').trim();
     if(!text)return;
 
     if(hideTimer){clearTimeout(hideTimer);hideTimer=null;}
@@ -85,7 +88,7 @@
   }
 
   function tooltipTarget(node){
-    return node instanceof Element?node.closest('[data-titania-tooltip]'):null;
+    return node instanceof Element?node.closest('[data-titania-tooltip],[data-star-tooltip]'):null;
   }
 
   function bind(){
@@ -133,7 +136,7 @@
       }
     });
 
-    observer.observe(document.documentElement,{subtree:true,childList:true,attributes:true,attributeFilter:['title']});
+    observer.observe(document.documentElement,{subtree:true,childList:true,attributes:true,attributeFilter:['title','data-star-tooltip']});
     bind();
   }
 
