@@ -44,13 +44,15 @@
   function protectControls(){
     const publish=document.getElementById('publicToggleBtn');
     if(publish){
-      const allowed=canPublish();
-      publish.disabled=!allowed;
-      if(!allowed)publish.title='Admin access required to publish or hide public lineups';
+      const shouldDisable=!canPublish();
+      if(publish.disabled!==shouldDisable)publish.disabled=shouldDisable;
+      if(shouldDisable&&publish.getAttribute('title')!=='Admin access required to publish or hide public lineups'){
+        publish.title='Admin access required to publish or hide public lineups';
+      }
     }
 
     const preReset=document.getElementById('preResetAllBtn');
-    if(preReset&&canManageAttendance())preReset.disabled=false;
+    if(preReset&&canManageAttendance()&&preReset.disabled)preReset.disabled=false;
   }
 
   function markAttendanceAction(event){
@@ -74,5 +76,6 @@
   install();
   document.addEventListener('DOMContentLoaded',install,{once:true});
   window.addEventListener('focus',install);
-  new MutationObserver(protectControls).observe(document.documentElement,{subtree:true,childList:true,attributes:true,attributeFilter:['disabled']});
+
+  new MutationObserver(protectControls).observe(document.documentElement,{subtree:true,childList:true});
 })();
