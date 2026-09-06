@@ -62,7 +62,6 @@
     const file=iconMap[cls];
     if(!file)return;
     const url=`${ICON_BASE}${file}`;
-    if(dot.dataset.jobIcon===url)return;
     dot.dataset.jobIcon=url;
     dot.dataset.jobClass=cls;
     dot.title=cls;
@@ -74,8 +73,8 @@
     dot.style.backgroundSize='contain';
     dot.style.borderRadius='0';
     dot.style.boxShadow='none';
-    dot.style.width=dot.closest('.slot')?'18px':'20px';
-    dot.style.height=dot.closest('.slot')?'18px':'20px';
+    dot.style.width=dot.closest('.slot')?'22px':'24px';
+    dot.style.height=dot.closest('.slot')?'22px':'24px';
     dot.style.minWidth=dot.style.width;
   }
 
