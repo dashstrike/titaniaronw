@@ -93,7 +93,6 @@
     const starYes=Boolean(siege&&stars.has(siege.teamKey));
 
     wrap.innerHTML=[
-      infoRow('Class',classHtml(member.cls||'Unknown')),
       infoRow('Guild League',gl?`${esc(gl.raid)} · ${esc(gl.party)}`:'Not assigned'),
       infoRow('Siege',siege?`${esc(siege.raid)} · ${esc(siege.party)}`:'Not assigned'),
       infoRow('Star Dungeon',siege?`<span class="${starYes?'member-info-yes':'member-info-no'}">${starYes?'Yes ★':'No'}</span>`:'—'),
