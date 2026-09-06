@@ -104,12 +104,15 @@
         button.className='party-star-toggle';
         button.textContent='★';
         button.dataset.partyStarKey=key;
+        button.dataset.starTooltip='Star Dungeon';
+        button.setAttribute('aria-label','Star Dungeon');
         name.appendChild(button);
       }
       const on=selected.has(key);
       button.classList.toggle('on',on);
       button.setAttribute('aria-pressed',on?'true':'false');
-      button.title='Star Dungeon';
+      button.removeAttribute('title');
+      button.dataset.starTooltip='Star Dungeon';
       button.disabled=!canEdit();
       card.classList.toggle('party-starred',on);
     });
@@ -128,9 +131,13 @@
         star=document.createElement('span');
         star.className='party-star-public';
         star.textContent='★';
-        star.title='Star Dungeon';
+        star.dataset.starTooltip='Star Dungeon';
         star.setAttribute('aria-label','Star Dungeon');
         name.appendChild(star);
+      }else if(on&&star){
+        star.removeAttribute('title');
+        star.dataset.starTooltip='Star Dungeon';
+        star.setAttribute('aria-label','Star Dungeon');
       }else if(!on&&star){
         star.remove();
       }
