@@ -73,8 +73,8 @@
     dot.style.backgroundSize='contain';
     dot.style.borderRadius='0';
     dot.style.boxShadow='none';
-    dot.style.width=dot.closest('.slot')?'22px':'24px';
-    dot.style.height=dot.closest('.slot')?'22px':'24px';
+    dot.style.width=dot.closest('.slot')?'26px':'28px';
+    dot.style.height=dot.closest('.slot')?'26px':'28px';
     dot.style.minWidth=dot.style.width;
   }
 
