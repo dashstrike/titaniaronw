@@ -88,13 +88,13 @@ const TITANIA_IS_MEMBER_PAGE = /\/member\.html$/i.test(window.location.pathname)
   else loadScript();
 })();
 
-/* Member profile links inside Manage Members. */
+/* Member profile links inside Manage Members + Dashboard rankings. */
 (function loadTitaniaMemberLinks(){
   if (!TITANIA_IS_MANAGEMENT_PAGE) return;
   const loadScript = () => {
     if (document.querySelector('script[data-titania-member-links]')) return;
     const script = document.createElement('script');
-    script.src = './js/member-links.js?v=20260905-2';
+    script.src = './js/member-links.js?v=20260906-3';
     script.setAttribute('data-titania-member-links', '1');
     document.body.appendChild(script);
   };
