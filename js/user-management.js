@@ -10,6 +10,14 @@
   let client=null;
   let currentUserId='';
 
+  const ROLE_OPTIONS=[
+    ['pending','Pending'],
+    ['viewer','Viewer'],
+    ['attendance_auditor','Attendance Auditor'],
+    ['party_organizer','Party Organizer'],
+    ['admin','Admin']
+  ];
+
   function esc(v){return String(v==null?'':v).replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));}
 
   function maskEmail(email){
@@ -30,7 +38,7 @@
   }
 
   function roleOptions(selected){
-    return ['pending','viewer','organizer','leader','admin'].map(role=>`<option value="${role}" ${role===selected?'selected':''}>${role}</option>`).join('');
+    return ROLE_OPTIONS.map(([value,label])=>`<option value="${value}" ${value===selected?'selected':''}>${label}</option>`).join('');
   }
 
   function renderUsers(rows){
