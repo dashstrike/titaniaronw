@@ -1,4 +1,4 @@
-/* Open Manage Members names in a dedicated profile tab. */
+/* Open member names in a dedicated profile tab. */
 (function(){
   'use strict';
 
@@ -14,23 +14,27 @@
     }
   }
 
+  function decorateNode(node){
+    if(!node||node.tagName==='A')return;
+    const name=String(node.textContent||'').trim();
+    const memberId=memberIdByName(name);
+    if(!memberId)return;
+
+    const link=document.createElement('a');
+    link.className=node.className;
+    link.textContent=node.textContent;
+    link.title=`View ${name} profile in a new tab`;
+    link.href=`./member.html?id=${encodeURIComponent(memberId)}`;
+    link.target='_blank';
+    link.rel='noopener';
+    node.replaceWith(link);
+  }
+
   function decorate(){
     decorateQueued=false;
-    document.querySelectorAll('#dashManageTable .dash-manage-name').forEach(node=>{
-      if(node.tagName==='A')return;
-      const name=String(node.textContent||'').trim();
-      const memberId=memberIdByName(name);
-      if(!memberId)return;
 
-      const link=document.createElement('a');
-      link.className=node.className;
-      link.textContent=node.textContent;
-      link.title=`View ${name} profile in a new tab`;
-      link.href=`./member.html?id=${encodeURIComponent(memberId)}`;
-      link.target='_blank';
-      link.rel='noopener';
-      node.replaceWith(link);
-    });
+    document.querySelectorAll('#dashManageTable .dash-manage-name').forEach(decorateNode);
+    document.querySelectorAll('.dash-gr-rank-grid .dash-bar-name').forEach(decorateNode);
   }
 
   function scheduleDecorate(){
@@ -43,8 +47,19 @@
   function boot(){
     const style=document.createElement('style');
     style.textContent=`
-      a.dash-manage-name{text-decoration:none;cursor:pointer;transition:color .15s ease,text-decoration-color .15s ease}
-      a.dash-manage-name:hover{color:var(--violet);text-decoration:underline;text-underline-offset:3px}
+      a.dash-manage-name,
+      .dash-gr-rank-grid a.dash-bar-name{
+        color:inherit;
+        text-decoration:none;
+        cursor:pointer;
+        transition:color .15s ease,text-decoration-color .15s ease;
+      }
+      a.dash-manage-name:hover,
+      .dash-gr-rank-grid a.dash-bar-name:hover{
+        color:var(--violet);
+        text-decoration:underline;
+        text-underline-offset:3px;
+      }
     `;
     document.head.appendChild(style);
 
