@@ -109,7 +109,7 @@
       const on=selected.has(key);
       button.classList.toggle('on',on);
       button.setAttribute('aria-pressed',on?'true':'false');
-      button.title=on?'Remove this Party from Star':'Mark this Party as going to Star';
+      button.title='Star Dungeon';
       button.disabled=!canEdit();
       card.classList.toggle('party-starred',on);
     });
@@ -128,8 +128,8 @@
         star=document.createElement('span');
         star.className='party-star-public';
         star.textContent='★';
-        star.title='This Party is going to Star';
-        star.setAttribute('aria-label','Going to Star');
+        star.title='Star Dungeon';
+        star.setAttribute('aria-label','Star Dungeon');
         name.appendChild(star);
       }else if(!on&&star){
         star.remove();
