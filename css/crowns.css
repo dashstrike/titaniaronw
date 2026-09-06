@@ -1,0 +1,30 @@
+.slot .crown,
+.member .crown,
+.member-card .crown,
+.team-card .crown,
+.dash-manage-row .crown{
+  width:26px!important;
+  height:26px!important;
+  min-width:26px!important;
+  display:inline-flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  flex:0 0 26px!important;
+  font-size:26px!important;
+  line-height:1!important;
+  vertical-align:middle!important;
+}
+
+@media(max-width:720px){
+  .slot .crown,
+  .member .crown,
+  .member-card .crown,
+  .team-card .crown,
+  .dash-manage-row .crown{
+    width:26px!important;
+    height:26px!important;
+    min-width:26px!important;
+    flex-basis:26px!important;
+    font-size:26px!important;
+  }
+}
