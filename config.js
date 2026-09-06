@@ -1,6 +1,7 @@
 /* Compatibility bootstrap. Real configuration lives in ./js/config.js. */
 document.write('<script src="./js/config.js?v=20260905-1"><\/script>');
 document.write('<script src="./js/job-icons-global.js?v=20260906-3"><\/script>');
+document.write('<link rel="stylesheet" href="./css/crowns.css?v=20260906-1">');
 document.write('<link rel="stylesheet" href="./css/tooltips.css?v=20260906-1">');
 document.write('<script src="./js/tooltips-global.js?v=20260906-2"><\/script>');
 document.write('<link rel="stylesheet" href="./css/party-stars.css?v=20260906-8">');
