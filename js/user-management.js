@@ -30,7 +30,7 @@
   }
 
   function roleOptions(selected){
-    return ['pending','viewer','leader','admin'].map(role=>`<option value="${role}" ${role===selected?'selected':''}>${role}</option>`).join('');
+    return ['pending','viewer','organizer','leader','admin'].map(role=>`<option value="${role}" ${role===selected?'selected':''}>${role}</option>`).join('');
   }
 
   function renderUsers(rows){
