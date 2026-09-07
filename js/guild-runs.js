@@ -87,7 +87,7 @@
       const need=runRegs.filter(r=>r.registration_type==='need_carry').length;
       const carry=runRegs.filter(r=>r.registration_type==='carrier').length;
       const time=formatTime(run.run_time);
-      const statusText=run.status==='open'?'Registration Open':run.status==='closed'?'Registration Closed':'Run Ended';
+      const statusText=run.status==='open'?'Open':run.status==='closed'?'Closed':'Ended';
       const statusClass=run.status==='ended'?'ended':run.status;
       const controls=run.status==='ended'
         ? '<span class="muted">Ended</span>'
