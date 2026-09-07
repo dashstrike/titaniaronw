@@ -105,7 +105,7 @@
   async function loadRegistration(){
     const params=new URLSearchParams(location.search);
     const runId=params.get('run');
-    if(!runId)throw new Error('Guild Run was not specified.');
+    if(!runId)throw new Error('No guild runs available at the moment.');
 
     const [runResult,regsResult]=await Promise.all([
       client.from('guild_runs').select('id,run_type,run_date,run_time,status').eq('id',runId).single(),
