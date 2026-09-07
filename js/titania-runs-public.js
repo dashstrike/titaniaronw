@@ -16,10 +16,16 @@
   function formatTime(time){if(!time)return '';const parts=String(time).split(':');const d=new Date();d.setHours(Number(parts[0]||0),Number(parts[1]||0),0,0);return d.toLocaleTimeString(undefined,{hour:'numeric',minute:'2-digit'});}
   function memberById(id){return roster.find(m=>String(m.id)===String(id));}
   function iconFor(member){const file=iconMap[member&&member.cls];return file?`./assets/images/job/${encodeURIComponent(file)}`:'';}
-  function memberHtml(member){
+  function statusIcon(status){
+    if(status==='done')return '<span class="run-status-icon done" title="Done" aria-label="Done">✓</span>';
+    if(status==='cancel')return '<span class="run-status-icon cancel" title="Cancel" aria-label="Cancel">✕</span>';
+    if(status==='mia')return '<span class="run-status-icon mia" title="MIA" aria-label="MIA">?</span>';
+    return '';
+  }
+  function memberHtml(member,status){
     if(!member)return '<span>Unknown member</span>';
     const src=iconFor(member);
-    return `<span class="player-cell">${src?`<img class="job-icon" src="${esc(src)}" alt="">`:''}<span>${esc(member.name)}</span></span>`;
+    return `<span class="player-cell">${src?`<img class="job-icon" src="${esc(src)}" alt="">`:''}<span>${esc(member.name)}</span>${statusIcon(status)}</span>`;
   }
   function showError(message){loading.hidden=true;errorBox.hidden=false;errorBox.textContent=message;}
   function clearError(){errorBox.hidden=true;}
@@ -50,11 +56,13 @@
       const needCarry=regs.filter(r=>r.registration_type==='need_carry');
       const time=formatTime(run.run_time);
       const isOpen=run.status==='open';
+      const note=String(run.note||'').trim();
       return `<article class="run-card public-run-card" data-run-id="${esc(run.id)}">
         <div class="run-card-head">
           <div>
             <div class="run-title">${esc(runLabel(run.run_type))}</div>
             <div class="run-meta">${esc(formatDate(run.run_date))}${time?` · ${esc(time)}`:''}</div>
+            ${note?`<div class="run-note">${esc(note)}</div>`:''}
           </div>
           <span class="status ${isOpen?'open':'closed'}">${isOpen?'Registration Open':'Registration Closed'}</span>
         </div>
@@ -66,8 +74,8 @@
         </form>`:'<div class="notice public-closed-note">Registration is currently closed.</div>'}
 
         <div class="registration-columns">
-          <div><h3>Can Carry <span class="count">(${carriers.length})</span></h3><div class="player-list">${carriers.length?carriers.map(r=>`<div class="player-row">${memberHtml(memberById(r.member_id))}</div>`).join(''):'<div class="empty">No players yet.</div>'}</div></div>
-          <div><h3>Need Carry <span class="count">(${needCarry.length})</span></h3><div class="player-list">${needCarry.length?needCarry.map(r=>`<div class="player-row">${memberHtml(memberById(r.member_id))}</div>`).join(''):'<div class="empty">No players yet.</div>'}</div></div>
+          <div><h3>Can Carry <span class="count">(${carriers.length})</span></h3><div class="player-list">${carriers.length?carriers.map(r=>`<div class="player-row">${memberHtml(memberById(r.member_id),r.carry_status)}</div>`).join(''):'<div class="empty">No players yet.</div>'}</div></div>
+          <div><h3>Need Carry <span class="count">(${needCarry.length})</span></h3><div class="player-list">${needCarry.length?needCarry.map(r=>`<div class="player-row">${memberHtml(memberById(r.member_id),r.carry_status)}</div>`).join(''):'<div class="empty">No players yet.</div>'}</div></div>
         </div>
       </article>`;
     }).join('');
