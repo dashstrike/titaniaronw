@@ -27,7 +27,7 @@ const TITANIA_IS_MEMBER_PAGE = /\/member\.html$/i.test(window.location.pathname)
   if (document.querySelector('link[data-titania-mobile-nav]')) return;
   const link = document.createElement('link');
   link.rel = 'stylesheet';
-  link.href = './css/mobile-nav.css?v=20260905-1';
+  link.href = './css/mobile-nav.css?v=20260907-2';
   link.setAttribute('data-titania-mobile-nav', '1');
   document.head.appendChild(link);
 })();
@@ -139,6 +139,13 @@ const TITANIA_IS_MEMBER_PAGE = /\/member\.html$/i.test(window.location.pathname)
   else loadScript();
 })();
 
+/* Open native date/time pickers when the input itself is clicked. */
+document.addEventListener('click', event => {
+  const input = event.target.closest('input[type="date"],input[type="time"]');
+  if (!input || typeof input.showPicker !== 'function') return;
+  try { input.showPicker(); } catch (_error) {}
+});
+
 /*
  * Reversible Polarity Zone hide switch.
  * This only hides UI/public access; saved Supabase Polarity data remains untouched.
@@ -148,7 +155,7 @@ const TITANIA_IS_MEMBER_PAGE = /\/member\.html$/i.test(window.location.pathname)
     if (!document.querySelector('link[data-titania-polarity-hidden]')) {
       const link = document.createElement('link');
       link.rel = 'stylesheet';
-      link.href = './css/polarity-hidden.css?v=20260905-1';
+      link.href = './css/polarity-hidden.css?v=20260907-2';
       link.setAttribute('data-titania-polarity-hidden', '1');
       document.head.appendChild(link);
     }
