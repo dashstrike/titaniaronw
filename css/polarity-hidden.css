@@ -42,9 +42,9 @@ body[data-view="polarity"]::before {
   box-shadow: 0 18px 50px #00000055;
 }
 
-/* Dashboard, Members, Guild League, Siege, Attendance remain visible. */
+/* Dashboard, Members, Guild League, Siege, Attendance, Runs remain visible. */
 @media (max-width: 720px) {
   .event-tabs {
-    grid-template-columns: repeat(5, minmax(0, 1fr)) !important;
+    grid-template-columns: repeat(6, minmax(0, 1fr)) !important;
   }
 }
