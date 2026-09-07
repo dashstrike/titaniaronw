@@ -47,6 +47,16 @@
     iconMap=iconsResult||{};
   }
 
+  function carryStatusControl(reg){
+    if(reg.registration_type!=='need_carry')return '—';
+    const value=reg.carry_status||'';
+    return `<div class="carry-switch" data-reg-id="${esc(reg.id)}">
+      <button type="button" data-carry-status="done" class="${value==='done'?'active done':''}">Done</button>
+      <button type="button" data-carry-status="cancel" class="${value==='cancel'?'active cancel':''}">Cancel</button>
+      <button type="button" data-carry-status="mia" class="${value==='mia'?'active mia':''}">MIA</button>
+    </div>`;
+  }
+
   async function loadRuns(){
     const runsPanel=document.getElementById('runsPanel');
     const createPanel=document.getElementById('createPanel');
@@ -56,7 +66,7 @@
 
     const [runsResult,regsResult]=await Promise.all([
       client.from('guild_runs').select('id,run_type,run_date,run_time,status,created_at').order('run_date',{ascending:false}).order('run_time',{ascending:false}),
-      client.from('guild_run_registrations').select('id,run_id,member_id,registration_type,created_at').order('created_at',{ascending:true})
+      client.from('guild_run_registrations').select('id,run_id,member_id,registration_type,carry_status,created_at').order('created_at',{ascending:true})
     ]);
     if(runsResult.error)throw runsResult.error;
     if(regsResult.error)throw regsResult.error;
@@ -76,12 +86,46 @@
       });
       const need=runRegs.filter(r=>r.registration_type==='need_carry').length;
       const carry=runRegs.filter(r=>r.registration_type==='carrier').length;
-      const detail=isOrganizer()?`<div class="run-summary"><div class="summary-counts"><span>Need Carry: <b>${need}</b></span><span>Can Carry: <b>${carry}</b></span></div>${runRegs.length?`<div class="table-wrap"><table><thead><tr><th>Player</th><th>Class</th><th>GR</th><th>Type</th></tr></thead><tbody>${sortedRunRegs.map(reg=>{const member=memberById(reg.member_id);return `<tr><td>${memberHtml(member)}</td><td>${esc(member&&member.cls||'—')}</td><td>${esc(member&&member.gr!=null?Number(member.gr).toLocaleString():'—')}</td><td>${esc(typeLabel(reg.registration_type))}</td></tr>`;}).join('')}</tbody></table></div>`:'<div class="empty">No registrations yet.</div>'}</div>`:'';
       const time=formatTime(run.run_time);
-      return `<article class="run-card"><div class="run-card-head"><div><div class="run-title">${esc(runLabel(run.run_type))}</div><div class="run-meta">${esc(formatDate(run.run_date))}${time?` · ${esc(time)}`:''}</div></div><div class="run-actions"><span class="status ${esc(run.status)}">${run.status==='open'?'Registration Open':'Registration Closed'}</span><a class="btn" href="./titaniaruns.html">Open Public Registration</a></div></div>${detail}</article>`;
+      const statusText=run.status==='open'?'Registration Open':run.status==='closed'?'Registration Closed':'Run Ended';
+      const statusClass=run.status==='ended'?'ended':run.status;
+      const controls=run.status==='ended'
+        ? '<span class="muted">Ended</span>'
+        : `<button type="button" class="btn" data-run-toggle="${esc(run.id)}" data-next-status="${run.status==='open'?'closed':'open'}">${run.status==='open'?'Close Registration':'Open Registration'}</button><button type="button" class="btn danger" data-run-end="${esc(run.id)}">End Run</button>`;
+      const table=runRegs.length?`<div class="table-wrap"><table><thead><tr><th>Player</th><th>Class</th><th>GR</th><th>Type</th><th>Carry Status</th></tr></thead><tbody>${sortedRunRegs.map(reg=>{const member=memberById(reg.member_id);return `<tr><td>${memberHtml(member)}</td><td>${esc(member&&member.cls||'—')}</td><td>${esc(member&&member.gr!=null?Number(member.gr).toLocaleString():'—')}</td><td>${esc(typeLabel(reg.registration_type))}</td><td>${carryStatusControl(reg)}</td></tr>`;}).join('')}</tbody></table></div>`:'<div class="empty">No registrations yet.</div>';
+      const detail=isOrganizer()?`<div class="run-summary"><div class="summary-counts"><span>Need Carry: <b>${need}</b></span><span>Can Carry: <b>${carry}</b></span></div>${table}</div>`:'';
+      return `<article class="run-card"><div class="run-card-head"><div><div class="run-title">${esc(runLabel(run.run_type))}</div><div class="run-meta">${esc(formatDate(run.run_date))}${time?` · ${esc(time)}`:''}</div></div><div class="run-actions"><span class="status ${esc(statusClass)}">${esc(statusText)}</span>${controls}<a class="btn" href="./titaniaruns.html" target="_blank" rel="noopener">Open Public Registration</a></div></div>${detail}</article>`;
     }).join(''):'<div class="empty">No Guild Runs created yet.</div>';
+
     runsPanel.hidden=false;
     loading.hidden=true;
+    wireRunControls();
+  }
+
+  function wireRunControls(){
+    document.querySelectorAll('[data-run-toggle]').forEach(button=>button.addEventListener('click',async()=>{
+      button.disabled=true;
+      const {error}=await client.from('guild_runs').update({status:button.dataset.nextStatus}).eq('id',button.dataset.runToggle);
+      if(error){button.disabled=false;showError(error.message||'Could not update registration status.');return;}
+      await loadRuns();
+    }));
+
+    document.querySelectorAll('[data-run-end]').forEach(button=>button.addEventListener('click',async()=>{
+      if(!confirm('End this run? It will no longer appear on the public registration page.'))return;
+      button.disabled=true;
+      const {error}=await client.from('guild_runs').update({status:'ended'}).eq('id',button.dataset.runEnd);
+      if(error){button.disabled=false;showError(error.message||'Could not end run.');return;}
+      await loadRuns();
+    }));
+
+    document.querySelectorAll('.carry-switch [data-carry-status]').forEach(button=>button.addEventListener('click',async()=>{
+      const wrap=button.closest('.carry-switch');
+      if(!wrap)return;
+      wrap.querySelectorAll('button').forEach(b=>b.disabled=true);
+      const {error}=await client.from('guild_run_registrations').update({carry_status:button.dataset.carryStatus}).eq('id',wrap.dataset.regId);
+      if(error){wrap.querySelectorAll('button').forEach(b=>b.disabled=false);showError(error.message||'Could not update carry status.');return;}
+      await loadRuns();
+    }));
   }
 
   async function createRun(event){
