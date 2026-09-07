@@ -3,20 +3,35 @@
 
   if(!(/\/$|\/index\.html$/i.test(location.pathname)))return;
 
-  function addLink(){
-    if(document.getElementById('guildRunsBtn'))return;
-    const usersButton=document.getElementById('adminUsersBtn');
-    const logoutButton=document.getElementById('logoutBtn');
-    const anchor=document.createElement('a');
-    anchor.id='guildRunsBtn';
-    anchor.className='btn';
-    anchor.href='./guild-runs.html';
-    anchor.textContent='⚔ Guild Runs';
-    const parent=(usersButton||logoutButton)&&((usersButton||logoutButton).parentElement);
-    if(!parent)return;
-    parent.insertBefore(anchor,usersButton||logoutButton);
+  function addTab(){
+    const tabs=document.getElementById('eventTabs');
+    if(!tabs||tabs.querySelector('[data-event="runs"]'))return false;
+    const attendance=tabs.querySelector('[data-event="attendance"]');
+    if(!attendance)return false;
+
+    const button=document.createElement('button');
+    button.className='event-tab';
+    button.dataset.event='runs';
+    button.type='button';
+    button.innerHTML='⚔ Runs';
+    button.addEventListener('click',event=>{
+      event.preventDefault();
+      event.stopImmediatePropagation();
+      location.href='./guild-runs.html';
+    },true);
+    attendance.insertAdjacentElement('afterend',button);
+    return true;
   }
 
-  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',addLink,{once:true});
-  else addLink();
+  function boot(){
+    if(addTab())return;
+    let tries=0;
+    const timer=setInterval(()=>{
+      tries++;
+      if(addTab()||tries>=50)clearInterval(timer);
+    },100);
+  }
+
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});
+  else boot();
 })();
