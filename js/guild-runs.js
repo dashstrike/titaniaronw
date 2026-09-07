@@ -26,6 +26,13 @@
   function formatDate(date){if(!date)return '';const d=new Date(`${date}T00:00:00`);return d.toLocaleDateString(undefined,{day:'numeric',month:'short',year:'numeric'});}
   function formatTime(time){if(!time)return '';const parts=String(time).split(':');const d=new Date();d.setHours(Number(parts[0]||0),Number(parts[1]||0),0,0);return d.toLocaleTimeString(undefined,{hour:'numeric',minute:'2-digit'});}
 
+  function enableWholeInputPicker(input){
+    if(!input||typeof input.showPicker!=='function')return;
+    input.addEventListener('click',()=>{
+      try{input.showPicker();}catch(_e){}
+    });
+  }
+
   async function loadBase(){
     if(!window.supabase||!cfg.supabaseUrl||!cfg.supabasePublishableKey)throw new Error('Supabase configuration is missing.');
     client=window.supabase.createClient(cfg.supabaseUrl,cfg.supabasePublishableKey,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:false}});
@@ -70,7 +77,7 @@
       const carry=runRegs.filter(r=>r.registration_type==='carrier').length;
       const detail=isOrganizer()?`<div class="run-summary"><div class="summary-counts"><span>Need Carry: <b>${need}</b></span><span>Can Carry: <b>${carry}</b></span></div>${runRegs.length?`<div class="table-wrap"><table><thead><tr><th>Player</th><th>Class</th><th>GR</th><th>Type</th></tr></thead><tbody>${runRegs.map(reg=>{const member=memberById(reg.member_id);return `<tr><td>${memberHtml(member)}</td><td>${esc(member&&member.cls||'—')}</td><td>${esc(member&&member.gr!=null?Number(member.gr).toLocaleString():'—')}</td><td>${esc(typeLabel(reg.registration_type))}</td></tr>`;}).join('')}</tbody></table></div>`:'<div class="empty">No registrations yet.</div>'}</div>`:'';
       const time=formatTime(run.run_time);
-      return `<article class="run-card"><div class="run-card-head"><div><div class="run-title">${esc(runLabel(run.run_type))}</div><div class="run-meta">${esc(formatDate(run.run_date))}${time?` · ${esc(time)}`:''}</div></div><div class="run-actions"><span class="status ${esc(run.status)}">${run.status==='open'?'Registration Open':'Registration Closed'}</span><a class="btn" href="./guild-runs-register.html?run=${encodeURIComponent(run.id)}">Open Registration</a></div></div>${detail}</article>`;
+      return `<article class="run-card"><div class="run-card-head"><div><div class="run-title">${esc(runLabel(run.run_type))}</div><div class="run-meta">${esc(formatDate(run.run_date))}${time?` · ${esc(time)}`:''}</div></div><div class="run-actions"><span class="status ${esc(run.status)}">${run.status==='open'?'Registration Open':'Registration Closed'}</span><a class="btn" href="./titaniaruns.html?run=${encodeURIComponent(run.id)}">Open Registration</a></div></div>${detail}</article>`;
     }).join(''):'<div class="empty">No Guild Runs created yet.</div>';
     runsPanel.hidden=false;
     loading.hidden=true;
@@ -167,7 +174,10 @@
       await loadBase();
       if(page==='organizer'){
         const dateInput=document.getElementById('runDate');
+        const timeInput=document.getElementById('runTime');
         if(dateInput&&!dateInput.value)dateInput.value=new Date().toISOString().slice(0,10);
+        enableWholeInputPicker(dateInput);
+        enableWholeInputPicker(timeInput);
         const form=document.getElementById('createRunForm');if(form)form.addEventListener('submit',createRun);
         await loadRuns();
       }else if(page==='register'){
