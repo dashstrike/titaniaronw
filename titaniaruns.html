@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Titania · Guild Run Registration</title>
+  <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
+  <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="./css/guild-runs.css?v=20260907-1">
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="./js/config.js?v=20260907-1"></script>
+  <script src="./js/guild-runs.js?v=20260907-2" defer></script>
+</head>
+<body data-guild-runs-page="register">
+  <header class="topbar">
+    <div class="brand">
+      <img src="titania-logo.webp" alt="Titania">
+      <div><b>TITANIA GUILD MANAGEMENT TOOL</b><span>Guild Run Registration</span></div>
+    </div>
+    <div class="top-actions"><a class="btn" href="./guild-runs.html">← Guild Runs</a></div>
+  </header>
+
+  <main class="wrap">
+    <div id="pageError" class="error" hidden></div>
+    <div id="loading" class="loading">Loading registration…</div>
+
+    <section id="registrationPanel" class="panel" hidden>
+      <div class="section-head">
+        <div><h1 id="registrationTitle">Registration</h1><p id="registrationMeta" class="muted"></p></div>
+      </div>
+
+      <div id="registrationClosed" class="notice" hidden>Registration is closed.</div>
+
+      <form id="registerForm" class="register-grid">
+        <label>Player<select id="memberSelect" required><option value=""></option></select></label>
+        <label>Register As<select id="registrationType" required><option value="need_carry">Need Carry</option><option value="carrier">Can Carry</option></select></label>
+        <button id="registerBtn" class="btn primary" type="submit">Register</button>
+      </form>
+
+      <div class="registration-columns">
+        <div><h3>Need Carry <span id="needCarryCount" class="count"></span></h3><div id="needCarryList" class="player-list"></div></div>
+        <div><h3>Can Carry <span id="carrierCount" class="count"></span></h3><div id="carrierList" class="player-list"></div></div>
+      </div>
+    </section>
+  </main>
+</body>
+</html>
