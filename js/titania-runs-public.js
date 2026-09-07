@@ -81,9 +81,33 @@
     }).join('');
 
     document.querySelectorAll('.public-member-select').forEach(select=>{
-      if(window.jQuery&&jQuery.fn&&jQuery.fn.select2){
-        jQuery(select).select2({placeholder:'Search player…',allowClear:true,templateResult:select2Template,templateSelection:select2Template,width:'100%'});
-      }
+      if(!(window.jQuery&&jQuery.fn&&jQuery.fn.select2))return;
+      const runId=select.dataset.memberSelect;
+      const run=runs.find(item=>String(item.id)===String(runId));
+      const regs=run&&Array.isArray(run.registrations)?run.registrations:[];
+      const registeredIds=new Set(regs.map(r=>String(r.member_id)));
+      const registeredNames=roster.filter(m=>registeredIds.has(String(m.id))).map(m=>String(m.name||''));
+      let searchTerm='';
+
+      jQuery(select).select2({
+        placeholder:'Search player…',
+        allowClear:true,
+        templateResult:select2Template,
+        templateSelection:select2Template,
+        width:'100%',
+        matcher(params,data){
+          searchTerm=String(params.term||'').trim();
+          if(!searchTerm)return data;
+          return String(data.text||'').toLowerCase().includes(searchTerm.toLowerCase())?data:null;
+        },
+        language:{
+          noResults(){
+            const term=searchTerm.toLowerCase();
+            if(term&&registeredNames.some(name=>name.toLowerCase().includes(term)))return 'Player already on the list';
+            return 'Player not found';
+          }
+        }
+      });
     });
 
     document.querySelectorAll('[data-register-form]').forEach(form=>form.addEventListener('submit',register));
