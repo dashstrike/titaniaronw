@@ -26,13 +26,6 @@
   function formatDate(date){if(!date)return '';const d=new Date(`${date}T00:00:00`);return d.toLocaleDateString(undefined,{day:'numeric',month:'short',year:'numeric'});}
   function formatTime(time){if(!time)return '';const parts=String(time).split(':');const d=new Date();d.setHours(Number(parts[0]||0),Number(parts[1]||0),0,0);return d.toLocaleTimeString(undefined,{hour:'numeric',minute:'2-digit'});}
 
-  function enableWholeInputPicker(input){
-    if(!input||typeof input.showPicker!=='function')return;
-    input.addEventListener('click',()=>{
-      try{input.showPicker();}catch(_e){}
-    });
-  }
-
   async function loadBase(){
     if(!window.supabase||!cfg.supabaseUrl||!cfg.supabasePublishableKey)throw new Error('Supabase configuration is missing.');
     client=window.supabase.createClient(cfg.supabaseUrl,cfg.supabasePublishableKey,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:false}});
@@ -174,10 +167,7 @@
       await loadBase();
       if(page==='organizer'){
         const dateInput=document.getElementById('runDate');
-        const timeInput=document.getElementById('runTime');
         if(dateInput&&!dateInput.value)dateInput.value=new Date().toISOString().slice(0,10);
-        enableWholeInputPicker(dateInput);
-        enableWholeInputPicker(timeInput);
         const form=document.getElementById('createRunForm');if(form)form.addEventListener('submit',createRun);
         await loadRuns();
       }else if(page==='register'){
