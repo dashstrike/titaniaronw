@@ -65,7 +65,7 @@
     if(isOrganizer())createPanel.hidden=false;
 
     const [runsResult,regsResult]=await Promise.all([
-      client.from('guild_runs').select('id,run_type,run_date,run_time,status,created_at').order('run_date',{ascending:false}).order('run_time',{ascending:false}),
+      client.from('guild_runs').select('id,run_type,run_date,run_time,note,status,created_at').order('run_date',{ascending:false}).order('run_time',{ascending:false}),
       client.from('guild_run_registrations').select('id,run_id,member_id,registration_type,carry_status,created_at').order('created_at',{ascending:true})
     ]);
     if(runsResult.error)throw runsResult.error;
@@ -92,8 +92,9 @@
       const controls=run.status==='ended'
         ? '<span class="muted">Ended</span>'
         : `<button type="button" class="btn" data-run-toggle="${esc(run.id)}" data-next-status="${run.status==='open'?'closed':'open'}">${run.status==='open'?'Close Registration':'Open Registration'}</button><button type="button" class="btn danger" data-run-end="${esc(run.id)}">End Run</button>`;
-      const table=runRegs.length?`<div class="table-wrap"><table><thead><tr><th>Player</th><th>Class</th><th>GR</th><th>Type</th><th>Carry Status</th></tr></thead><tbody>${sortedRunRegs.map(reg=>{const member=memberById(reg.member_id);return `<tr><td>${memberHtml(member)}</td><td>${esc(member&&member.cls||'—')}</td><td>${esc(member&&member.gr!=null?Number(member.gr).toLocaleString():'—')}</td><td>${esc(typeLabel(reg.registration_type))}</td><td>${carryStatusControl(reg)}</td></tr>`;}).join('')}</tbody></table></div>`:'<div class="empty">No registrations yet.</div>';
-      const detail=isOrganizer()?`<div class="run-summary"><div class="summary-counts"><span>Need Carry: <b>${need}</b></span><span>Can Carry: <b>${carry}</b></span></div>${table}</div>`:'';
+      const table=runRegs.length?`<div class="table-wrap"><table><thead><tr><th>Player</th><th>Class</th><th>GR</th><th>Type</th><th>Status</th></tr></thead><tbody>${sortedRunRegs.map(reg=>{const member=memberById(reg.member_id);return `<tr><td>${memberHtml(member)}</td><td>${esc(member&&member.cls||'—')}</td><td>${esc(member&&member.gr!=null?Number(member.gr).toLocaleString():'—')}</td><td>${esc(typeLabel(reg.registration_type))}</td><td>${carryStatusControl(reg)}</td></tr>`;}).join('')}</tbody></table></div>`:'<div class="empty">No registrations yet.</div>';
+      const note=String(run.note||'').trim();
+      const detail=isOrganizer()?`<div class="run-summary">${note?`<div class="run-note">${esc(note)}</div>`:''}<div class="summary-counts"><span>Need Carry: <b>${need}</b></span><span>Can Carry: <b>${carry}</b></span></div>${table}</div>`:'';
       return `<article class="run-card"><div class="run-card-head"><div><div class="run-title">${esc(runLabel(run.run_type))}</div><div class="run-meta">${esc(formatDate(run.run_date))}${time?` · ${esc(time)}`:''}</div></div><div class="run-actions"><span class="status ${esc(statusClass)}">${esc(statusText)}</span>${controls}<a class="btn" href="./titaniaruns.html" target="_blank" rel="noopener">Open Public Registration</a></div></div>${detail}</article>`;
     }).join(''):'<div class="empty">No Guild Runs created yet.</div>';
 
@@ -123,7 +124,7 @@
       if(!wrap)return;
       wrap.querySelectorAll('button').forEach(b=>b.disabled=true);
       const {error}=await client.from('guild_run_registrations').update({carry_status:button.dataset.carryStatus}).eq('id',wrap.dataset.regId);
-      if(error){wrap.querySelectorAll('button').forEach(b=>b.disabled=false);showError(error.message||'Could not update carry status.');return;}
+      if(error){wrap.querySelectorAll('button').forEach(b=>b.disabled=false);showError(error.message||'Could not update status.');return;}
       await loadRuns();
     }));
   }
@@ -135,11 +136,13 @@
     const runType=document.getElementById('runType').value;
     const runDate=document.getElementById('runDate').value;
     const runTime=document.getElementById('runTime').value||null;
+    const note=document.getElementById('runNote').value.trim();
     if(!runDate)return;
     button.disabled=true;button.textContent='Creating…';
-    const {error}=await client.from('guild_runs').insert({run_type:runType,run_date:runDate,run_time:runTime,status:'open'});
+    const {error}=await client.from('guild_runs').insert({run_type:runType,run_date:runDate,run_time:runTime,note,status:'open'});
     button.disabled=false;button.textContent='Create Run';
     if(error){showError(error.message||'Could not create run.');return;}
+    document.getElementById('runNote').value='';
     await loadRuns();
   }
 
