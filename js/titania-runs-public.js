@@ -49,20 +49,21 @@
       const carriers=regs.filter(r=>r.registration_type==='carrier');
       const needCarry=regs.filter(r=>r.registration_type==='need_carry');
       const time=formatTime(run.run_time);
+      const isOpen=run.status==='open';
       return `<article class="run-card public-run-card" data-run-id="${esc(run.id)}">
         <div class="run-card-head">
           <div>
             <div class="run-title">${esc(runLabel(run.run_type))}</div>
             <div class="run-meta">${esc(formatDate(run.run_date))}${time?` · ${esc(time)}`:''}</div>
           </div>
-          <span class="status open">Registration Open</span>
+          <span class="status ${isOpen?'open':'closed'}">${isOpen?'Registration Open':'Registration Closed'}</span>
         </div>
 
-        <form class="register-grid public-register-form" data-register-form="${esc(run.id)}">
+        ${isOpen?`<form class="register-grid public-register-form" data-register-form="${esc(run.id)}">
           <label>Player<select class="public-member-select" data-member-select="${esc(run.id)}" required><option value=""></option>${available.map(m=>`<option value="${esc(m.id)}">${esc(m.name)}</option>`).join('')}</select></label>
           <label>Register As<select data-registration-type="${esc(run.id)}" required><option value="need_carry">Need Carry</option><option value="carrier">Can Carry</option></select></label>
           <button class="btn primary" type="submit">Register</button>
-        </form>
+        </form>`:'<div class="notice public-closed-note">Registration is currently closed.</div>'}
 
         <div class="registration-columns">
           <div><h3>Can Carry <span class="count">(${carriers.length})</span></h3><div class="player-list">${carriers.length?carriers.map(r=>`<div class="player-row">${memberHtml(memberById(r.member_id))}</div>`).join(''):'<div class="empty">No players yet.</div>'}</div></div>
