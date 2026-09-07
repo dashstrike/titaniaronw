@@ -64,7 +64,7 @@
             <div class="run-meta">${esc(formatDate(run.run_date))}${time?` · ${esc(time)}`:''}</div>
             ${note?`<div class="run-note">${esc(note)}</div>`:''}
           </div>
-          <span class="status ${isOpen?'open':'closed'}">${isOpen?'Registration Open':'Registration Closed'}</span>
+          <span class="status ${isOpen?'open':'closed'}">${isOpen?'Open':'Closed'}</span>
         </div>
 
         ${isOpen?`<form class="register-grid public-register-form" data-register-form="${esc(run.id)}">
