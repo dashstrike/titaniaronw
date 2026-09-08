@@ -16,6 +16,37 @@
   white-space: nowrap;
 }
 
+/* Keep the same two-row top layout on every planner page. */
+@media (min-width: 721px) {
+  .topbar {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas:
+      "brand tabs"
+      "stats actions";
+    align-items: center;
+  }
+
+  .topbar .brand {
+    grid-area: brand;
+  }
+
+  .topbar .event-tabs {
+    grid-area: tabs;
+    justify-self: end;
+  }
+
+  .topbar .stats {
+    grid-area: stats;
+    justify-content: flex-start;
+  }
+
+  .topbar .actions {
+    grid-area: actions;
+    justify-content: flex-end;
+  }
+}
+
 @media (max-width: 900px) {
   .dash-gr-rank-grid .dash-bar-avg {
     width: 135px !important;
