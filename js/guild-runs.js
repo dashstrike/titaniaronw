@@ -22,6 +22,10 @@
     const src=iconFor(member);
     return `<span class="player-cell">${src?`<img class="job-icon" src="${esc(src)}" alt="">`:''}<span>${esc(member.name)}</span></span>`;
   }
+  function pickerIcon(type){
+    if(type==='date')return '<span class="run-picker-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"></rect><path d="M16 3v4M8 3v4M3 11h18"></path></svg></span>';
+    return '<span class="run-picker-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 2"></path></svg></span>';
+  }
   function showError(message){if(loading)loading.hidden=true;if(errorBox){errorBox.hidden=false;errorBox.textContent=message;}}
   function clearError(){if(errorBox)errorBox.hidden=true;}
 
@@ -98,9 +102,9 @@
           <input class="run-title-input" type="text" maxlength="200" value="${esc(run.note||'')}" placeholder="Untitled Run" data-run-edit="note" data-run-id="${esc(run.id)}">
         </div>
         <div class="run-meta-edit">
-          <input class="run-date-input" type="date" value="${esc(run.run_date||'')}" data-run-edit="run_date" data-run-id="${esc(run.id)}">
+          <span class="run-picker-wrap"><input class="run-date-input" type="date" value="${esc(run.run_date||'')}" data-run-edit="run_date" data-run-id="${esc(run.id)}">${pickerIcon('date')}</span>
           <span>·</span>
-          <input class="run-time-input" type="time" value="${esc(run.run_time?String(run.run_time).slice(0,5):'')}" data-run-edit="run_time" data-run-id="${esc(run.id)}">
+          <span class="run-picker-wrap"><input class="run-time-input" type="time" value="${esc(run.run_time?String(run.run_time).slice(0,5):'')}" data-run-edit="run_time" data-run-id="${esc(run.id)}">${pickerIcon('time')}</span>
           <span class="autosave-state" data-autosave-state="${esc(run.id)}"></span>
         </div>
       </div><div class="run-actions"><span class="status ${esc(statusClass)}">${esc(statusText)}</span>${controls}<a class="btn" href="./titaniaruns.html" target="_blank" rel="noopener">Open Public Registration</a></div></div>${detail}</article>`;
