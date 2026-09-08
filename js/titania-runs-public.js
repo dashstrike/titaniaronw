@@ -60,8 +60,7 @@
       return `<article class="run-card public-run-card" data-run-id="${esc(run.id)}">
         <div class="run-card-head">
           <div>
-            <div class="run-title">${esc(title)}</div>
-            <div class="run-type-pill ${run.run_type==='mirage'?'mirage':'time-echo'}">${esc(runLabel(run.run_type))}</div>
+            <div class="run-public-label"><span class="run-type-pill ${run.run_type==='mirage'?'mirage':'time-echo'}">${esc(runLabel(run.run_type))}</span><span class="run-public-title">${esc(title)}</span></div>
             <div class="run-meta">${esc(formatDate(run.run_date))}${time?` · ${esc(time)}`:''}</div>
           </div>
           <span class="status ${isOpen?'open':'closed'}">${isOpen?'Open':'Closed'}</span>
