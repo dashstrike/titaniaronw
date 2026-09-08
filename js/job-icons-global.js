@@ -24,8 +24,10 @@
 
     const attendance=dot.closest('.att-member-main');
     if(attendance){
-      const cls=attendance.querySelector('div > span');
-      if(cls&&iconMap[text(cls)])return text(cls);
+      const info=attendance.querySelector(':scope > div');
+      const cls=info&&info.querySelector('span');
+      const value=text(cls);
+      if(iconMap[value])return value;
     }
 
     const cb=dot.closest('.cb-row');
