@@ -9,6 +9,7 @@
   let profile=null;
   let roster=[];
   let iconMap={};
+  const saveTimers=new Map();
 
   function esc(v){return String(v==null?'':v).replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));}
   function isOrganizer(){return Boolean(profile&&profile.approved&&['party_organizer','admin'].includes(profile.role));}
@@ -23,8 +24,6 @@
   }
   function showError(message){if(loading)loading.hidden=true;if(errorBox){errorBox.hidden=false;errorBox.textContent=message;}}
   function clearError(){if(errorBox)errorBox.hidden=true;}
-  function formatDate(date){if(!date)return '';const d=new Date(`${date}T00:00:00`);return d.toLocaleDateString(undefined,{day:'numeric',month:'short',year:'numeric'});}
-  function formatTime(time){if(!time)return '';const parts=String(time).split(':');const d=new Date();d.setHours(Number(parts[0]||0),Number(parts[1]||0),0,0);return d.toLocaleTimeString(undefined,{hour:'numeric',minute:'2-digit'});}
 
   async function loadBase(){
     if(!window.supabase||!cfg.supabaseUrl||!cfg.supabasePublishableKey)throw new Error('Supabase configuration is missing.');
@@ -86,20 +85,49 @@
       });
       const need=runRegs.filter(r=>r.registration_type==='need_carry').length;
       const carry=runRegs.filter(r=>r.registration_type==='carrier').length;
-      const time=formatTime(run.run_time);
       const statusText=run.status==='open'?'Open':run.status==='closed'?'Closed':'Ended';
       const statusClass=run.status==='ended'?'ended':run.status;
       const controls=run.status==='ended'
         ? '<span class="muted">Ended</span>'
         : `<button type="button" class="btn" data-run-toggle="${esc(run.id)}" data-next-status="${run.status==='open'?'closed':'open'}">${run.status==='open'?'Close Registration':'Open Registration'}</button><button type="button" class="btn danger" data-run-end="${esc(run.id)}">End Run</button>`;
       const table=runRegs.length?`<div class="table-wrap"><table><thead><tr><th>Player</th><th>Class</th><th>GR</th><th>Type</th><th>Status</th></tr></thead><tbody>${sortedRunRegs.map(reg=>{const member=memberById(reg.member_id);return `<tr><td>${memberHtml(member)}</td><td>${esc(member&&member.cls||'—')}</td><td>${esc(member&&member.gr!=null?Number(member.gr).toLocaleString():'—')}</td><td>${esc(typeLabel(reg.registration_type))}</td><td>${carryStatusControl(reg)}</td></tr>`;}).join('')}</tbody></table></div>`:'<div class="empty">No registrations yet.</div>';
-      const detail=isOrganizer()?`<div class="run-summary"><div class="run-note-editor"><label>Notes<input type="text" maxlength="200" value="${esc(run.note||'')}" data-run-note-input="${esc(run.id)}"></label><button type="button" class="btn" data-run-note-save="${esc(run.id)}">Save Note</button></div><div class="summary-counts"><span>Need Carry: <b>${need}</b></span><span>Can Carry: <b>${carry}</b></span></div>${table}</div>`:'';
-      return `<article class="run-card"><div class="run-card-head"><div><div class="run-title">${esc(runLabel(run.run_type))}</div><div class="run-meta">${esc(formatDate(run.run_date))}${time?` · ${esc(time)}`:''}</div></div><div class="run-actions"><span class="status ${esc(statusClass)}">${esc(statusText)}</span>${controls}<a class="btn" href="./titaniaruns.html" target="_blank" rel="noopener">Open Public Registration</a></div></div>${detail}</article>`;
+      const detail=isOrganizer()?`<div class="run-summary"><div class="run-edit-grid">
+        <label>Title<input type="text" maxlength="200" value="${esc(run.note||'')}" data-run-edit="note" data-run-id="${esc(run.id)}"></label>
+        <label>Date<input type="date" value="${esc(run.run_date||'')}" data-run-edit="run_date" data-run-id="${esc(run.id)}"></label>
+        <label>Time<input type="time" value="${esc(run.run_time?String(run.run_time).slice(0,5):'')}" data-run-edit="run_time" data-run-id="${esc(run.id)}"></label>
+        <span class="autosave-state" data-autosave-state="${esc(run.id)}"></span>
+      </div><div class="summary-counts"><span>Need Carry: <b>${need}</b></span><span>Can Carry: <b>${carry}</b></span></div>${table}</div>`:'';
+      const title=String(run.note||'').trim()||'Untitled Run';
+      return `<article class="run-card"><div class="run-card-head"><div><div class="run-title">${esc(title)}</div><div class="run-type-pill ${run.run_type==='mirage'?'mirage':'time-echo'}">${esc(runLabel(run.run_type))}</div></div><div class="run-actions"><span class="status ${esc(statusClass)}">${esc(statusText)}</span>${controls}<a class="btn" href="./titaniaruns.html" target="_blank" rel="noopener">Open Public Registration</a></div></div>${detail}</article>`;
     }).join(''):'<div class="empty">No Guild Runs created yet.</div>';
 
     runsPanel.hidden=false;
     loading.hidden=true;
     wireRunControls();
+  }
+
+  async function saveRunField(input){
+    const runId=input.dataset.runId;
+    const field=input.dataset.runEdit;
+    if(!runId||!field)return;
+    const state=document.querySelector(`[data-autosave-state="${runId}"]`);
+    const value=field==='run_time'?(input.value||null):field==='note'?input.value.trim():input.value;
+    if(state)state.textContent='Saving…';
+    const {error}=await client.from('guild_runs').update({[field]:value}).eq('id',runId);
+    if(error){if(state)state.textContent='Save failed';showError(error.message||'Could not save run details.');return;}
+    if(state)state.textContent='Saved';
+    if(field==='note'){
+      const card=input.closest('.run-card');
+      const title=card&&card.querySelector('.run-title');
+      if(title)title.textContent=input.value.trim()||'Untitled Run';
+    }
+    setTimeout(()=>{if(state&&state.textContent==='Saved')state.textContent='';},1200);
+  }
+
+  function queueRunSave(input){
+    const key=`${input.dataset.runId}:${input.dataset.runEdit}`;
+    clearTimeout(saveTimers.get(key));
+    saveTimers.set(key,setTimeout(()=>saveRunField(input),450));
   }
 
   function wireRunControls(){
@@ -118,15 +146,9 @@
       await loadRuns();
     }));
 
-    document.querySelectorAll('[data-run-note-save]').forEach(button=>button.addEventListener('click',async()=>{
-      const runId=button.dataset.runNoteSave;
-      const input=document.querySelector(`[data-run-note-input="${runId}"]`);
-      if(!input)return;
-      button.disabled=true;
-      const {error}=await client.from('guild_runs').update({note:input.value.trim()}).eq('id',runId);
-      if(error){button.disabled=false;showError(error.message||'Could not update note.');return;}
-      await loadRuns();
-    }));
+    document.querySelectorAll('[data-run-edit]').forEach(input=>{
+      input.addEventListener(input.type==='text'?'input':'change',()=>queueRunSave(input));
+    });
 
     document.querySelectorAll('.carry-switch [data-carry-status]').forEach(button=>button.addEventListener('click',async()=>{
       const wrap=button.closest('.carry-switch');
