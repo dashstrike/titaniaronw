@@ -16,7 +16,7 @@
     if(document.getElementById('titania-fa-nav-style'))return;
     const style=document.createElement('style');
     style.id='titania-fa-nav-style';
-    style.textContent='@media (max-width:720px){.event-tab.fa-nav-tab::before{display:none!important}.event-tab.fa-nav-tab i{font-size:21px!important;line-height:1}}@media (max-width:420px){.event-tab.fa-nav-tab i{font-size:20px!important}}';
+    style.textContent='.event-tab.active.gl{color:#0dcaf0!important}@media (max-width:720px){.event-tab.fa-nav-tab::before{display:none!important}.event-tab.fa-nav-tab i{font-size:21px!important;line-height:1}}@media (max-width:420px){.event-tab.fa-nav-tab i{font-size:20px!important}}';
     document.head.appendChild(style);
   }
 
