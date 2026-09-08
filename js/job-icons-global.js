@@ -22,6 +22,12 @@
       if(cls&&iconMap[text(cls)])return text(cls);
     }
 
+    const attendance=dot.closest('.att-member-main');
+    if(attendance){
+      const cls=attendance.querySelector('div > span');
+      if(cls&&iconMap[text(cls)])return text(cls);
+    }
+
     const cb=dot.closest('.cb-row');
     if(cb){
       const cls=cb.querySelector('.cb-name');
