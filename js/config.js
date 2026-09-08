@@ -37,7 +37,7 @@ const TITANIA_IS_MEMBER_PAGE = /\/member\.html$/i.test(window.location.pathname)
   if (document.querySelector('link[data-titania-dashboard-fixes]')) return;
   const link = document.createElement('link');
   link.rel = 'stylesheet';
-  link.href = './css/dashboard-fixes.css?v=20260905-1';
+  link.href = './css/dashboard-fixes.css?v=20260908-1';
   link.setAttribute('data-titania-dashboard-fixes', '1');
   document.head.appendChild(link);
 })();
