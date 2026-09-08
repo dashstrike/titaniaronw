@@ -5,10 +5,10 @@
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Titania · Guild Runs</title>
   <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
-  <link rel="stylesheet" href="./css/guild-runs.css?v=20260908-1">
+  <link rel="stylesheet" href="./css/guild-runs.css?v=20260908-2">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="./js/config.js?v=20260907-2"></script>
-  <script src="./js/guild-runs.js?v=20260907-7" defer></script>
+  <script src="./js/guild-runs.js?v=20260908-1" defer></script>
 </head>
 <body data-guild-runs-page="organizer">
   <header class="topbar">
@@ -30,6 +30,7 @@
     <section id="createPanel" class="panel" hidden>
       <h2>Create Run</h2>
       <form id="createRunForm" class="create-grid">
+        <label>Title<input id="runNote" type="text" maxlength="200" placeholder="Run title"></label>
         <label>Run Type
           <select id="runType" required>
             <option value="time_echo">Time Echo</option>
@@ -38,7 +39,6 @@
         </label>
         <label>Date<input id="runDate" type="date" required></label>
         <label>Time<input id="runTime" type="time"></label>
-        <label class="note-field">Notes<input id="runNote" type="text" maxlength="200" placeholder="Optional"></label>
         <button class="btn primary" type="submit">Create Run</button>
       </form>
     </section>
