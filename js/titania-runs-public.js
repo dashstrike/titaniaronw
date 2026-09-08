@@ -56,13 +56,13 @@
       const needCarry=regs.filter(r=>r.registration_type==='need_carry');
       const time=formatTime(run.run_time);
       const isOpen=run.status==='open';
-      const note=String(run.note||'').trim();
+      const title=String(run.note||'').trim()||'Untitled Run';
       return `<article class="run-card public-run-card" data-run-id="${esc(run.id)}">
         <div class="run-card-head">
           <div>
-            <div class="run-title">${esc(runLabel(run.run_type))}</div>
+            <div class="run-title">${esc(title)}</div>
+            <div class="run-type-pill ${run.run_type==='mirage'?'mirage':'time-echo'}">${esc(runLabel(run.run_type))}</div>
             <div class="run-meta">${esc(formatDate(run.run_date))}${time?` · ${esc(time)}`:''}</div>
-            ${note?`<div class="run-note">${esc(note)}</div>`:''}
           </div>
           <span class="status ${isOpen?'open':'closed'}">${isOpen?'Open':'Closed'}</span>
         </div>
