@@ -1,7 +1,7 @@
 /* Compatibility bootstrap. Real configuration lives in ./js/config.js. */
-document.write('<script src="./js/config.js?v=20260908-1"><\/script>');
+document.write('<script src="./js/config.js?v=20260908-2"><\/script>');
 document.write('<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">');
-document.write('<script src="./js/job-icons-global.js?v=20260908-1"><\/script>');
+document.write('<script src="./js/job-icons-global.js?v=20260908-2"><\/script>');
 document.write('<link rel="stylesheet" href="./css/crowns.css?v=20260906-2">');
 document.write('<link rel="stylesheet" href="./css/tooltips.css?v=20260906-1">');
 document.write('<script src="./js/tooltips-global.js?v=20260906-2"><\/script>');
