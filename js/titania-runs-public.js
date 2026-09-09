@@ -57,11 +57,10 @@
       const time=formatTime(run.run_time);
       const isOpen=run.status==='open';
       const title=String(run.note||'').trim()||'Untitled Run';
-      const typeClass=run.run_type==='mirage'?'mirage':'time-echo';
       return `<article class="run-card public-run-card" data-run-id="${esc(run.id)}">
         <div class="public-run-top">
-          <div class="public-run-heading">
-            <h2 class="public-run-type ${typeClass}">${esc(runLabel(run.run_type))}</h2>
+          <div class="public-run-heading" style="align-items:flex-start">
+            <h2 class="public-run-type">${esc(runLabel(run.run_type))}</h2>
             <span class="status ${isOpen?'open':'closed'}">${isOpen?'Open':'Closed'}</span>
           </div>
           <div class="public-run-datetime">${esc(formatDate(run.run_date))}${time?` · ${esc(time)}`:''}</div>
