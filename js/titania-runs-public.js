@@ -12,8 +12,8 @@
 
   function esc(v){return String(v==null?'':v).replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));}
   function runLabel(type){return type==='mirage'?'Mirage':'Time Echo';}
-  function formatDate(date){if(!date)return '';const d=new Date(`${date}T00:00:00`);return d.toLocaleDateString(undefined,{day:'numeric',month:'short',year:'numeric'});}
-  function formatTime(time){if(!time)return '';const parts=String(time).split(':');const d=new Date();d.setHours(Number(parts[0]||0),Number(parts[1]||0),0,0);return d.toLocaleTimeString(undefined,{hour:'numeric',minute:'2-digit'});}
+  function formatDate(date){if(!date)return '';const d=new Date(`${date}T00:00:00`);return d.toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'});}
+  function formatTime(time){if(!time)return '';return String(time).slice(0,5);}
   function memberById(id){return roster.find(m=>String(m.id)===String(id));}
   function iconFor(member){const file=iconMap[member&&member.cls];return file?`./assets/images/job/${encodeURIComponent(file)}`:'';}
   function statusIcon(status){
@@ -58,13 +58,15 @@
       const isOpen=run.status==='open';
       const title=String(run.note||'').trim()||'Untitled Run';
       return `<article class="run-card public-run-card" data-run-id="${esc(run.id)}">
-        <div class="run-card-head">
-          <div>
-            <div class="run-public-label"><span class="run-type-pill ${run.run_type==='mirage'?'mirage':'time-echo'}">${esc(runLabel(run.run_type))}</span><span class="run-public-title">${esc(title)}</span></div>
-            <div class="run-meta">${esc(formatDate(run.run_date))}${time?` · ${esc(time)}`:''}</div>
+        <div class="public-run-top">
+          <div class="public-run-heading">
+            <h2 class="public-run-type">${esc(runLabel(run.run_type))}</h2>
+            <span class="status ${isOpen?'open':'closed'}">${isOpen?'Open':'Closed'}</span>
           </div>
-          <span class="status ${isOpen?'open':'closed'}">${isOpen?'Open':'Closed'}</span>
+          <div class="public-run-datetime">${esc(formatDate(run.run_date))}${time?` · ${esc(time)}`:''}</div>
         </div>
+
+        <div class="public-run-title">${esc(title)}</div>
 
         ${isOpen?`<form class="register-grid public-register-form" data-register-form="${esc(run.id)}">
           <label>Player<select class="public-member-select" data-member-select="${esc(run.id)}" required><option value=""></option>${available.map(m=>`<option value="${esc(m.id)}">${esc(m.name)}</option>`).join('')}</select></label>
