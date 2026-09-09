@@ -107,7 +107,7 @@
           <span class="run-picker-wrap"><input class="run-time-input" type="time" value="${esc(run.run_time?String(run.run_time).slice(0,5):'')}" data-run-edit="run_time" data-run-id="${esc(run.id)}">${pickerIcon('time')}</span>
           <span class="autosave-state" data-autosave-state="${esc(run.id)}"></span>
         </div>
-      </div><div class="run-actions"><span class="status ${esc(statusClass)}">${esc(statusText)}</span>${controls}<a class="btn" href="./titaniaruns.html" target="_blank" rel="noopener">Open Public Registration</a></div></div>${detail}</article>`;
+      </div><div class="run-actions"><span class="status ${esc(statusClass)}">${esc(statusText)}</span>${controls}<a class="btn" href="./titaniaruns.html" target="_blank" rel="noopener">Open Public Registration</a><button type="button" class="btn danger" data-run-delete="${esc(run.id)}" data-run-title="${esc(run.note||runLabel(run.run_type))}">Delete Run</button></div></div>${detail}</article>`;
     }).join(''):'<div class="empty">No Guild Runs created yet.</div>';
 
     runsPanel.hidden=false;
@@ -147,6 +147,45 @@
       button.disabled=true;
       const {error}=await client.from('guild_runs').update({status:'ended'}).eq('id',button.dataset.runEnd);
       if(error){button.disabled=false;showError(error.message||'Could not end run.');return;}
+      await loadRuns();
+    }));
+
+    document.querySelectorAll('[data-run-delete]').forEach(button=>button.addEventListener('click',async()=>{
+      const title=button.dataset.runTitle||'this run';
+      let confirmed=false;
+      if(window.Swal){
+        const result=await Swal.fire({
+          title:'Delete this run?',
+          text:`${title} and all of its registrations will be permanently deleted.`,
+          icon:'warning',
+          showCancelButton:true,
+          confirmButtonText:'Delete Run',
+          cancelButtonText:'Cancel',
+          confirmButtonColor:'#ef5a6f',
+          cancelButtonColor:'#2a3350',
+          background:'#141a2b',
+          color:'#e9ecf7'
+        });
+        confirmed=result.isConfirmed;
+      }else{
+        confirmed=confirm(`Delete ${title}? This will also delete all registrations for this run.`);
+      }
+      if(!confirmed)return;
+
+      button.disabled=true;
+      const {error}=await client.from('guild_runs').delete().eq('id',button.dataset.runDelete);
+      if(error){button.disabled=false;showError(error.message||'Could not delete run.');return;}
+
+      if(window.Swal){
+        await Swal.fire({
+          title:'Run deleted',
+          icon:'success',
+          timer:1200,
+          showConfirmButton:false,
+          background:'#141a2b',
+          color:'#e9ecf7'
+        });
+      }
       await loadRuns();
     }));
 
