@@ -5,7 +5,83 @@
 .run-card-top{display:flex;align-items:center;justify-content:space-between;gap:18px;flex-wrap:wrap}.run-identity{display:flex;align-items:center;gap:12px;min-width:0;flex-wrap:wrap}.run-type-heading{margin:0;font-size:29px;line-height:1;font-weight:900;letter-spacing:.5px;color:var(--text);text-transform:uppercase}.run-type-heading.mirage,.run-type-heading.time-echo{color:var(--text)}.run-public-link{color:#b9b2f9;text-decoration:none;font-weight:700;font-size:14px}.run-public-link:hover{text-decoration:underline;color:#d6d1ff}.run-actions{margin-left:auto;justify-content:flex-end}.btn.danger-solid{background:var(--red);border-color:var(--red);color:#fff}.btn.danger-solid:hover{background:#d94d62;border-color:#d94d62;box-shadow:0 0 0 1px #ef5a6f55}.run-edit-row{display:grid;grid-template-columns:minmax(260px,1fr) 150px auto 120px auto;align-items:center;gap:10px;margin-top:14px;max-width:100%}.run-edit-row .run-title-input{width:100%!important;max-width:none!important;min-width:0}.run-edit-row .run-picker-wrap{width:100%}.run-edit-row .run-date-input,.run-edit-row .run-time-input{width:100%!important;appearance:none!important;-webkit-appearance:none!important;border:1px solid var(--line)!important;background-color:#0d1322!important;color:var(--text)!important;border-radius:8px!important;font-size:14px!important;padding:8px 34px 8px 10px!important;outline:none!important;color-scheme:dark}.run-edit-row .run-date-input:focus,.run-edit-row .run-time-input:focus{border-color:var(--violet)!important;box-shadow:0 0 0 2px rgba(139,124,246,.15)!important}.run-edit-separator{color:var(--muted);text-align:center}.run-card .run-summary{margin-top:16px}.run-card .status{flex:none}
 
 /* Public Guild Runs layout */
-.public-run-card{padding:18px 20px}.public-run-top{display:flex;align-items:center;justify-content:space-between;gap:18px}.public-run-heading{display:flex;align-items:center;gap:12px;min-width:0}.public-run-type{margin:0;font-size:31px;line-height:1;font-weight:900;letter-spacing:.4px;text-transform:uppercase;color:var(--text)}.public-run-type.mirage{color:#ef5a6f}.public-run-type.time-echo{color:#8b7cf6}.public-run-datetime{color:#9ba5c7;font-size:14px;white-space:nowrap}.public-run-title{margin-top:16px;font-size:18px;font-weight:400;line-height:1.35;color:var(--text)}.public-run-card .public-register-form{margin-top:22px}.public-run-card .register-grid{grid-template-columns:minmax(0,1fr) minmax(180px,220px) auto;gap:12px;align-items:end}.public-run-card .registration-columns{margin-top:18px}
+.public-run-card{padding:18px 20px}.public-run-top{display:flex;align-items:center;justify-content:space-between;gap:18px}.public-run-heading{display:flex;align-items:center;gap:12px;min-width:0}.public-run-type{margin:0;font-size:31px;line-height:1;font-weight:900;letter-spacing:.4px;text-transform:uppercase;color:var(--text)!important}.public-run-datetime{color:#9ba5c7;font-size:14px;white-space:nowrap}.public-run-title{margin-top:16px;font-size:18px;font-weight:400;line-height:1.35;color:var(--text)}.public-run-card .public-register-form{margin-top:22px}.public-run-card .register-grid{grid-template-columns:minmax(0,1fr) minmax(180px,220px) auto;gap:12px;align-items:end}.public-run-card .registration-columns{margin-top:18px}
 
-@media(max-width:900px){.run-card-top{align-items:flex-start}.run-identity{width:100%}.run-actions{width:100%;margin-left:0;justify-content:flex-start}.run-edit-row{grid-template-columns:minmax(0,1fr) 150px auto 120px}.run-edit-row .autosave-state{grid-column:1/-1}.public-run-top{align-items:flex-start}.public-run-datetime{white-space:normal;text-align:right}}
-@media(max-width:760px){.topbar{align-items:flex-start;flex-direction:column}.create-grid,.register-grid{grid-template-columns:1fr}.registration-columns{grid-template-columns:1fr}.run-card-head{flex-direction:column}.run-heading-line{align-items:flex-start;flex-direction:column}.run-title-input{width:100%;max-width:none}.wrap{width:calc(100% - 14px);margin-top:12px}.autosave-state{padding-bottom:0}.run-type-heading{font-size:24px}.run-edit-row{grid-template-columns:1fr 1fr;gap:8px}.run-edit-row .run-title-input{grid-column:1/-1}.run-edit-row .run-edit-separator{display:none}.run-edit-row .autosave-state{grid-column:1/-1}.run-actions .btn{flex:1 1 auto}.run-public-link{width:100%}.public-run-card{padding:15px}.public-run-top{gap:10px;flex-wrap:wrap}.public-run-type{font-size:25px}.public-run-datetime{width:100%;text-align:left}.public-run-title{margin-top:12px;font-size:16px}.public-run-card .register-grid{grid-template-columns:1fr}}
+/* Phone and iPad responsive fixes */
+html,body{max-width:100%;overflow-x:hidden}.topbar,.wrap,.panel,.runs-list,.run-card,.create-grid,.register-grid,.registration-columns,.run-card-top,.run-identity,.run-actions,.run-edit-row,.run-summary,.table-wrap{min-width:0;max-width:100%}.brand>div{min-width:0}.brand b,.brand span{overflow-wrap:anywhere}.create-grid label,.register-grid label,.registration-columns>div{min-width:0}.create-grid input,.create-grid select,.register-grid select,.run-title-input,.run-date-input,.run-time-input{min-width:0;max-width:100%}.select2-container{max-width:100%!important}.table-wrap{width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch}
+
+@media(max-width:1024px){
+  .wrap{width:calc(100% - 24px);margin:18px auto 40px}
+  .topbar{padding:11px 14px}
+  .panel{padding:16px}
+  body[data-guild-runs-page="organizer"] .create-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  body[data-guild-runs-page="organizer"] .create-grid .btn{grid-column:1/-1;width:100%}
+  body[data-guild-runs-page="organizer"] .run-card-top{align-items:flex-start}
+  body[data-guild-runs-page="organizer"] .run-identity{flex:1 1 100%}
+  body[data-guild-runs-page="organizer"] .run-actions{width:100%;margin-left:0;justify-content:flex-start}
+  body[data-guild-runs-page="organizer"] .run-edit-row{grid-template-columns:minmax(0,1fr) 150px auto 120px}
+  body[data-guild-runs-page="organizer"] .run-edit-row .autosave-state{grid-column:1/-1}
+  body[data-guild-runs-page="organizer"] table{min-width:660px}
+  body[data-guild-runs-page="public"] .public-run-card .register-grid{grid-template-columns:minmax(0,1fr) minmax(170px,220px) auto}
+}
+
+@media(max-width:760px){
+  .wrap{width:calc(100% - 20px);margin:16px auto 32px}
+  .topbar{position:relative;display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:start;gap:10px;padding:10px 12px}
+  .brand{min-width:0;gap:8px}
+  .brand img{width:38px;height:36px}
+  .brand b{font-size:15px;line-height:1.2;letter-spacing:.8px}
+  .brand span{font-size:12px}
+  .top-actions{align-self:start}
+  .top-actions .btn{padding:8px 10px;font-size:12px;white-space:nowrap}
+  .page-head h1,.section-head h1{font-size:27px}
+  .page-head p,.section-head p{font-size:14px;line-height:1.35}
+  .panel{padding:13px;border-radius:12px}
+  .panel h2{font-size:21px}
+  body[data-guild-runs-page="organizer"] .create-grid{grid-template-columns:1fr}
+  body[data-guild-runs-page="organizer"] .create-grid .btn{grid-column:auto}
+  body[data-guild-runs-page="organizer"] .run-card{padding:13px}
+  body[data-guild-runs-page="organizer"] .run-card-top{display:block}
+  body[data-guild-runs-page="organizer"] .run-identity{width:100%;gap:8px 10px}
+  body[data-guild-runs-page="organizer"] .run-type-heading{font-size:25px}
+  body[data-guild-runs-page="organizer"] .run-public-link{flex-basis:100%;width:auto;font-size:13px}
+  body[data-guild-runs-page="organizer"] .run-actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:12px}
+  body[data-guild-runs-page="organizer"] .run-actions .btn{width:100%;padding:9px 8px;font-size:12px}
+  body[data-guild-runs-page="organizer"] .run-actions .danger-solid{grid-column:1/-1}
+  body[data-guild-runs-page="organizer"] .run-edit-row{grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:8px;margin-top:12px}
+  body[data-guild-runs-page="organizer"] .run-edit-row .run-title-input{grid-column:1/-1;width:100%!important}
+  body[data-guild-runs-page="organizer"] .run-edit-row .run-picker-wrap{width:100%}
+  body[data-guild-runs-page="organizer"] .run-edit-row .run-date-input,body[data-guild-runs-page="organizer"] .run-edit-row .run-time-input{width:100%!important}
+  body[data-guild-runs-page="organizer"] .run-edit-separator{display:none}
+  body[data-guild-runs-page="organizer"] .run-edit-row .autosave-state{grid-column:1/-1}
+  .summary-counts{flex-wrap:wrap;gap:8px 16px}
+  body[data-guild-runs-page="organizer"] table{min-width:650px}
+  body[data-guild-runs-page="public"] .public-run-card{padding:15px}
+  body[data-guild-runs-page="public"] .public-run-top{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;flex-wrap:wrap}
+  body[data-guild-runs-page="public"] .public-run-heading{align-items:center!important;gap:10px}
+  body[data-guild-runs-page="public"] .public-run-type{font-size:25px}
+  body[data-guild-runs-page="public"] .public-run-datetime{width:100%;text-align:left;white-space:normal;font-size:13px}
+  body[data-guild-runs-page="public"] .public-run-title{margin-top:12px;font-size:16px}
+  body[data-guild-runs-page="public"] .public-run-card .register-grid{grid-template-columns:1fr}
+  body[data-guild-runs-page="public"] .public-register-form .btn{width:100%}
+  body[data-guild-runs-page="public"] .registration-columns{grid-template-columns:1fr}
+}
+
+@media(max-width:420px){
+  .wrap{width:calc(100% - 16px);margin-top:12px}
+  .topbar{padding:9px 10px;gap:8px}
+  .brand img{width:34px;height:32px}
+  .brand b{font-size:14px;letter-spacing:.5px}
+  .top-actions .btn{padding:7px 8px;font-size:11px}
+  .page-head h1,.section-head h1{font-size:25px}
+  .panel{padding:11px}
+  .run-card{padding:12px}
+  body[data-guild-runs-page="organizer"] .run-actions{grid-template-columns:1fr}
+  body[data-guild-runs-page="organizer"] .run-actions .danger-solid{grid-column:auto}
+  body[data-guild-runs-page="organizer"] .run-edit-row{grid-template-columns:1fr}
+  body[data-guild-runs-page="organizer"] .run-edit-row .run-title-input,body[data-guild-runs-page="organizer"] .run-edit-row .autosave-state{grid-column:auto}
+  body[data-guild-runs-page="public"] .public-run-card{padding:13px}
+  body[data-guild-runs-page="public"] .public-run-type{font-size:24px}
+  .registration-columns>div{padding:10px}
+  .player-row{padding:8px 9px}
+}
