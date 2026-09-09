@@ -91,23 +91,29 @@
       const carry=runRegs.filter(r=>r.registration_type==='carrier').length;
       const statusText=run.status==='open'?'Open':run.status==='closed'?'Closed':'Ended';
       const statusClass=run.status==='ended'?'ended':run.status;
-      const controls=run.status==='ended'
-        ? '<span class="muted">Ended</span>'
+      const actionControls=run.status==='ended'
+        ? ''
         : `<button type="button" class="btn" data-run-toggle="${esc(run.id)}" data-next-status="${run.status==='open'?'closed':'open'}">${run.status==='open'?'Close Registration':'Open Registration'}</button><button type="button" class="btn danger" data-run-end="${esc(run.id)}">End Run</button>`;
       const table=runRegs.length?`<div class="table-wrap"><table><thead><tr><th>Player</th><th>Class</th><th>GR</th><th>Type</th><th>Status</th></tr></thead><tbody>${sortedRunRegs.map(reg=>{const member=memberById(reg.member_id);return `<tr><td>${memberHtml(member)}</td><td>${esc(member&&member.cls||'—')}</td><td>${esc(member&&member.gr!=null?Number(member.gr).toLocaleString():'—')}</td><td>${esc(typeLabel(reg.registration_type))}</td><td>${carryStatusControl(reg)}</td></tr>`;}).join('')}</tbody></table></div>`:'<div class="empty">No registrations yet.</div>';
       const detail=isOrganizer()?`<div class="run-summary"><div class="summary-counts"><span>Need Carry: <b>${need}</b></span><span>Can Carry: <b>${carry}</b></span></div>${table}</div>`:'';
-      return `<article class="run-card"><div class="run-card-head"><div class="run-primary-editor">
-        <div class="run-heading-line">
-          <span class="run-type-pill ${run.run_type==='mirage'?'mirage':'time-echo'}">${esc(runLabel(run.run_type))}</span>
-          <input class="run-title-input" type="text" maxlength="200" value="${esc(run.note||'')}" placeholder="Untitled Run" data-run-edit="note" data-run-id="${esc(run.id)}">
+      return `<article class="run-card">
+        <div class="run-card-top">
+          <div class="run-identity">
+            <h3 class="run-type-heading ${run.run_type==='mirage'?'mirage':'time-echo'}">${esc(runLabel(run.run_type))}</h3>
+            <span class="status ${esc(statusClass)}">${esc(statusText)}</span>
+            <a class="run-public-link" href="./titaniaruns.html" target="_blank" rel="noopener">Open Public Registration</a>
+          </div>
+          <div class="run-actions">${actionControls}<button type="button" class="btn danger-solid" data-run-delete="${esc(run.id)}" data-run-title="${esc(run.note||runLabel(run.run_type))}">Delete Run</button></div>
         </div>
-        <div class="run-meta-edit">
+        <div class="run-edit-row">
+          <input class="run-title-input" type="text" maxlength="200" value="${esc(run.note||'')}" placeholder="Untitled Run" data-run-edit="note" data-run-id="${esc(run.id)}">
           <span class="run-picker-wrap"><input class="run-date-input" type="date" value="${esc(run.run_date||'')}" data-run-edit="run_date" data-run-id="${esc(run.id)}">${pickerIcon('date')}</span>
-          <span>·</span>
+          <span class="run-edit-separator">·</span>
           <span class="run-picker-wrap"><input class="run-time-input" type="time" value="${esc(run.run_time?String(run.run_time).slice(0,5):'')}" data-run-edit="run_time" data-run-id="${esc(run.id)}">${pickerIcon('time')}</span>
           <span class="autosave-state" data-autosave-state="${esc(run.id)}"></span>
         </div>
-      </div><div class="run-actions"><span class="status ${esc(statusClass)}">${esc(statusText)}</span>${controls}<a class="btn" href="./titaniaruns.html" target="_blank" rel="noopener">Open Public Registration</a><button type="button" class="btn danger" data-run-delete="${esc(run.id)}" data-run-title="${esc(run.note||runLabel(run.run_type))}">Delete Run</button></div></div>${detail}</article>`;
+        ${detail}
+      </article>`;
     }).join(''):'<div class="empty">No Guild Runs created yet.</div>';
 
     runsPanel.hidden=false;
