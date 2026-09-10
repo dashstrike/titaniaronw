@@ -10,6 +10,7 @@
   };
   let mode='actual';
   let pending=null;
+  let cardObserver=null;
 
   function esc(value){return String(value==null?'':value).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
   function userId(){return typeof currentAuthUser!=='undefined'&&currentAuthUser?currentAuthUser.id:'';}
@@ -199,11 +200,28 @@
     });
   }
 
+  function packDashboardCards(wrap){
+    if(wrap.querySelector('.dash-packed-layout'))return;
+    if(cardObserver){cardObserver.disconnect();cardObserver=null;}
+    const groups=[...wrap.querySelectorAll(':scope > .dash-class-analytics-grid,:scope > .dash-gr-analytics-grid,:scope > .dash-gr-rank-grid')];
+    if(!groups.length)return;
+    const grid=document.createElement('div');
+    grid.className='dash-packed-layout';
+    groups[0].before(grid);
+    groups.forEach(group=>grid.appendChild(group));
+    if(window.TitaniaCardLayout)cardObserver=window.TitaniaCardLayout(grid,
+      '.dash-class-analytics-grid > .dash-panel,.dash-gr-analytics-grid > .dash-panel,.dash-gr-rank-col');
+  }
+
   function mount(){
-    if(document.body.dataset.event!=='dashboard')return;
+    if(document.body.dataset.event!=='dashboard'){
+      if(cardObserver){cardObserver.disconnect();cardObserver=null;}
+      return;
+    }
     const wrap=document.getElementById('teamsWrap');
     if(!wrap)return;
     styleDashboardCards(wrap);
+    packDashboardCards(wrap);
     if(!canRead()||wrap.querySelector('#dashAttendance'))return;
     const panel=document.createElement('section');
     panel.id='dashAttendance';
