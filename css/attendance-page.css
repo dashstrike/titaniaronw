@@ -104,6 +104,24 @@ html[data-theme="light"] .att-picker-card input[type="date"]{color-scheme:light;
 .att-loading>span{width:15px;height:15px;border-radius:50%;border:2px solid var(--line);border-top-color:var(--violet);animation:attSpin .7s linear infinite;}
 @keyframes attSpin{to{transform:rotate(360deg)}}
 .event-tab.att-tab.active{color:#ffd166!important;}
+
+/* Keep Attendance create controls the same height and vertically aligned. */
+.att-create-row{align-items:flex-end;}
+.att-create-row select,
+.att-create-row input[type="date"],
+.att-create-row>.btn{
+  height:42px!important;
+  min-height:42px!important;
+}
+.att-create-row>.btn{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  align-self:flex-end;
+  padding-top:0;
+  padding-bottom:0;
+}
+
 @media (max-width:1200px){
   .att-summary-grid{grid-template-columns:repeat(4,minmax(90px,1fr));}
   .att-column-head,.att-member-row{grid-template-columns:minmax(180px,1.2fr) minmax(100px,.6fr) 110px minmax(300px,1.6fr) 36px;}
