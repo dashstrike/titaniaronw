@@ -202,3 +202,51 @@
     min-width: 135px !important;
   }
 }
+
+/* Compact dashboard panels; no effect on planner or attendance editing pages. */
+body[data-event="dashboard"] .main{padding-bottom:32px;}
+body[data-event="dashboard"] #teamsWrap > .section-head{margin-top:18px;margin-bottom:10px;}
+body[data-event="dashboard"] #teamsWrap > .section-head:first-child{margin-top:0;}
+.dash-gr-analytics-grid{align-items:start;}
+.dash-gr-spread-panel{align-self:start;}
+.dash-gr-rank-grid{gap:16px;margin-top:18px;}
+.dash-gr-rank-col .section-head{margin-bottom:10px;}
+/* Profile links replace the name span and lose its inline flex:1 style. */
+.dash-gr-rank-grid .dash-bar-name{flex:1;min-width:0;width:auto;}
+.dash-gr-rank-grid .dash-bar-count{margin-left:auto;}
+.dash-gr-rank-col .section-title{white-space:normal;font-size:clamp(14px,1.15vw,18px)!important;}
+
+/* CSS-only stacked attendance chart, using the existing dashboard palette. */
+.dash-attendance{margin-top:18px;padding:16px;min-width:0;}
+.dash-att-head{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;}
+.dash-att-head h2{font-size:18px;line-height:1.35;margin:0;color:var(--text);}
+.dash-att-head p{margin:4px 0 0;color:var(--muted);font-size:12px;}
+.dash-att-controls{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+.dash-att-controls select{width:auto;max-width:100%;font:inherit;font-size:12px;}
+.dash-att-legend{display:flex;flex-wrap:wrap;gap:8px 18px;margin:14px 0;font-size:12px;color:var(--muted);}
+.dash-att-legend > span{display:inline-flex;align-items:center;gap:6px;}
+.dash-att-legend b{color:var(--text);font-variant-numeric:tabular-nums;}
+.dash-att-dot{width:9px;height:9px;border-radius:2px;display:inline-block;}
+.dash-att-scroll{max-width:100%;overflow-x:auto;padding-bottom:4px;}
+.dash-att-chart{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(76px,1fr);gap:12px;padding:0 4px;}
+.dash-att-column{display:flex;flex-direction:column;align-items:center;gap:5px;font-size:12px;min-width:0;}
+.dash-att-column > strong{font:600 15px 'IBM Plex Mono',monospace;color:var(--text);}
+.dash-att-column > b{font-size:12px;white-space:nowrap;}
+.dash-att-column > span,.dash-att-column > small{color:var(--muted);font-size:11px;white-space:nowrap;}
+.dash-att-column .dash-att-state{font-size:10px;}
+.dash-att-bar{height:150px;width:48px;border:1px solid var(--line-soft);border-radius:5px;overflow:hidden;display:flex;flex-direction:column-reverse;background:var(--panel-2);flex:none;}
+.dash-att-bar > span{display:block;flex:none;width:100%;}
+.dash-att-bar:focus-visible,.dash-att-scroll:focus-visible{outline:2px solid var(--violet);outline-offset:3px;}
+.dash-attendance .present,.dash-attendance .going{background:var(--teal);}
+.dash-attendance .absent,.dash-attendance .not_going{background:var(--red);}
+.dash-attendance .excused{background:var(--amber);}
+.dash-attendance .not_checked,.dash-attendance .no_response{background:var(--muted-2);}
+.dash-att-note{font-size:11px;line-height:1.6;color:var(--muted);margin:12px 0 0;}
+.dash-att-message{font-size:13px;color:var(--muted);margin:16px 0 4px;}
+@media(max-width:600px){
+  .dash-gr-rank-grid .dash-bar-avg{display:none;}
+  .dash-gr-rank-grid .dash-bar-count{flex-basis:72px;}
+  .dash-gr-spread-panel .dash-bar-name{width:115px;font-size:12px!important;}
+  .dash-gr-spread-panel .dash-bar-count,.dash-gr-spread-panel .dash-bar-pct{width:32px;}
+  .dash-attendance{padding:12px;}
+}

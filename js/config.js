@@ -60,9 +60,19 @@ const TITANIA_IS_MEMBER_PAGE = /\/member\.html$/i.test(window.location.pathname)
   if (document.querySelector('link[data-titania-dashboard-fixes]')) return;
   const link = document.createElement('link');
   link.rel = 'stylesheet';
-  link.href = './css/dashboard-fixes.css?v=20260908-2';
+  link.href = './css/dashboard-fixes.css?v=20260910-dashboard-1';
   link.setAttribute('data-titania-dashboard-fixes', '1');
   document.head.appendChild(link);
+
+  const loadScript = () => {
+    if (document.querySelector('script[data-titania-dashboard-attendance]')) return;
+    const script = document.createElement('script');
+    script.src = './js/dashboard-attendance.js?v=20260910-dashboard-1';
+    script.setAttribute('data-titania-dashboard-attendance', '1');
+    document.body.appendChild(script);
+  };
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', loadScript, {once:true});
+  else loadScript();
 })();
 
 /* Guild League / Siege pre-attendance badge UI. */
