@@ -71,7 +71,7 @@ const TITANIA_IS_MEMBER_PAGE = /\/member\.html$/i.test(window.location.pathname)
   if (!document.querySelector('link[data-titania-attendance-page]')) {
     const link = document.createElement('link');
     link.rel = 'stylesheet';
-    link.href = './css/attendance-page.css?v=20260910-1';
+    link.href = './css/attendance-page.css?v=20260910-2';
     link.setAttribute('data-titania-attendance-page', '1');
     document.head.appendChild(link);
   }
@@ -79,7 +79,7 @@ const TITANIA_IS_MEMBER_PAGE = /\/member\.html$/i.test(window.location.pathname)
   const loadScript = () => {
     if (document.querySelector('script[data-titania-attendance-page]')) return;
     const script = document.createElement('script');
-    script.src = './js/attendance-page.js?v=20260905-1';
+    script.src = './js/attendance-page.js?v=20260910-1';
     script.setAttribute('data-titania-attendance-page', '1');
     document.body.appendChild(script);
   };
