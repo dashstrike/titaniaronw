@@ -219,8 +219,8 @@ body[data-event="dashboard"] #teamsWrap > .section-head:first-child{margin-top:0
 /* CSS-only stacked attendance chart, using the existing dashboard palette. */
 .dash-attendance{margin-top:18px;padding:16px;min-width:0;}
 .dash-att-head{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;}
-.dash-att-head h2{font-size:18px;line-height:1.35;margin:0;color:var(--text);}
-.dash-att-head p{margin:4px 0 0;color:var(--muted);font-size:12px;}
+.dash-att-head h2,.dash-card-head h2{font-size:18px;line-height:1.35;margin:0;color:var(--text);}
+.dash-att-head p,.dash-card-head p{margin:4px 0 0;color:var(--muted);font-size:12px;}
 .dash-att-controls{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
 .dash-att-controls select{width:auto;max-width:100%;font:inherit;font-size:12px;}
 .dash-att-legend{display:flex;flex-wrap:wrap;gap:8px 18px;margin:14px 0;font-size:12px;color:var(--muted);}
@@ -250,3 +250,15 @@ body[data-event="dashboard"] #teamsWrap > .section-head:first-child{margin-top:0
   .dash-gr-spread-panel .dash-bar-count,.dash-gr-spread-panel .dash-bar-pct{width:32px;}
   .dash-attendance{padding:12px;}
 }
+
+/* All dashboard cards share the Attendance Overview's in-card header. */
+body[data-event="dashboard"] .dash-headed-card{padding:16px;}
+.dash-card-head{width:100%;min-width:0;flex:none;margin-bottom:14px;text-align:left;}
+.dash-card-head h2{font-family:inherit;font-weight:700;letter-spacing:0;text-transform:none;overflow-wrap:anywhere;}
+.dash-card-head p{line-height:1.4;}
+.dash-card > .dash-card-head{margin-bottom:8px;}
+.dash-card > .dash-card-head h2{font-size:16px;}
+.dash-card > .dash-card-head p{font-size:11px;}
+.dash-class-pie-panel.dash-headed-card{justify-content:flex-start;}
+.dash-class-analytics-grid,.dash-gr-analytics-grid{margin-top:18px;align-items:start;}
+@media(max-width:600px){body[data-event="dashboard"] .dash-headed-card{padding:12px;}}

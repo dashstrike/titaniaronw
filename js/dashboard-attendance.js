@@ -141,10 +141,70 @@
     }
   }
 
+  // Match the attendance card without rebuilding chart nodes or their listeners.
+  function addCardHeader(card,icon,title,subtitle){
+    if(!card||card.querySelector('.dash-card-head'))return false;
+    const header=document.createElement('header');
+    header.className='dash-card-head';
+    header.innerHTML=`<h2><i class="fa-solid ${icon} mr-2" aria-hidden="true"></i>${esc(title)}</h2><p>${esc(subtitle)}</p>`;
+    card.prepend(header);
+    card.classList.add('dash-headed-card');
+    return true;
+  }
+
+  function styleDashboardCards(wrap){
+    const metrics={
+      'Active Members':['fa-users','Available for team assignment'],
+      'Inactive Members':['fa-user-clock','Hidden from Member Pool'],
+      'All Member Records':['fa-address-book','Active and inactive members'],
+      'Active Total GR':['fa-layer-group','Combined active-member Gear Rating'],
+      'Active Average GR':['fa-gauge-high','Average across active members'],
+      'Active Healers':['fa-heart-pulse','Healers in the active roster'],
+      'Highest Active GR':['fa-trophy','Highest rated active member'],
+      'Lowest Active GR':['fa-arrow-trend-down','Lowest rated active member']
+    };
+    wrap.querySelectorAll('.dash-card').forEach(card=>{
+      const label=card.querySelector('.dash-card-label');
+      if(!label)return;
+      const title=label.textContent.trim();
+      const meta=metrics[title];
+      if(!meta)return;
+      const sub=card.querySelector(':scope > .dash-card-sub');
+      if(addCardHeader(card,meta[0],title,sub?sub.textContent:meta[1])){
+        label.remove();
+        if(sub)sub.remove();
+      }
+    });
+
+    const panels=[
+      ['.dash-class-bars','fa-users','Active Members by Class',`${wrap.querySelectorAll('.dash-class-bars .dash-bar-row').length} classes - count, share and average GR`],
+      ['.dash-class-pie-panel','fa-chart-pie','Class Distribution','Hover a slice for class %'],
+      ['.dash-gr-class-chart-panel','fa-chart-column','Average GR by Class','Hover a bar for class details'],
+      ['.dash-gr-spread-panel','fa-chart-simple','Gear Rating Spread','Active members by rating range'],
+      ['.dash-gr-rank-col:first-child .dash-panel','fa-trophy','Top 5 Active Members','Ranked by Gear Rating - highest first'],
+      ['.dash-gr-rank-col:last-child .dash-panel','fa-arrow-trend-down','Lowest 5 Active Members','Ranked by Gear Rating - lowest first']
+    ];
+    panels.forEach(([selector,icon,title,subtitle])=>{
+      const card=wrap.querySelector(selector);
+      if(!addCardHeader(card,icon,title,subtitle))return;
+      card.querySelectorAll('.dash-class-pie-title,.dash-class-pie-note,.dash-gr-class-chart-title,.dash-gr-class-chart-note').forEach(el=>el.remove());
+      // The ranking title used to sit outside its panel.
+      const previous=card.previousElementSibling;
+      if(previous&&previous.matches('.section-head'))previous.remove();
+    });
+    // Each chart now owns its header; keep the main Guild Dashboard heading.
+    wrap.querySelectorAll('.dash-class-analytics-grid,.dash-gr-analytics-grid').forEach(grid=>{
+      const previous=grid.previousElementSibling;
+      if(previous&&previous.matches('.section-head'))previous.remove();
+    });
+  }
+
   function mount(){
-    if(document.body.dataset.event!=='dashboard'||!canRead())return;
+    if(document.body.dataset.event!=='dashboard')return;
     const wrap=document.getElementById('teamsWrap');
-    if(!wrap||wrap.querySelector('#dashAttendance'))return;
+    if(!wrap)return;
+    styleDashboardCards(wrap);
+    if(!canRead()||wrap.querySelector('#dashAttendance'))return;
     const panel=document.createElement('section');
     panel.id='dashAttendance';
     panel.className='dash-panel dash-attendance';
@@ -162,7 +222,7 @@
   function boot(){
     const wrap=document.getElementById('teamsWrap');
     if(!wrap)return;
-    // Watch only dashboard replacement, not every icon, chart or member change.
+    // Reuse one observer for card headers and attendance after dashboard redraws.
     new MutationObserver(mount).observe(wrap,{childList:true});
     mount();
   }
