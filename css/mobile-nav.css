@@ -76,19 +76,8 @@
     font-size: 0 !important;
   }
 
-  .event-tab::before {
-    display: block;
-    font-size: 21px;
-    line-height: 1;
-  }
-
-  .event-tab[data-event="dashboard"]::before { content: "📊"; }
-  .event-tab[data-event="manage_members"]::before { content: "🛠"; }
-  .event-tab[data-event="guild_league"]::before { content: "🛡️"; }
-  .event-tab[data-event="siege"]::before { content: "🏰"; }
-  .event-tab[data-event="attendance"]::before { content: "📋"; }
-  .event-tab[data-event="runs"]::before { content: "⚔"; }
-  .event-tab[data-event="polarity_zone"]::before { content: "⚡"; }
+  .event-tab::before { display: none; }
+  .event-tab i { font-size: 21px; line-height: 1; }
 
   .stats,
   .actions {
@@ -254,7 +243,7 @@
     height: 42px;
   }
 
-  .event-tab::before {
+  .event-tab i {
     font-size: 20px;
   }
 

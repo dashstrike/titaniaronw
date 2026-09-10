@@ -18,6 +18,29 @@ window.TITANIA_FEATURES = Object.freeze({
   polarityZone: false
 });
 
+/* One Font Awesome stylesheet and shared icons for every Titania page. */
+(function loadTitaniaUiIcons(){
+  if (!document.querySelector('link[href*="font-awesome/"]')) {
+    const link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.href = 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css';
+    document.head.appendChild(link);
+  }
+  if (!document.querySelector('link[data-titania-ui-icons]')) {
+    const link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.href = './css/ui-icons.css?v=20260910-fa-1';
+    link.setAttribute('data-titania-ui-icons', '1');
+    document.head.appendChild(link);
+  }
+  if (!document.querySelector('script[data-titania-ui-icons]')) {
+    const script = document.createElement('script');
+    script.src = './js/ui-icons.js?v=20260910-fa-1';
+    script.setAttribute('data-titania-ui-icons', '1');
+    document.head.appendChild(script);
+  }
+})();
+
 const TITANIA_IS_MANAGEMENT_PAGE = /\/$|\/index\.html$/i.test(window.location.pathname);
 const TITANIA_IS_PUBLIC_EVENT_PAGE = /\/(guild-league|siege)\.html$/i.test(window.location.pathname);
 const TITANIA_IS_MEMBER_PAGE = /\/member\.html$/i.test(window.location.pathname);
@@ -27,7 +50,7 @@ const TITANIA_IS_MEMBER_PAGE = /\/member\.html$/i.test(window.location.pathname)
   if (document.querySelector('link[data-titania-mobile-nav]')) return;
   const link = document.createElement('link');
   link.rel = 'stylesheet';
-  link.href = './css/mobile-nav.css?v=20260907-2';
+  link.href = './css/mobile-nav.css?v=20260910-fa-1';
   link.setAttribute('data-titania-mobile-nav', '1');
   document.head.appendChild(link);
 })();
@@ -48,7 +71,7 @@ const TITANIA_IS_MEMBER_PAGE = /\/member\.html$/i.test(window.location.pathname)
   if (!document.querySelector('link[data-titania-pre-attendance]')) {
     const link = document.createElement('link');
     link.rel = 'stylesheet';
-    link.href = './css/attendance-pre.css?v=20260905-1';
+    link.href = './css/attendance-pre.css?v=20260910-fa-1';
     link.setAttribute('data-titania-pre-attendance', '1');
     document.head.appendChild(link);
   }
@@ -122,7 +145,7 @@ const TITANIA_IS_MEMBER_PAGE = /\/member\.html$/i.test(window.location.pathname)
   if (!document.querySelector('link[data-titania-public-attendance]')) {
     const link = document.createElement('link');
     link.rel = 'stylesheet';
-    link.href = './css/public-attendance.css?v=20260905-1';
+    link.href = './css/public-attendance.css?v=20260910-fa-1';
     link.setAttribute('data-titania-public-attendance', '1');
     document.head.appendChild(link);
   }

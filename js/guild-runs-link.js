@@ -29,7 +29,7 @@
     body.innerHTML=`
       <div class="guide-step"><div class="guide-step-num">1</div><div><b>Dashboard</b> — review guild statistics, class balance, Gear Rating distribution, top members, and recent membership history. Use the <b>Members</b> tab for roster changes.</div></div>
       <div class="guide-step"><div class="guide-step-num">2</div><div><b>Members</b> — add or edit members, change class and Gear Rating, mark members inactive when they leave, and reactivate them when they return. Changes autosave to Supabase.</div></div>
-      <div class="guide-step"><div class="guide-step-num">3</div><div><b>Guild League & Siege</b> — drag a member onto a slot. Drag one filled slot onto another to swap. On any device, tap/click a member or filled slot, then tap another slot to place or swap. Use the slot ✕ to remove a member.</div></div>
+      <div class="guide-step"><div class="guide-step-num">3</div><div><b>Guild League & Siege</b> — drag a member onto a slot. Drag one filled slot onto another to swap. On any device, tap/click a member or filled slot, then tap another slot to place or swap. Use the slot Remove button to remove a member.</div></div>
       <div class="guide-step"><div class="guide-step-num">4</div><div><b>Siege Parties</b> — drag the ⠿ handle on a Party into another Raid. Each Raid must keep at least 1 Party and can hold up to 5.</div></div>
       <div class="guide-step"><div class="guide-step-num">5</div><div><b>Attendance</b> — open or create an event, mark actual attendance, use <b>Refresh Members</b> to reload the latest active roster and party list, then finish attendance when complete.</div></div>
       <div class="guide-step"><div class="guide-step-num">6</div><div><b>Runs</b> — create Time Echo or Mirage runs, open or close registration, review registered players, update status, and end or delete runs.</div></div>
@@ -47,47 +47,6 @@
       button.classList.add('fa-nav-tab');
       button.innerHTML=`<i class="${meta.icon}" aria-hidden="true"></i> ${meta.label}`;
     });
-  }
-
-  function currentEvent(tabs){
-    const active=tabs&&tabs.querySelector('.event-tab.active');
-    return active&&active.dataset.event?active.dataset.event:String(document.body.dataset.event||'');
-  }
-
-  function setSectionTitleIcon(element,event,label){
-    const meta=navIcons[event];
-    if(!element||!meta)return;
-    element.innerHTML=`<i class="${meta.icon} page-fa-icon" aria-hidden="true"></i>${label}`;
-  }
-
-  function applyPageHeadingIcon(){
-    const tabs=document.getElementById('eventTabs');
-    if(!tabs)return;
-    const event=currentEvent(tabs);
-
-    if(event==='dashboard'){
-      const title=[...document.querySelectorAll('.section-title')].find(el=>el.textContent.includes('Guild Dashboard'));
-      setSectionTitleIcon(title,event,'Guild Dashboard');
-      return;
-    }
-
-    if(event==='manage_members'){
-      const title=[...document.querySelectorAll('.section-title')].find(el=>el.textContent.includes('Manage Members'));
-      setSectionTitleIcon(title,event,'Manage Members');
-      return;
-    }
-
-    if(event==='guild_league'||event==='siege'){
-      const title=[...document.querySelectorAll('.section-title')].find(el=>el.textContent.includes('Main Battlefield'));
-      setSectionTitleIcon(title,event,'Main Battlefield');
-      return;
-    }
-
-    if(event==='attendance'){
-      const icon=document.querySelector('.att-page-head>div:first-child>span');
-      const meta=navIcons.attendance;
-      if(icon&&meta)icon.innerHTML=`<i class="${meta.icon} page-fa-icon" aria-hidden="true"></i>`;
-    }
   }
 
   function addTab(){
@@ -113,16 +72,10 @@
     styleFontAwesomeTabs();
     applyIcons(tabs);
     installHelpGuide();
-    setTimeout(applyPageHeadingIcon,0);
     return true;
   }
 
   function boot(){
-    document.addEventListener('click',event=>{
-      if(!event.target.closest('.event-tab'))return;
-      setTimeout(applyPageHeadingIcon,0);
-    },true);
-
     if(addTab())return;
     let tries=0;
     const timer=setInterval(()=>{
