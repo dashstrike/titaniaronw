@@ -29,13 +29,13 @@ window.TITANIA_FEATURES = Object.freeze({
   if (!document.querySelector('link[data-titania-ui-icons]')) {
     const link = document.createElement('link');
     link.rel = 'stylesheet';
-    link.href = './css/ui-icons.css?v=20260910-fa-1';
+    link.href = './css/ui-icons.css?v=20260910-spacing-1';
     link.setAttribute('data-titania-ui-icons', '1');
     document.head.appendChild(link);
   }
   if (!document.querySelector('script[data-titania-ui-icons]')) {
     const script = document.createElement('script');
-    script.src = './js/ui-icons.js?v=20260910-fa-1';
+    script.src = './js/ui-icons.js?v=20260910-spacing-1';
     script.setAttribute('data-titania-ui-icons', '1');
     document.head.appendChild(script);
   }
@@ -132,7 +132,7 @@ const TITANIA_IS_MEMBER_PAGE = /\/member\.html$/i.test(window.location.pathname)
     if (document.querySelector('script[data-titania-member-job-icons]')) return;
     const script = document.createElement('script');
     script.src = './js/member-job-icons.js?v=20260905-1';
-    script.setAttribute('data-titania-member-job-icons', '1');
+    script.setAttribute('data-titania-member-job-icons','1');
     document.body.appendChild(script);
   };
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', loadScript, {once:true});

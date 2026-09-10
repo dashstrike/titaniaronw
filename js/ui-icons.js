@@ -61,6 +61,18 @@
   const protectedText='input,textarea,select,option,[contenteditable],.slot-name,.member-name,.m-name,.dash-manage-name,.history-name,.toast-title,.toast-msg';
   const svgTargets='svg.leader-icon,svg.p-leader-icon,.search-box > svg,.hint-bar > svg';
 
+  const buttonControls='button,[role="button"],a.btn,a.tool-btn,.viewerbar .nav a';
+
+  // Space labelled controls, not icon-only buttons. Reuse the existing redraw scan.
+  function spaceButtonIcon(element){
+    const button=element.closest(buttonControls);
+    if(!button)return;
+    const icon=button.querySelector('.fa-solid,.fa-regular,.fa-brands');
+    if(!icon)return;
+    const target=icon.closest('.theme-icon,.att-btn-icon')||icon;
+    target.classList.toggle('mr-2',Boolean(button.textContent.trim()));
+  }
+
   function iconElement(classes){
     const icon=document.createElement('i');
     icon.className=classes+' titania-ui-icon';
@@ -120,11 +132,14 @@
     if(root.nodeType===Node.TEXT_NODE){
       const parent=root.parentElement;
       if(parent&&parent.matches(targets))decorate(parent);
+      if(parent)spaceButtonIcon(parent);
       return;
     }
     if(!(root instanceof Element))return;
     if(root.matches(targets+','+svgTargets))decorate(root);
     root.querySelectorAll(targets+','+svgTargets).forEach(decorate);
+    spaceButtonIcon(root);
+    root.querySelectorAll(buttonControls).forEach(spaceButtonIcon);
   }
 
   function boot(){
@@ -133,6 +148,7 @@
     // Only added/changed nodes are visited, and existing FA icons are left alone.
     new MutationObserver(records=>{
       for(const record of records){
+        if(record.target instanceof Element)spaceButtonIcon(record.target);
         if(record.type==='characterData')scan(record.target);
         else for(const node of record.addedNodes)scan(node);
       }
