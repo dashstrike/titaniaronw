@@ -13,6 +13,7 @@
   }
 
   function esc(value){return String(value==null?'':value).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+  function hasPartyDrag(event){return Boolean(event.dataTransfer&&Array.from(event.dataTransfer.types||[]).includes('application/x-titania-party'));}
 
   function ensureStyle(){
     if(document.getElementById('titania-party-pool-style'))return;
@@ -185,7 +186,7 @@
   }
 
   function parsedParty(event){
-    if(!event.dataTransfer||!event.dataTransfer.types.includes('application/x-titania-party'))return null;
+    if(!hasPartyDrag(event))return null;
     try{return JSON.parse(event.dataTransfer.getData('application/x-titania-party'));}catch(_e){return null;}
   }
 
@@ -212,7 +213,7 @@
   }
 
   document.addEventListener('dragover',event=>{
-    if(!canUsePools()||!event.dataTransfer||!event.dataTransfer.types.includes('application/x-titania-party'))return;
+    if(!canUsePools()||!hasPartyDrag(event))return;
     const card=event.target.closest('.team-card[data-team-key]');
     if(!card)return;
     event.preventDefault();
