@@ -35,6 +35,8 @@
     return {id:select.value,label:option?option.textContent.trim():'this attendance event'};
   }
 
+  function esc(value){return String(value||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+
   async function removeAttendance(){
     if(busy||!isAdmin)return;
     const event=selectedEvent();
@@ -46,7 +48,7 @@
 
     const result=await Swal.fire({
       title:'Delete attendance event?',
-      html:`<b>${event.label.replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}</b><br><br>This permanently deletes this event and all attendance records inside it.`,
+      html:`<b>${esc(event.label)}</b><br><br>This permanently deletes this event and all attendance records inside it.`,
       icon:'warning',
       showCancelButton:true,
       confirmButtonText:'Delete Attendance',
@@ -63,7 +65,7 @@
     busy=true;
     const button=document.getElementById('attDeleteEventBtn');
     if(button)button.disabled=true;
-    const deletion=await client.from('attendance_events').delete().eq('id',event.id);
+    const deletion=await client.rpc('admin_delete_attendance_event',{p_event_id:event.id});
     if(deletion.error){
       busy=false;
       if(button)button.disabled=false;
