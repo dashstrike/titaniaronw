@@ -6,6 +6,7 @@ document.write('<link rel="stylesheet" href="./css/crowns.css?v=20260906-2">');
 document.write('<link rel="stylesheet" href="./css/tooltips.css?v=20260906-1">');
 document.write('<script src="./js/tooltips-global.js?v=20260906-2"><\/script>');
 document.write('<link rel="stylesheet" href="./css/party-stars.css?v=20260906-8">');
+document.write('<link rel="stylesheet" href="./css/ui-polish.css?v=20260911-1">');
 document.write('<script src="./js/member-profile-enhancements.js?v=20260906-2"><\/script>');
 document.write('<script src="./js/user-management-link.js?v=20260906-1"><\/script>');
 document.write('<script src="./js/guild-runs-link.js?v=20260910-fa-1"><\/script>');
