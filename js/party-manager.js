@@ -10,9 +10,12 @@
   let roster=[];
   let parties=[];
   let canEdit=false;
+  let iconMap={};
 
   function esc(value){return String(value==null?'':value).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
   function active(member){return member&&member.status!=='inactive';}
+  function memberById(id){return roster.find(member=>String(member.id)===String(id));}
+  function iconFor(member){const file=iconMap[member&&member.cls];return file?`./assets/images/job/${encodeURIComponent(file)}`:'';}
 
   async function boot(){
     if(!window.supabase||!cfg.supabaseUrl||!cfg.supabasePublishableKey){fail('Supabase configuration is missing.');return;}
@@ -27,15 +30,17 @@
     if(profileResult.error||!profile||!profile.approved){fail('Approved Titania access is required.');return;}
     canEdit=['party_organizer','admin'].includes(profile.role);
 
-    const [plannerResult,partyResult]=await Promise.all([
+    const [plannerResult,partyResult,iconsResult]=await Promise.all([
       client.from('planner_state').select('state').eq('id',1).single(),
-      client.from('party_templates').select('party_no,member_ids,updated_at').order('party_no',{ascending:true})
+      client.from('party_templates').select('party_no,member_ids,updated_at').order('party_no',{ascending:true}),
+      fetch('./assets/images/job/job-icons.json').then(response=>response.ok?response.json():{}).catch(()=>({}))
     ]);
     if(plannerResult.error){fail(plannerResult.error.message||'Could not load roster.');return;}
     if(partyResult.error){fail(partyResult.error.message||'Could not load parties.');return;}
 
     roster=((plannerResult.data&&plannerResult.data.state&&plannerResult.data.state.roster)||[]).filter(active).sort((a,b)=>String(a.name||'').localeCompare(String(b.name||''),undefined,{sensitivity:'base'}));
     parties=partyResult.data||[];
+    iconMap=iconsResult||{};
     render();
   }
 
@@ -48,12 +53,56 @@
   }
 
   function options(selectedId,partyNo,slotNo){
-    let html='<option value="">Empty slot</option>';
+    let html='<option value=""></option>';
     for(const member of roster){
       const id=String(member.id||'');
       html+=`<option value="${esc(id)}"${id===selectedId?' selected':''}>${esc(member.name||'Unnamed')} · ${esc(member.cls||'Unknown')}</option>`;
     }
-    return `<select data-party="${partyNo}" data-slot="${slotNo}" ${canEdit?'':'disabled'}>${html}</select>`;
+    return `<select class="party-member-select" data-party="${partyNo}" data-slot="${slotNo}" ${canEdit?'':'disabled'}>${html}</select>`;
+  }
+
+  function select2Template(option){
+    if(!option.id)return 'Empty slot';
+    const member=memberById(option.id);
+    if(!member)return option.text;
+    const row=document.createElement('span');
+    row.className='select2-member';
+    const src=iconFor(member);
+    if(src){
+      const img=document.createElement('img');
+      img.src=src;
+      img.alt='';
+      row.appendChild(img);
+    }
+    const main=document.createElement('span');
+    main.className='select2-member-main';
+    const name=document.createElement('span');
+    name.className='select2-member-name';
+    name.textContent=member.name||'Unnamed';
+    const cls=document.createElement('span');
+    cls.className='select2-member-class';
+    cls.textContent=member.cls||'Unknown';
+    main.append(name,cls);
+    row.appendChild(main);
+    return row;
+  }
+
+  function initSelect2(){
+    if(!(window.jQuery&&jQuery.fn&&jQuery.fn.select2))return;
+    grid.querySelectorAll('.party-member-select').forEach(select=>{
+      jQuery(select).select2({
+        placeholder:'Empty slot',
+        allowClear:true,
+        width:'100%',
+        templateResult:select2Template,
+        templateSelection:select2Template,
+        matcher(params,data){
+          const term=String(params.term||'').trim().toLowerCase();
+          if(!term||!data.id)return data;
+          return String(data.text||'').toLowerCase().includes(term)?data:null;
+        }
+      });
+    });
   }
 
   function render(){
@@ -73,13 +122,12 @@
     grid.innerHTML=cards.join('');
     stateBox.hidden=true;
     grid.hidden=false;
+    initSelect2();
     updateSummary();
 
-    grid.addEventListener('change',event=>{
-      const select=event.target.closest('select[data-party]');
-      if(!select)return;
+    jQuery(grid).on('change','.party-member-select',function(){
       validateDuplicates();
-      updateCount(Number(select.dataset.party));
+      updateCount(Number(this.dataset.party));
     });
     grid.addEventListener('click',event=>{
       const button=event.target.closest('[data-save]');
@@ -103,7 +151,10 @@
   function validateDuplicates(){
     const counts=new Map();
     selectedIds().forEach(id=>counts.set(id,(counts.get(id)||0)+1));
-    grid.querySelectorAll('select').forEach(select=>select.classList.toggle('duplicate',Boolean(select.value&&counts.get(select.value)>1)));
+    grid.querySelectorAll('.party-slot').forEach(slot=>{
+      const select=slot.querySelector('select');
+      slot.classList.toggle('duplicate',Boolean(select&&select.value&&counts.get(select.value)>1));
+    });
     return [...counts.values()].every(count=>count===1);
   }
 
