@@ -1,6 +1,6 @@
 /* Compatibility bootstrap. Real configuration lives in ./js/config.js. */
 document.write('<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"><\/script>');
-document.write('<script src="./js/config.js?v=20260911-att-delete-1"><\/script>');
+document.write('<script src="./js/config.js?v=20260911-att-layout-1"><\/script>');
 document.write('<script src="./js/job-icons-global.js?v=20260908-2"><\/script>');
 document.write('<link rel="stylesheet" href="./css/crowns.css?v=20260906-2">');
 document.write('<link rel="stylesheet" href="./css/tooltips.css?v=20260906-1">');
@@ -11,7 +11,9 @@ document.write('<script src="./js/user-management-link.js?v=20260906-1"><\/scrip
 document.write('<script src="./js/guild-runs-link.js?v=20260910-fa-1"><\/script>');
 document.write('<script src="./js/help-guide.js?v=20260910-1"><\/script>');
 document.write('<script src="./js/organizer-role.js?v=20260907-1"><\/script>');
-document.write('<script src="./js/attendance-delete.js?v=20260911-1"><\/script>');
+document.write('<link rel="stylesheet" href="./css/attendance-page.css?v=20260911-layout-1">');
+document.write('<script src="./js/attendance-delete.js?v=20260911-2"><\/script>');
+document.write('<script src="./js/attendance-layout.js?v=20260911-1"><\/script>');
 
 document.addEventListener('DOMContentLoaded',()=>{
   if(document.querySelector('script[data-titania-party-stars]'))return;
