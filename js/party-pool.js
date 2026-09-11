@@ -54,10 +54,6 @@
     try{return typeof isActiveMember==='function'?isActiveMember(member):member.status!=='inactive';}catch(_e){return member.status!=='inactive';}
   }
 
-  function partyMembers(party){
-    return (party.member_ids||[]).map(memberFromId).filter(Boolean);
-  }
-
   async function loadParties(force){
     if(loading||(!force&&loaded))return;
     let client;
@@ -66,10 +62,7 @@
     loading=true;
     const result=await client.from('party_templates').select('party_no,member_ids,updated_at').order('party_no',{ascending:true});
     loading=false;
-    if(result.error){
-      console.warn('Party Pool load failed',result.error);
-      return;
-    }
+    if(result.error){console.warn('Party Pool load failed',result.error);return;}
     parties=result.data||[];
     loaded=true;
     renderPartyPool();
@@ -84,23 +77,19 @@
       return;
     }
     list.innerHTML=saved.map(party=>{
-      const members=partyMembers(party);
+      const members=(party.member_ids||[]).map(memberFromId).filter(Boolean);
       const full=party.member_ids.length===5&&members.length===5&&members.every(activeMember)&&new Set(party.member_ids).size===5;
       const rows=(party.member_ids||[]).map(id=>{
         const member=memberFromId(id);
-        const label=member?member.name:'Member unavailable';
-        return `<div class="party-pool-member"><i class="fa-solid fa-user" aria-hidden="true"></i><span>${esc(label)}</span></div>`;
+        return `<div class="party-pool-member"><i class="fa-solid fa-user" aria-hidden="true"></i><span>${esc(member?member.name:'Member unavailable')}</span></div>`;
       }).join('');
-      return `<article class="party-pool-card${full?'':' incomplete'}" data-party-no="${party.party_no}" draggable="${full?'true':'false'}" title="${full?'Drag this party onto a Guild League or Siege party card':'Party must contain 5 active members before it can be dragged'}">
-        <div class="party-pool-head"><b>Party ${party.party_no}</b><span class="party-pool-count">${members.length}/5</span></div>
-        <div class="party-pool-members">${rows}</div>
-      </article>`;
+      return `<article class="party-pool-card${full?'':' incomplete'}" data-party-no="${party.party_no}" draggable="${full?'true':'false'}" title="${full?'Drag this party onto a Guild League or Siege party card':'Party must contain 5 active members before it can be dragged'}"><div class="party-pool-head"><b>Party ${party.party_no}</b><span class="party-pool-count">${members.length}/5</span></div><div class="party-pool-members">${rows}</div></article>`;
     }).join('');
 
     list.querySelectorAll('.party-pool-card[draggable="true"]').forEach(card=>{
       card.addEventListener('dragstart',event=>{
         const party=parties.find(item=>String(item.party_no)===card.dataset.partyNo);
-        if(!party)return;
+        if(!party||!event.dataTransfer)return;
         card.classList.add('dragging');
         event.dataTransfer.effectAllowed='copy';
         event.dataTransfer.setData('application/x-titania-party',JSON.stringify({partyNo:party.party_no,memberIds:party.member_ids}));
@@ -113,7 +102,6 @@
     const sidebar=document.getElementById('sidebar');
     const head=sidebar&&sidebar.querySelector('.sidebar-head');
     const memberList=document.getElementById('memberList');
-    const classBreakdown=document.getElementById('classBreakdown');
     if(!sidebar||!head||!memberList)return;
 
     const add=document.getElementById('addMemberBtn');
@@ -150,17 +138,16 @@
     }
 
     applyPoolView();
-    if(classBreakdown)classBreakdown.dataset.partyPoolReady='1';
   }
 
   function applyPoolView(){
     const sidebar=document.getElementById('sidebar');
     if(!sidebar)return;
-    const tabs=sidebar.querySelector('.pool-tabs');
+    const head=sidebar.querySelector('.sidebar-head');
+    const tabs=head&&head.querySelector('.pool-tabs');
     const memberList=document.getElementById('memberList');
     const partyList=document.getElementById('partyPoolList');
     const classBreakdown=document.getElementById('classBreakdown');
-    const head=sidebar.querySelector('.sidebar-head');
     const search=head&&head.querySelector('.search-box');
     const filters=head&&head.querySelector('#filterRow');
     const classSelect=head&&head.querySelector('.class-select');
@@ -169,9 +156,9 @@
     const title=head&&head.querySelector('.sidebar-title-row h2');
     const enabled=canUsePools();
 
-    if(tabs)tabs.hidden=!enabled;
     if(!enabled)activePool='members';
     const partiesActive=enabled&&activePool==='parties';
+    if(tabs)tabs.hidden=!enabled;
     if(memberList)memberList.hidden=partiesActive;
     if(partyList)partyList.hidden=!partiesActive;
     if(classBreakdown)classBreakdown.hidden=partiesActive;
@@ -180,14 +167,12 @@
     if(classSelect)classSelect.hidden=partiesActive;
     if(sortRow)sortRow.hidden=partiesActive;
     if(tools)tools.hidden=!partiesActive;
-    if(title)title.textContent=partiesActive?'Party Pool':'Member Pool';
+    if(title){
+      const wanted=partiesActive?'Party Pool':'Member Pool';
+      if(title.textContent!==wanted)title.textContent=wanted;
+    }
     if(tabs)tabs.querySelectorAll('[data-pool]').forEach(button=>button.classList.toggle('active',button.dataset.pool===activePool));
-    if(partiesActive)loadParties(true);
-  }
-
-  function parsedParty(event){
-    if(!hasPartyDrag(event))return null;
-    try{return JSON.parse(event.dataTransfer.getData('application/x-titania-party'));}catch(_e){return null;}
+    if(partiesActive)loadParties(false);
   }
 
   function fillTeamFromParty(team,payload){
@@ -224,11 +209,13 @@
   },true);
 
   document.addEventListener('drop',event=>{
-    const payload=parsedParty(event);
-    if(!payload)return;
+    if(!hasPartyDrag(event))return;
     const card=event.target.closest('.team-card[data-team-key]');
     document.querySelectorAll('.party-drop-ready').forEach(node=>node.classList.remove('party-drop-ready'));
     if(!card)return;
+    let payload=null;
+    try{payload=JSON.parse(event.dataTransfer.getData('application/x-titania-party'));}catch(_e){}
+    if(!payload)return;
     event.preventDefault();
     event.stopPropagation();
     fillTeamFromParty(card.dataset.teamKey,payload);
@@ -236,11 +223,20 @@
 
   document.addEventListener('dragend',()=>document.querySelectorAll('.party-drop-ready').forEach(node=>node.classList.remove('party-drop-ready')));
 
+  function refreshForEvent(){
+    ensureSidebar();
+    applyPoolView();
+  }
+
   function boot(){
     ensureStyle();
     ensureSidebar();
-    new MutationObserver(()=>{ensureSidebar();applyPoolView();}).observe(document.body,{childList:true,subtree:true});
+    document.addEventListener('click',event=>{
+      if(event.target.closest('.event-tab'))setTimeout(refreshForEvent,0);
+    });
+    window.addEventListener('focus',refreshForEvent);
   }
+
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});
   else boot();
 })();
