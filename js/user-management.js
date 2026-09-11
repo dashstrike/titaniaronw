@@ -115,7 +115,26 @@
     const userId=row.dataset.userId||'';
     if(!userId||userId===currentUserId)return;
     const name=row.dataset.userName||'this user';
-    if(!confirm(`Delete ${name}?\n\nThis permanently removes the Titania login and profile. This cannot be undone.`))return;
+    if(!window.Swal){
+      alert('SweetAlert2 did not load. User was not deleted. Refresh the page and try again.');
+      return;
+    }
+
+    const result=await Swal.fire({
+      title:'Delete this user?',
+      html:`<b>${esc(name)}</b><br><br>This permanently removes the Titania login and profile.`,
+      icon:'warning',
+      showCancelButton:true,
+      confirmButtonText:'Delete User',
+      cancelButtonText:'Cancel',
+      reverseButtons:true,
+      focusCancel:true,
+      confirmButtonColor:'#ef5a6f',
+      cancelButtonColor:'#2a3350',
+      background:'#141a2b',
+      color:'#e9ecf7'
+    });
+    if(!result.isConfirmed)return;
 
     const controls=row.querySelectorAll('button,select,input');
     controls.forEach(control=>control.disabled=true);
@@ -125,13 +144,14 @@
     if(error){
       controls.forEach(control=>control.disabled=false);
       button.innerHTML='<i class="fa-solid fa-trash-can mr-2" aria-hidden="true"></i>Delete';
-      alert(error.message||'Could not delete user.');
+      await Swal.fire({title:'Delete failed',text:error.message||'Could not delete user.',icon:'error',background:'#141a2b',color:'#e9ecf7'});
       return;
     }
 
     row.remove();
     const remaining=list.querySelectorAll('.user-row').length;
     count.textContent=`${remaining} user${remaining===1?'':'s'}`;
+    await Swal.fire({title:'User deleted',icon:'success',timer:1100,showConfirmButton:false,background:'#141a2b',color:'#e9ecf7'});
   }
 
   async function boot(){
