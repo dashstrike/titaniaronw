@@ -18,7 +18,7 @@
     ['admin','Admin']
   ];
 
-  function esc(v){return String(v==null?'':v).replace(/[&<>'\"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','\"':'&quot;'}[c]));}
+  function esc(v){return String(v==null?'':v).replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));}
 
   function maskEmail(email){
     const value=String(email||'').trim();
@@ -117,13 +117,13 @@
     const name=row.dataset.userName||'this user';
     if(!confirm(`Delete ${name}?\n\nThis permanently removes the Titania login and profile. This cannot be undone.`))return;
 
-    const buttons=row.querySelectorAll('button,select,input');
-    buttons.forEach(control=>control.disabled=true);
+    const controls=row.querySelectorAll('button,select,input');
+    controls.forEach(control=>control.disabled=true);
     button.innerHTML='<i class="fa-solid fa-spinner fa-spin mr-2" aria-hidden="true"></i>Deleting';
 
     const {error}=await client.rpc('admin_delete_titania_user',{p_user_id:userId});
     if(error){
-      buttons.forEach(control=>control.disabled=false);
+      controls.forEach(control=>control.disabled=false);
       button.innerHTML='<i class="fa-solid fa-trash-can mr-2" aria-hidden="true"></i>Delete';
       alert(error.message||'Could not delete user.');
       return;
