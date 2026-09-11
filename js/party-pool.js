@@ -7,12 +7,14 @@
   let loaded=false;
   let loading=false;
   let activePool='members';
+  let iconMap={};
+  let iconMapPromise=null;
 
   function canUsePools(){
     return document.body.dataset.event==='guild_league'||document.body.dataset.event==='siege';
   }
 
-  function esc(value){return String(value==null?'':value).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot',"'":'&#39;'}[c]));}
+  function esc(value){return String(value==null?'':value).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
   function hasPartyDrag(event){return Boolean(event.dataTransfer&&Array.from(event.dataTransfer.types||[]).includes('application/x-titania-party'));}
 
   function ensureStyle(){
@@ -20,7 +22,7 @@
     const style=document.createElement('style');
     style.id='titania-party-pool-style';
     style.textContent=`
-      /* Keep the legacy Add button in the DOM because the core planner wires it at startup; hide it visually only. */
+      /* Keep legacy Add in DOM because core planner wires it during startup. */
       #addMemberBtn{display:none!important}
       .pool-tabs{display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-bottom:10px;padding:3px;background:var(--panel-2);border:1px solid var(--line-soft);border-radius:9px}
       .pool-tab{border:0;background:transparent;color:var(--muted);border-radius:7px;padding:7px 8px;font:600 12px 'IBM Plex Sans',Arial,sans-serif;cursor:pointer}
@@ -36,9 +38,10 @@
       .party-pool-card.dragging{opacity:.35}
       .party-pool-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:7px}
       .party-pool-head b{font-size:13px}.party-pool-count{font:600 11px 'IBM Plex Mono',monospace;color:var(--muted)}
-      .party-pool-members{display:grid;gap:4px}
-      .party-pool-member{display:flex;align-items:center;gap:7px;min-width:0;font-size:12px;color:var(--text)}
-      .party-pool-member i{width:13px;text-align:center;color:var(--muted-2);flex:none}.party-pool-member span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+      .party-pool-members{display:grid;gap:5px}
+      .party-pool-member{display:flex;align-items:center;gap:8px;min-width:0;font-size:12px;color:var(--text)}
+      .party-pool-job-icon{width:20px;height:20px;object-fit:contain;flex:none;display:block}
+      .party-pool-member-name{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
       .party-pool-empty{padding:24px 8px;text-align:center;color:var(--muted);font-size:12px;line-height:1.6}
       .party-drop-ready{outline:2px solid var(--teal)!important;outline-offset:2px}
       @media(max-width:720px){.pool-tabs{margin-top:2px}.party-pool-list{max-height:320px;padding-bottom:20px}}
@@ -55,13 +58,30 @@
     try{return typeof isActiveMember==='function'?isActiveMember(member):member.status!=='inactive';}catch(_e){return member.status!=='inactive';}
   }
 
+  function iconFor(member){
+    const file=member&&iconMap[member.cls];
+    return file?`./assets/images/job/${encodeURIComponent(file)}`:'';
+  }
+
+  function loadIcons(){
+    if(iconMapPromise)return iconMapPromise;
+    iconMapPromise=fetch('./assets/images/job/job-icons.json?v=20260905-2',{cache:'force-cache'})
+      .then(response=>response.ok?response.json():{})
+      .then(data=>{iconMap=data||{};})
+      .catch(error=>console.warn('[Titania] Could not load Party Pool job icons:',error));
+    return iconMapPromise;
+  }
+
   async function loadParties(force){
     if(loading||(!force&&loaded))return;
     let client;
     try{client=supabaseClient;}catch(_e){return;}
     if(!client)return;
     loading=true;
-    const result=await client.from('party_templates').select('party_no,member_ids,updated_at').order('party_no',{ascending:true});
+    const [result]=await Promise.all([
+      client.from('party_templates').select('party_no,member_ids,updated_at').order('party_no',{ascending:true}),
+      loadIcons()
+    ]);
     loading=false;
     if(result.error){console.warn('Party Pool load failed',result.error);return;}
     parties=result.data||[];
@@ -77,12 +97,14 @@
       list.innerHTML='<div class="party-pool-empty">No saved parties yet.<br>Open <b>Manage Parties</b> to build your 30 reference parties.</div>';
       return;
     }
+
     list.innerHTML=saved.map(party=>{
       const members=(party.member_ids||[]).map(memberFromId).filter(Boolean);
       const full=party.member_ids.length===5&&members.length===5&&members.every(activeMember)&&new Set(party.member_ids).size===5;
       const rows=(party.member_ids||[]).map(id=>{
         const member=memberFromId(id);
-        return `<div class="party-pool-member"><i class="fa-solid fa-user" aria-hidden="true"></i><span>${esc(member?member.name:'Member unavailable')}</span></div>`;
+        const src=iconFor(member);
+        return `<div class="party-pool-member">${src?`<img class="party-pool-job-icon" src="${esc(src)}" alt="" title="${esc(member.cls||'')}">`:''}<span class="party-pool-member-name">${esc(member?member.name:'Member unavailable')}</span></div>`;
       }).join('');
       return `<article class="party-pool-card${full?'':' incomplete'}" data-party-no="${party.party_no}" draggable="${full?'true':'false'}" title="${full?'Drag this party onto a Guild League or Siege party card':'Party must contain 5 active members before it can be dragged'}"><div class="party-pool-head"><b>Party ${party.party_no}</b><span class="party-pool-count">${members.length}/5</span></div><div class="party-pool-members">${rows}</div></article>`;
     }).join('');
@@ -103,7 +125,7 @@
     const sidebar=document.getElementById('sidebar');
     const head=sidebar&&sidebar.querySelector('.sidebar-head');
     const memberList=document.getElementById('memberList');
-    if(!sidebar||!head||!memberList)return;
+    if(!sidebar||!head||!memberList)return false;
 
     let tabs=head.querySelector('.pool-tabs');
     if(!tabs){
@@ -136,6 +158,7 @@
     }
 
     applyPoolView();
+    return true;
   }
 
   function applyPoolView(){
@@ -228,7 +251,12 @@
 
   function boot(){
     ensureStyle();
+    loadIcons();
     ensureSidebar();
+
+    // Safe observer: watch only the planner's active event attribute.
+    new MutationObserver(refreshForEvent).observe(document.body,{attributes:true,attributeFilter:['data-event']});
+
     document.addEventListener('click',event=>{
       if(event.target.closest('.event-tab'))setTimeout(refreshForEvent,0);
     });
