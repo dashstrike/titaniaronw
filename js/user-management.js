@@ -18,7 +18,7 @@
     ['admin','Admin']
   ];
 
-  function esc(v){return String(v==null?'':v).replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));}
+  function esc(v){return String(v==null?'':v).replace(/[&<>'\"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','\"':'&quot;'}[c]));}
 
   function maskEmail(email){
     const value=String(email||'').trim();
@@ -52,14 +52,17 @@
     list.innerHTML=sorted.map(profile=>{
       const self=profile.id===currentUserId;
       const pending=profile.role==='pending';
-      return `<div class="user-row${self?' self':''}" data-user-id="${esc(profile.id)}">
+      return `<div class="user-row${self?' self':''}" data-user-id="${esc(profile.id)}" data-user-name="${esc(profile.display_name||'Unnamed user')}">
         <div class="user-ident">
           <div class="user-name">${esc(profile.display_name||'Unnamed user')}${self?' <span class="you">· You</span>':''}${pending?' <span class="pending-badge">Pending</span>':''}</div>
           <div class="user-email">${esc(maskEmail(profile.email||''))}</div>
         </div>
         <select class="role-select" data-role ${self?'disabled':''}>${roleOptions(profile.role||'pending')}</select>
         <label class="approved"><input type="checkbox" data-approved ${profile.approved?'checked':''} ${self?'disabled':''}> Approved</label>
-        <button class="save-btn" data-save type="button" ${self?'disabled':''}>Save</button>
+        <div class="user-actions">
+          <button class="save-btn" data-save type="button" ${self?'disabled':''}><i class="fa-solid fa-floppy-disk mr-2" aria-hidden="true"></i>Save</button>
+          <button class="delete-btn" data-delete type="button" ${self?'disabled title="You cannot delete your own account."':''}><i class="fa-solid fa-trash-can mr-2" aria-hidden="true"></i>Delete</button>
+        </div>
       </div>`;
     }).join('');
 
@@ -89,23 +92,46 @@
     const role=row.querySelector('[data-role]').value;
     const approved=row.querySelector('[data-approved]').checked;
     button.disabled=true;
-    button.textContent='Saving…';
+    button.innerHTML='<i class="fa-solid fa-spinner fa-spin mr-2" aria-hidden="true"></i>Saving';
 
     const {error}=await client.from('profiles').update({role,approved}).eq('id',userId);
     if(error){
       button.disabled=false;
-      button.textContent='Save';
+      button.innerHTML='<i class="fa-solid fa-floppy-disk mr-2" aria-hidden="true"></i>Save';
       alert(error.message||'Could not save user access.');
       return;
     }
 
-    button.textContent='Saved';
+    button.innerHTML='<i class="fa-solid fa-check mr-2" aria-hidden="true"></i>Saved';
     button.classList.add('saved');
     setTimeout(()=>{
       button.classList.remove('saved');
-      button.textContent='Save';
+      button.innerHTML='<i class="fa-solid fa-floppy-disk mr-2" aria-hidden="true"></i>Save';
       button.disabled=false;
     },1000);
+  }
+
+  async function deleteUser(row,button){
+    const userId=row.dataset.userId||'';
+    if(!userId||userId===currentUserId)return;
+    const name=row.dataset.userName||'this user';
+    if(!confirm(`Delete ${name}?\n\nThis permanently removes the Titania login and profile. This cannot be undone.`))return;
+
+    const buttons=row.querySelectorAll('button,select,input');
+    buttons.forEach(control=>control.disabled=true);
+    button.innerHTML='<i class="fa-solid fa-spinner fa-spin mr-2" aria-hidden="true"></i>Deleting';
+
+    const {error}=await client.rpc('admin_delete_titania_user',{p_user_id:userId});
+    if(error){
+      buttons.forEach(control=>control.disabled=false);
+      button.innerHTML='<i class="fa-solid fa-trash-can mr-2" aria-hidden="true"></i>Delete';
+      alert(error.message||'Could not delete user.');
+      return;
+    }
+
+    row.remove();
+    const remaining=list.querySelectorAll('.user-row').length;
+    count.textContent=`${remaining} user${remaining===1?'':'s'}`;
   }
 
   async function boot(){
@@ -128,10 +154,14 @@
 
   refreshBtn.addEventListener('click',loadUsers);
   list.addEventListener('click',event=>{
-    const button=event.target.closest('[data-save]');
+    const saveButton=event.target.closest('[data-save]');
+    const deleteButton=event.target.closest('[data-delete]');
+    const button=saveButton||deleteButton;
     if(!button)return;
     const row=button.closest('.user-row');
-    if(row)saveUser(row,button);
+    if(!row)return;
+    if(saveButton)saveUser(row,saveButton);
+    else deleteUser(row,deleteButton);
   });
 
   boot();
