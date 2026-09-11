@@ -53,15 +53,32 @@
   margin-right:.5rem!important;
 }
 
-/* Siege: never use a one-sided accent. The whole party card gets the accent. */
+/* Star comes after the Party label: space the star itself with ml-2. */
+body .team-name.party-star-name{
+  gap:0!important;
+}
+body .party-star-toggle,
+body .party-star-public{
+  margin-left:.5rem!important;
+}
+
+/* Guild League: no one-sided accent. Use a full purple border around every party card. */
+body[data-event="guild_league"] .body-wrap[data-event="guild_league"] .team-card.main-bf,
+body[data-event="guild_league"] .body-wrap[data-event="guild_league"] .team-card.sub-bf{
+  box-shadow:none!important;
+  border:1px solid var(--violet)!important;
+}
+
+/* Siege: no one-sided accent. Use a full red border around normal party cards. */
 body[data-event="siege"] .body-wrap[data-event="siege"] .team-card.main-bf,
 body[data-event="siege"] .body-wrap[data-event="siege"] .team-card.sub-bf{
   box-shadow:none!important;
   border:1px solid #ef5a6f!important;
 }
 
-/* Star-selected Siege parties keep a full gold border/glow. */
-body[data-event="siege"] .team-card.party-starred{
+/* Star-selected Siege parties override the red rule with a full gold border/glow. */
+body[data-event="siege"] .body-wrap[data-event="siege"] .team-card.main-bf.party-starred,
+body[data-event="siege"] .body-wrap[data-event="siege"] .team-card.sub-bf.party-starred{
   border:1px solid #f0b429!important;
   box-shadow:0 0 0 1px #f0b42944,0 0 18px #f0b42912!important;
 }
