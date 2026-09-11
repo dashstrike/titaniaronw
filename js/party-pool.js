@@ -12,7 +12,7 @@
     return document.body.dataset.event==='guild_league'||document.body.dataset.event==='siege';
   }
 
-  function esc(value){return String(value==null?'':value).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+  function esc(value){return String(value==null?'':value).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot',"'":'&#39;'}[c]));}
   function hasPartyDrag(event){return Boolean(event.dataTransfer&&Array.from(event.dataTransfer.types||[]).includes('application/x-titania-party'));}
 
   function ensureStyle(){
@@ -20,6 +20,7 @@
     const style=document.createElement('style');
     style.id='titania-party-pool-style';
     style.textContent=`
+      /* Keep the legacy Add button in the DOM because the core planner wires it at startup; hide it visually only. */
       #addMemberBtn{display:none!important}
       .pool-tabs{display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-bottom:10px;padding:3px;background:var(--panel-2);border:1px solid var(--line-soft);border-radius:9px}
       .pool-tab{border:0;background:transparent;color:var(--muted);border-radius:7px;padding:7px 8px;font:600 12px 'IBM Plex Sans',Arial,sans-serif;cursor:pointer}
@@ -104,9 +105,6 @@
     const memberList=document.getElementById('memberList');
     if(!sidebar||!head||!memberList)return;
 
-    const add=document.getElementById('addMemberBtn');
-    if(add)add.remove();
-
     let tabs=head.querySelector('.pool-tabs');
     if(!tabs){
       tabs=document.createElement('div');
@@ -190,7 +188,7 @@
       state.assignments[team]=names.slice(0,5);
       if(typeof clearSelections==='function')clearSelections(false);
       commitMutation(`Party ${payload.partyNo} placed`);
-      showToast('Party placed',`Party ${payload.partyNo} → ${displayTeamLabel(team)}`);
+      showToast('Party placed',`Party ${payload.partyNo} -> ${displayTeamLabel(team)}`);
     }catch(error){
       console.warn('Party drop failed',error);
       try{showToast('Party not placed','Could not place this party.','warn');}catch(_e){}
