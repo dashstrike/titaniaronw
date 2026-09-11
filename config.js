@@ -14,7 +14,7 @@ document.write('<script src="./js/organizer-role.js?v=20260907-1"><\/script>');
 document.write('<link rel="stylesheet" href="./css/attendance-page.css?v=20260911-layout-1">');
 document.write('<script src="./js/attendance-delete.js?v=20260911-2"><\/script>');
 document.write('<script src="./js/attendance-layout.js?v=20260911-2"><\/script>');
-document.write('<script src="./js/party-pool.js?v=20260911-1"><\/script>');
+document.write('<script src="./js/party-pool.js?v=20260911-2"><\/script>');
 
 document.addEventListener('DOMContentLoaded',()=>{
   if(document.querySelector('script[data-titania-party-stars]'))return;
