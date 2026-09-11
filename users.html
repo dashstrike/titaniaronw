@@ -5,10 +5,11 @@
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Titania · User Management</title>
   <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
-  <link rel="stylesheet" href="./css/user-management.css?v=20260906-1">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+  <link rel="stylesheet" href="./css/user-management.css?v=20260911-delete-1">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="./js/config.js?v=20260906-1"></script>
-  <script src="./js/user-management.js?v=20260906-3" defer></script>
+  <script src="./js/config.js?v=20260911-aligned-1"></script>
+  <script src="./js/user-management.js?v=20260911-delete-1" defer></script>
 </head>
 <body>
   <header class="topbar">
@@ -20,8 +21,8 @@
       </div>
     </div>
     <div class="top-actions">
-      <button class="btn" id="refreshBtn" type="button">↻ Refresh</button>
-      <a class="btn" href="./index.html">← Back to Titania</a>
+      <button class="btn" id="refreshBtn" type="button"><i class="fa-solid fa-rotate mr-2" aria-hidden="true"></i>Refresh</button>
+      <a class="btn" href="./index.html"><i class="fa-solid fa-arrow-left mr-2" aria-hidden="true"></i>Back to Titania</a>
     </div>
   </header>
 
@@ -35,7 +36,7 @@
     </section>
 
     <div class="notice">
-      <b>Admin</b>: full access · <b>Party Organizer</b>: roster, lineups, Star Dungeon and attendance · <b>Attendance Auditor</b>: attendance and pre-attendance only · <b>Viewer</b>: read-only · <b>Pending</b>: awaiting approval.
+      <b>Admin</b>: full access · <b>Party Organizer</b>: roster, lineups, Star Dungeon and attendance · <b>Attendance Auditor</b>: attendance and pre-attendance only · <b>Viewer</b>: read-only · <b>Pending</b>: awaiting approval. Admins can permanently delete unnecessary accounts; your own account is protected.
     </div>
 
     <section class="panel">
