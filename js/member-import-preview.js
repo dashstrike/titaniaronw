@@ -15,6 +15,7 @@
   const applyBtn=document.getElementById('applyBtn');
   const footerMsg=document.getElementById('footerMsg');
   const fileMeta=document.getElementById('fileMeta');
+  const inactivePreview=document.getElementById('inactivePreview');
   let client=null;
   let plannerState=null;
   let plannerRevision=0;
@@ -34,7 +35,17 @@
   }
   function toInt(value){const n=Number(String(value==null?'':value).replace(/,/g,'').trim());return Number.isFinite(n)?Math.max(0,Math.round(n)):0;}
   function fmt(value){return Number(value||0).toLocaleString();}
-  function memberName(memberId){const m=roster.find(item=>String(item.id)===String(memberId));return m?m.name:'';}
+  function localDate(){const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;}
+  function makeId(prefix){
+    if(window.crypto&&typeof window.crypto.randomUUID==='function')return `${prefix}_${window.crypto.randomUUID().replace(/-/g,'').slice(0,16)}`;
+    return `${prefix}_${Date.now().toString(36)}${Math.random().toString(36).slice(2,10)}`;
+  }
+  function makeMemberId(reserved){
+    let id=makeId('member');
+    while(reserved.has(id))id=makeId('member');
+    reserved.add(id);
+    return id;
+  }
 
   function parseCsv(text){
     const out=[];let row=[],field='',quoted=false;
@@ -77,7 +88,6 @@
     const key=looseKey(csvName);if(!key)return null;
     let best=null,bestScore=-1;
     for(const member of roster){
-      if(member.status==='inactive')continue;
       const id=String(member.id||'');
       if(usedIds.has(id))continue;
       const mKey=looseKey(member.name||'');if(!mKey)continue;
@@ -105,11 +115,12 @@
     const aliasByCsv=new Map(savedCsvRows.map(item=>[exactKey(item.csv_player_name),String(item.member_id)]));
     const exactByName=new Map(roster.map(member=>[exactKey(member.name),member]));
     const used=new Set();
+    const reservedIds=new Set(roster.map(member=>String(member.id||'')).filter(Boolean));
     rows=records.map((record,index)=>{
       const csvName=String(record.Player||'').trim();
-      let member=null,matchType='unmatched',needsReview=true;
+      let member=null,matchType='unmatched',needsReview=true,newMember=false;
       const savedId=aliasByCsv.get(exactKey(csvName));
-      if(savedId){member=roster.find(m=>String(m.id)===savedId)||null;if(member){matchType='saved';needsReview=false;}}
+      if(savedId){member=roster.find(m=>String(m.id)===savedId)||null;if(member&&!used.has(String(member.id))){matchType='saved';needsReview=false;}else member=null;}
       if(!member){
         const exact=exactByName.get(exactKey(csvName));
         if(exact&&!used.has(String(exact.id))){member=exact;matchType='exact';needsReview=false;}
@@ -118,12 +129,15 @@
         const suggested=suggestionFor(csvName,used);
         if(suggested){member=suggested;matchType='suggested';needsReview=true;}
       }
+      if(!member){newMember=true;matchType='new';needsReview=false;}
       if(member)used.add(String(member.id));
       const existingData=member?savedCsvRows.find(item=>String(item.member_id)===String(member.id)):null;
       return {
         index,
         csvName,
         memberId:member?String(member.id):'',
+        newMember,
+        newMemberId:newMember?makeMemberId(reservedIds):'',
         originalMemberId:member?String(member.id):'',
         matchType,
         needsReview,
@@ -139,31 +153,45 @@
     });
   }
 
-  function memberOptions(selectedId){
+  function memberOptions(row){
+    const selected=row.newMember?'__new__':String(row.memberId||'');
     const sorted=[...roster].sort((a,b)=>{
       const ai=a.status==='inactive'?1:0,bi=b.status==='inactive'?1:0;
       return ai-bi||String(a.name||'').localeCompare(String(b.name||''),undefined,{sensitivity:'base'});
     });
-    return `<option value=""></option>${sorted.map(m=>`<option value="${esc(m.id)}"${String(m.id)===String(selectedId)?' selected':''}>${esc(m.name)}${m.status==='inactive'?' · Inactive':''}</option>`).join('')}`;
+    return `<option value=""></option><option value="__new__"${selected==='__new__'?' selected':''}>+ Create new member · ${esc(row.csvName)}</option>${sorted.map(m=>`<option value="${esc(m.id)}"${String(m.id)===selected?' selected':''}>${esc(m.name)}${m.status==='inactive'?' · Inactive':''}</option>`).join('')}`;
   }
+
+  function currentMember(row){return roster.find(m=>String(m.id)===String(row.memberId))||null;}
+  function isReactivation(row){const m=currentMember(row);return Boolean(!row.ignored&&!row.newMember&&m&&m.status==='inactive');}
+  function classChanged(row){const m=currentMember(row);return Boolean(m&&!row.ignored&&!row.newMember&&String(m.cls||'')!==String(row.cls||''));}
+  function grChanged(row){const m=currentMember(row);return Boolean(m&&!row.ignored&&!row.newMember&&Number(m.gr||0)!==Number(row.gr||0));}
+  function nameMapping(row){const m=currentMember(row);return Boolean(m&&!row.ignored&&!row.newMember&&exactKey(m.name)!==exactKey(row.csvName));}
 
   function statusLabel(row){
     if(row.ignored)return ['ignored','Ignored'];
+    if(row.newMember)return ['new','New Member'];
     if(!row.memberId)return ['unmatched','Unmatched'];
     if(row.needsReview)return ['suggested','Review'];
+    if(isReactivation(row))return ['reactivate','Reactivate'];
     if(row.matchType==='saved')return ['saved','Saved Match'];
     if(row.matchType==='manual')return ['manual','Confirmed'];
     return ['exact','Exact'];
   }
 
-  function currentMember(row){return roster.find(m=>String(m.id)===String(row.memberId))||null;}
-  function classChanged(row){const m=currentMember(row);return Boolean(m&&!row.ignored&&String(m.cls||'')!==String(row.cls||''));}
-  function grChanged(row){const m=currentMember(row);return Boolean(m&&!row.ignored&&Number(m.gr||0)!==Number(row.gr||0));}
-  function nameMapping(row){const m=currentMember(row);return Boolean(m&&!row.ignored&&exactKey(m.name)!==exactKey(row.csvName));}
+  function presentExistingIds(){
+    return new Set(rows.filter(row=>row.memberId).map(row=>String(row.memberId)));
+  }
+
+  function inactiveCandidates(){
+    const present=presentExistingIds();
+    return roster.filter(member=>member.status!=='inactive'&&member.id&&!present.has(String(member.id)));
+  }
 
   function rowVisible(row){
     if(filter==='all')return true;
-    if(filter==='review')return !row.ignored&&(row.needsReview||!row.memberId);
+    if(filter==='review')return !row.ignored&&!row.newMember&&(row.needsReview||!row.memberId);
+    if(filter==='new')return !row.ignored&&row.newMember;
     if(filter==='mapping')return nameMapping(row);
     if(filter==='class')return classChanged(row);
     if(filter==='gr')return grChanged(row);
@@ -173,12 +201,11 @@
   function renderRows(){
     const visible=rows.filter(rowVisible);
     rowsBody.innerHTML=visible.map(row=>{
-      const m=currentMember(row);
       const [statusClass,statusText]=statusLabel(row);
-      const rowClass=row.ignored?'ignored':!row.memberId?'unresolved':row.needsReview?'needs-review':'';
+      const rowClass=row.ignored?'ignored':row.newMember?'new-member':!row.memberId?'unresolved':row.needsReview?'needs-review':isReactivation(row)?'reactivate-member':'';
       return `<tr data-index="${row.index}" class="${rowClass}">
         <td><div class="csv-name" title="${esc(row.csvName)}">${esc(row.csvName)}</div></td>
-        <td class="match-cell"><select class="match-select" data-field="memberId">${memberOptions(row.memberId)}</select></td>
+        <td class="match-cell"><select class="match-select" data-field="memberId">${memberOptions(row)}</select></td>
         <td><span class="status-pill ${statusClass}">${statusText}</span></td>
         <td><input class="edit${classChanged(row)?' change':''}" data-field="cls" value="${esc(row.cls)}"></td>
         <td><input class="edit number${grChanged(row)?' change':''}" data-field="gr" type="number" min="0" step="1" value="${row.gr}"></td>
@@ -202,31 +229,53 @@
 
   function duplicateIds(){
     const counts=new Map();
-    rows.forEach(row=>{if(!row.ignored&&row.memberId)counts.set(row.memberId,(counts.get(row.memberId)||0)+1);});
+    rows.forEach(row=>{if(!row.ignored&&!row.newMember&&row.memberId)counts.set(row.memberId,(counts.get(row.memberId)||0)+1);});
     return new Set([...counts].filter(([,count])=>count>1).map(([id])=>id));
+  }
+
+  function duplicateCsvNames(){
+    const counts=new Map();
+    rows.forEach(row=>{if(!row.ignored){const key=exactKey(row.csvName);if(key)counts.set(key,(counts.get(key)||0)+1);}});
+    return new Set([...counts].filter(([,count])=>count>1).map(([key])=>key));
+  }
+
+  function renderInactivePreview(members){
+    if(!inactivePreview)return;
+    if(!members.length){inactivePreview.hidden=true;inactivePreview.innerHTML='';return;}
+    inactivePreview.hidden=false;
+    inactivePreview.innerHTML=`<div class="inactive-preview-head"><strong><i class="fa-solid fa-user-slash mr-2" aria-hidden="true"></i>${members.length} current member${members.length===1?'':'s'} missing from CSV</strong><span>These members will be marked inactive when you apply.</span></div><div class="inactive-preview-names">${members.map(member=>`<span>${esc(member.name)}</span>`).join('')}</div>`;
   }
 
   function refreshSummary(){
     const activeRows=rows.filter(r=>!r.ignored);
-    const matched=activeRows.filter(r=>r.memberId&&!r.needsReview).length;
-    const review=activeRows.filter(r=>!r.memberId||r.needsReview).length;
+    const matched=activeRows.filter(r=>!r.newMember&&r.memberId&&!r.needsReview).length;
+    const newCount=activeRows.filter(r=>r.newMember).length;
+    const review=activeRows.filter(r=>!r.newMember&&(!r.memberId||r.needsReview)).length;
     const cls=activeRows.filter(classChanged).length;
     const gr=activeRows.filter(grChanged).length;
+    const goingInactive=inactiveCandidates();
     document.getElementById('sumRows').textContent=rows.length;
     document.getElementById('sumMatched').textContent=matched;
+    document.getElementById('sumNew').textContent=newCount;
     document.getElementById('sumReview').textContent=review;
+    document.getElementById('sumInactive').textContent=goingInactive.length;
     document.getElementById('sumClass').textContent=cls;
     document.getElementById('sumGr').textContent=gr;
+    renderInactivePreview(goingInactive);
+
     const duplicates=duplicateIds();
+    const csvDuplicates=duplicateCsvNames();
     rowsBody.querySelectorAll('tr[data-index]').forEach(tr=>{
-      const row=rows[Number(tr.dataset.index)];tr.classList.toggle('duplicate',Boolean(row&&row.memberId&&duplicates.has(row.memberId)));
+      const row=rows[Number(tr.dataset.index)];
+      tr.classList.toggle('duplicate',Boolean(row&&!row.newMember&&row.memberId&&duplicates.has(row.memberId))||Boolean(row&&csvDuplicates.has(exactKey(row.csvName))));
     });
-    const unresolved=activeRows.filter(r=>!r.memberId||r.needsReview).length;
-    const valid=activeRows.length>0&&!unresolved&&!duplicates.size;
+    const unresolved=activeRows.filter(r=>!r.newMember&&(!r.memberId||r.needsReview)).length;
+    const valid=activeRows.length>0&&!unresolved&&!duplicates.size&&!csvDuplicates.size;
     applyBtn.disabled=!valid;
     if(duplicates.size)footerMsg.textContent=`${duplicates.size} Titania member match${duplicates.size===1?' is':'es are'} used more than once.`;
+    else if(csvDuplicates.size)footerMsg.textContent=`${csvDuplicates.size} duplicate CSV player name${csvDuplicates.size===1?' needs':'s need'} to be resolved.`;
     else if(unresolved)footerMsg.textContent=`Resolve ${unresolved} row${unresolved===1?'':'s'} before applying.`;
-    else footerMsg.textContent=`Ready to update ${activeRows.length} matched member${activeRows.length===1?'':'s'}. Ignored rows will not be changed.`;
+    else footerMsg.textContent=`Ready: ${matched} matched · ${newCount} new · ${goingInactive.length} going inactive.`;
     document.getElementById('toolbarNote').textContent=`${rows.filter(rowVisible).length} row${rows.filter(rowVisible).length===1?'':'s'} shown`;
   }
 
@@ -235,9 +284,24 @@
   function wireTable(){
     jQuery(rowsBody).on('change','.match-select',function(){
       const row=rowFromTarget(this);if(!row)return;
-      row.memberId=String(this.value||'');
-      row.needsReview=!row.memberId;
-      row.matchType=row.memberId?'manual':'unmatched';
+      const value=String(this.value||'');
+      if(value==='__new__'){
+        row.newMember=true;
+        row.memberId='';
+        row.newMemberId=row.newMemberId||makeId('member');
+        row.needsReview=false;
+        row.matchType='new';
+      }else if(value){
+        row.newMember=false;
+        row.memberId=value;
+        row.needsReview=false;
+        row.matchType='manual';
+      }else{
+        row.newMember=false;
+        row.memberId='';
+        row.needsReview=true;
+        row.matchType='unmatched';
+      }
       row.ignored=false;
       renderRows();
     });
@@ -247,9 +311,7 @@
       const field=input.dataset.field;
       row[field]=['gr','weekly','weeklyContribution','totalContribution'].includes(field)?toInt(input.value):input.value;
       refreshSummary();
-      if(field==='cls'||field==='gr'){
-        input.classList.toggle('change',field==='cls'?classChanged(row):grChanged(row));
-      }
+      if(field==='cls'||field==='gr')input.classList.toggle('change',field==='cls'?classChanged(row):grChanged(row));
     });
     rowsBody.addEventListener('click',event=>{
       const row=rowFromTarget(event.target);if(!row)return;
@@ -257,7 +319,10 @@
         row.needsReview=false;row.matchType='manual';renderRows();return;
       }
       if(event.target.closest('[data-ignore]')){
-        row.ignored=!row.ignored;if(row.ignored)row.needsReview=false;else row.needsReview=!row.memberId;renderRows();
+        row.ignored=!row.ignored;
+        if(row.ignored)row.needsReview=false;
+        else if(!row.newMember)row.needsReview=!row.memberId;
+        renderRows();
       }
     });
   }
@@ -273,25 +338,98 @@
 
   function clone(value){return JSON.parse(JSON.stringify(value));}
 
+  function appendMembershipHistory(next,member,action,effectiveDate,reason,changedAt){
+    if(!Array.isArray(next.membershipHistory))next.membershipHistory=[];
+    next.membershipHistory.push({
+      id:makeId('history'),
+      memberId:member.id,
+      memberName:member.name,
+      action,
+      effectiveDate,
+      reason,
+      changedAt
+    });
+    if(next.membershipHistory.length>20000)next.membershipHistory=next.membershipHistory.slice(-20000);
+  }
+
+  function removeInactiveFromLineups(next,memberName){
+    if(next.assignments&&typeof next.assignments==='object'){
+      Object.keys(next.assignments).forEach(key=>{
+        if(Array.isArray(next.assignments[key]))next.assignments[key]=next.assignments[key].map(value=>value===memberName?null:value);
+      });
+    }
+    if(next.raidLeaders&&typeof next.raidLeaders==='object'){
+      Object.keys(next.raidLeaders).forEach(key=>{if(next.raidLeaders[key]===memberName)next.raidLeaders[key]='';});
+    }
+  }
+
   function applyToState(){
     const next=clone(plannerState);
-    const byId=new Map((next.roster||[]).map(member=>[String(member.id||''),member]));
+    if(!Array.isArray(next.roster))next.roster=[];
+    const byId=new Map(next.roster.map(member=>[String(member.id||''),member]));
     const editor=(currentProfile&&String(currentProfile.display_name||currentProfile.email||'').trim())||'CSV Import';
     const now=new Date().toISOString();
+    const date=localDate();
+    const present=presentExistingIds();
+
+    next.roster.forEach(member=>{
+      const id=String(member.id||'');
+      if(!id||member.status==='inactive'||present.has(id))return;
+      removeInactiveFromLineups(next,member.name);
+      member.status='inactive';
+      member.inactiveSince=date;
+      member.inactiveReason='Missing from member CSV';
+      member.updatedAt=now;
+      member.updatedBy=editor;
+      appendMembershipHistory(next,member,'inactive',date,'Missing from member CSV',now);
+    });
+
     for(const row of rows){
-      if(row.ignored||!row.memberId)continue;
+      if(row.ignored)continue;
+      if(row.newMember){
+        const id=row.newMemberId||makeId('member');
+        row.newMemberId=id;
+        const member={
+          id,
+          name:String(row.csvName||'').trim().slice(0,120),
+          cls:String(row.cls||'').trim()||'Unknown',
+          gr:toInt(row.gr),
+          status:'active',
+          inactiveSince:'',
+          lastReturned:'',
+          inactiveReason:'',
+          notes:'',
+          updatedAt:now,
+          updatedBy:editor
+        };
+        next.roster.push(member);
+        byId.set(id,member);
+        continue;
+      }
+
+      if(!row.memberId)continue;
       const member=byId.get(String(row.memberId));if(!member)continue;
-      const changed=String(member.cls||'')!==String(row.cls||'')||Number(member.gr||0)!==Number(row.gr||0);
-      member.cls=String(row.cls||'').trim()||member.cls;
-      member.gr=toInt(row.gr);
+      let changed=false;
+      if(member.status==='inactive'){
+        member.status='active';
+        member.lastReturned=date;
+        member.inactiveSince='';
+        member.inactiveReason='';
+        appendMembershipHistory(next,member,'reactivated',date,'Present in member CSV',now);
+        changed=true;
+      }
+      const newClass=String(row.cls||'').trim()||member.cls||'Unknown';
+      const newGr=toInt(row.gr);
+      if(String(member.cls||'')!==newClass){member.cls=newClass;changed=true;}
+      if(Number(member.gr||0)!==newGr){member.gr=newGr;changed=true;}
       if(changed){member.updatedAt=now;member.updatedBy=editor;}
     }
     return next;
   }
 
   function importPayload(){
-    return rows.filter(row=>!row.ignored&&row.memberId).map(row=>({
-      member_id:row.memberId,
+    return rows.filter(row=>!row.ignored&&(row.newMember||row.memberId)).map(row=>({
+      member_id:row.newMember?row.newMemberId:row.memberId,
       csv_player_name:row.csvName,
       title:String(row.title||'').trim(),
       weekly:toInt(row.weekly),
@@ -302,13 +440,17 @@
 
   async function applyUpdates(){
     refreshSummary();if(applyBtn.disabled)return;
-    const active=rows.filter(r=>!r.ignored&&r.memberId);
+    const active=rows.filter(r=>!r.ignored);
+    const matched=active.filter(r=>!r.newMember&&r.memberId&&!r.needsReview);
+    const newMembers=active.filter(r=>r.newMember);
+    const inactive=inactiveCandidates();
+    const reactivated=active.filter(isReactivation);
     const classCount=active.filter(classChanged).length;
     const grCount=active.filter(grChanged).length;
     const aliasCount=active.filter(nameMapping).length;
     const result=await Swal.fire({
       icon:'question',title:'Update Titania members?',
-      html:`<div style="text-align:left;line-height:1.75"><b>${active.length}</b> members matched<br><b>${aliasCount}</b> CSV name mappings<br><b>${classCount}</b> class changes<br><b>${grCount}</b> Gear Score changes<br><b>${active.length}</b> weekly/contribution updates</div>`,
+      html:`<div style="text-align:left;line-height:1.75"><b>${matched.length}</b> existing members matched<br><b>${newMembers.length}</b> new members to add<br><b>${inactive.length}</b> current members to mark inactive<br><b>${reactivated.length}</b> inactive members to reactivate<br><b>${aliasCount}</b> CSV name mappings<br><b>${classCount}</b> class changes<br><b>${grCount}</b> Gear Score changes<br><b>${active.length}</b> activity/contribution updates</div>`,
       showCancelButton:true,confirmButtonText:'Apply Updates',cancelButtonText:'Cancel',reverseButtons:true
     });
     if(!result.isConfirmed)return;
@@ -320,7 +462,11 @@
       const rpc=await client.rpc('apply_member_csv_import',{p_state:nextState,p_base_revision:plannerRevision,p_rows:importPayload()});
       if(rpc.error)throw rpc.error;
       sessionStorage.removeItem(STORAGE_KEY);
-      await Swal.fire({icon:'success',title:'Members updated',text:`${active.length} Titania members were updated successfully.`,confirmButtonText:'Back to Members'});
+      const pieces=[`${matched.length} updated`];
+      if(newMembers.length)pieces.push(`${newMembers.length} added`);
+      if(inactive.length)pieces.push(`${inactive.length} marked inactive`);
+      if(reactivated.length)pieces.push(`${reactivated.length} reactivated`);
+      await Swal.fire({icon:'success',title:'Member sync complete',text:pieces.join(' · '),confirmButtonText:'Back to Members'});
       location.href='./index.html#members';
     }catch(error){
       const msg=String(error&&error.message||error||'Member update failed.');
