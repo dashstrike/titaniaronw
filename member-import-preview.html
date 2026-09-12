@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Titania · Member CSV Preview</title>
+  <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800&family=IBM+Plex+Mono:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css">
+  <style>
+    :root{--bg:#0c0f1a;--panel:#141a2b;--panel-2:#1b2237;--line:#2a3350;--line-soft:#202944;--text:#e9ecf7;--muted:#8b93b0;--muted-2:#5f6889;--violet:#8b7cf6;--teal:#3fd6c4;--amber:#f0b429;--red:#ef5a6f;--green:#4fd67a}
+    *{box-sizing:border-box}html,body{margin:0;min-height:100%;background:var(--bg);color:var(--text);font-family:'IBM Plex Sans',Arial,sans-serif}button,input,select{font:inherit}.mr-2{margin-right:.5rem}.ml-2{margin-left:.5rem}
+    .topbar{position:sticky;top:0;z-index:30;display:flex;align-items:center;justify-content:space-between;gap:16px;padding:13px 18px;border-bottom:1px solid var(--line-soft);background:#0c0f1af2;backdrop-filter:blur(10px)}
+    .brand{display:flex;align-items:center;gap:10px;min-width:0}.brand img{width:40px;height:36px;object-fit:contain}.brand h1{font:700 17px 'Cinzel',serif;letter-spacing:1.2px;margin:0}.brand p{margin:1px 0 0;color:var(--muted);font-size:11px}.actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+    .btn{border:1px solid var(--line);background:var(--panel);color:var(--text);border-radius:8px;padding:9px 12px;cursor:pointer;font-weight:600;display:inline-flex;align-items:center;justify-content:center;text-decoration:none}.btn:hover{border-color:var(--violet)}.btn:disabled{opacity:.45;cursor:not-allowed}.btn.primary{background:linear-gradient(135deg,#8b7cf6,#6f5ee0);border:none;color:#fff}.btn.small{padding:7px 10px;font-size:12px}
+    main{max-width:1780px;margin:0 auto;padding:20px 18px 60px}.page-head{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:14px}.page-head h2{font-size:21px;margin:0}.page-head p{font-size:12.5px;color:var(--muted);margin:4px 0 0}.file-meta{font:600 11px 'IBM Plex Mono',monospace;color:var(--muted);white-space:nowrap}
+    .summary-grid{display:grid;grid-template-columns:repeat(5,minmax(120px,1fr));gap:9px;margin-bottom:12px}.summary-card{background:var(--panel);border:1px solid var(--line-soft);border-radius:10px;padding:11px 12px}.summary-card span{display:block;color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:.65px}.summary-card strong{display:block;font:600 21px 'IBM Plex Mono',monospace;margin-top:4px}.summary-card.warn strong{color:var(--amber)}.summary-card.bad strong{color:#ff92a2}.summary-card.good strong{color:#83e79e}
+    .toolbar{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;background:var(--panel);border:1px solid var(--line-soft);border-radius:10px;padding:10px 12px;margin-bottom:10px}.filters{display:flex;align-items:center;gap:6px;flex-wrap:wrap}.filter-btn{border:1px solid var(--line-soft);background:transparent;color:var(--muted);padding:6px 9px;border-radius:999px;cursor:pointer;font-size:11.5px;font-weight:700}.filter-btn.active{background:var(--panel-2);color:var(--text);border-color:var(--violet)}.toolbar-note{font-size:11.5px;color:var(--muted)}
+    .state{padding:36px 18px;text-align:center;color:var(--muted);background:var(--panel);border:1px dashed var(--line);border-radius:10px}.state.error{color:#ff9caa}.table-wrap{background:var(--panel);border:1px solid var(--line-soft);border-radius:10px;overflow:auto;max-height:calc(100vh - 315px)}
+    table{width:100%;border-collapse:separate;border-spacing:0;min-width:1500px}thead th{position:sticky;top:0;z-index:5;background:#111728;color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:.65px;text-align:left;padding:9px 8px;border-bottom:1px solid var(--line);white-space:nowrap}tbody td{padding:7px 8px;border-bottom:1px solid var(--line-soft);font-size:12px;vertical-align:middle}tbody tr:last-child td{border-bottom:none}tbody tr.needs-review{background:#f0b42908}tbody tr.unresolved{background:#ef5a6f08}tbody tr.ignored{opacity:.52}tbody tr.duplicate{background:#ef5a6f12}
+    .csv-name{font-weight:700;max-width:190px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.match-cell{min-width:220px}.match-select{width:100%}.status-pill{display:inline-flex;align-items:center;border:1px solid var(--line);border-radius:999px;padding:4px 7px;font-size:10px;font-weight:800;white-space:nowrap}.status-pill.exact,.status-pill.saved,.status-pill.manual{color:#8fe89f;border-color:#4fd67a55;background:#4fd67a0c}.status-pill.suggested{color:#f6c85b;border-color:#f0b42966;background:#f0b4290d}.status-pill.unmatched{color:#ff9caa;border-color:#ef5a6f66;background:#ef5a6f0d}.status-pill.ignored{color:var(--muted)}
+    .edit{width:100%;min-width:92px;background:#0f1424;border:1px solid var(--line);border-radius:6px;color:var(--text);padding:7px 8px;outline:none}.edit:focus{border-color:var(--violet);box-shadow:0 0 0 2px #8b7cf622}.edit.title{min-width:170px}.edit.number{font-family:'IBM Plex Mono',monospace;text-align:right}.change{color:var(--amber)}.same{color:var(--muted)}.row-actions{display:flex;gap:5px;align-items:center;white-space:nowrap}.confirm-suggestion{border:1px solid #f0b42955;background:#f0b4290b;color:#f6c85b;border-radius:6px;padding:5px 7px;cursor:pointer;font-weight:700;font-size:10.5px}.ignore-btn{border:1px solid var(--line-soft);background:transparent;color:var(--muted);border-radius:6px;padding:5px 7px;cursor:pointer;font-size:10.5px;font-weight:700}
+    .footer-bar{position:sticky;bottom:0;z-index:20;margin-top:10px;background:#0c0f1af2;border:1px solid var(--line);border-radius:10px;padding:10px 12px;display:flex;align-items:center;justify-content:space-between;gap:12px;backdrop-filter:blur(10px)}.footer-msg{font-size:11.5px;color:var(--muted)}.footer-actions{display:flex;gap:8px;align-items:center}
+    .select2-container{width:100%!important}.select2-container--default .select2-selection--single{height:34px;background:#0f1424;border:1px solid var(--line);border-radius:6px}.select2-container--default .select2-selection--single .select2-selection__rendered{line-height:32px;color:var(--text);padding-left:8px;padding-right:28px;font-size:12px}.select2-container--default .select2-selection--single .select2-selection__arrow{height:32px}.select2-dropdown{background:#0d1322;border-color:var(--line);z-index:9999}.select2-results__option{color:var(--text);font-size:12px;padding:7px 9px}.select2-container--default .select2-results__option--highlighted.select2-results__option--selectable{background:#5f52c6}.select2-search--dropdown{padding:7px}.select2-search__field{background:#111827!important;color:var(--text)!important;border:1px solid var(--line)!important;border-radius:6px;padding:7px!important;outline:none}.select2-container--default .select2-selection--single .select2-selection__placeholder{color:var(--muted)}
+    @media(max-width:900px){.summary-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.page-head{flex-direction:column}.file-meta{white-space:normal}.table-wrap{max-height:none}.footer-bar{position:relative}.topbar{align-items:flex-start;flex-direction:column}.actions{width:100%}.actions .btn{flex:1}}
+  </style>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script src="./js/config.js?v=20260912-member-import-1"></script>
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand"><img src="favicon-192.png" alt=""><div><h1>Titania Guild Management Tool</h1><p>Member CSV Review</p></div></div>
+    <div class="actions"><a class="btn" href="./index.html#members"><i class="fa-solid fa-arrow-left mr-2" aria-hidden="true"></i>Back to Members</a><button class="btn" id="replaceFileBtn" type="button"><i class="fa-solid fa-file-arrow-up mr-2" aria-hidden="true"></i>Choose Different CSV</button><input id="replaceFileInput" type="file" accept=".csv,text/csv" hidden></div>
+  </header>
+  <main>
+    <div class="page-head"><div><h2><i class="fa-solid fa-list-check mr-2" aria-hidden="true"></i>Review Member Update</h2><p>Cross-reference CSV names with Titania members, correct any values, then apply the update.</p></div><div class="file-meta" id="fileMeta"></div></div>
+    <div class="summary-grid" id="summaryGrid" hidden>
+      <div class="summary-card"><span>CSV Players</span><strong id="sumRows">0</strong></div>
+      <div class="summary-card good"><span>Matched</span><strong id="sumMatched">0</strong></div>
+      <div class="summary-card warn"><span>Need Review</span><strong id="sumReview">0</strong></div>
+      <div class="summary-card"><span>Class Changes</span><strong id="sumClass">0</strong></div>
+      <div class="summary-card"><span>GR Changes</span><strong id="sumGr">0</strong></div>
+    </div>
+    <div class="toolbar" id="toolbar" hidden><div class="filters" id="filters"><button class="filter-btn active" data-filter="all">All</button><button class="filter-btn" data-filter="review">Need Review</button><button class="filter-btn" data-filter="mapping">Name Mapping</button><button class="filter-btn" data-filter="class">Class Changes</button><button class="filter-btn" data-filter="gr">GR Changes</button></div><div class="toolbar-note" id="toolbarNote"></div></div>
+    <div id="state" class="state">Loading CSV preview...</div>
+    <div class="table-wrap" id="tableWrap" hidden><table><thead><tr><th>CSV Player</th><th>Titania Member</th><th>Match</th><th>Class</th><th>Gear Score</th><th>Title</th><th>Weekly</th><th>Weekly Contribution</th><th>Total Contribution</th><th>Action</th></tr></thead><tbody id="rowsBody"></tbody></table></div>
+    <div class="footer-bar" id="footerBar" hidden><div class="footer-msg" id="footerMsg"></div><div class="footer-actions"><a class="btn" href="./index.html#members">Cancel</a><button class="btn primary" id="applyBtn" type="button" disabled><i class="fa-solid fa-cloud-arrow-up mr-2" aria-hidden="true"></i>Apply Updates</button></div></div>
+  </main>
+  <script src="./js/member-import-preview.js?v=20260912-1"></script>
+</body>
+</html>
