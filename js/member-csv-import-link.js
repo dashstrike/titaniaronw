@@ -58,6 +58,12 @@
     head.appendChild(action);
   }
 
+  function openMembersFromHash(){
+    if(location.hash!=='#members')return;
+    const tab=document.querySelector('.event-tab[data-event="manage_members"]');
+    if(tab&&document.body.dataset.event!=='manage_members')tab.click();
+  }
+
   async function handleFile(event){
     const file=event.target.files&&event.target.files[0];
     if(!file)return;
@@ -87,7 +93,7 @@
     document.addEventListener('click',event=>{
       if(event.target.closest('.event-tab'))setTimeout(ensureButton,0);
     });
-    ensureButton();
+    setTimeout(()=>{openMembersFromHash();ensureButton();},0);
   }
 
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});
