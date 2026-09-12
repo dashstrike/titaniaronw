@@ -53,7 +53,9 @@
       const registeredIds=new Set(regs.map(r=>String(r.member_id)));
       const available=roster.filter(m=>!registeredIds.has(String(m.id)));
       const carriers=regs.filter(r=>r.registration_type==='carrier');
-      const needCarry=regs.filter(r=>r.registration_type==='need_carry');
+      const needCarry=regs
+        .filter(r=>r.registration_type==='need_carry')
+        .sort((a,b)=>(a.carry_status==='done'?1:0)-(b.carry_status==='done'?1:0));
       const time=formatTime(run.run_time);
       const isOpen=run.status==='open';
       const title=String(run.note||'').trim()||'Untitled Run';
