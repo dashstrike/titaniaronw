@@ -97,7 +97,7 @@
 
     wrap.innerHTML=[
       imported?infoRow('Title',esc(imported.title||'—')):'',
-      imported?infoRow('Weekly',`<span class="member-import-value">${esc(fmtNum(imported.weekly))}</span>`):'',
+      imported?infoRow('This Week Activity',`<span class="member-import-value">${esc(fmtNum(imported.weekly))}</span>`):'',
       imported?infoRow('Weekly Contribution',`<span class="member-import-value">${esc(fmtNum(imported.weekly_contribution))}</span>`):'',
       imported?infoRow('Total Contribution',`<span class="member-import-value">${esc(fmtNum(imported.total_contribution))}</span>`):'',
       infoRow('Guild League',gl?`${esc(gl.raid)} · ${esc(gl.party)}`:'Not assigned'),
