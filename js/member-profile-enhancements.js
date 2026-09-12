@@ -9,6 +9,7 @@
 
   function esc(v){return String(v==null?'':v).replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));}
   function fmtDateTime(v){const d=new Date(v);return Number.isNaN(d.getTime())?'—':d.toLocaleString(undefined,{year:'numeric',month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'});}
+  function fmtNum(v){const n=Number(v);return Number.isFinite(n)?Math.round(n).toLocaleString():'0';}
 
   function addStyle(){
     if(document.getElementById('member-profile-enhancements-style'))return;
@@ -19,6 +20,7 @@
       .member-info-class img{width:28px;height:28px;object-fit:contain;flex:none}
       .member-info-yes{color:var(--amber);font-weight:800}
       .member-info-no{color:var(--muted);font-weight:700}
+      .member-import-value{font-family:'IBM Plex Mono',monospace;font-weight:600}
       .class-history-panel{margin-top:14px}
       .class-history-table{width:100%;border-collapse:collapse}
       .class-history-table th,.class-history-table td{text-align:left;padding:10px 8px;border-bottom:1px solid var(--lineSoft);font-size:13px}
@@ -85,14 +87,19 @@
     return `<div class="info-row"><div class="info-key">${esc(label)}</div><div class="info-value">${valueHtml}</div></div>`;
   }
 
-  function renderInfo(member,state,stars){
+  function renderInfo(member,state,stars,csvData){
     const wrap=document.getElementById('memberInfo');
     if(!wrap)return;
     const gl=glPlacement(state.assignments||{},member.name||'');
     const siege=siegePlacement(state,member.name||'');
     const starYes=Boolean(siege&&stars.has(siege.teamKey));
+    const imported=csvData||null;
 
     wrap.innerHTML=[
+      imported?infoRow('Title',esc(imported.title||'—')):'',
+      imported?infoRow('Weekly',`<span class="member-import-value">${esc(fmtNum(imported.weekly))}</span>`):'',
+      imported?infoRow('Weekly Contribution',`<span class="member-import-value">${esc(fmtNum(imported.weekly_contribution))}</span>`):'',
+      imported?infoRow('Total Contribution',`<span class="member-import-value">${esc(fmtNum(imported.total_contribution))}</span>`):'',
       infoRow('Guild League',gl?`${esc(gl.raid)} · ${esc(gl.party)}`:'Not assigned'),
       infoRow('Siege',siege?`${esc(siege.raid)} · ${esc(siege.party)}`:'Not assigned'),
       infoRow('Star Dungeon',siege?`<span class="${starYes?'member-info-yes':'member-info-no'}">${starYes?'Yes ★':'No'}</span>`:'—'),
@@ -101,7 +108,7 @@
       infoRow('Inactive since',member.inactiveSince?esc(new Date(member.inactiveSince).toLocaleDateString()):'—'),
       infoRow('Last returned',member.lastReturned?esc(new Date(member.lastReturned).toLocaleDateString()):'—'),
       infoRow('Notes',esc(member.notes||'—'))
-    ].join('');
+    ].filter(Boolean).join('');
   }
 
   function ensureHistoryPanel(){
@@ -139,10 +146,11 @@
     if(!memberId)return;
     const client=window.supabase.createClient(cfg.supabaseUrl,cfg.supabasePublishableKey,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:false}});
 
-    const [plannerRes,starsRes,classHistoryRes]=await Promise.all([
+    const [plannerRes,starsRes,classHistoryRes,csvDataRes]=await Promise.all([
       client.from('planner_state').select('state').eq('id',1).single(),
       client.from('party_star_selections').select('team_key').eq('event_key','siege'),
-      client.from('class_history').select('old_class,new_class,changed_at').eq('member_id',memberId).order('changed_at',{ascending:false})
+      client.from('class_history').select('old_class,new_class,changed_at').eq('member_id',memberId).order('changed_at',{ascending:false}),
+      client.from('member_csv_data').select('title,weekly,weekly_contribution,total_contribution').eq('member_id',memberId).maybeSingle()
     ]);
 
     if(plannerRes.error)return;
@@ -151,11 +159,12 @@
     const member=roster.find(m=>String(m&&m.id||'')===memberId);
     if(!member)return;
     const stars=new Set((starsRes.data||[]).map(r=>String(r.team_key||'')));
+    const csvData=csvDataRes.error?null:csvDataRes.data;
 
     const waitForBase=()=>{
       const wrap=document.getElementById('memberInfo');
       if(!wrap||document.getElementById('profile')?.style.display!=='block')return false;
-      renderInfo(member,state,stars);
+      renderInfo(member,state,stars,csvData);
       renderClassHistory(classHistoryRes.error?[]:(classHistoryRes.data||[]));
       return true;
     };
