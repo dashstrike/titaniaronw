@@ -17,6 +17,7 @@ document.write('<script src="./js/attendance-delete.js?v=20260911-2"><\/script>'
 document.write('<script src="./js/attendance-layout.js?v=20260911-2"><\/script>');
 document.write('<script src="./js/party-pool.js?v=20260911-4"><\/script>');
 document.write('<script src="./js/siege-polarity-label.js?v=20260913-1"><\/script>');
+document.write('<script src="./js/dashboard-weekly-ranking.js?v=20260914-1"><\/script>');
 
 document.addEventListener('DOMContentLoaded',()=>{
   if(document.querySelector('script[data-titania-party-stars]'))return;
