@@ -20,14 +20,17 @@
       .member-info-class img{width:28px;height:28px;object-fit:contain;flex:none}
       .member-info-yes{color:var(--amber);font-weight:800}
       .member-info-no{color:var(--muted);font-weight:700}
-      .member-import-value{font-family:'IBM Plex Mono',monospace;font-weight:600}
+      .member-import-value{font-weight:600}
+      .member-title-metric{font-weight:700;color:var(--text)}
+      .metric #trackingSince.member-import-value{font-size:23px!important;font-family:inherit!important}
       .class-history-panel{margin-top:14px}
       .class-history-table{width:100%;border-collapse:collapse}
       .class-history-table th,.class-history-table td{text-align:left;padding:10px 8px;border-bottom:1px solid var(--lineSoft);font-size:13px}
       .class-history-table th{color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:.7px}
-      .class-change{display:inline-flex;align-items:center;gap:7px;font-weight:700}
+      .class-change-flow{display:inline-flex;align-items:center;gap:7px;vertical-align:middle}
+      .class-change{display:inline-flex;align-items:center;gap:7px;font-weight:700;line-height:1.25}
       .class-change img{width:24px;height:24px;object-fit:contain;flex:none}
-      .class-arrow{color:var(--muted2);padding:0 2px}
+      .class-arrow{display:inline-flex;align-items:center;justify-content:center;align-self:center;color:var(--muted2);line-height:1;padding:0 2px;transform:translateY(-1px)}
     `;
     document.head.appendChild(style);
   }
@@ -87,6 +90,32 @@
     return `<div class="info-row"><div class="info-key">${esc(label)}</div><div class="info-value">${valueHtml}</div></div>`;
   }
 
+  function renderMetricCards(csvData){
+    const titleValue=document.getElementById('gainTotal');
+    const contributionValue=document.getElementById('trackingSince');
+    const imported=csvData||null;
+
+    if(titleValue){
+      const card=titleValue.closest('.metric');
+      const heading=card&&card.querySelector('.card-head h2');
+      const desc=card&&card.querySelector('.card-head p');
+      if(heading)heading.innerHTML='<i class="fa-solid fa-award mr-2" aria-hidden="true"></i>Title';
+      if(desc)desc.remove();
+      titleValue.className='member-title-metric';
+      titleValue.textContent=imported&&String(imported.title||'').trim()?String(imported.title).trim():'—';
+    }
+
+    if(contributionValue){
+      const card=contributionValue.closest('.metric');
+      const heading=card&&card.querySelector('.card-head h2');
+      const desc=card&&card.querySelector('.card-head p');
+      if(heading)heading.innerHTML='<i class="fa-solid fa-coins mr-2" aria-hidden="true"></i>Total Contribution';
+      if(desc)desc.textContent='All-time contribution';
+      contributionValue.className='member-import-value';
+      contributionValue.textContent=imported?fmtNum(imported.total_contribution):'—';
+    }
+  }
+
   function renderInfo(member,state,stars,csvData){
     const wrap=document.getElementById('memberInfo');
     if(!wrap)return;
@@ -96,10 +125,8 @@
     const imported=csvData||null;
 
     wrap.innerHTML=[
-      imported?infoRow('Title',esc(imported.title||'—')):'',
       imported?infoRow('This Week Activity',`<span class="member-import-value">${esc(fmtNum(imported.weekly))}</span>`):'',
       imported?infoRow('Weekly Contribution',`<span class="member-import-value">${esc(fmtNum(imported.weekly_contribution))}</span>`):'',
-      imported?infoRow('Total Contribution',`<span class="member-import-value">${esc(fmtNum(imported.total_contribution))}</span>`):'',
       infoRow('Guild League',gl?`${esc(gl.raid)} · ${esc(gl.party)}`:'Not assigned'),
       infoRow('Siege',siege?`${esc(siege.raid)} · ${esc(siege.party)}`:'Not assigned'),
       infoRow('Star Dungeon',siege?`<span class="${starYes?'member-info-yes':'member-info-no'}">${starYes?'Yes ★':'No'}</span>`:'—'),
@@ -134,7 +161,7 @@
       return;
     }
     wrap.className='';
-    wrap.innerHTML=`<table class="class-history-table"><thead><tr><th>Date</th><th>Change</th></tr></thead><tbody>${rows.map(row=>`<tr><td>${esc(fmtDateTime(row.changed_at))}</td><td>${classChangeHtml(row.old_class)} <span class="class-arrow">→</span> ${classChangeHtml(row.new_class)}</td></tr>`).join('')}</tbody></table>`;
+    wrap.innerHTML=`<table class="class-history-table"><thead><tr><th>Date</th><th>Change</th></tr></thead><tbody>${rows.map(row=>`<tr><td>${esc(fmtDateTime(row.changed_at))}</td><td><span class="class-change-flow">${classChangeHtml(row.old_class)}<span class="class-arrow" aria-hidden="true">→</span>${classChangeHtml(row.new_class)}</span></td></tr>`).join('')}</tbody></table>`;
   }
 
   async function boot(){
@@ -164,6 +191,7 @@
     const waitForBase=()=>{
       const wrap=document.getElementById('memberInfo');
       if(!wrap||document.getElementById('profile')?.style.display!=='block')return false;
+      renderMetricCards(csvData);
       renderInfo(member,state,stars,csvData);
       renderClassHistory(classHistoryRes.error?[]:(classHistoryRes.data||[]));
       return true;
