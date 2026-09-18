@@ -51,7 +51,7 @@
     runsList.innerHTML=runs.map(run=>{
       const regs=Array.isArray(run.registrations)?run.registrations:[];
       const registeredIds=new Set(regs.map(r=>String(r.member_id)));
-      const available=roster.filter(m=>!registeredIds.has(String(m.id)));
+      const available=roster.filter(m=>String(m.status||'active').toLowerCase()!=='inactive'&&!registeredIds.has(String(m.id)));
       const carriers=regs.filter(r=>r.registration_type==='carrier');
       const needCarry=regs
         .filter(r=>r.registration_type==='need_carry')
