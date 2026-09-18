@@ -95,3 +95,42 @@ html,body{max-width:100%;overflow-x:hidden}.topbar,.wrap,.panel,.runs-list,.run-
 .history-carry-status.cancel{color:#ffcf7a;border-color:rgba(240,180,41,.45);background:rgba(240,180,41,.1)}
 .history-carry-status.mia{color:#ffadb9;border-color:rgba(239,90,111,.45);background:rgba(239,90,111,.1)}
 @media(max-width:760px){.page-head-actions{align-items:flex-start;flex-direction:column}.previous-run-meta{align-items:flex-start;flex-direction:column}.previous-run-meta span{white-space:normal}}
+
+/* Keep Guild Runs buttons and controls on the same baseline/height. */
+.btn{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  min-height:40px;
+  line-height:1;
+  white-space:nowrap;
+}
+.create-grid input,
+.create-grid select,
+.create-grid > .btn{
+  height:42px;
+  min-height:42px;
+}
+.create-grid > .btn{
+  align-self:end;
+  padding-top:0;
+  padding-bottom:0;
+}
+.run-actions .btn,
+.top-actions .btn,
+.section-head-actions .btn{
+  min-height:40px;
+}
+.section-head-actions{
+  display:flex;
+  align-items:center;
+  justify-content:flex-end;
+  gap:10px;
+  flex-wrap:wrap;
+}
+.section-head-actions .muted{
+  white-space:nowrap;
+}
+@media(max-width:760px){
+  .section-head-actions{width:100%;justify-content:space-between}
+}
