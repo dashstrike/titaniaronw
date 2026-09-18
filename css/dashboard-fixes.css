@@ -236,8 +236,8 @@ body[data-event="dashboard"] #teamsWrap > .section-head:first-child{margin-top:0
 .dash-att-bar:focus-visible,.dash-att-scroll:focus-visible{outline:2px solid var(--violet);outline-offset:3px;}
 .dash-attendance .present,.dash-attendance .going{background:var(--teal);}
 .dash-attendance .absent,.dash-attendance .not_going{background:var(--red);}
-.dash-attendance .excused{background:var(--amber);}
-.dash-attendance .afk{background:#8798d8;}
+.dash-attendance .excused{background:#4d8de8;}
+.dash-attendance .afk{background:var(--amber);}
 .dash-attendance .no_response{background:var(--muted-2);}
 .dash-att-note{font-size:11px;line-height:1.6;color:var(--muted);margin:12px 0 0;}
 .dash-att-message{font-size:13px;color:var(--muted);margin:16px 0 4px;}
