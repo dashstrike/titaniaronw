@@ -7,7 +7,7 @@ window.TitaniaMemberAttendance = function(client, memberId, viewerId){
   const select=document.getElementById('memberAttendanceMode');
   const refresh=document.getElementById('memberAttendanceRefresh');
   const labels={guild_league_tuesday:'GL Tue',guild_league_thursday:'GL Thu',siege:'Siege'};
-  const actual={present:['Present','fa-check'],absent:['Absent','fa-xmark'],excused:['Excused','fa-calendar-check'],not_checked:['Not checked','fa-question']};
+  const actual={present:['Present','fa-check'],absent:['Absent','fa-xmark'],excused:['Excused','fa-calendar-check'],afk:['AFK','fa-pause']};
   const pre={going:['Going','fa-check'],not_going:['Not going','fa-xmark'],no_response:['No response','fa-question']};
   const other={not_listed:['Not listed','fa-minus'],unknown:['No record','fa-minus']};
   let events=[];
@@ -26,7 +26,7 @@ window.TitaniaMemberAttendance = function(client, memberId, viewerId){
       const eligible=listed||Boolean(record&&(!hasRoster||!snapshot.membersRefreshed));
       const missing=hasRoster?'not_listed':'unknown';
       return {...event,
-        actual:eligible?(record&&Object.hasOwn(actual,record.actual_status)?record.actual_status:'not_checked'):missing,
+        actual:eligible?(record&&Object.hasOwn(actual,record.actual_status)?record.actual_status:'unknown'):missing,
         pre:eligible?(record&&Object.hasOwn(pre,record.pre_status)?record.pre_status:'no_response'):missing,
         eligible
       };
@@ -41,7 +41,7 @@ window.TitaniaMemberAttendance = function(client, memberId, viewerId){
     const mode=select.value==='pre'?'pre':'actual';
     const meta=mode==='actual'?actual:pre;
     const counts=Object.fromEntries(Object.keys(meta).map(key=>[key,events.filter(event=>event[mode]===key).length]));
-    const eligible=events.filter(event=>event.eligible).length;
+    const eligible=events.filter(event=>event.eligible&&(mode!=='actual'||Object.hasOwn(actual,event.actual))).length;
     const positive=mode==='actual'?counts.present:counts.going;
     const pct=eligible?Math.round(positive/eligible*100)+'%':'N/A';
     const legend=Object.entries(meta).map(([key,[label]])=>`<span><i class="att-key ${key}" aria-hidden="true"></i>${label} <b>${counts[key]}</b></span>`).join('');
@@ -57,7 +57,7 @@ window.TitaniaMemberAttendance = function(client, memberId, viewerId){
     }).join('');
     content.innerHTML=`<div class="att-summary"><strong class="att-rate">${pct}</strong><span class="att-rate-label">${positive}/${eligible} eligible events ${mode==='actual'?'marked present':'marked going'}</span><div class="att-legend">${legend}</div></div>
       <div class="att-scroll" tabindex="0" role="region" aria-label="Member attendance timeline; scroll horizontally on small screens"><div class="att-event-chart" role="list">${bars}</div></div>
-      <p class="att-note">Each bar is one event, with colour showing this member's status. ${mode==='actual'?'Not checked is not absent.':'No response is not Not going.'} Not listed / No record events are excluded from the percentage. Results for unfinished events are provisional.</p>`;
+      <p class="att-note">Each bar is one event, with colour showing this member's status. ${mode==='actual'?'Events with no actual status are excluded.':'No response is not Not going.'} Not listed / No record events are excluded from the percentage. Results for unfinished events are provisional.</p>`;
   }
 
   async function checkViewer(){
