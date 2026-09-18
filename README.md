@@ -17,8 +17,7 @@ Titania Guild Management is a browser-based guild planning tool hosted on GitHub
 │  ├─ attendance-page.js
 │  ├─ attendance-pre.js
 │  ├─ member-links.js
-│  ├─ public-attendance.js
-│  └─ public-lineup.js
+│  └─ public-attendance.js
 ├─ css/
 │  ├─ attendance-page.css
 │  ├─ attendance-pre.css
@@ -35,6 +34,14 @@ Titania Guild Management is a browser-based guild planning tool hosted on GitHub
 │  └─ siege_public_setup.sql
 └─ image assets / README / LICENSE
 ```
+
+## Public lineup maintenance
+
+The active lineup JavaScript lives inline in `guild-league.html`, `siege.html`, and `polarity-zone.html`. Edit those pages for lineup rendering; `js/public-attendance.js` is a separate attendance enhancement loaded by `js/config.js`.
+
+Keep the existing `get_public_lineup` requests with `{ p_view: VIEW }` and the unpublished-lineup handling. Do not replace the working page scripts with an older renderer.
+
+Frontend-only cleanup does not require running SQL setup scripts or resetting Supabase. Keep database changes separate.
 
 ## Important security rule
 
