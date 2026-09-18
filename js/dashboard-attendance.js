@@ -5,7 +5,7 @@
 
   const EVENT_LABELS={guild_league_tuesday:'GL Tue',guild_league_thursday:'GL Thu',siege:'Siege'};
   const MODES={
-    actual:[['present','Present'],['absent','Absent'],['excused','Excused'],['not_checked','Not checked']],
+    actual:[['present','Present'],['absent','Absent'],['excused','Excused'],['afk','AFK']],
     pre:[['going','Going'],['not_going','Not going'],['no_response','No response']]
   };
   let mode='actual';
@@ -36,12 +36,12 @@
         // Refresh Members deliberately removes old members from this event.
         if(!hasRoster||!snapshot.membersRefreshed||members.has(id))members.set(id,row);
       });
-      const actual={present:0,absent:0,excused:0,not_checked:0};
+      const actual={present:0,absent:0,excused:0,afk:0};
       const pre={going:0,not_going:0,no_response:0};
       members.forEach(row=>{
-        const a=Object.hasOwn(actual,row.actual_status)?row.actual_status:'not_checked';
+        const a=Object.hasOwn(actual,row.actual_status)?row.actual_status:null;
         const p=Object.hasOwn(pre,row.pre_status)?row.pre_status:'no_response';
-        actual[a]++;
+        if(a)actual[a]++;
         pre[p]++;
       });
       return {id:event.id,label:EVENT_LABELS[event.event_type]||'Event',date:event.event_date,status:event.status,total:members.size,actual,pre,hasRoster};
@@ -90,15 +90,16 @@
     const legend=meta.map(([key,label])=>`<span><i class="dash-att-dot ${key}" aria-hidden="true"></i>${label} <b>${total[key]}</b></span>`).join('');
     const bars=events.map(event=>{
       const counts=event[mode];
-      const pct=event.total?Math.round(counts[primary]/event.total*100):null;
-      const detail=`${event.label} ${event.date}. ${meta.map(([key,label])=>`${label}: ${counts[key]}`).join(', ')}. ${event.total} event members. ${event.status==='closed'?'Closed.':'Not final.'}`;
+      const markedTotal=Object.values(counts).reduce((sum,value)=>sum+value,0);
+      const pct=markedTotal?Math.round(counts[primary]/markedTotal*100):null;
+      const detail=`${event.label} ${event.date}. ${meta.map(([key,label])=>`${label}: ${counts[key]}`).join(', ')}. ${markedTotal} marked of ${event.total} event members. ${event.status==='closed'?'Closed.':'Not final.'}`;
       return `<div class="dash-att-column">
         <strong>${pct===null?'\u2014':pct+'%'}</strong>
         <div class="dash-att-bar" tabindex="0" role="img" aria-label="${esc(detail)}" title="${esc(detail)}">
-          ${meta.map(([key])=>`<span class="${key}" style="height:${event.total?counts[key]/event.total*100:0}%"></span>`).join('')}
+          ${meta.map(([key])=>`<span class="${key}" style="height:${markedTotal?counts[key]/markedTotal*100:0}%"></span>`).join('')}
         </div>
         <b>${esc(dateLabel(event.date))}</b><span>${esc(event.label)}</span>
-        <small>${counts[primary]}/${event.total} ${mode==='actual'?'present':'going'}</small>
+        <small>${counts[primary]}/${mode==='actual'?markedTotal:event.total} ${mode==='actual'?'present':'going'}</small>
         <small class="dash-att-state">${event.status==='closed'?'Closed':'Not final'}</small>
       </div>`;
     }).join('');
@@ -106,7 +107,7 @@
       <div class="dash-att-scroll" tabindex="0" role="region" aria-label="Attendance chart; scroll horizontally on small screens">
         <div class="dash-att-chart">${bars}</div>
       </div>
-      <p class="dash-att-note">Percentages use that event's members, not today's roster. ${mode==='actual'?'Not checked is not counted as absent.':'No response is separate from Not going.'} Unfinished events are marked Not final.${events.some(event=>!event.hasRoster)?' Events without a saved roster use recorded members only.':''}</p>`;
+      <p class="dash-att-note">Percentages use that event's saved data, not today's roster. ${mode==='actual'?'Members with no actual status are excluded.':'No response is separate from Not going.'} Unfinished events are marked Not final.${events.some(event=>!event.hasRoster)?' Events without a saved roster use recorded members only.':''}</p>`;
   }
 
   async function load(panel){
