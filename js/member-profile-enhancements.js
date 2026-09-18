@@ -23,7 +23,11 @@
       .member-import-value{font-weight:600}
       .member-title-metric{font-weight:700;color:var(--text)}
       .metric #trackingSince.member-import-value{font-size:23px!important;font-family:inherit!important}
-      .class-history-panel{margin-top:14px}
+      .name-history-table{width:100%;border-collapse:collapse}
+      .name-history-table th,.name-history-table td{text-align:left;padding:10px 8px;border-bottom:1px solid var(--lineSoft);font-size:13px}
+      .name-history-table th{color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:.7px}
+      .name-change-flow{display:inline-flex;align-items:center;gap:7px;vertical-align:middle;font-weight:700;line-height:1.25}
+      .name-arrow{display:inline-flex;align-items:center;justify-content:center;color:var(--muted2);line-height:1;padding:0 2px;transform:translateY(-1px)}
       .class-history-table{width:100%;border-collapse:collapse}
       .class-history-table th,.class-history-table td{text-align:left;padding:10px 8px;border-bottom:1px solid var(--lineSoft);font-size:13px}
       .class-history-table th{color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:.7px}
@@ -151,6 +155,19 @@
     return panel;
   }
 
+  function renderNameHistory(rows){
+    const panel=document.getElementById('nameHistoryPanel');
+    if(!panel)return;
+    const wrap=panel.querySelector('#nameHistoryWrap');
+    if(!rows.length){
+      wrap.className='muted';
+      wrap.textContent='No name changes recorded yet. Name changes will be tracked automatically from now on.';
+      return;
+    }
+    wrap.className='';
+    wrap.innerHTML=`<table class="name-history-table"><thead><tr><th>Date</th><th>Change</th></tr></thead><tbody>${rows.map(row=>`<tr><td>${esc(fmtDateTime(row.changed_at))}</td><td><span class="name-change-flow"><span>${esc(row.old_name)}</span><span class="name-arrow" aria-hidden="true">→</span><span>${esc(row.new_name)}</span></span></td></tr>`).join('')}</tbody></table>`;
+  }
+
   function renderClassHistory(rows){
     const panel=ensureHistoryPanel();
     if(!panel)return;
@@ -173,9 +190,10 @@
     if(!memberId)return;
     const client=window.supabase.createClient(cfg.supabaseUrl,cfg.supabasePublishableKey,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:false}});
 
-    const [plannerRes,starsRes,classHistoryRes,csvDataRes]=await Promise.all([
+    const [plannerRes,starsRes,nameHistoryRes,classHistoryRes,csvDataRes]=await Promise.all([
       client.from('planner_state').select('state').eq('id',1).single(),
       client.from('party_star_selections').select('team_key').eq('event_key','siege'),
+      client.from('name_history').select('old_name,new_name,changed_at').eq('member_id',memberId).order('changed_at',{ascending:false}),
       client.from('class_history').select('old_class,new_class,changed_at').eq('member_id',memberId).order('changed_at',{ascending:false}),
       client.from('member_csv_data').select('title,weekly,weekly_contribution,total_contribution').eq('member_id',memberId).maybeSingle()
     ]);
@@ -193,6 +211,7 @@
       if(!wrap||document.getElementById('profile')?.style.display!=='block')return false;
       renderMetricCards(csvData);
       renderInfo(member,state,stars,csvData);
+      renderNameHistory(nameHistoryRes.error?[]:(nameHistoryRes.data||[]));
       renderClassHistory(classHistoryRes.error?[]:(classHistoryRes.data||[]));
       return true;
     };
