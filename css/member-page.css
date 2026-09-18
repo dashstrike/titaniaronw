@@ -89,7 +89,8 @@ a{color:inherit;}
 .member-attendance .present,.member-attendance .going{background:var(--teal);}
 .member-attendance .absent,.member-attendance .not_going{background:var(--red);}
 .member-attendance .excused{background:var(--amber);}
-.member-attendance .not_checked,.member-attendance .no_response{background:var(--muted2);color:var(--text);}
+.member-attendance .afk{background:#8798d8;color:var(--text);}
+.member-attendance .no_response{background:var(--muted2);color:var(--text);}
 .member-attendance .not_listed,.member-attendance .unknown{background:transparent;color:var(--muted);border-style:dashed;}
 .att-note{color:var(--muted);font-size:11px;line-height:1.6;margin:10px 0 0;}
 @media(max-width:1000px){.metrics{grid-template-columns:repeat(2,minmax(0,1fr));}.member-card-grid{grid-template-columns:minmax(0,1fr);}}
