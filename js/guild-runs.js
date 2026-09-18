@@ -50,13 +50,13 @@
     iconMap=iconsResult||{};
   }
 
-  function carryStatusControl(reg){
+  function carryStatusControl(reg,locked){
     if(reg.registration_type!=='need_carry')return '—';
     const value=reg.carry_status||'';
     return `<div class="carry-switch" data-reg-id="${esc(reg.id)}">
-      <button type="button" data-carry-status="done" class="${value==='done'?'active done':''}">Done</button>
-      <button type="button" data-carry-status="cancel" class="${value==='cancel'?'active cancel':''}">Cancel</button>
-      <button type="button" data-carry-status="mia" class="${value==='mia'?'active mia':''}">MIA</button>
+      <button type="button" data-carry-status="done" class="${value==='done'?'active done':''}" ${locked?'disabled':''}>Done</button>
+      <button type="button" data-carry-status="cancel" class="${value==='cancel'?'active cancel':''}" ${locked?'disabled':''}>Cancel</button>
+      <button type="button" data-carry-status="mia" class="${value==='mia'?'active mia':''}" ${locked?'disabled':''}>MIA</button>
     </div>`;
   }
 
@@ -91,25 +91,26 @@
       const carry=runRegs.filter(r=>r.registration_type==='carrier').length;
       const statusText=run.status==='open'?'Open':run.status==='closed'?'Closed':'Ended';
       const statusClass=run.status==='ended'?'ended':run.status;
-      const actionControls=run.status==='ended'
+      const locked=run.status==='ended';
+      const actionControls=locked
         ? ''
         : `<button type="button" class="btn" data-run-toggle="${esc(run.id)}" data-next-status="${run.status==='open'?'closed':'open'}">${run.status==='open'?'Close Registration':'Open Registration'}</button><button type="button" class="btn danger" data-run-end="${esc(run.id)}">End Run</button>`;
-      const table=runRegs.length?`<div class="table-wrap"><table><thead><tr><th>Player</th><th>Class</th><th>GR</th><th>Type</th><th>Status</th></tr></thead><tbody>${sortedRunRegs.map(reg=>{const member=memberById(reg.member_id);return `<tr><td>${memberHtml(member)}</td><td>${esc(member&&member.cls||'—')}</td><td>${esc(member&&member.gr!=null?Number(member.gr).toLocaleString():'—')}</td><td>${esc(typeLabel(reg.registration_type))}</td><td>${carryStatusControl(reg)}</td></tr>`;}).join('')}</tbody></table></div>`:'<div class="empty">No registrations yet.</div>';
+      const table=runRegs.length?`<div class="table-wrap"><table><thead><tr><th>Player</th><th>Class</th><th>GR</th><th>Type</th><th>Status</th></tr></thead><tbody>${sortedRunRegs.map(reg=>{const member=memberById(reg.member_id);return `<tr><td>${memberHtml(member)}</td><td>${esc(member&&member.cls||'—')}</td><td>${esc(member&&member.gr!=null?Number(member.gr).toLocaleString():'—')}</td><td>${esc(typeLabel(reg.registration_type))}</td><td>${carryStatusControl(reg,locked)}</td></tr>`;}).join('')}</tbody></table></div>`:'<div class="empty">No registrations yet.</div>';
       const detail=isOrganizer()?`<div class="run-summary"><div class="summary-counts"><span>Need Carry: <b>${need}</b></span><span>Can Carry: <b>${carry}</b></span></div>${table}</div>`:'';
       return `<article class="run-card">
         <div class="run-card-top">
           <div class="run-identity">
             <h3 class="run-type-heading ${run.run_type==='mirage'?'mirage':'time-echo'}">${esc(runLabel(run.run_type))}</h3>
             <span class="status ${esc(statusClass)}">${esc(statusText)}</span>
-            <a class="run-public-link" href="./titaniaruns.html" target="_blank" rel="noopener">Open Public Registration</a>
+            ${locked?'':'<a class="run-public-link" href="./titaniaruns.html" target="_blank" rel="noopener">Open Public Registration</a>'}
           </div>
           <div class="run-actions">${actionControls}<button type="button" class="btn danger-solid" data-run-delete="${esc(run.id)}" data-run-title="${esc(run.note||runLabel(run.run_type))}">Delete Run</button></div>
         </div>
         <div class="run-edit-row">
-          <input class="run-title-input" type="text" maxlength="200" value="${esc(run.note||'')}" placeholder="Untitled Run" data-run-edit="note" data-run-id="${esc(run.id)}">
-          <span class="run-picker-wrap"><input class="run-date-input" type="date" value="${esc(run.run_date||'')}" data-run-edit="run_date" data-run-id="${esc(run.id)}">${pickerIcon('date')}</span>
+          <input class="run-title-input" type="text" maxlength="200" value="${esc(run.note||'')}" placeholder="Untitled Run" data-run-edit="note" data-run-id="${esc(run.id)}" ${locked?'disabled':''}>
+          <span class="run-picker-wrap"><input class="run-date-input" type="date" value="${esc(run.run_date||'')}" data-run-edit="run_date" data-run-id="${esc(run.id)}" ${locked?'disabled':''}>${pickerIcon('date')}</span>
           <span class="run-edit-separator">·</span>
-          <span class="run-picker-wrap"><input class="run-time-input" type="time" value="${esc(run.run_time?String(run.run_time).slice(0,5):'')}" data-run-edit="run_time" data-run-id="${esc(run.id)}">${pickerIcon('time')}</span>
+          <span class="run-picker-wrap"><input class="run-time-input" type="time" value="${esc(run.run_time?String(run.run_time).slice(0,5):'')}" data-run-edit="run_time" data-run-id="${esc(run.id)}" ${locked?'disabled':''}>${pickerIcon('time')}</span>
           <span class="autosave-state" data-autosave-state="${esc(run.id)}"></span>
         </div>
         ${detail}
@@ -174,6 +175,7 @@
   }
 
   async function saveRunField(input){
+    if(input.disabled)return;
     const runId=input.dataset.runId;
     const field=input.dataset.runEdit;
     if(!runId||!field)return;
