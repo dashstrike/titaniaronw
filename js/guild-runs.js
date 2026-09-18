@@ -74,7 +74,7 @@
     if(runsResult.error)throw runsResult.error;
     if(regsResult.error)throw regsResult.error;
 
-    const runs=runsResult.data||[];
+    const runs=(runsResult.data||[]).filter(run=>run.status!=='ended');
     const regs=regsResult.data||[];
     runCount.textContent=`${runs.length} run${runs.length===1?'':'s'}`;
     runsList.innerHTML=runs.length?runs.map(run=>{
@@ -119,6 +119,58 @@
     runsPanel.hidden=false;
     loading.hidden=true;
     wireRunControls();
+  }
+
+
+  async function loadPreviousRuns(){
+    const runsPanel=document.getElementById('runsPanel');
+    const runsList=document.getElementById('runsList');
+    const runCount=document.getElementById('runCount');
+
+    const [runsResult,regsResult]=await Promise.all([
+      client.from('guild_runs').select('id,run_type,run_date,run_time,note,status,created_at').eq('status','ended').order('run_date',{ascending:false}).order('run_time',{ascending:false}),
+      client.from('guild_run_registrations').select('id,run_id,member_id,registration_type,carry_status,created_at').order('created_at',{ascending:true})
+    ]);
+    if(runsResult.error)throw runsResult.error;
+    if(regsResult.error)throw regsResult.error;
+
+    const runs=runsResult.data||[];
+    const regs=regsResult.data||[];
+    runCount.textContent=`${runs.length} previous run${runs.length===1?'':'s'}`;
+
+    runsList.innerHTML=runs.length?runs.map(run=>{
+      const runRegs=regs.filter(r=>r.run_id===run.id);
+      const sortedRunRegs=[...runRegs].sort((a,b)=>{
+        const aOrder=a.registration_type==='carrier'?0:1;
+        const bOrder=b.registration_type==='carrier'?0:1;
+        if(aOrder!==bOrder)return aOrder-bOrder;
+        const aMember=memberById(a.member_id);
+        const bMember=memberById(b.member_id);
+        return String(aMember&&aMember.name||'').localeCompare(String(bMember&&bMember.name||''),undefined,{sensitivity:'base'});
+      });
+      const need=runRegs.filter(r=>r.registration_type==='need_carry').length;
+      const carry=runRegs.filter(r=>r.registration_type==='carrier').length;
+      const table=runRegs.length?`<div class="table-wrap"><table><thead><tr><th>Player</th><th>Class</th><th>GR</th><th>Type</th><th>Status</th></tr></thead><tbody>${sortedRunRegs.map(reg=>{const member=memberById(reg.member_id);return `<tr><td>${memberHtml(member)}</td><td>${esc(member&&member.cls||'—')}</td><td>${esc(member&&member.gr!=null?Number(member.gr).toLocaleString():'—')}</td><td>${esc(typeLabel(reg.registration_type))}</td><td>${reg.registration_type==='need_carry'?(reg.carry_status?'<span class="history-carry-status '+esc(reg.carry_status)+'">'+esc(reg.carry_status.toUpperCase())+'</span>':'—'):'—'}</td></tr>`;}).join('')}</tbody></table></div>`:'<div class="empty">No registrations were recorded.</div>';
+      return `<article class="run-card previous-run-card">
+        <div class="run-card-top">
+          <div class="run-identity">
+            <h3 class="run-type-heading ${run.run_type==='mirage'?'mirage':'time-echo'}">${esc(runLabel(run.run_type))}</h3>
+            <span class="status ended">Ended</span>
+          </div>
+        </div>
+        <div class="previous-run-meta">
+          <strong>${esc(run.note||'Untitled Run')}</strong>
+          <span>${esc(run.run_date||'No date')}${run.run_time?' · '+esc(String(run.run_time).slice(0,5)):''}</span>
+        </div>
+        <div class="run-summary">
+          <div class="summary-counts"><span>Need Carry: <b>${need}</b></span><span>Can Carry: <b>${carry}</b></span></div>
+          ${table}
+        </div>
+      </article>`;
+    }).join(''):'<div class="empty">No previous Guild Runs yet.</div>';
+
+    runsPanel.hidden=false;
+    loading.hidden=true;
   }
 
   async function saveRunField(input){
@@ -234,6 +286,8 @@
         if(dateInput&&!dateInput.value)dateInput.value=new Date().toISOString().slice(0,10);
         const form=document.getElementById('createRunForm');if(form)form.addEventListener('submit',createRun);
         await loadRuns();
+      }else if(page==='history'){
+        await loadPreviousRuns();
       }
     }catch(error){showError(error&&error.message?error.message:'Could not load Guild Runs.');}
   }
