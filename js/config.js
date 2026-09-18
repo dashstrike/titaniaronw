@@ -60,14 +60,14 @@ const TITANIA_IS_MEMBER_PAGE = /\/member\.html$/i.test(window.location.pathname)
   if (document.querySelector('link[data-titania-dashboard-fixes]')) return;
   const link = document.createElement('link');
   link.rel = 'stylesheet';
-  link.href = './css/dashboard-fixes.css?v=20260911-aligned-1';
+  link.href = './css/dashboard-fixes.css?v=20260918-attendance-afk-1';
   link.setAttribute('data-titania-dashboard-fixes', '1');
   document.head.appendChild(link);
 
   const loadScript = () => {
     if (document.querySelector('script[data-titania-dashboard-attendance]')) return;
     const script = document.createElement('script');
-    script.src = './js/dashboard-attendance.js?v=20260911-aligned-1';
+    script.src = './js/dashboard-attendance.js?v=20260918-attendance-afk-1';
     script.setAttribute('data-titania-dashboard-attendance', '1');
     document.body.appendChild(script);
   };
@@ -104,7 +104,7 @@ const TITANIA_IS_MEMBER_PAGE = /\/member\.html$/i.test(window.location.pathname)
   if (!document.querySelector('link[data-titania-attendance-page]')) {
     const link = document.createElement('link');
     link.rel = 'stylesheet';
-    link.href = './css/attendance-page.css?v=20260910-2';
+    link.href = './css/attendance-page.css?v=20260918-attendance-afk-1';
     link.setAttribute('data-titania-attendance-page', '1');
     document.head.appendChild(link);
   }
@@ -112,7 +112,7 @@ const TITANIA_IS_MEMBER_PAGE = /\/member\.html$/i.test(window.location.pathname)
   const loadScript = () => {
     if (document.querySelector('script[data-titania-attendance-page]')) return;
     const script = document.createElement('script');
-    script.src = './js/attendance-page.js?v=20260910-1';
+    script.src = './js/attendance-page.js?v=20260918-attendance-afk-1';
     script.setAttribute('data-titania-attendance-page', '1');
     document.body.appendChild(script);
   };
