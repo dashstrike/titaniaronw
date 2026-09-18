@@ -45,6 +45,8 @@ html[data-theme="light"] .att-picker-card input[type="date"]{color-scheme:light;
 .att-summary-chip.not-going b,.att-summary-chip.absent b{color:#ff7d8f;}
 .att-summary-chip.no-response b,.att-summary-chip.not-checked b{color:var(--muted);}
 .att-summary-chip.excused b{color:var(--amber);}
+.att-summary-chip.afk b{color:#9fb0ff;}
+.att-summary-chip.unmarked b{color:var(--muted);}
 .att-summary-chip.rate b{color:var(--teal);}
 .att-filterbar{border-radius:10px;padding:10px;display:grid;grid-template-columns:minmax(240px,1fr) 170px 170px;gap:8px;}
 .att-column-head{display:grid;grid-template-columns:minmax(220px,1.45fr) minmax(120px,.7fr) minmax(120px,.7fr) minmax(360px,1.7fr) 38px;gap:10px;padding:0 14px;color:var(--muted-2);font-size:11px;text-transform:uppercase;letter-spacing:.8px;font-weight:700;}
@@ -61,6 +63,7 @@ html[data-theme="light"] .att-picker-card input[type="date"]{color-scheme:light;
 .att-member-row.present{box-shadow:inset 3px 0 0 #4fd67a88;}
 .att-member-row.absent{box-shadow:inset 3px 0 0 #ef5a6f88;}
 .att-member-row.excused{box-shadow:inset 3px 0 0 #f0b42988;}
+.att-member-row.afk{box-shadow:inset 3px 0 0 #8798d888;}
 .att-member-main{display:flex;align-items:center;gap:10px;min-width:0;}
 .att-member-main>div{min-width:0;display:flex;flex-direction:column;}
 .att-member-main b,.att-member-main a.att-member-profile{font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
@@ -82,7 +85,7 @@ html[data-theme="light"] .att-picker-card input[type="date"]{color-scheme:light;
 .att-actual-btn.present.active{background:#14351f;border-color:#4fd67a88;color:#8fe89f;}
 .att-actual-btn.absent.active{background:#381820;border-color:#ef5a6f88;color:#ff9caa;}
 .att-actual-btn.excused.active{background:#352b13;border-color:#f0b42988;color:#ffd166;}
-.att-actual-btn.not-checked.active{background:#252c42;border-color:#6f7897;color:#c5cad9;}
+.att-actual-btn.afk.active{background:#202943;border-color:#8798d888;color:#c7d0ff;}
 .att-actual-btn:disabled{cursor:not-allowed;opacity:.72;}
 .att-note-btn{width:34px;height:34px;border-radius:7px;border:1px solid var(--line);background:#0f1424;color:var(--muted);cursor:pointer;padding:0;}
 .att-note-btn.has-note{border-color:#f0b42977;background:#f0b42912;color:#ffd166;}
