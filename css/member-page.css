@@ -88,8 +88,8 @@ a{color:inherit;}
 .att-event > span,.att-event small{color:var(--muted);font-size:10px;white-space:nowrap;}
 .member-attendance .present,.member-attendance .going{background:var(--teal);}
 .member-attendance .absent,.member-attendance .not_going{background:var(--red);}
-.member-attendance .excused{background:var(--amber);}
-.member-attendance .afk{background:#8798d8;color:var(--text);}
+.member-attendance .excused{background:#4d8de8;}
+.member-attendance .afk{background:var(--amber);color:var(--text);}
 .member-attendance .no_response{background:var(--muted2);color:var(--text);}
 .member-attendance .not_listed,.member-attendance .unknown{background:transparent;color:var(--muted);border-style:dashed;}
 .att-note{color:var(--muted);font-size:11px;line-height:1.6;margin:10px 0 0;}
