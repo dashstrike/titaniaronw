@@ -71,8 +71,8 @@ create table if not exists public.attendance_records (
   member_name text not null default '',
   pre_status text not null default 'no_response'
     check (pre_status in ('no_response','going','not_going')),
-  actual_status text not null default 'not_checked'
-    check (actual_status in ('not_checked','present','absent','excused')),
+  actual_status text
+    check (actual_status is null or actual_status in ('present','absent','excused','afk')),
   note text not null default '',
   pre_updated_by uuid references auth.users(id) on delete set null,
   pre_updated_at timestamptz,
@@ -112,7 +112,7 @@ begin
       new.pre_updated_by = auth.uid();
       new.pre_updated_at = now();
     end if;
-    if new.actual_status is distinct from 'not_checked' then
+    if new.actual_status is not null then
       new.actual_updated_by = auth.uid();
       new.actual_updated_at = now();
     end if;
