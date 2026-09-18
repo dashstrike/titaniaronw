@@ -17,7 +17,7 @@
   function decorateNode(node){
     if(!node||node.tagName==='A')return;
     const name=String(node.textContent||'').trim();
-    const memberId=memberIdByName(name);
+    const memberId=String(node.dataset&&node.dataset.memberId||'')||memberIdByName(name);
     if(!memberId)return;
 
     const link=document.createElement('a');
