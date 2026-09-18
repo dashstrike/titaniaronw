@@ -134,3 +134,31 @@ html,body{max-width:100%;overflow-x:hidden}.topbar,.wrap,.panel,.runs-list,.run-
 @media(max-width:760px){
   .section-head-actions{width:100%;justify-content:space-between}
 }
+
+/* Public registration control alignment */
+.public-run-card .register-grid{
+  align-items:end;
+}
+.public-run-card .register-grid > label{
+  min-width:0;
+}
+.public-run-card .register-grid > .btn{
+  height:40px;
+  min-height:40px;
+  align-self:end;
+  padding-top:0;
+  padding-bottom:0;
+}
+.public-run-card .register-grid select{
+  height:40px;
+  min-height:40px;
+}
+.public-run-card .select2-container .select2-selection--single{
+  height:40px!important;
+}
+.public-run-card .select2-container--default .select2-selection--single .select2-selection__rendered{
+  line-height:38px!important;
+}
+.public-run-card .select2-container--default .select2-selection--single .select2-selection__arrow{
+  height:38px!important;
+}
