@@ -14,10 +14,10 @@
     no_response:{label:'NO RESPONSE',symbol:'?',className:'no-response'}
   };
   const ACTUAL_META={
-    present:{label:'Present',symbol:'✓',className:'present'},
-    absent:{label:'Absent',symbol:'✕',className:'absent'},
-    excused:{label:'Excused',symbol:'E',className:'excused'},
-    afk:{label:'AFK',symbol:'Z',className:'afk'}
+    present:{label:'Present',icon:'fa-check',className:'present'},
+    absent:{label:'Absent',icon:'fa-xmark',className:'absent'},
+    excused:{label:'Excused',icon:'fa-calendar-check',className:'excused'},
+    afk:{label:'AFK',icon:'fa-pause',className:'afk'}
   };
 
   let attendanceActive=false;
@@ -104,7 +104,7 @@
   function groupRows(rows){const groups=new Map();rows.forEach(r=>{const a=r.assignment;let key='unassigned',label='Unassigned / Reserve',order=9999;if(a){const g=String(a.groupLabel||'');label=g?`${g} · ${a.raidLabel||'Raid ?'}`:(a.raidLabel||'Raid ?');key=`${g}|${a.raidId||a.raidLabel}`;order=(g==='Sub Battlefield'?100:0)+(Number(a.raidOrder)||999);}if(!groups.has(key))groups.set(key,{label,order,rows:[]});groups.get(key).rows.push(r);});const out=[...groups.values()].sort((a,b)=>a.order-b.order||a.label.localeCompare(b.label));out.forEach(g=>g.rows.sort((a,b)=>(Number(a.assignment&&a.assignment.partyOrder)||999)-(Number(b.assignment&&b.assignment.partyOrder)||999)||(Number(a.assignment&&a.assignment.slot)||0)-(Number(b.assignment&&b.assignment.slot)||0)||a.name.localeCompare(b.name)));return out;}
   function chip(v,l,c){return `<div class="att-summary-chip ${c}"><b>${v}</b><span>${esc(l)}</span></div>`;}
   function prePill(s){const m=PRE_META[s];return `<span class="att-pre-pill ${m.className}"><b>${m.symbol}</b>${esc(m.label)}</span>`;}
-  function actualControls(r){const disabled=!canEdit()||selectedEvent.status==='closed';return `<div class="att-actual-buttons">${['present','absent','excused','afk'].map(s=>{const m=ACTUAL_META[s];return `<button type="button" class="att-actual-btn ${m.className}${r.actual_status===s?' active':''}" data-att-actual="${s}" data-member-id="${esc(r.memberId)}" ${disabled?'disabled':''}><span>${m.symbol}</span><em>${esc(m.label)}</em></button>`;}).join('')}</div>`;}
+  function actualControls(r){const disabled=!canEdit()||selectedEvent.status==='closed';return `<div class="att-actual-buttons">${['present','absent','excused','afk'].map(s=>{const m=ACTUAL_META[s];return `<button type="button" class="att-actual-btn ${m.className}${r.actual_status===s?' active':''}" data-att-actual="${s}" data-member-id="${esc(r.memberId)}" ${disabled?'disabled':''}><span><i class="fa-solid ${m.icon}" aria-hidden="true"></i></span><em>${esc(m.label)}</em></button>`;}).join('')}</div>`;}
 
   function renderMemberGroups(){const box=document.getElementById('attendanceMemberGroups');if(!box||!selectedEvent)return;const rows=filteredRows(membersForEvent());if(!rows.length){box.innerHTML='<div class="att-empty">No members match the current filters.</div>';return;}box.innerHTML=groupRows(rows).map(g=>`<section class="att-group"><div class="att-group-head"><div><b>${esc(g.label)}</b><span>${g.rows.length} members</span></div><strong>${g.rows.filter(r=>r.actual_status==='present').length}/${g.rows.length} Present</strong></div><div class="att-member-list">${g.rows.map(r=>`<div class="att-member-row ${r.actual_status}"><div class="att-member-main"><span class="class-dot" style="background:${typeof classColor==='function'?classColor(r.cls):'#8b93b0'}"></span><div><b>${esc(r.name)}</b><span>${esc(r.cls)}</span></div></div><div class="att-party">${r.assignment?`<b>${esc(r.assignment.partyLabel||'')}</b><span>${esc(r.assignment.raidLabel||'')}</span>`:'<span>Reserve / Unassigned</span>'}</div><div class="att-pre-cell">${prePill(r.pre_status)}</div><div class="att-actual-cell">${actualControls(r)}</div><button type="button" class="att-note-btn ${r.note?'has-note':''}" data-att-note="${esc(r.memberId)}">📝</button></div>`).join('')}</div></section>`).join('');}
   function renderEventPanel(){
