@@ -368,6 +368,23 @@ create table if not exists public.attendance_records (
   unique (event_id, member_id)
 );
 
+
+-- Upgrade older attendance_records tables to nullable actual status + AFK.
+alter table public.attendance_records
+  drop constraint if exists attendance_records_actual_status_check;
+
+alter table public.attendance_records
+  alter column actual_status drop default,
+  alter column actual_status drop not null;
+
+update public.attendance_records
+set actual_status = null
+where actual_status = 'not_checked';
+
+alter table public.attendance_records
+  add constraint attendance_records_actual_status_check
+  check (actual_status is null or actual_status in ('present','absent','excused','afk'));
+
 create index if not exists attendance_events_date_idx
   on public.attendance_events(event_date desc, event_type);
 create index if not exists attendance_records_event_idx
