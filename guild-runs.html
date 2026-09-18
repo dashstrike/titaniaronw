@@ -5,11 +5,11 @@
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Titania · Guild Runs</title>
   <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
-  <link rel="stylesheet" href="./css/guild-runs.css?v=20260909-5">
+  <link rel="stylesheet" href="./css/guild-runs.css?v=20260918-history-1">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <script src="./js/config.js?v=20260907-2"></script>
-  <script src="./js/guild-runs.js?v=20260909-2" defer></script>
+  <script src="./js/guild-runs.js?v=20260918-history-1" defer></script>
 </head>
 <body data-guild-runs-page="organizer">
   <header class="topbar">
@@ -21,8 +21,9 @@
   </header>
 
   <main class="wrap">
-    <section class="page-head">
+    <section class="page-head page-head-actions">
       <div><h1>Guild Runs</h1><p>Create Time Echo or Mirage runs and view registrations.</p></div>
+      <a class="btn" href="./guild-runs-history.html">Previous Runs</a>
     </section>
 
     <div id="pageError" class="error" hidden></div>
