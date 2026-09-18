@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Titania · Previous Guild Runs</title>
+  <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
+  <link rel="stylesheet" href="./css/guild-runs.css?v=20260918-history-1">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="./js/config.js?v=20260907-2"></script>
+  <script src="./js/guild-runs.js?v=20260918-history-1" defer></script>
+</head>
+<body data-guild-runs-page="history">
+  <header class="topbar">
+    <div class="brand">
+      <img src="titania-logo.webp" alt="Titania">
+      <div><b>TITANIA GUILD MANAGEMENT TOOL</b><span>Previous Guild Runs</span></div>
+    </div>
+    <div class="top-actions"><a class="btn" href="./guild-runs.html">← Back to Guild Runs</a></div>
+  </header>
+
+  <main class="wrap">
+    <section class="page-head">
+      <div><h1>Previous Runs</h1><p>Ended Time Echo and Mirage runs with their final registrations and carry status.</p></div>
+    </section>
+
+    <div id="pageError" class="error" hidden></div>
+    <div id="loading" class="loading">Loading previous Guild Runs…</div>
+
+    <section id="runsPanel" class="panel" hidden>
+      <div class="section-head"><h2>Run History</h2><span id="runCount" class="muted"></span></div>
+      <div id="runsList" class="runs-list"></div>
+    </section>
+  </main>
+</body>
+</html>
