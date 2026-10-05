@@ -243,7 +243,7 @@
     .raid-commander-control{display:flex;align-items:center;gap:7px;color:var(--muted);font-size:12px;white-space:nowrap;}
     .raid-commander-control b{font-weight:600;color:#f0b429;}
     .raid-commander-drop{min-width:180px;max-width:260px;display:flex;align-items:center;gap:7px;background:#0f1424;color:var(--muted);border:1px solid #3a466d;border-radius:7px;padding:7px 10px;font:600 12px 'IBM Plex Sans',sans-serif;outline:none;cursor:default;transition:.15s;}
-    .raid-commander-drop svg{width:12px;height:12px;color:#f0b429;flex:none;}
+    .raid-commander-drop svg,.raid-commander-drop .raid-commander-icon{width:12px;height:12px;color:#f0b429;flex:none;display:inline-flex;align-items:center;justify-content:center;}
     .raid-commander-drop-name{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--text);}
     .raid-commander-drop.empty .raid-commander-drop-name{color:var(--muted-2);font-weight:500;}
     .raid-commander-drop.dragover{border-color:#f0b429;background:#1b1a11;box-shadow:0 0 0 2px #f0b42922;}
@@ -2080,7 +2080,7 @@
         const displayCommander=selectedCommander||'NOT ASSIGNED';
         const dropText=selectedCommander||'Drag member here';
         const gridClass=keys.length===5?'cols-5':'cols-4';
-        html+=`<div class="pz-dungeon-group"><div class="pz-dungeon-group-head"><span class="pz-dungeon-group-title">🗝 Normal Dungeon ${dungeon}</span><span class="pz-dungeon-group-team">TEAM ${escapeHtml(displayCommander)}</span><span class="pz-dungeon-group-line"></span><label class="raid-commander-control"><b>Raid Commander</b><span class="raid-commander-drop ${selectedCommander?'':'empty'}" data-raid-commander-drop="${raid?raid.id:''}" role="button" tabindex="0" title="Drag any member from Normal Dungeon ${dungeon} here to make them Raid Commander">${crownIcon()}<span class="raid-commander-drop-name">${escapeHtml(dropText)}</span></span></label>${finished?'<span class="dungeon-finished-badge">✅ Run Finished</span>':`<span class="pz-dungeon-member-count">${assigned}/${keys.length*CONFIG.teamSize} members</span>`}<span class="pz-dungeon-group-actions"><button class="btn small" data-autofill-dungeon="${dungeon}">⚡ Auto-fill</button><button class="btn small dungeon-finish-btn ${finished?'active':''}" data-finish-dungeon="${dungeon}">${finished?'↺ Reopen':'🏁 Mark Finished'}</button></span></div><div class="pz-dungeon-team-grid ${gridClass}">${keys.map(teamCardHtml).join('')}</div></div>`;
+        html+=`<div class="pz-dungeon-group"><div class="pz-dungeon-group-head"><span class="pz-dungeon-group-title">🗝 Normal Dungeon ${dungeon}</span><span class="pz-dungeon-group-team">TEAM ${escapeHtml(displayCommander)}</span><span class="pz-dungeon-group-line"></span><label class="raid-commander-control"><b>Raid Commander</b><span class="raid-commander-drop ${selectedCommander?'':'empty'}" data-raid-commander-drop="${raid?raid.id:''}" role="button" tabindex="0" title="Drag any member from Normal Dungeon ${dungeon} here to make them Raid Commander">${raidCommanderIcon()}<span class="raid-commander-drop-name">${escapeHtml(dropText)}</span></span></label>${finished?'<span class="dungeon-finished-badge">✅ Run Finished</span>':`<span class="pz-dungeon-member-count">${assigned}/${keys.length*CONFIG.teamSize} members</span>`}<span class="pz-dungeon-group-actions"><button class="btn small" data-autofill-dungeon="${dungeon}">⚡ Auto-fill</button><button class="btn small dungeon-finish-btn ${finished?'active':''}" data-finish-dungeon="${dungeon}">${finished?'↺ Reopen':'🏁 Mark Finished'}</button></span></div><div class="pz-dungeon-team-grid ${gridClass}">${keys.map(teamCardHtml).join('')}</div></div>`;
       }
       wrap.innerHTML=html;
     }else if(currentEvent==='siege'){
@@ -2110,7 +2110,7 @@
     const title=isPolarityRaid?`RAID TEAM — ${displayCommander}`:`${raid.label.toUpperCase()} · TEAM ${displayCommander}`;
     let gridClass=raid.kind==='star'?'pz-star-raid-grid':raid.kind==='normal'?'pz-normal-raid-grid':'main-raid-grid';
     if(!isPolarityRaid&&raid.keys.length===5)gridClass+=' five';
-    return `<div class="main-raid-block" data-raid="${raid.id}"><div class="main-raid-head"><div class="main-raid-title">${escapeHtml(title)}</div>${modeToggle}<div class="main-raid-line"></div><label class="raid-commander-control"><b>Raid Commander</b><span class="raid-commander-drop ${selectedCommander?'':'empty'}" data-raid-commander-drop="${raid.id}" role="button" tabindex="0" title="Drag any member from this raid here to make them Raid Commander">${crownIcon()}<span class="raid-commander-drop-name">${escapeHtml(dropText)}</span></span></label></div><div class="${gridClass}">${raid.keys.map(teamCardHtml).join('')}</div></div>`;
+    return `<div class="main-raid-block" data-raid="${raid.id}"><div class="main-raid-head"><div class="main-raid-title">${escapeHtml(title)}</div>${modeToggle}<div class="main-raid-line"></div><label class="raid-commander-control"><b>Raid Commander</b><span class="raid-commander-drop ${selectedCommander?'':'empty'}" data-raid-commander-drop="${raid.id}" role="button" tabindex="0" title="Drag any member from this raid here to make them Raid Commander">${raidCommanderIcon()}<span class="raid-commander-drop-name">${escapeHtml(dropText)}</span></span></label></div><div class="${gridClass}">${raid.keys.map(teamCardHtml).join('')}</div></div>`;
   }
 
   function raidForTeam(key){if(key.startsWith('siege_'))return currentSiegeRaids().find(raid=>raid.keys.includes(key))||null;return ALL_RAIDS.find(raid=>!raid.siege&&raid.keys.includes(key))||null;}
@@ -2140,6 +2140,7 @@
     return `<div class="slot filled ${leader?'leader':''} ${selected?'slot-selected':''}" draggable="true" data-team="${key}" data-slot="${index}" role="button" tabindex="0" aria-label="${escapeAttr(name)} in ${escapeAttr(teamLongLabel(key))}"><div class="slot-member-main">${memberBoardIconHtml(member,true)}<div class="slot-info"><span class="slot-name">${escapeHtml(name)}</span><span class="slot-class" style="color:${color}">${escapeHtml(member.cls)}</span></div>${leader?`<span class="slot-leader-mark" title="Party Leader" aria-label="Party Leader">${crownIcon()}</span>`:''}</div><span class="slot-gr">${formatNumber(member.gr)}</span><button class="slot-remove" data-remove-team="${key}" data-remove-slot="${index}" title="Remove from slot" aria-label="Remove ${escapeAttr(name)}">✕</button></div>`;
   }
 
+  function raidCommanderIcon(){return '<i class="fa-solid fa-person-military-rifle raid-commander-icon" aria-hidden="true"></i>';}
   function crownIcon(){return `<svg class="leader-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M5 16L3 6l5.5 4L12 4l3.5 6L21 6l-2 10H5zm0 2h14v2H5v-2z"/></svg>`;}
   function printCrownIcon(){return `<svg class="p-leader-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M5 16L3 6l5.5 4L12 4l3.5 6L21 6l-2 10H5zm0 2h14v2H5v-2z"/></svg>`;}
 
