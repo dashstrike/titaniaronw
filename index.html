@@ -249,7 +249,8 @@
     .raid-commander-drop.empty .raid-commander-drop-name,.raid-leader-drop.empty .raid-leader-drop-name{color:var(--muted-2);font-weight:500;}
     .raid-commander-drop.dragover,.raid-leader-drop.dragover{border-color:#f0b429;background:#1b1a11;box-shadow:0 0 0 2px #f0b42922;}
     .raid-commander-drop.invalid,.raid-leader-drop.invalid{border-color:#ff6b7a;box-shadow:0 0 0 2px #ff6b7a22;}
-    .slot-raid-leader-mark{display:inline-flex;align-items:center;justify-content:center;flex:none;margin-left:8px;margin-right:2px;color:#f0b429;}
+    .slot-raid-commander-mark,.slot-raid-leader-mark{display:inline-flex;align-items:center;justify-content:center;flex:none;margin-left:8px;margin-right:2px;color:#f0b429;}
+    .slot-raid-commander-mark .raid-commander-slot-icon{font-size:18px;line-height:18px;}
     .slot-raid-leader-mark .raid-leader-slot-icon{font-size:20px;line-height:20px;}
     .main-raid-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;}
     .main-raid-grid.five{grid-template-columns:repeat(5,minmax(0,1fr));}
@@ -2177,11 +2178,13 @@
     }
     const member=memberByName[name]||{name,cls:'Unknown',gr:0};const color=classColor(member.cls);
     const raid=raidForTeam(key);
+    const raidCommanderSelected=Boolean(raid&&state.raidCommanders&&state.raidCommanders[raid.id]===name);
     const raidLeaderSelected=Boolean(raid&&state.raidLeaders&&state.raidLeaders[raid.id]===name);
-    return `<div class="slot filled ${leader?'leader':''} ${selected?'slot-selected':''}" draggable="true" data-team="${key}" data-slot="${index}" role="button" tabindex="0" aria-label="${escapeAttr(name)} in ${escapeAttr(teamLongLabel(key))}"><div class="slot-member-main">${memberBoardIconHtml(member,true)}<div class="slot-info"><span class="slot-name">${escapeHtml(name)}</span><span class="slot-class" style="color:${color}">${escapeHtml(member.cls)}</span></div>${raidLeaderSelected?`<span class="slot-raid-leader-mark" title="Raid Leader" aria-label="Raid Leader">${raidLeaderSlotIcon()}</span>`:''}</div><span class="slot-gr">${formatNumber(member.gr)}</span><button class="slot-remove" data-remove-team="${key}" data-remove-slot="${index}" title="Remove from slot" aria-label="Remove ${escapeAttr(name)}">✕</button></div>`;
+    return `<div class="slot filled ${leader?'leader':''} ${selected?'slot-selected':''}" draggable="true" data-team="${key}" data-slot="${index}" role="button" tabindex="0" aria-label="${escapeAttr(name)} in ${escapeAttr(teamLongLabel(key))}"><div class="slot-member-main">${memberBoardIconHtml(member,true)}<div class="slot-info"><span class="slot-name">${escapeHtml(name)}</span><span class="slot-class" style="color:${color}">${escapeHtml(member.cls)}</span></div>${raidCommanderSelected?`<span class="slot-raid-commander-mark" title="Raid Commander" aria-label="Raid Commander">${raidCommanderSlotIcon()}</span>`:''}${raidLeaderSelected?`<span class="slot-raid-leader-mark" title="Raid Leader" aria-label="Raid Leader">${raidLeaderSlotIcon()}</span>`:''}</div><span class="slot-gr">${formatNumber(member.gr)}</span><button class="slot-remove" data-remove-team="${key}" data-remove-slot="${index}" title="Remove from slot" aria-label="Remove ${escapeAttr(name)}">✕</button></div>`;
   }
 
   function raidCommanderIcon(){return '<i class="fa-solid fa-person-military-rifle raid-commander-icon" aria-hidden="true"></i>';}
+  function raidCommanderSlotIcon(){return '<i class="fa-solid fa-person-military-rifle raid-commander-slot-icon" aria-hidden="true"></i>';}
   function raidLeaderIcon(){return '<i class="fa-solid fa-crown raid-leader-icon" aria-hidden="true"></i>';}
   function raidLeaderSlotIcon(){return '<i class="fa-solid fa-crown raid-leader-slot-icon" aria-hidden="true"></i>';}
   function crownIcon(){return `<svg class="leader-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M5 16L3 6l5.5 4L12 4l3.5 6L21 6l-2 10H5zm0 2h14v2H5v-2z"/></svg>`;}
