@@ -17,7 +17,7 @@ security definer
 set search_path = public
 as $$
 declare
-  v_view text := lower(trim(coalesce(p_view, ''));
+  v_view text := lower(trim(coalesce(p_view, '')));
   v_state jsonb := '{}'::jsonb;
   v_revision bigint := 0;
   v_row_updated_at timestamptz;
