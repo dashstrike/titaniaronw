@@ -220,16 +220,15 @@
 
       const status=statusByMemberId.get(memberId)||'no_response';
       const meta=STATUS_META[status]||STATUS_META.no_response;
-      const badgeAnchor=slot.querySelector(':scope > .slot-leader-mark')||infoEl;
       let badge=slot.querySelector(':scope > .pre-attendance-badge');
 
       if(!badge){
-        badgeAnchor.insertAdjacentHTML('afterend',badgeHtml(status,memberId,name));
+        infoEl.insertAdjacentHTML('afterend',badgeHtml(status,memberId,name));
         return;
       }
 
-      if(badge.previousElementSibling!==badgeAnchor){
-        badgeAnchor.insertAdjacentElement('afterend',badge);
+      if(badge.previousElementSibling!==infoEl){
+        infoEl.insertAdjacentElement('afterend',badge);
       }
 
       const desiredClass=`pre-attendance-badge ${meta.className}`;
