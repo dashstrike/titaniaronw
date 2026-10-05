@@ -171,6 +171,7 @@
   }
 
   .raid-commander-control,
+  .raid-leader-control,
   .pz-dungeon-group-head .raid-commander-control {
     width: 100%;
     min-width: 0;
@@ -180,7 +181,8 @@
     align-items: center;
   }
 
-  .raid-commander-drop {
+  .raid-commander-drop,
+  .raid-leader-drop {
     width: 100%;
     min-width: 0;
     max-width: none;
