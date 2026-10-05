@@ -240,22 +240,14 @@
     .raid-mode-toggle.atk{color:#f0b429;border-color:#8a6a20;background:#1b180f;}
     .raid-mode-toggle.def{color:#73b7ff;border-color:#315b85;background:#0e1724;}
     .main-raid-line{height:1px;flex:1;background:var(--line-soft);min-width:20px;}
-    .raid-commander-control{display:flex;align-items:center;gap:7px;color:var(--muted);font-size:12px;white-space:nowrap;}
-    .raid-commander-control b{font-weight:600;color:#f0b429;}
-    .raid-commander-drop{min-width:180px;max-width:260px;display:flex;align-items:center;gap:7px;background:#0f1424;color:var(--muted);border:1px solid #3a466d;border-radius:7px;padding:7px 10px;font:600 12px 'IBM Plex Sans',sans-serif;outline:none;cursor:default;transition:.15s;}
-    .raid-commander-drop svg,.raid-commander-drop .raid-commander-icon{width:18px;height:18px;font-size:18px;color:#f0b429;flex:none;display:inline-flex;align-items:center;justify-content:center;}
-    .raid-commander-drop-name{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--text);}
-    .raid-commander-drop.empty .raid-commander-drop-name{color:var(--muted-2);font-weight:500;}
-    .raid-commander-drop.dragover{border-color:#f0b429;background:#1b1a11;box-shadow:0 0 0 2px #f0b42922;}
-    .raid-commander-drop.invalid{border-color:#ff6b7a;box-shadow:0 0 0 2px #ff6b7a22;}
-    .raid-leader-control{display:flex;align-items:center;gap:7px;color:var(--muted);font-size:12px;white-space:nowrap;}
-    .raid-leader-control b{font-weight:600;color:#f0b429;}
-    .raid-leader-drop{min-width:180px;max-width:260px;display:flex;align-items:center;gap:7px;background:#0f1424;color:var(--muted);border:1px solid #3a466d;border-radius:7px;padding:7px 10px;font:600 12px 'IBM Plex Sans',sans-serif;outline:none;cursor:default;transition:.15s;}
-    .raid-leader-drop svg{width:18px;height:18px;color:#f0b429;flex:none;}
-    .raid-leader-drop-name{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--text);}
-    .raid-leader-drop.empty .raid-leader-drop-name{color:var(--muted-2);font-weight:500;}
-    .raid-leader-drop.dragover{border-color:#f0b429;background:#1b1a11;box-shadow:0 0 0 2px #f0b42922;}
-    .raid-leader-drop.invalid{border-color:#ff6b7a;box-shadow:0 0 0 2px #ff6b7a22;}
+    .raid-commander-control,.raid-leader-control{display:flex;align-items:center;gap:7px;color:var(--muted);font-size:12px;white-space:nowrap;}
+    .raid-commander-control b,.raid-leader-control b{font-weight:600;color:#f0b429;}
+    .raid-commander-drop,.raid-leader-drop{min-width:180px;max-width:260px;display:flex;align-items:center;gap:7px;background:#0f1424;color:var(--muted);border:1px solid #3a466d;border-radius:7px;padding:7px 10px;font:600 12px 'IBM Plex Sans',sans-serif;outline:none;cursor:default;transition:.15s;}
+    .raid-commander-drop .raid-commander-icon,.raid-leader-drop .raid-leader-icon{width:18px;height:18px;font-size:18px;line-height:18px;color:#f0b429;flex:none;display:inline-flex;align-items:center;justify-content:center;}
+    .raid-commander-drop-name,.raid-leader-drop-name{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--text);}
+    .raid-commander-drop.empty .raid-commander-drop-name,.raid-leader-drop.empty .raid-leader-drop-name{color:var(--muted-2);font-weight:500;}
+    .raid-commander-drop.dragover,.raid-leader-drop.dragover{border-color:#f0b429;background:#1b1a11;box-shadow:0 0 0 2px #f0b42922;}
+    .raid-commander-drop.invalid,.raid-leader-drop.invalid{border-color:#ff6b7a;box-shadow:0 0 0 2px #ff6b7a22;}
     .slot.raid-leader-selected{border-color:#f0b429!important;box-shadow:0 0 0 1px #f0b42966,0 0 12px #f0b42922;}
     .main-raid-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;}
     .main-raid-grid.five{grid-template-columns:repeat(5,minmax(0,1fr));}
@@ -2150,7 +2142,7 @@
     const title=isPolarityRaid?`RAID TEAM — ${displayCommander}`:`${raid.label.toUpperCase()} · TEAM ${displayCommander}`;
     const selectedLeader=!isPolarityRaid?stringValue(state.raidLeaders&&state.raidLeaders[raid.id]).trim():'';
     const leaderDropText=selectedLeader||'Drag member here';
-    const raidLeaderControl=isPolarityRaid?'':`<label class="raid-leader-control"><b>Raid Leader</b><span class="raid-leader-drop ${selectedLeader?'':'empty'}" data-raid-leader-drop="${raid.id}" role="button" tabindex="0" title="Drag the member who created this raid party here">${crownIcon()}<span class="raid-leader-drop-name">${escapeHtml(leaderDropText)}</span></span></label>`;
+    const raidLeaderControl=isPolarityRaid?'':`<label class="raid-leader-control"><b>Raid Leader</b><span class="raid-leader-drop ${selectedLeader?'':'empty'}" data-raid-leader-drop="${raid.id}" role="button" tabindex="0" title="Drag the member who created this raid party here">${raidLeaderIcon()}<span class="raid-leader-drop-name">${escapeHtml(leaderDropText)}</span></span></label>`;
     let gridClass=raid.kind==='star'?'pz-star-raid-grid':raid.kind==='normal'?'pz-normal-raid-grid':'main-raid-grid';
     if(!isPolarityRaid&&raid.keys.length===5)gridClass+=' five';
     return `<div class="main-raid-block" data-raid="${raid.id}"><div class="main-raid-head"><div class="main-raid-title">${escapeHtml(title)}</div>${modeToggle}<div class="main-raid-line"></div><label class="raid-commander-control"><b>Raid Commander</b><span class="raid-commander-drop ${selectedCommander?'':'empty'}" data-raid-commander-drop="${raid.id}" role="button" tabindex="0" title="Drag any member from this raid here to make them Raid Commander">${raidCommanderIcon()}<span class="raid-commander-drop-name">${escapeHtml(dropText)}</span></span></label>${raidLeaderControl}</div><div class="${gridClass}">${raid.keys.map(teamCardHtml).join('')}</div></div>`;
@@ -2186,6 +2178,7 @@
   }
 
   function raidCommanderIcon(){return '<i class="fa-solid fa-person-military-rifle raid-commander-icon" aria-hidden="true"></i>';}
+  function raidLeaderIcon(){return '<i class="fa-solid fa-person-rays raid-leader-icon" aria-hidden="true"></i>';}
   function crownIcon(){return `<svg class="leader-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M5 16L3 6l5.5 4L12 4l3.5 6L21 6l-2 10H5zm0 2h14v2H5v-2z"/></svg>`;}
   function printCrownIcon(){return `<svg class="p-leader-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M5 16L3 6l5.5 4L12 4l3.5 6L21 6l-2 10H5zm0 2h14v2H5v-2z"/></svg>`;}
 
