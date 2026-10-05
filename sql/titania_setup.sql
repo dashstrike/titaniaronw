@@ -199,7 +199,7 @@ $$;
 
 grant execute on function public.save_planner_state(jsonb,bigint) to authenticated;
 
-create or replace function public.save_raid_leader_setting(p_raid_id text, p_member_name text)
+create or replace function public.save_raid_commander_setting(p_raid_id text, p_member_name text)
 returns jsonb
 language plpgsql
 security invoker
@@ -207,7 +207,7 @@ set search_path = public
 as $$
 declare
   v_state jsonb;
-  v_leaders jsonb;
+  v_commanders jsonb;
   v_revision bigint;
   v_updated_at timestamptz;
 begin
@@ -221,9 +221,9 @@ begin
   for update;
 
   v_state := coalesce(v_state, '{}'::jsonb);
-  v_leaders := coalesce(v_state -> 'raidLeaders', '{}'::jsonb);
-  v_leaders := jsonb_set(v_leaders, array[p_raid_id], to_jsonb(coalesce(p_member_name,'')), true);
-  v_state := jsonb_set(v_state, '{raidLeaders}', v_leaders, true);
+  v_commanders := coalesce(v_state -> 'raidCommanders', '{}'::jsonb);
+  v_commanders := jsonb_set(v_commanders, array[p_raid_id], to_jsonb(coalesce(p_member_name,'')), true);
+  v_state := jsonb_set(v_state, '{raidCommanders}', v_commanders, true);
 
   update public.planner_state
   set state = v_state,
@@ -242,7 +242,7 @@ begin
 end;
 $$;
 
-grant execute on function public.save_raid_leader_setting(text,text) to authenticated;
+grant execute on function public.save_raid_commander_setting(text,text) to authenticated;
 
 create or replace function public.save_raid_mode_setting(p_raid_id text, p_mode text)
 returns jsonb
@@ -530,7 +530,7 @@ declare
   v_raid_pattern text;
   v_published boolean := false;
   v_assignments jsonb := '{}'::jsonb;
-  v_raid_leaders jsonb := '{}'::jsonb;
+  v_raid_commanders jsonb := '{}'::jsonb;
   v_raid_modes jsonb := '{}'::jsonb;
   v_roster jsonb := '[]'::jsonb;
   v_used_names text[] := array[]::text[];
@@ -552,7 +552,7 @@ begin
       'published', false,
       'roster', '[]'::jsonb,
       'assignments', '{}'::jsonb,
-      'raidLeaders', '{}'::jsonb,
+      'raidCommanders', '{}'::jsonb,
       'raidModes', '{}'::jsonb,
       'siegeRaidGroups', '{}'::jsonb,
       'finishedDungeons', '[]'::jsonb,
@@ -572,7 +572,7 @@ begin
       'published', false,
       'roster', '[]'::jsonb,
       'assignments', '{}'::jsonb,
-      'raidLeaders', '{}'::jsonb,
+      'raidCommanders', '{}'::jsonb,
       'raidModes', '{}'::jsonb,
       'siegeRaidGroups', '{}'::jsonb,
       'finishedDungeons', '[]'::jsonb,
@@ -610,7 +610,7 @@ begin
       'published', false,
       'roster', '[]'::jsonb,
       'assignments', '{}'::jsonb,
-      'raidLeaders', '{}'::jsonb,
+      'raidCommanders', '{}'::jsonb,
       'raidModes', '{}'::jsonb,
       'siegeRaidGroups', '{}'::jsonb,
       'finishedDungeons', '[]'::jsonb,
@@ -643,8 +643,8 @@ begin
   where (m.item->>'name') = any(v_used_names);
 
   select coalesce(jsonb_object_agg(e.key, e.value), '{}'::jsonb)
-    into v_raid_leaders
-  from jsonb_each(coalesce(v_state->'raidLeaders', '{}'::jsonb)) e
+    into v_raid_commanders
+  from jsonb_each(coalesce(v_state->'raidCommanders', '{}'::jsonb)) e
   where e.key ~ v_raid_pattern;
 
   select coalesce(jsonb_object_agg(e.key, e.value), '{}'::jsonb)
@@ -694,7 +694,7 @@ begin
     'published', true,
     'roster', v_roster,
     'assignments', v_assignments,
-    'raidLeaders', v_raid_leaders,
+    'raidCommanders', v_raid_commanders,
     'raidModes', v_raid_modes,
     'siegeRaidGroups', v_siege_raid_groups,
     'finishedDungeons', v_finished_dungeons,
