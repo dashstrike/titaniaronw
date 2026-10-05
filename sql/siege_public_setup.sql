@@ -24,6 +24,7 @@ declare
   v_published boolean := false;
   v_assignments jsonb := '{}'::jsonb;
   v_raid_commanders jsonb := '{}'::jsonb;
+  v_raid_leaders jsonb := '{}'::jsonb;
   v_raid_modes jsonb := '{}'::jsonb;
   v_roster jsonb := '[]'::jsonb;
   v_used_names text[] := array[]::text[];
@@ -46,6 +47,7 @@ begin
       'roster', '[]'::jsonb,
       'assignments', '{}'::jsonb,
       'raidCommanders', '{}'::jsonb,
+      'raidLeaders', '{}'::jsonb,
       'raidModes', '{}'::jsonb,
       'siegeRaidGroups', '{}'::jsonb,
       'finishedDungeons', '[]'::jsonb,
@@ -66,6 +68,7 @@ begin
       'roster', '[]'::jsonb,
       'assignments', '{}'::jsonb,
       'raidCommanders', '{}'::jsonb,
+      'raidLeaders', '{}'::jsonb,
       'raidModes', '{}'::jsonb,
       'siegeRaidGroups', '{}'::jsonb,
       'finishedDungeons', '[]'::jsonb,
@@ -104,6 +107,7 @@ begin
       'roster', '[]'::jsonb,
       'assignments', '{}'::jsonb,
       'raidCommanders', '{}'::jsonb,
+      'raidLeaders', '{}'::jsonb,
       'raidModes', '{}'::jsonb,
       'siegeRaidGroups', '{}'::jsonb,
       'finishedDungeons', '[]'::jsonb,
@@ -129,7 +133,13 @@ begin
 
   select coalesce(jsonb_agg(jsonb_build_object(
       'name', m.item->>'name',
-      'cls', coalesce(nullif(m.item->>'cls', ''), 'Unknown')
+      'cls', coalesce(nullif(m.item->>'cls', ''), 'Unknown'),
+      'title', coalesce((
+        select d.title
+        from public.member_csv_data d
+        where d.member_id = m.item->>'id'
+        limit 1
+      ), '')
     ) order by m.ord), '[]'::jsonb)
     into v_roster
   from jsonb_array_elements(coalesce(v_state->'roster', '[]'::jsonb)) with ordinality as m(item, ord)
@@ -138,6 +148,11 @@ begin
   select coalesce(jsonb_object_agg(e.key, e.value), '{}'::jsonb)
     into v_raid_commanders
   from jsonb_each(coalesce(v_state->'raidCommanders', '{}'::jsonb)) e
+  where e.key ~ v_raid_pattern;
+
+  select coalesce(jsonb_object_agg(e.key, e.value), '{}'::jsonb)
+    into v_raid_leaders
+  from jsonb_each(coalesce(v_state->'raidLeaders', '{}'::jsonb)) e
   where e.key ~ v_raid_pattern;
 
   select coalesce(jsonb_object_agg(e.key, e.value), '{}'::jsonb)
@@ -189,6 +204,7 @@ begin
     'roster', v_roster,
     'assignments', v_assignments,
     'raidCommanders', v_raid_commanders,
+    'raidLeaders', v_raid_leaders,
     'raidModes', v_raid_modes,
     'siegeRaidGroups', v_siege_raid_groups,
     'finishedDungeons', v_finished_dungeons,
