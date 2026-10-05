@@ -361,6 +361,9 @@
     if(next.raidCommanders&&typeof next.raidCommanders==='object'){
       Object.keys(next.raidCommanders).forEach(key=>{if(next.raidCommanders[key]===memberName)next.raidCommanders[key]='';});
     }
+    if(next.raidLeaders&&typeof next.raidLeaders==='object'){
+      Object.keys(next.raidLeaders).forEach(key=>{if(next.raidLeaders[key]===memberName)next.raidLeaders[key]='';});
+    }
   }
 
   function applyToState(){
