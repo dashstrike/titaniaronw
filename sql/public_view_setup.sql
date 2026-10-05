@@ -27,7 +27,7 @@ declare
   v_raid_pattern text;
   v_published boolean := false;
   v_assignments jsonb := '{}'::jsonb;
-  v_raid_leaders jsonb := '{}'::jsonb;
+  v_raid_commanders jsonb := '{}'::jsonb;
   v_raid_modes jsonb := '{}'::jsonb;
   v_roster jsonb := '[]'::jsonb;
   v_used_names text[] := array[]::text[];
@@ -49,7 +49,7 @@ begin
       'published', false,
       'roster', '[]'::jsonb,
       'assignments', '{}'::jsonb,
-      'raidLeaders', '{}'::jsonb,
+      'raidCommanders', '{}'::jsonb,
       'raidModes', '{}'::jsonb,
       'siegeRaidGroups', '{}'::jsonb,
       'finishedDungeons', '[]'::jsonb,
@@ -69,7 +69,7 @@ begin
       'published', false,
       'roster', '[]'::jsonb,
       'assignments', '{}'::jsonb,
-      'raidLeaders', '{}'::jsonb,
+      'raidCommanders', '{}'::jsonb,
       'raidModes', '{}'::jsonb,
       'siegeRaidGroups', '{}'::jsonb,
       'finishedDungeons', '[]'::jsonb,
@@ -107,7 +107,7 @@ begin
       'published', false,
       'roster', '[]'::jsonb,
       'assignments', '{}'::jsonb,
-      'raidLeaders', '{}'::jsonb,
+      'raidCommanders', '{}'::jsonb,
       'raidModes', '{}'::jsonb,
       'siegeRaidGroups', '{}'::jsonb,
       'finishedDungeons', '[]'::jsonb,
@@ -140,8 +140,8 @@ begin
   where (m.item->>'name') = any(v_used_names);
 
   select coalesce(jsonb_object_agg(e.key, e.value), '{}'::jsonb)
-    into v_raid_leaders
-  from jsonb_each(coalesce(v_state->'raidLeaders', '{}'::jsonb)) e
+    into v_raid_commanders
+  from jsonb_each(coalesce(v_state->'raidCommanders', '{}'::jsonb)) e
   where e.key ~ v_raid_pattern;
 
   select coalesce(jsonb_object_agg(e.key, e.value), '{}'::jsonb)
@@ -192,7 +192,7 @@ begin
     'published', true,
     'roster', v_roster,
     'assignments', v_assignments,
-    'raidLeaders', v_raid_leaders,
+    'raidCommanders', v_raid_commanders,
     'raidModes', v_raid_modes,
     'siegeRaidGroups', v_siege_raid_groups,
     'finishedDungeons', v_finished_dungeons,
