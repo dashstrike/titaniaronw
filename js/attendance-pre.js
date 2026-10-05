@@ -213,7 +213,8 @@
       cleanupOldNameWrapper(slot);
       const nameEl=slot.querySelector('.slot-name');
       const infoEl=slot.querySelector('.slot-info');
-      if(!nameEl||!infoEl)return;
+      const memberMain=slot.querySelector(':scope > .slot-member-main');
+      if(!nameEl||!infoEl||!memberMain)return;
       const name=nameEl.textContent.trim();
       const memberId=memberIdForName(name,maps);
       if(!memberId)return;
@@ -223,12 +224,12 @@
       let badge=slot.querySelector(':scope > .pre-attendance-badge');
 
       if(!badge){
-        infoEl.insertAdjacentHTML('afterend',badgeHtml(status,memberId,name));
+        memberMain.insertAdjacentHTML('afterend',badgeHtml(status,memberId,name));
         return;
       }
 
-      if(badge.previousElementSibling!==infoEl){
-        infoEl.insertAdjacentElement('afterend',badge);
+      if(badge.previousElementSibling!==memberMain){
+        memberMain.insertAdjacentElement('afterend',badge);
       }
 
       const desiredClass=`pre-attendance-badge ${meta.className}`;
