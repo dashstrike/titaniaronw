@@ -5,6 +5,16 @@
 
   const ICON_BASE='./assets/images/job/';
   const ICON_MAP_URL=`${ICON_BASE}job-icons.json?v=20260906-1`;
+  const TITLE_BASE='./assets/images/title/';
+  const TITLE_SERIES={
+    traveler:'traveler_green',
+    explorer:'explorer_blue',
+    pathfinder:'pathfinder_purple',
+    trailblazer:'trailblazer_orange',
+    pioneer:'pioneer_red',
+    dawnbringer:'dawnbringer_rainbow'
+  };
+  const TITLE_LEVELS={i:1,ii:2,iii:3,iv:4,v:5,'1':1,'2':2,'3':3,'4':4,'5':5};
   let iconMap={};
 
   function esc(v){return String(v==null?'':v).replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));}
@@ -22,6 +32,9 @@
       .member-info-no{color:var(--muted);font-weight:700}
       .member-import-value{font-weight:600}
       .member-title-metric{font-weight:700;color:var(--text)}
+      .member-title-display{display:flex;align-items:center;gap:10px;min-width:0}
+      .member-title-display img{width:38px;height:38px;object-fit:contain;flex:none}
+      .member-title-display span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
       .metric #trackingSince.member-import-value{font-size:23px!important;font-family:inherit!important}
       .name-history-table{width:100%;border-collapse:collapse}
       .name-history-table th,.name-history-table td{text-align:left;padding:10px 8px;border-bottom:1px solid var(--lineSoft);font-size:13px}
@@ -94,6 +107,17 @@
     return `<div class="info-row"><div class="info-key">${esc(label)}</div><div class="info-value">${valueHtml}</div></div>`;
   }
 
+  function titleAsset(title){
+    const value=String(title||'').trim();
+    if(!value)return '';
+    const match=value.match(/^([A-Za-z]+)\s+([IVX]+|[1-5])$/i);
+    if(!match)return '';
+    const series=TITLE_SERIES[match[1].toLowerCase()];
+    const level=TITLE_LEVELS[match[2].toLowerCase()];
+    if(!series||!level)return '';
+    return `${TITLE_BASE}${series}_${level}_star${level===1?'':'s'}.png`;
+  }
+
   function renderMetricCards(csvData){
     const titleValue=document.getElementById('gainTotal');
     const contributionValue=document.getElementById('trackingSince');
@@ -106,7 +130,11 @@
       if(heading)heading.innerHTML='<i class="fa-solid fa-award mr-2" aria-hidden="true"></i>Title';
       if(desc)desc.remove();
       titleValue.className='member-title-metric';
-      titleValue.textContent=imported&&String(imported.title||'').trim()?String(imported.title).trim():'—';
+      const title=imported&&String(imported.title||'').trim()?String(imported.title).trim():'';
+      const asset=titleAsset(title);
+      titleValue.innerHTML=title
+        ? `<span class="member-title-display">${asset?`<img src="${esc(asset)}" alt="${esc(title)} title icon">`:''}<span>${esc(title)}</span></span>`
+        : '—';
     }
 
     if(contributionValue){
