@@ -295,6 +295,7 @@
     }
     .slot.leader{border-style:solid;border-color:#f0b42955;background:#1c1a10;}
     .slot.filled{border-style:solid;border-color:var(--line);background:var(--panel-2);cursor:grab;}
+    .slot.filled.leader{border-color:#f0b429!important;box-shadow:0 0 0 1px #f0b42955,0 0 10px #f0b42918;}
     .slot:hover{border-color:#3a4568;}
     .slot.dragover,.slot.slot-selected{border-color:var(--teal);box-shadow:0 0 0 2px var(--teal-glow);background:#132322;}
     .leader-icon{width:13px;height:13px;color:var(--amber);flex:none;}
@@ -516,6 +517,7 @@
     .print-team-head{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:8px;}
     .print-team-head b{font-family:'Lexend',Arial,sans-serif;font-size:12.5px;font-weight:700;color:#14172a;flex:none;}.print-team-head span{display:inline-flex;align-items:center;max-width:70%;margin-left:5px;padding:3px 8px;border:1px solid #55b8d4;border-radius:999px;background:#e8f7fb;font-family:'Lexend',Arial,sans-serif;font-size:12.5px;font-weight:800;line-height:1.1;color:#176b87;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
     .print-slot-row{display:flex;align-items:center;gap:7px;font-family:'Lexend',Arial,sans-serif;font-size:12px;line-height:1.35;padding:3px 0;color:#14172a;}
+    .print-slot-row.p-party-leader{border:1px solid #f0b429;border-radius:5px;padding:3px 4px;}
     .p-dot{width:7px;height:7px;border-radius:50%;flex:none;}.p-name{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-family:'Lexend',Arial,sans-serif;font-weight:600;color:#14172a;}.p-name-row{display:flex;align-items:center;gap:4px;flex:1;min-width:0;}.p-name-row .p-name{flex:0 1 auto;min-width:0;}.p-leader-icon{width:12px;height:12px;color:#f0b429;flex:none;display:inline-block;vertical-align:middle;}.p-cls{font-family:'Lexend',Arial,sans-serif;color:#5b6180;font-size:10px;font-weight:500;flex:none;}.p-empty{color:#a8adc4;font-style:italic;}.print-team-warn{margin-top:6px;font-family:'Lexend',Arial,sans-serif;font-size:10px;font-weight:700;color:#c23c56;}.print-footer-note{margin-top:24px;font-family:'Lexend',Arial,sans-serif;font-size:10px;color:#9095ac;text-align:center;}
 
     @media(max-width:1500px){
@@ -2169,16 +2171,16 @@
   function slotHtml(key,index,name){
     const leader=index===0;const selected=selectedSlot&&selectedSlot.team===key&&selectedSlot.slot===index;
     if(!name){
-      return `<div class="slot ${leader?'leader':''} ${selected?'slot-selected':''}" data-team="${key}" data-slot="${index}" role="button" tabindex="0" aria-label="${leader?'Empty team leader slot':'Empty member slot'}">${leader?crownIcon():''}<span class="slot-empty-label">${leader?'Team Leader — drop here':'Empty slot'}</span></div>`;
+      return `<div class="slot ${leader?'leader':''} ${selected?'slot-selected':''}" data-team="${key}" data-slot="${index}" role="button" tabindex="0" aria-label="${leader?'Empty team leader slot':'Empty member slot'}"><span class="slot-empty-label">${leader?'Team Leader — drop here':'Empty slot'}</span></div>`;
     }
     const member=memberByName[name]||{name,cls:'Unknown',gr:0};const color=classColor(member.cls);
     const raid=raidForTeam(key);
     const raidLeaderSelected=Boolean(raid&&state.raidLeaders&&state.raidLeaders[raid.id]===name);
-    return `<div class="slot filled ${leader?'leader':''} ${selected?'slot-selected':''} ${raidLeaderSelected?'raid-leader-selected':''}" draggable="true" data-team="${key}" data-slot="${index}" role="button" tabindex="0" aria-label="${escapeAttr(name)} in ${escapeAttr(teamLongLabel(key))}"><div class="slot-member-main">${memberBoardIconHtml(member,true)}<div class="slot-info"><span class="slot-name">${escapeHtml(name)}</span><span class="slot-class" style="color:${color}">${escapeHtml(member.cls)}</span></div>${leader?`<span class="slot-leader-mark" title="Party Leader" aria-label="Party Leader">${crownIcon()}</span>`:''}</div><span class="slot-gr">${formatNumber(member.gr)}</span><button class="slot-remove" data-remove-team="${key}" data-remove-slot="${index}" title="Remove from slot" aria-label="Remove ${escapeAttr(name)}">✕</button></div>`;
+    return `<div class="slot filled ${leader?'leader':''} ${selected?'slot-selected':''} ${raidLeaderSelected?'raid-leader-selected':''}" draggable="true" data-team="${key}" data-slot="${index}" role="button" tabindex="0" aria-label="${escapeAttr(name)} in ${escapeAttr(teamLongLabel(key))}"><div class="slot-member-main">${memberBoardIconHtml(member,true)}<div class="slot-info"><span class="slot-name">${escapeHtml(name)}</span><span class="slot-class" style="color:${color}">${escapeHtml(member.cls)}</span></div></div><span class="slot-gr">${formatNumber(member.gr)}</span><button class="slot-remove" data-remove-team="${key}" data-remove-slot="${index}" title="Remove from slot" aria-label="Remove ${escapeAttr(name)}">✕</button></div>`;
   }
 
   function raidCommanderIcon(){return '<i class="fa-solid fa-person-military-rifle raid-commander-icon" aria-hidden="true"></i>';}
-  function raidLeaderIcon(){return '<i class="fa-solid fa-person-rays raid-leader-icon" aria-hidden="true"></i>';}
+  function raidLeaderIcon(){return '<svg class="raid-leader-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M5 16L3 6l5.5 4L12 4l3.5 6L21 6l-2 10H5zm0 2h14v2H5v-2z"/></svg>';}
   function crownIcon(){return `<svg class="leader-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M5 16L3 6l5.5 4L12 4l3.5 6L21 6l-2 10H5zm0 2h14v2H5v-2z"/></svg>`;}
   function printCrownIcon(){return `<svg class="p-leader-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M5 16L3 6l5.5 4L12 4l3.5 6L21 6l-2 10H5zm0 2h14v2H5v-2z"/></svg>`;}
 
@@ -3354,9 +3356,9 @@ Their team assignments and membership history will also be removed. Use Mark Ina
       const raidCommanderName=raid?(stringValue(state.raidCommanders&&state.raidCommanders[raid.id]).trim()||'Not assigned'):'Not assigned';
       let card=`<div class="print-team-card ${currentEvent==='siege'?'siege-party ':''}${noHealer?'no-healer':''}"><div class="print-team-head"><b>${escapeHtml(displayTeamLabel(key))}</b><span title="Team ${escapeAttr(raidCommanderName)}">TEAM ${escapeHtml(raidCommanderName)}</span></div>`;
       slots.forEach((name,index)=>{
-        if(!name){card+=`<div class="print-slot-row p-empty"><span>${index===0?'♛':'·'}</span><span>${index===0?'Empty leader':'Empty slot'}</span></div>`;return;}
+        if(!name){card+=`<div class="print-slot-row p-empty ${index===0?'p-party-leader':''}"><span>${index===0?'':'·'}</span><span>${index===0?'Empty leader':'Empty slot'}</span></div>`;return;}
         const member=memberByName[name]||{cls:'Unknown'};card+=index===0
-          ? `<div class="print-slot-row"><span class="p-dot" style="background:${classColor(member.cls)}"></span><span class="p-name-row"><span class="p-name">${escapeHtml(name)}</span>${printCrownIcon()}</span><span class="p-cls">${escapeHtml(member.cls)}</span></div>`
+          ? `<div class="print-slot-row p-party-leader"><span class="p-dot" style="background:${classColor(member.cls)}"></span><span class="p-name">${escapeHtml(name)}</span><span class="p-cls">${escapeHtml(member.cls)}</span></div>`
           : `<div class="print-slot-row"><span class="p-dot" style="background:${classColor(member.cls)}"></span><span class="p-name">${escapeHtml(name)}</span><span class="p-cls">${escapeHtml(member.cls)}</span></div>`;
       });
       if(noHealer)card+='<div class="print-team-warn">⚠ No healer</div>';
