@@ -358,8 +358,8 @@
         if(Array.isArray(next.assignments[key]))next.assignments[key]=next.assignments[key].map(value=>value===memberName?null:value);
       });
     }
-    if(next.raidLeaders&&typeof next.raidLeaders==='object'){
-      Object.keys(next.raidLeaders).forEach(key=>{if(next.raidLeaders[key]===memberName)next.raidLeaders[key]='';});
+    if(next.raidCommanders&&typeof next.raidCommanders==='object'){
+      Object.keys(next.raidCommanders).forEach(key=>{if(next.raidCommanders[key]===memberName)next.raidCommanders[key]='';});
     }
   }
 
