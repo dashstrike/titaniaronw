@@ -1608,8 +1608,8 @@
       const keys=raidKeysForGroups(raid,siegeRaidGroups);
       // Backward compatibility: older versions stored a team key. Convert it to that team's current leader.
       if(keys.includes(candidate)){
-        const legacyLeader=assignments[candidate]&&assignments[candidate][0]?assignments[candidate][0]:'';
-        if(legacyLeader)out[raid.id]=legacyLeader;
+        const legacyCommander=assignments[candidate]&&assignments[candidate][0]?assignments[candidate][0]:'';
+        if(legacyCommander)out[raid.id]=legacyCommander;
         return;
       }
       if(raidMemberNames(raid,assignments,siegeRaidGroups).has(candidate))out[raid.id]=candidate;
