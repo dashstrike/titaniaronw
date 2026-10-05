@@ -170,8 +170,8 @@
     display: none;
   }
 
-  .raid-leader-control,
-  .pz-dungeon-group-head .raid-leader-control {
+  .raid-commander-control,
+  .pz-dungeon-group-head .raid-commander-control {
     width: 100%;
     min-width: 0;
     margin-left: 0;
@@ -180,7 +180,7 @@
     align-items: center;
   }
 
-  .raid-leader-drop {
+  .raid-commander-drop {
     width: 100%;
     min-width: 0;
     max-width: none;
