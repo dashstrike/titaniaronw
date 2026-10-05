@@ -243,12 +243,14 @@
     .raid-commander-control,.raid-leader-control{display:flex;align-items:center;gap:7px;color:var(--muted);font-size:12px;white-space:nowrap;}
     .raid-commander-control b,.raid-leader-control b{font-weight:600;color:#f0b429;}
     .raid-commander-drop,.raid-leader-drop{min-width:180px;max-width:260px;display:flex;align-items:center;gap:7px;background:#0f1424;color:var(--muted);border:1px solid #3a466d;border-radius:7px;padding:7px 10px;font:600 12px 'IBM Plex Sans',sans-serif;outline:none;cursor:default;transition:.15s;}
-    .raid-commander-drop .raid-commander-icon,.raid-leader-drop .raid-leader-icon{width:18px;height:18px;font-size:18px;line-height:18px;color:#f0b429;flex:none;display:inline-flex;align-items:center;justify-content:center;}
+    .raid-commander-drop .raid-commander-icon{width:18px;height:18px;font-size:18px;line-height:18px;color:#f0b429;flex:none;display:inline-flex;align-items:center;justify-content:center;}
+    .raid-leader-drop .raid-leader-icon{width:22px;height:22px;font-size:22px;line-height:22px;color:#f0b429;flex:none;display:inline-flex;align-items:center;justify-content:center;}
     .raid-commander-drop-name,.raid-leader-drop-name{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--text);}
     .raid-commander-drop.empty .raid-commander-drop-name,.raid-leader-drop.empty .raid-leader-drop-name{color:var(--muted-2);font-weight:500;}
     .raid-commander-drop.dragover,.raid-leader-drop.dragover{border-color:#f0b429;background:#1b1a11;box-shadow:0 0 0 2px #f0b42922;}
     .raid-commander-drop.invalid,.raid-leader-drop.invalid{border-color:#ff6b7a;box-shadow:0 0 0 2px #ff6b7a22;}
-    .slot.raid-leader-selected{border-color:#f0b429!important;box-shadow:0 0 0 1px #f0b42966,0 0 12px #f0b42922;}
+    .slot-raid-leader-mark{display:inline-flex;align-items:center;justify-content:center;flex:none;margin-left:8px;margin-right:2px;color:#f0b429;}
+    .slot-raid-leader-mark .raid-leader-slot-icon{font-size:20px;line-height:20px;}
     .main-raid-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;}
     .main-raid-grid.five{grid-template-columns:repeat(5,minmax(0,1fr));}
     .pz-star-raid-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:14px;}
@@ -2176,11 +2178,12 @@
     const member=memberByName[name]||{name,cls:'Unknown',gr:0};const color=classColor(member.cls);
     const raid=raidForTeam(key);
     const raidLeaderSelected=Boolean(raid&&state.raidLeaders&&state.raidLeaders[raid.id]===name);
-    return `<div class="slot filled ${leader?'leader':''} ${selected?'slot-selected':''} ${raidLeaderSelected?'raid-leader-selected':''}" draggable="true" data-team="${key}" data-slot="${index}" role="button" tabindex="0" aria-label="${escapeAttr(name)} in ${escapeAttr(teamLongLabel(key))}"><div class="slot-member-main">${memberBoardIconHtml(member,true)}<div class="slot-info"><span class="slot-name">${escapeHtml(name)}</span><span class="slot-class" style="color:${color}">${escapeHtml(member.cls)}</span></div></div><span class="slot-gr">${formatNumber(member.gr)}</span><button class="slot-remove" data-remove-team="${key}" data-remove-slot="${index}" title="Remove from slot" aria-label="Remove ${escapeAttr(name)}">✕</button></div>`;
+    return `<div class="slot filled ${leader?'leader':''} ${selected?'slot-selected':''}" draggable="true" data-team="${key}" data-slot="${index}" role="button" tabindex="0" aria-label="${escapeAttr(name)} in ${escapeAttr(teamLongLabel(key))}"><div class="slot-member-main">${memberBoardIconHtml(member,true)}<div class="slot-info"><span class="slot-name">${escapeHtml(name)}</span><span class="slot-class" style="color:${color}">${escapeHtml(member.cls)}</span></div>${raidLeaderSelected?`<span class="slot-raid-leader-mark" title="Raid Leader" aria-label="Raid Leader">${raidLeaderSlotIcon()}</span>`:''}</div><span class="slot-gr">${formatNumber(member.gr)}</span><button class="slot-remove" data-remove-team="${key}" data-remove-slot="${index}" title="Remove from slot" aria-label="Remove ${escapeAttr(name)}">✕</button></div>`;
   }
 
   function raidCommanderIcon(){return '<i class="fa-solid fa-person-military-rifle raid-commander-icon" aria-hidden="true"></i>';}
-  function raidLeaderIcon(){return '<svg class="raid-leader-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M5 16L3 6l5.5 4L12 4l3.5 6L21 6l-2 10H5zm0 2h14v2H5v-2z"/></svg>';}
+  function raidLeaderIcon(){return '<i class="fa-solid fa-crown raid-leader-icon" aria-hidden="true"></i>';}
+  function raidLeaderSlotIcon(){return '<i class="fa-solid fa-crown raid-leader-slot-icon" aria-hidden="true"></i>';}
   function crownIcon(){return `<svg class="leader-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M5 16L3 6l5.5 4L12 4l3.5 6L21 6l-2 10H5zm0 2h14v2H5v-2z"/></svg>`;}
   function printCrownIcon(){return `<svg class="p-leader-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M5 16L3 6l5.5 4L12 4l3.5 6L21 6l-2 10H5zm0 2h14v2H5v-2z"/></svg>`;}
 
