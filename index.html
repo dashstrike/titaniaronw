@@ -297,6 +297,7 @@
     .slot:hover{border-color:#3a4568;}
     .slot.dragover,.slot.slot-selected{border-color:var(--teal);box-shadow:0 0 0 2px var(--teal-glow);background:#132322;}
     .leader-icon{width:13px;height:13px;color:var(--amber);flex:none;}
+    .slot-leader-mark{display:inline-flex;align-items:center;justify-content:center;flex:none;margin-left:2px;margin-right:2px;}
     .slot-empty-label{font-size:12.5px;color:var(--muted-2);flex:1;}
     .slot .class-dot{width:8px;height:8px;}
     .slot-info{flex:1;min-width:0;display:flex;flex-direction:column;gap:1px;}
@@ -2133,7 +2134,7 @@
       return `<div class="slot ${leader?'leader':''} ${selected?'slot-selected':''}" data-team="${key}" data-slot="${index}" role="button" tabindex="0" aria-label="${leader?'Empty team leader slot':'Empty member slot'}">${leader?crownIcon():''}<span class="slot-empty-label">${leader?'Team Leader — drop here':'Empty slot'}</span></div>`;
     }
     const member=memberByName[name]||{name,cls:'Unknown',gr:0};const color=classColor(member.cls);
-    return `<div class="slot filled ${leader?'leader':''} ${selected?'slot-selected':''}" draggable="true" data-team="${key}" data-slot="${index}" role="button" tabindex="0" aria-label="${escapeAttr(name)} in ${escapeAttr(teamLongLabel(key))}">${leader?crownIcon():memberBoardIconHtml(member,true)}<div class="slot-info"><span class="slot-name">${escapeHtml(name)}</span><span class="slot-class" style="color:${color}">${escapeHtml(member.cls)}</span></div><span class="slot-gr">${formatNumber(member.gr)}</span><button class="slot-remove" data-remove-team="${key}" data-remove-slot="${index}" title="Remove from slot" aria-label="Remove ${escapeAttr(name)}">✕</button></div>`;
+    return `<div class="slot filled ${leader?'leader':''} ${selected?'slot-selected':''}" draggable="true" data-team="${key}" data-slot="${index}" role="button" tabindex="0" aria-label="${escapeAttr(name)} in ${escapeAttr(teamLongLabel(key))}">${memberBoardIconHtml(member,true)}<div class="slot-info"><span class="slot-name">${escapeHtml(name)}</span><span class="slot-class" style="color:${color}">${escapeHtml(member.cls)}</span></div><span class="slot-gr">${formatNumber(member.gr)}</span>${leader?`<span class="slot-leader-mark" title="Party Leader" aria-label="Party Leader">${crownIcon()}</span>`:''}<button class="slot-remove" data-remove-team="${key}" data-remove-slot="${index}" title="Remove from slot" aria-label="Remove ${escapeAttr(name)}">✕</button></div>`;
   }
 
   function crownIcon(){return `<svg class="leader-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M5 16L3 6l5.5 4L12 4l3.5 6L21 6l-2 10H5zm0 2h14v2H5v-2z"/></svg>`;}
