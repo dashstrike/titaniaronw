@@ -240,14 +240,14 @@
     .raid-mode-toggle.atk{color:#f0b429;border-color:#8a6a20;background:#1b180f;}
     .raid-mode-toggle.def{color:#73b7ff;border-color:#315b85;background:#0e1724;}
     .main-raid-line{height:1px;flex:1;background:var(--line-soft);min-width:20px;}
-    .raid-leader-control{display:flex;align-items:center;gap:7px;color:var(--muted);font-size:12px;white-space:nowrap;}
-    .raid-leader-control b{font-weight:600;color:#f0b429;}
-    .raid-leader-drop{min-width:180px;max-width:260px;display:flex;align-items:center;gap:7px;background:#0f1424;color:var(--muted);border:1px solid #3a466d;border-radius:7px;padding:7px 10px;font:600 12px 'IBM Plex Sans',sans-serif;outline:none;cursor:default;transition:.15s;}
-    .raid-leader-drop svg{width:12px;height:12px;color:#f0b429;flex:none;}
-    .raid-leader-drop-name{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--text);}
-    .raid-leader-drop.empty .raid-leader-drop-name{color:var(--muted-2);font-weight:500;}
-    .raid-leader-drop.dragover{border-color:#f0b429;background:#1b1a11;box-shadow:0 0 0 2px #f0b42922;}
-    .raid-leader-drop.invalid{border-color:#ff6b7a;box-shadow:0 0 0 2px #ff6b7a22;}
+    .raid-commander-control{display:flex;align-items:center;gap:7px;color:var(--muted);font-size:12px;white-space:nowrap;}
+    .raid-commander-control b{font-weight:600;color:#f0b429;}
+    .raid-commander-drop{min-width:180px;max-width:260px;display:flex;align-items:center;gap:7px;background:#0f1424;color:var(--muted);border:1px solid #3a466d;border-radius:7px;padding:7px 10px;font:600 12px 'IBM Plex Sans',sans-serif;outline:none;cursor:default;transition:.15s;}
+    .raid-commander-drop svg{width:12px;height:12px;color:#f0b429;flex:none;}
+    .raid-commander-drop-name{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--text);}
+    .raid-commander-drop.empty .raid-commander-drop-name{color:var(--muted-2);font-weight:500;}
+    .raid-commander-drop.dragover{border-color:#f0b429;background:#1b1a11;box-shadow:0 0 0 2px #f0b42922;}
+    .raid-commander-drop.invalid{border-color:#ff6b7a;box-shadow:0 0 0 2px #ff6b7a22;}
     .main-raid-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;}
     .main-raid-grid.five{grid-template-columns:repeat(5,minmax(0,1fr));}
     .pz-star-raid-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:14px;}
@@ -257,14 +257,14 @@
     .pz-dungeon-group-title{font-family:'Cinzel',serif;font-size:17px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:#ffb08a;white-space:nowrap;}
     .pz-dungeon-group-team{font-size:11.5px;font-weight:800;letter-spacing:.5px;text-transform:uppercase;color:#c6bdfb;background:#15182b;border:1px solid #202944;border-radius:2px;padding:7px 9px;white-space:nowrap;}
     .pz-dungeon-group-line{height:1px;flex:1;background:var(--line-soft);min-width:20px;}
-    .pz-dungeon-group-head .raid-leader-control{margin-left:auto;}
+    .pz-dungeon-group-head .raid-commander-control{margin-left:auto;}
     .pz-dungeon-member-count{font-family:'IBM Plex Mono',monospace;font-size:11.5px;color:var(--muted);white-space:nowrap;}
     .pz-dungeon-group-actions{display:flex;gap:7px;align-items:center;flex-wrap:wrap;}
     .pz-dungeon-team-grid{display:grid;gap:14px;}
     .pz-dungeon-team-grid.cols-5{grid-template-columns:repeat(5,minmax(0,1fr));}
     .pz-dungeon-team-grid.cols-4{grid-template-columns:repeat(4,minmax(0,1fr));}
-    .raid-leader-marker{display:inline-flex;align-items:center;gap:4px;margin-left:5px;color:#f0b429;font-size:10px;font-weight:700;letter-spacing:.25px;text-transform:uppercase;}
-    .raid-leader-marker svg{width:10px;height:10px;flex:none;}
+    .raid-commander-marker{display:inline-flex;align-items:center;gap:4px;margin-left:5px;color:#f0b429;font-size:10px;font-weight:700;letter-spacing:.25px;text-transform:uppercase;}
+    .raid-commander-marker svg{width:10px;height:10px;flex:none;}
     .team-card{
       background:var(--panel);border:1px solid var(--line-soft);border-radius:14px;padding:12px;
       display:flex;flex-direction:column;gap:8px;transition:.15s;min-width:0;
@@ -506,7 +506,7 @@
     .print-raid-mode{display:inline-flex;align-items:center;gap:4px;margin-left:7px;padding:2px 6px;border-radius:999px;font-size:9px;font-weight:700;letter-spacing:.2px;white-space:nowrap;}
     .print-raid-mode.atk{color:#8b6500;background:#fff2bd;border:1px solid #e5c65f;}
     .print-raid-mode.def{color:#245b8f;background:#e5f1ff;border:1px solid #9dc7ef;}
-    .print-raid-leader{color:#8a6400;font-weight:600;text-align:right;}
+    .print-raid-commander{color:#8a6400;font-weight:600;text-align:right;}
     .print-main-raid-grid{grid-template-columns:repeat(4,minmax(0,1fr));}
     .print-main-raid-grid.five{grid-template-columns:repeat(5,minmax(0,1fr));}
     .print-polarity-grid{grid-template-columns:repeat(5,minmax(0,1fr));gap:8px;}
@@ -525,7 +525,7 @@
     }
     @media(max-width:1100px){
       .main-raid-grid,.pz-star-raid-grid,.pz-normal-raid-grid{grid-template-columns:repeat(2,minmax(0,1fr));}
-      .main-raid-head{flex-wrap:wrap}.main-raid-line{min-width:40px}.raid-leader-control{margin-left:auto}
+      .main-raid-head{flex-wrap:wrap}.main-raid-line{min-width:40px}.raid-commander-control{margin-left:auto}
     }
     @media(max-width:900px){
       .sidebar{position:relative;top:0;height:auto;width:100%;min-width:0;border-right:none;border-bottom:1px solid var(--line-soft);max-height:none;overflow:visible;}
@@ -543,7 +543,7 @@
       .topbar{padding:12px}.brand{min-width:0;width:100%;justify-content:center}.brand-logo{width:54px;height:47px}.brand-text h1{font-size:15px;letter-spacing:1.2px}.brand-text p{text-align:center}.event-tabs{width:100%;justify-content:center}.event-tab{flex:1;justify-content:center;padding:8px 7px;font-size:11.5px}.actions{justify-content:center;width:100%}.save-flag{width:100%;justify-content:center}.team-grid{grid-template-columns:1fr}.section-head{flex-wrap:wrap}.section-line{min-width:30px}.form-grid{grid-template-columns:1fr}.dash-manage-name{width:90px}.dash-status-info{width:125px}.dash-row-class{max-width:120px}.dash-row-gr{width:80px}.dash-last-updated{width:100%;margin-left:28px}.dash-manage-actions{width:100%;margin-left:28px;justify-content:flex-end}.event-last-updated{width:100%;margin-left:0;justify-content:flex-end}.dash-bar-name{width:80px}.dash-bar-avg{display:none}.history-row{grid-template-columns:1fr 110px}.history-date,.history-reason{grid-column:2}.print-content{padding:20px 16px}.print-doc-head{align-items:flex-start;flex-direction:column}.print-doc-meta{text-align:left}
     }
     @page{size:A4 landscape;margin:8mm;}
-    @media(max-width:640px){.main-raid-grid,.pz-star-raid-grid,.pz-normal-raid-grid,.pz-dungeon-team-grid{grid-template-columns:1fr}.main-raid-line{display:none}.raid-leader-control{width:100%;margin-left:0;flex-wrap:wrap}.raid-leader-drop{width:100%;max-width:none}.pz-dungeon-group-head{flex-wrap:wrap}.pz-dungeon-group-head .raid-leader-control{margin-left:0}.pz-dungeon-group-actions{width:100%}}
+    @media(max-width:640px){.main-raid-grid,.pz-star-raid-grid,.pz-normal-raid-grid,.pz-dungeon-team-grid{grid-template-columns:1fr}.main-raid-line{display:none}.raid-commander-control{width:100%;margin-left:0;flex-wrap:wrap}.raid-commander-drop{width:100%;max-width:none}.pz-dungeon-group-head{flex-wrap:wrap}.pz-dungeon-group-head .raid-commander-control{margin-left:0}.pz-dungeon-group-actions{width:100%}}
     @media print{
       html,body{
         width:100%!important;
@@ -672,7 +672,7 @@
     body.readonly-mode .dash-manage-actions{display:none!important;}
     body.readonly-mode .member-card,
     body.readonly-mode .slot,
-    body.readonly-mode .raid-leader-drop{pointer-events:none;}
+    body.readonly-mode .raid-commander-drop{pointer-events:none;}
     body.readonly-mode .dash-row-class,
     body.readonly-mode .dash-row-gr,
     body.readonly-mode .dash-row-check,
@@ -711,11 +711,11 @@
       .section-title{font-size:19px!important;}
       .section-note{font-size:13.5px!important;}
       .main-raid-title{font-size:14px!important;}
-      .raid-leader-control{font-size:13.5px!important;}
+      .raid-commander-control{font-size:13.5px!important;}
       .pz-dungeon-group-title{font-size:19px!important;}
       .pz-dungeon-group-team{font-size:13px!important;}
       .pz-dungeon-member-count{font-size:13px!important;}
-      .raid-leader-marker{font-size:11.5px!important;}
+      .raid-commander-marker{font-size:11.5px!important;}
       .team-name{font-size:16px!important;}
       .team-drag-handle{font-size:15px!important;}
       .team-meta{font-size:13px!important;}
@@ -901,7 +901,7 @@
       <div class="modal-body">
         <div class="guide-step"><div class="guide-step-num">1</div><div><b>Shared storage</b> — roster and lineup edits are saved securely in Supabase, so approved guild leaders can work from the same data.</div></div>
         <div class="guide-step"><div class="guide-step-num">2</div><div><b>Place members</b> — drag an unassigned member onto a slot, or tap/click the member and then a slot. Tap two filled slots to swap them.</div></div>
-        <div class="guide-step"><div class="guide-step-num">3</div><div><b>Polarity Zone raids</b> — STAR and Normal Dun are grouped into raid rows. Drag any member from a raid into its Raid Leader box, just like Guild League or Siege. Team-handle transfer still works: STAR is copied; Normal Dun teams are moved.</div></div>
+        <div class="guide-step"><div class="guide-step-num">3</div><div><b>Polarity Zone raids</b> — STAR and Normal Dun are grouped into raid rows. Drag any member from a raid into its Raid Commander box, just like Guild League or Siege. Team-handle transfer still works: STAR is copied; Normal Dun teams are moved.</div></div>
         <div class="guide-step"><div class="guide-step-num">4</div><div><b>People leaving or returning</b> — use <b>Mark Inactive</b> instead of deleting a member. Inactive members leave every current team and disappear from the Member Pool. Reactivate them from Dashboard when they return.</div></div>
         <div class="guide-step"><div class="guide-step-num">5</div><div><b>Website access</b> — approved users sign in through this site. Leaders/Admins can edit; Viewers are read-only.</div></div>
         <div class="guide-note">Export/import contains the full roster, Guild Status, membership history, Guild League, Siege, Polarity Zone, and finished-dungeon marks.</div>
@@ -1127,7 +1127,7 @@
     roster:[],
     assignments:createEmptyAssignments(),
     finishedDungeons:[],
-    raidLeaders:createDefaultRaidLeaders(),
+    raidCommanders:createDefaultRaidCommanders(),
     raidModes:createDefaultRaidModes(),
     siegeRaidGroups:createDefaultSiegeRaidGroups(),
     membershipHistory:[],
@@ -1534,9 +1534,9 @@
       if(error)throw error;
       return data||{};
     }
-    if(method==='saveRaidLeaderSetting'){
-      if(!userCanEdit())throw new Error('READ_ONLY: Your account cannot edit Raid Leaders.');
-      const {data,error}=await supabaseClient.rpc('save_raid_leader_setting',{p_raid_id:stringValue(args[0]),p_member_name:stringValue(args[1])});
+    if(method==='saveRaidCommanderSetting'){
+      if(!userCanEdit())throw new Error('READ_ONLY: Your account cannot edit Raid Commanders.');
+      const {data,error}=await supabaseClient.rpc('save_raid_commander_setting',{p_raid_id:stringValue(args[0]),p_member_name:stringValue(args[1])});
       if(error)throw error;
       return data||{};
     }
@@ -1568,10 +1568,10 @@
     assignments.elite_1=['Kairo','Astra','YRDRY','Lumi','Nyx'];
     assignments.dungeon1_1=['Kairo','Astra','YRDRY','Lumi','Nyx'];
     const membershipHistory=[{id:'history_preview_1',memberId:'member_preview_former',memberName:'FormerMember',action:'inactive',effectiveDate:'2026-07-20',reason:'Left Guild',changedAt:'2026-07-20T10:00:00.000Z'}];
-    return {version:'preview',spreadsheetName:'Preview Sheet',roster,assignments,finishedDungeons:[],raidLeaders:createDefaultRaidLeaders(),raidModes:createDefaultRaidModes(),siegeRaidGroups:createDefaultSiegeRaidGroups(),membershipHistory,eventUpdates:{guildLeague:{updatedAt:'',updatedBy:''},siege:{updatedAt:'',updatedBy:''},polarityZone:{updatedAt:'',updatedBy:''}},revision:1,updatedAt:new Date().toISOString()};
+    return {version:'preview',spreadsheetName:'Preview Sheet',roster,assignments,finishedDungeons:[],raidCommanders:createDefaultRaidCommanders(),raidModes:createDefaultRaidModes(),siegeRaidGroups:createDefaultSiegeRaidGroups(),membershipHistory,eventUpdates:{guildLeague:{updatedAt:'',updatedBy:''},siege:{updatedAt:'',updatedBy:''},polarityZone:{updatedAt:'',updatedBy:''}},revision:1,updatedAt:new Date().toISOString()};
   }
 
-  function createDefaultRaidLeaders(){
+  function createDefaultRaidCommanders(){
     const out={};
     ALL_RAIDS.forEach(raid=>{out[raid.id]='';});
     return out;
@@ -1599,9 +1599,9 @@
     return names;
   }
 
-  function normalizeRaidLeaders(raw,assignments,siegeRaidGroups){
+  function normalizeRaidCommanders(raw,assignments,siegeRaidGroups){
     const source=raw&&typeof raw==='object'?raw:{};
-    const out=createDefaultRaidLeaders();
+    const out=createDefaultRaidCommanders();
     ALL_RAIDS.forEach(raid=>{
       const candidate=stringValue(source[raid.id]).trim();
       if(!candidate)return;
@@ -1617,10 +1617,10 @@
     return out;
   }
 
-  function validateRaidLeaders(){
+  function validateRaidCommanders(){
     ALL_RAIDS.forEach(raid=>{
-      const selected=stringValue(state.raidLeaders&&state.raidLeaders[raid.id]).trim();
-      if(selected&&!raidMemberNames(raid).has(selected))state.raidLeaders[raid.id]='';
+      const selected=stringValue(state.raidCommanders&&state.raidCommanders[raid.id]).trim();
+      if(selected&&!raidMemberNames(raid).has(selected))state.raidCommanders[raid.id]='';
     });
   }
 
@@ -1682,7 +1682,7 @@
     const rawFinished=Array.isArray(input.finishedDungeons)?input.finishedDungeons:(Array.isArray(input.fd)?input.fd:[]);
     const finishedDungeons=[...new Set(rawFinished.map(v=>toInt(v,0,999)).filter(v=>v>=1&&v<=CONFIG.dungeonCount))].sort((a,b)=>a-b);
     const siegeRaidGroups=normalizeSiegeRaidGroups(input.siegeRaidGroups||(input.srg&&typeof input.srg==='object'?input.srg:{}));
-    const raidLeaders=normalizeRaidLeaders(input.raidLeaders||(input.rl&&typeof input.rl==='object'?input.rl:{}),assignments,siegeRaidGroups);
+    const raidCommanders=normalizeRaidCommanders(input.raidCommanders||(input.rc&&typeof input.rc==='object'?input.rc:(input.rl&&typeof input.rl==='object'?input.rl:{})),assignments,siegeRaidGroups);
     const raidModes=normalizeRaidModes(input.raidModes||(input.rm&&typeof input.rm==='object'?input.rm:{}));
     const rawHistory=Array.isArray(input.membershipHistory)?input.membershipHistory:(Array.isArray(input.mh)?input.mh:[]);
     const usedHistoryIds=new Set();
@@ -1721,7 +1721,7 @@
       siege:normalizeEventUpdate(rawEventUpdates.siege,false),
       polarityZone:normalizeEventUpdate(rawEventUpdates.polarityZone)
     };
-    return {roster,assignments,finishedDungeons,raidLeaders,raidModes,siegeRaidGroups,membershipHistory:membershipHistory.slice(-CONFIG.maxHistory),publicVisibility,eventUpdates,revision:0,updatedAt:'',spreadsheetName:''};
+    return {roster,assignments,finishedDungeons,raidCommanders,raidModes,siegeRaidGroups,membershipHistory:membershipHistory.slice(-CONFIG.maxHistory),publicVisibility,eventUpdates,revision:0,updatedAt:'',spreadsheetName:''};
   }
 
   function enforceUnique(assignments,keys){
@@ -2076,11 +2076,11 @@
       for(let dungeon=1;dungeon<=CONFIG.dungeonCount;dungeon++){
         const keys=dungeonKeys(dungeon);const assigned=assignedNamesSet(keys).size;const finished=state.finishedDungeons.includes(dungeon);
         const raid=POLARITY_NORMAL_RAIDS.find(item=>item.dungeon===dungeon);
-        const selectedLeader=raid?stringValue(state.raidLeaders&&state.raidLeaders[raid.id]).trim():'';
-        const displayLeader=selectedLeader||'NOT ASSIGNED';
-        const dropText=selectedLeader||'Drag member here';
+        const selectedCommander=raid?stringValue(state.raidCommanders&&state.raidCommanders[raid.id]).trim():'';
+        const displayCommander=selectedCommander||'NOT ASSIGNED';
+        const dropText=selectedCommander||'Drag member here';
         const gridClass=keys.length===5?'cols-5':'cols-4';
-        html+=`<div class="pz-dungeon-group"><div class="pz-dungeon-group-head"><span class="pz-dungeon-group-title">🗝 Normal Dungeon ${dungeon}</span><span class="pz-dungeon-group-team">TEAM ${escapeHtml(displayLeader)}</span><span class="pz-dungeon-group-line"></span><label class="raid-leader-control"><b>Raid Leader</b><span class="raid-leader-drop ${selectedLeader?'':'empty'}" data-raid-leader-drop="${raid?raid.id:''}" role="button" tabindex="0" title="Drag any member from Normal Dungeon ${dungeon} here to make them Raid Leader">${crownIcon()}<span class="raid-leader-drop-name">${escapeHtml(dropText)}</span></span></label>${finished?'<span class="dungeon-finished-badge">✅ Run Finished</span>':`<span class="pz-dungeon-member-count">${assigned}/${keys.length*CONFIG.teamSize} members</span>`}<span class="pz-dungeon-group-actions"><button class="btn small" data-autofill-dungeon="${dungeon}">⚡ Auto-fill</button><button class="btn small dungeon-finish-btn ${finished?'active':''}" data-finish-dungeon="${dungeon}">${finished?'↺ Reopen':'🏁 Mark Finished'}</button></span></div><div class="pz-dungeon-team-grid ${gridClass}">${keys.map(teamCardHtml).join('')}</div></div>`;
+        html+=`<div class="pz-dungeon-group"><div class="pz-dungeon-group-head"><span class="pz-dungeon-group-title">🗝 Normal Dungeon ${dungeon}</span><span class="pz-dungeon-group-team">TEAM ${escapeHtml(displayCommander)}</span><span class="pz-dungeon-group-line"></span><label class="raid-commander-control"><b>Raid Commander</b><span class="raid-commander-drop ${selectedCommander?'':'empty'}" data-raid-commander-drop="${raid?raid.id:''}" role="button" tabindex="0" title="Drag any member from Normal Dungeon ${dungeon} here to make them Raid Commander">${crownIcon()}<span class="raid-commander-drop-name">${escapeHtml(dropText)}</span></span></label>${finished?'<span class="dungeon-finished-badge">✅ Run Finished</span>':`<span class="pz-dungeon-member-count">${assigned}/${keys.length*CONFIG.teamSize} members</span>`}<span class="pz-dungeon-group-actions"><button class="btn small" data-autofill-dungeon="${dungeon}">⚡ Auto-fill</button><button class="btn small dungeon-finish-btn ${finished?'active':''}" data-finish-dungeon="${dungeon}">${finished?'↺ Reopen':'🏁 Mark Finished'}</button></span></div><div class="pz-dungeon-team-grid ${gridClass}">${keys.map(teamCardHtml).join('')}</div></div>`;
       }
       wrap.innerHTML=html;
     }else if(currentEvent==='siege'){
@@ -2092,9 +2092,9 @@
   }
 
   function mainRaidHtml(raid){
-    const selectedLeader=stringValue(state.raidLeaders&&state.raidLeaders[raid.id]).trim();
-    const displayLeader=selectedLeader||'Not assigned';
-    const dropText=selectedLeader||'Drag member here';
+    const selectedCommander=stringValue(state.raidCommanders&&state.raidCommanders[raid.id]).trim();
+    const displayCommander=selectedCommander||'Not assigned';
+    const dropText=selectedCommander||'Drag member here';
     const isGuildMainRaid=MAIN_RAIDS.some(item=>item.id===raid.id);
     const isSiegeRaid=ALL_SIEGE_RAIDS.some(item=>item.id===raid.id);
     const isPolarityRaid=Boolean(raid.polarity);
@@ -2107,10 +2107,10 @@
       const modeTitle=isSiegeRaid?'Switch this raid between CAPTURE and RESPAWN':'Switch this raid between ATK and DEF';
       modeToggle=`<button class="raid-mode-toggle ${raidMode.toLowerCase()}" data-raid-mode-toggle="${raid.id}" type="button" title="${modeTitle}">${modeIcon} ${modeLabel}</button>`;
     }
-    const title=isPolarityRaid?`RAID TEAM — ${displayLeader}`:`${raid.label.toUpperCase()} · TEAM ${displayLeader}`;
+    const title=isPolarityRaid?`RAID TEAM — ${displayCommander}`:`${raid.label.toUpperCase()} · TEAM ${displayCommander}`;
     let gridClass=raid.kind==='star'?'pz-star-raid-grid':raid.kind==='normal'?'pz-normal-raid-grid':'main-raid-grid';
     if(!isPolarityRaid&&raid.keys.length===5)gridClass+=' five';
-    return `<div class="main-raid-block" data-raid="${raid.id}"><div class="main-raid-head"><div class="main-raid-title">${escapeHtml(title)}</div>${modeToggle}<div class="main-raid-line"></div><label class="raid-leader-control"><b>Raid Leader</b><span class="raid-leader-drop ${selectedLeader?'':'empty'}" data-raid-leader-drop="${raid.id}" role="button" tabindex="0" title="Drag any member from this raid here to make them Raid Leader">${crownIcon()}<span class="raid-leader-drop-name">${escapeHtml(dropText)}</span></span></label></div><div class="${gridClass}">${raid.keys.map(teamCardHtml).join('')}</div></div>`;
+    return `<div class="main-raid-block" data-raid="${raid.id}"><div class="main-raid-head"><div class="main-raid-title">${escapeHtml(title)}</div>${modeToggle}<div class="main-raid-line"></div><label class="raid-commander-control"><b>Raid Commander</b><span class="raid-commander-drop ${selectedCommander?'':'empty'}" data-raid-commander-drop="${raid.id}" role="button" tabindex="0" title="Drag any member from this raid here to make them Raid Commander">${crownIcon()}<span class="raid-commander-drop-name">${escapeHtml(dropText)}</span></span></label></div><div class="${gridClass}">${raid.keys.map(teamCardHtml).join('')}</div></div>`;
   }
 
   function raidForTeam(key){if(key.startsWith('siege_'))return currentSiegeRaids().find(raid=>raid.keys.includes(key))||null;return ALL_RAIDS.find(raid=>!raid.siege&&raid.keys.includes(key))||null;}
@@ -2202,8 +2202,8 @@
       }finally{quickSaveInFlight=Math.max(0,quickSaveInFlight-1);}
     }));
 
-        wrap.querySelectorAll('[data-raid-leader-drop]').forEach(drop=>{
-      const raid=raidById(drop.dataset.raidLeaderDrop);
+        wrap.querySelectorAll('[data-raid-commander-drop]').forEach(drop=>{
+      const raid=raidById(drop.dataset.raidCommanderDrop);
       if(!raid)return;
       const chooseFromSlot=source=>{
         if(!source||!raid.keys.includes(source.team)){
@@ -2213,27 +2213,27 @@
         }
         const name=state.assignments[source.team]&&state.assignments[source.team][source.slot];
         if(!name)return false;
-        const previous=stringValue(state.raidLeaders&&state.raidLeaders[raid.id]);
-        state.raidLeaders[raid.id]=name;
+        const previous=stringValue(state.raidCommanders&&state.raidCommanders[raid.id]);
+        state.raidCommanders[raid.id]=name;
         clearSelections(false);
-        validateRaidLeaders();rebuildIndex();renderAll();
+        validateRaidCommanders();rebuildIndex();renderAll();
         if(raid.siege){
-          commitMutation('Siege Raid Leader updated');
-          showToast('Raid Leader updated',`${raid.label}: ${state.raidLeaders[raid.id]}`);
+          commitMutation('Siege Raid Commander updated');
+          showToast('Raid Commander updated',`${raid.label}: ${state.raidCommanders[raid.id]}`);
           return true;
         }
         setSaveFlag('busy','Saving');quickSaveInFlight+=1;
-        callServer('saveRaidLeaderSetting',raid.id,name).then(result=>{
-          state.raidLeaders[raid.id]=stringValue(result&&result.memberName)||name;
+        callServer('saveRaidCommanderSetting',raid.id,name).then(result=>{
+          state.raidCommanders[raid.id]=stringValue(result&&result.memberName)||name;
           state.revision=toInt(result&&result.revision,state.revision,Number.MAX_SAFE_INTEGER);
           state.updatedAt=stringValue(result&&result.updatedAt);
           state.updatedBy=currentEditorName();
           touchEventUpdate(raid.polarity?'polarity_zone':'guild_league');
           renderEventLastUpdated();
           queueSave();
-          showToast('Raid Leader updated',`${raid.label}: ${state.raidLeaders[raid.id]}`);
+          showToast('Raid Commander updated',`${raid.label}: ${state.raidCommanders[raid.id]}`);
         }).catch(error=>{
-          state.raidLeaders[raid.id]=previous;validateRaidLeaders();rebuildIndex();renderAll();setSaveFlag('err','Save failed');showToast('Raid Leader save failed',errorMessage(error),'err');
+          state.raidCommanders[raid.id]=previous;validateRaidCommanders();rebuildIndex();renderAll();setSaveFlag('err','Save failed');showToast('Raid Commander save failed',errorMessage(error),'err');
         }).finally(()=>{quickSaveInFlight=Math.max(0,quickSaveInFlight-1);});
         return true;
       };
@@ -2268,7 +2268,7 @@
       drop.addEventListener('click',event=>{
         event.preventDefault();event.stopPropagation();
         if(selectedSlot){chooseFromSlot(selectedSlot);return;}
-        showToast('Choose Raid Leader',`Drag a member from ${raid.label} here, or select a member slot first.`);
+        showToast('Choose Raid Commander',`Drag a member from ${raid.label} here, or select a member slot first.`);
       });
       drop.addEventListener('keydown',event=>{
         if(event.key==='Enter'||event.key===' '){event.preventDefault();drop.click();}
@@ -2508,7 +2508,7 @@
       const oldName=member.name;member.name=name.slice(0,120);member.cls=CLASSES.includes(cls)?cls:'Unknown';member.gr=gr;member.notes=notes;touchMember(member);
       if(oldName!==member.name){
         ALL_KEYS.forEach(key=>state.assignments[key]=state.assignments[key].map(value=>value===oldName?member.name:value));
-        ALL_RAIDS.forEach(raid=>{if(state.raidLeaders[raid.id]===oldName)state.raidLeaders[raid.id]=member.name;});
+        ALL_RAIDS.forEach(raid=>{if(state.raidCommanders[raid.id]===oldName)state.raidCommanders[raid.id]=member.name;});
         if(dashboardSelected.delete(oldName))dashboardSelected.add(member.name);
         if(selectedMember===oldName)selectedMember=member.name;
       }
@@ -2916,7 +2916,7 @@ Their team assignments and membership history will also be removed. Use Mark Ina
       roster:Array.isArray(value.roster)?value.roster:[],
       assignments:value.assignments&&typeof value.assignments==='object'?value.assignments:createEmptyAssignments(),
       finishedDungeons:Array.isArray(value.finishedDungeons)?value.finishedDungeons:[],
-      raidLeaders:value.raidLeaders&&typeof value.raidLeaders==='object'?value.raidLeaders:createDefaultRaidLeaders(),
+      raidCommanders:value.raidCommanders&&typeof value.raidCommanders==='object'?value.raidCommanders:createDefaultRaidCommanders(),
       raidModes:value.raidModes&&typeof value.raidModes==='object'?value.raidModes:createDefaultRaidModes(),
       siegeRaidGroups:value.siegeRaidGroups&&typeof value.siegeRaidGroups==='object'?value.siegeRaidGroups:createDefaultSiegeRaidGroups(),
       membershipHistory:Array.isArray(value.membershipHistory)?value.membershipHistory:[],
@@ -3002,7 +3002,7 @@ Their team assignments and membership history will also be removed. Use Mark Ina
 
     ALL_RAIDS.forEach(raid=>{
       const id=raid.id;
-      if(!sameJson(local.raidLeaders[id],base.raidLeaders[id]))merged.raidLeaders[id]=local.raidLeaders[id]||'';
+      if(!sameJson(local.raidCommanders[id],base.raidCommanders[id]))merged.raidCommanders[id]=local.raidCommanders[id]||'';
     });
     [...MAIN_RAIDS,...ALL_SIEGE_RAIDS].forEach(raid=>{
       const id=raid.id;
@@ -3036,9 +3036,9 @@ Their team assignments and membership history will also be removed. Use Mark Ina
           return text&&renameMap.has(text.toLowerCase())?renameMap.get(text.toLowerCase()):name;
         });
       });
-      Object.keys(merged.raidLeaders).forEach(id=>{
-        const text=stringValue(merged.raidLeaders[id]).trim();
-        if(text&&renameMap.has(text.toLowerCase()))merged.raidLeaders[id]=renameMap.get(text.toLowerCase());
+      Object.keys(merged.raidCommanders).forEach(id=>{
+        const text=stringValue(merged.raidCommanders[id]).trim();
+        if(text&&renameMap.has(text.toLowerCase()))merged.raidCommanders[id]=renameMap.get(text.toLowerCase());
       });
     }
 
@@ -3098,7 +3098,7 @@ Their team assignments and membership history will also be removed. Use Mark Ina
     if(!userCanEdit()){showToast('Read-only access','Your account cannot make changes.','warn');reloadFromServer();return;}
     if(eventScope==='all'||eventScope==='both')touchEventUpdate('all');
     else if(eventScope!=='none'&&(currentEvent==='guild_league'||currentEvent==='siege'||currentEvent==='polarity_zone'))touchEventUpdate(currentEvent);
-    validateRaidLeaders();
+    validateRaidCommanders();
     rebuildIndex();
     renderAll();
     queueSave();
@@ -3187,7 +3187,7 @@ Their team assignments and membership history will also be removed. Use Mark Ina
   }
 
   function exportLineup(){
-    const payload={type:'tempest-lineup-export',version:8,exportedAt:new Date().toISOString(),source:'Titania Supabase website',m:state.roster,a:state.assignments,fd:state.finishedDungeons,rl:state.raidLeaders,rm:state.raidModes,mh:state.membershipHistory,eu:state.eventUpdates};
+    const payload={type:'tempest-lineup-export',version:9,exportedAt:new Date().toISOString(),source:'Titania Supabase website',m:state.roster,a:state.assignments,fd:state.finishedDungeons,rc:state.raidCommanders,rm:state.raidModes,mh:state.membershipHistory,eu:state.eventUpdates};
     const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});const url=URL.createObjectURL(blob);const link=document.createElement('a');link.href=url;link.download=`guild-lineup-${new Date().toISOString().slice(0,10)}.json`;document.body.appendChild(link);link.click();link.remove();URL.revokeObjectURL(url);showToast('Lineup exported','Roster status, membership history, Guild League, Siege, Polarity Zone, and finished-dungeon marks were included.');
   }
 
@@ -3199,7 +3199,7 @@ Their team assignments and membership history will also be removed. Use Mark Ina
       const imported=normalizeClientState(data);
       const when=data.exportedAt?new Date(data.exportedAt).toLocaleString():'an unknown time';
       if(!confirm(`Import the lineup exported on ${when}?\n\nThis will replace the current roster, Guild Status records, membership history, and all event lineups in the Titania database.`))return;
-      state.roster=imported.roster;state.assignments=imported.assignments;state.finishedDungeons=imported.finishedDungeons;state.raidLeaders=imported.raidLeaders;state.raidModes=imported.raidModes;state.siegeRaidGroups=imported.siegeRaidGroups;state.membershipHistory=imported.membershipHistory;dashboardSelected.clear();clearSelections(false);commitMutation('Lineup imported','all');showToast('Lineup imported','The roster, raid leaders, status history, and event data are being saved to Supabase.');
+      state.roster=imported.roster;state.assignments=imported.assignments;state.finishedDungeons=imported.finishedDungeons;state.raidCommanders=imported.raidCommanders;state.raidModes=imported.raidModes;state.siegeRaidGroups=imported.siegeRaidGroups;state.membershipHistory=imported.membershipHistory;dashboardSelected.clear();clearSelections(false);commitMutation('Lineup imported','all');showToast('Lineup imported','The roster, raid commanders, status history, and event data are being saved to Supabase.');
     };
     reader.onerror=()=>showToast('Import failed','The file could not be read.','err');reader.readAsText(file);
   }
@@ -3230,8 +3230,8 @@ Their team assignments and membership history will also be removed. Use Mark Ina
     const appendTeamCard=key=>{
       const slots=state.assignments[key];const noHealer=teamHasNoHealer(key);
       const raid=raidForTeam(key);
-      const raidLeaderName=raid?(stringValue(state.raidLeaders&&state.raidLeaders[raid.id]).trim()||'Not assigned'):'Not assigned';
-      let card=`<div class="print-team-card ${currentEvent==='siege'?'siege-party ':''}${noHealer?'no-healer':''}"><div class="print-team-head"><b>${escapeHtml(displayTeamLabel(key))}</b><span title="Team ${escapeAttr(raidLeaderName)}">TEAM ${escapeHtml(raidLeaderName)}</span></div>`;
+      const raidCommanderName=raid?(stringValue(state.raidCommanders&&state.raidCommanders[raid.id]).trim()||'Not assigned'):'Not assigned';
+      let card=`<div class="print-team-card ${currentEvent==='siege'?'siege-party ':''}${noHealer?'no-healer':''}"><div class="print-team-head"><b>${escapeHtml(displayTeamLabel(key))}</b><span title="Team ${escapeAttr(raidCommanderName)}">TEAM ${escapeHtml(raidCommanderName)}</span></div>`;
       slots.forEach((name,index)=>{
         if(!name){card+=`<div class="print-slot-row p-empty"><span>${index===0?'♛':'·'}</span><span>${index===0?'Empty leader':'Empty slot'}</span></div>`;return;}
         const member=memberByName[name]||{cls:'Unknown'};card+=index===0
@@ -3245,37 +3245,37 @@ Their team assignments and membership history will also be removed. Use Mark Ina
     if(currentEvent==='polarity_zone'){
       html+=`<div class="print-section-title">★ STAR DUNGEON</div>`;
       POLARITY_STAR_RAIDS.forEach(raid=>{
-        const leaderName=stringValue(state.raidLeaders&&state.raidLeaders[raid.id]).trim()||'Not assigned';
-        html+=`<div class="print-raid-block"><div class="print-raid-head"><span>RAID TEAM — ${escapeHtml(leaderName)}</span></div><div class="print-team-grid print-polarity-grid">${raid.keys.map(appendTeamCard).join('')}</div></div>`;
+        const commanderName=stringValue(state.raidCommanders&&state.raidCommanders[raid.id]).trim()||'Not assigned';
+        html+=`<div class="print-raid-block"><div class="print-raid-head"><span>RAID TEAM — ${escapeHtml(commanderName)}</span></div><div class="print-team-grid print-polarity-grid">${raid.keys.map(appendTeamCard).join('')}</div></div>`;
       });
       html+=`<div class="print-section-title">🗝 NORMAL DUNGEON</div>`;
       for(let dungeon=1;dungeon<=CONFIG.dungeonCount;dungeon++){
         const raid=POLARITY_NORMAL_RAIDS.find(item=>item.dungeon===dungeon);
-        const leaderName=raid?stringValue(state.raidLeaders&&state.raidLeaders[raid.id]).trim()||'Not assigned':'Not assigned';
-        html+=`<div class="print-raid-block"><div class="print-raid-head"><span>NORMAL DUNGEON ${dungeon} · TEAM ${escapeHtml(leaderName)}</span></div><div class="print-team-grid print-polarity-grid">${dungeonKeys(dungeon).map(appendTeamCard).join('')}</div></div>`;
+        const commanderName=raid?stringValue(state.raidCommanders&&state.raidCommanders[raid.id]).trim()||'Not assigned':'Not assigned';
+        html+=`<div class="print-raid-block"><div class="print-raid-head"><span>NORMAL DUNGEON ${dungeon} · TEAM ${escapeHtml(commanderName)}</span></div><div class="print-team-grid print-polarity-grid">${dungeonKeys(dungeon).map(appendTeamCard).join('')}</div></div>`;
       }
     }else if(currentEvent==='siege'){
       currentSiegeRaids().forEach(raid=>{
-        const leaderName=stringValue(state.raidLeaders&&state.raidLeaders[raid.id]).trim()||'Not assigned';
+        const commanderName=stringValue(state.raidCommanders&&state.raidCommanders[raid.id]).trim()||'Not assigned';
         const raidMode=state.raidModes&&state.raidModes[raid.id]==='DEF'?'DEF':'ATK';
         const modeLabel=raidMode==='DEF'?'RESPAWN':'CAPTURE';
         const modeIcon=raidMode==='DEF'?'↻':'🏰';
         const printGridClass=raid.keys.length===5?'print-main-raid-grid five':'print-main-raid-grid';
-        html+=`<div class="print-raid-block"><div class="print-raid-head"><span>${escapeHtml(raid.label.toUpperCase())} · TEAM ${escapeHtml(leaderName)} <span class="print-raid-mode ${raidMode.toLowerCase()}">${modeIcon} ${modeLabel}</span></span></div><div class="print-team-grid ${printGridClass}">${raid.keys.map(appendTeamCard).join('')}</div></div>`;
+        html+=`<div class="print-raid-block"><div class="print-raid-head"><span>${escapeHtml(raid.label.toUpperCase())} · TEAM ${escapeHtml(commanderName)} <span class="print-raid-mode ${raidMode.toLowerCase()}">${modeIcon} ${modeLabel}</span></span></div><div class="print-team-grid ${printGridClass}">${raid.keys.map(appendTeamCard).join('')}</div></div>`;
       });
     }else{
       html+=`<div class="print-section-title">Main Battlefield</div>`;
       MAIN_RAIDS.forEach(raid=>{
-        const leaderName=stringValue(state.raidLeaders&&state.raidLeaders[raid.id]).trim()||'Not assigned';
+        const commanderName=stringValue(state.raidCommanders&&state.raidCommanders[raid.id]).trim()||'Not assigned';
         const raidMode=state.raidModes&&state.raidModes[raid.id]==='DEF'?'DEF':'ATK';
         const modeIcon=raidMode==='DEF'?'🛡':'⚔';
-        html+=`<div class="print-raid-block"><div class="print-raid-head"><span>${escapeHtml(raid.label.toUpperCase())} · TEAM ${escapeHtml(leaderName)} <span class="print-raid-mode ${raidMode.toLowerCase()}">${modeIcon} ${raidMode}</span></span></div><div class="print-team-grid print-main-raid-grid">${raid.keys.map(appendTeamCard).join('')}</div></div>`;
+        html+=`<div class="print-raid-block"><div class="print-raid-head"><span>${escapeHtml(raid.label.toUpperCase())} · TEAM ${escapeHtml(commanderName)} <span class="print-raid-mode ${raidMode.toLowerCase()}">${modeIcon} ${raidMode}</span></span></div><div class="print-team-grid print-main-raid-grid">${raid.keys.map(appendTeamCard).join('')}</div></div>`;
       });
       html+=`<div class="print-section-title">Sub Battlefield</div>`;
       SUB_RAIDS.forEach(raid=>{
-        const leaderName=stringValue(state.raidLeaders&&state.raidLeaders[raid.id]).trim()||'Not assigned';
+        const commanderName=stringValue(state.raidCommanders&&state.raidCommanders[raid.id]).trim()||'Not assigned';
         const printGridClass=raid.keys.length===5?'print-main-raid-grid five':'print-main-raid-grid';
-        html+=`<div class="print-raid-block"><div class="print-raid-head"><span>${escapeHtml(raid.label.toUpperCase())} · TEAM ${escapeHtml(leaderName)}</span></div><div class="print-team-grid ${printGridClass}">${raid.keys.map(appendTeamCard).join('')}</div></div>`;
+        html+=`<div class="print-raid-block"><div class="print-raid-head"><span>${escapeHtml(raid.label.toUpperCase())} · TEAM ${escapeHtml(commanderName)}</span></div><div class="print-team-grid ${printGridClass}">${raid.keys.map(appendTeamCard).join('')}</div></div>`;
       });
     }
     return html+'<div class="print-footer-note">Generated from Titania Guild Management Tool · Dark Lord Server.</div>';
