@@ -33,7 +33,7 @@
       .member-import-value{font-weight:600}
       .member-title-metric{font-weight:700;color:var(--text)}
       .member-title-display{display:flex;align-items:center;gap:10px;min-width:0}
-      .member-title-display img{width:38px;height:38px;object-fit:contain;flex:none}
+      .member-title-display img{width:64px;height:64px;object-fit:contain;flex:none}
       .member-title-display span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
       .metric #trackingSince.member-import-value{font-size:23px!important;font-family:inherit!important}
       .name-history-table{width:100%;border-collapse:collapse}
