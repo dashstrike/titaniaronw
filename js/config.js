@@ -89,7 +89,7 @@ const TITANIA_IS_MEMBER_PAGE = /\/member\.html$/i.test(window.location.pathname)
   const loadScript = () => {
     if (document.querySelector('script[data-titania-pre-attendance]')) return;
     const script = document.createElement('script');
-    script.src = './js/attendance-pre.js?v=20260905-1';
+    script.src = './js/attendance-pre.js?v=20261005-party-leader-order-1';
     script.setAttribute('data-titania-pre-attendance', '1');
     document.body.appendChild(script);
   };
