@@ -91,7 +91,7 @@ function normalize(raw){
   return {
     roster,
     assignments,
-    raidLeaders:raw.raidLeaders||{},
+    raidCommanders:raw.raidCommanders||{},
     raidModes:raw.raidModes||{},
     finishedDungeons:Array.isArray(raw.finishedDungeons)?raw.finishedDungeons.map(Number):[],
     revision:num(raw.revision),
@@ -125,11 +125,11 @@ function renderPolarity(){
   let html=section('★ Star Dungeon','star');
   html+=STAR_RAIDS.map(r=>raidBlock(r,'star',true)).join('');
   DUNGEONS.forEach(d=>{
-    const leader=str(state.raidLeaders[d.id])||'Not assigned';
+    const commander=str(state.raidCommanders[d.id])||'Not assigned';
     const finished=state.finishedDungeons.includes(d.dungeon);
     html+=`<div class="raid-block dungeon-block">
       <div class="raid-head">
-        <div class="raid-name">NORMAL DUNGEON ${d.dungeon} · TEAM <b>${esc(leader)}</b></div>
+        <div class="raid-name">NORMAL DUNGEON ${d.dungeon} · TEAM <b>${esc(commander)}</b></div>
         ${finished?'<span class="finished">✓ Run Finished</span>':''}
         <div class="raid-line"></div>
       </div>
@@ -140,9 +140,9 @@ function renderPolarity(){
 }
 
 function raidBlock(raid,kind,five){
-  const leader=str(state.raidLeaders[raid.id])||'Not assigned';
+  const commander=str(state.raidCommanders[raid.id])||'Not assigned';
   const mode=MAIN_RAIDS.some(r=>r.id===raid.id)?(str(state.raidModes[raid.id]).toUpperCase()==='DEF'?'DEF':'ATK'):'';
-  const raidTitle=kind==='star'?`RAID TEAM — <b>${esc(leader)}</b>`:`${esc(raid.label.toUpperCase())} · TEAM <b>${esc(leader)}</b>`;
+  const raidTitle=kind==='star'?`RAID TEAM — <b>${esc(commander)}</b>`:`${esc(raid.label.toUpperCase())} · TEAM <b>${esc(commander)}</b>`;
   return `<div class="raid-block">
     <div class="raid-head">
       <div class="raid-name">${raidTitle}</div>
