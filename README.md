@@ -110,7 +110,7 @@ Reload the website and sign in. You will now see the `Users` button in the top b
 ## Roles
 
 - `viewer` - can open and print/export the planner but is read-only
-- `leader` - can edit roster, assignments, raid leaders, modes, and attendance
+- `leader` - can edit roster, assignments, raid commanders, modes, and attendance
 - `admin` - same as Leader plus user approval/role management
 
 ## Database approach
@@ -124,7 +124,7 @@ Gear Rating history is stored separately in `public.gear_rating_history` and is 
 Core database functions include:
 
 - `save_planner_state` - full autosave with revision checking
-- `save_raid_leader_setting` - direct Raid Leader save
+- `save_raid_commander_setting` - direct Raid Commander save
 - `save_raid_mode_setting` - direct ATK/DEF save
 - `get_public_lineup(p_view text)` - safe published lineup access for Guild League, Siege, and Polarity Zone
 
