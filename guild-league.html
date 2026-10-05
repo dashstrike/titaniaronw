@@ -63,8 +63,8 @@ button{font:inherit}
 .team-head{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:8px}
 .team-name{font-size:17px;font-weight:700;flex:none}.team-count{display:inline-flex;align-items:center;justify-content:center;max-width:70%;margin-left:5px;padding:4px 10px;border:1px solid color-mix(in srgb,var(--teal) 62%,var(--line));border-radius:999px;background:color-mix(in srgb,var(--teal) 13%,var(--panel2));font-family:'Lexend','IBM Plex Sans',Arial,sans-serif;font-size:17px;font-weight:800;line-height:1.15;letter-spacing:.15px;color:var(--teal);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .slot{display:flex;align-items:center;gap:8px;padding:7px;border-bottom:1px solid var(--lineSoft);min-height:44px}
-.slot:last-of-type{border-bottom:none}.slot.leader-slot{background:var(--leaderSlot);border-radius:6px;border-bottom-color:transparent}
-.crown{color:var(--amber);font-size:13px;width:14px;flex:none}.dot{width:9px;height:9px;border-radius:50%;flex:none;box-shadow:0 0 4px currentColor}
+.slot:last-of-type{border-bottom:none}.slot.leader-slot{background:var(--leaderSlot);border:1px solid var(--amber);border-radius:6px}
+.dot{width:9px;height:9px;border-radius:50%;flex:none;box-shadow:0 0 4px currentColor}
 .member{min-width:0;flex:1;display:flex;align-items:center;gap:7px}.member-name{font-size:15.5px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
 .job-class{font-size:14.5px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:45%;text-align:right}
 .public-pre-attendance{display:inline-flex;align-items:center;justify-content:center;min-height:24px;padding:4px 8px;border:1.5px solid #566079;border-radius:999px;background:#20263a;color:#c7cde0;font:800 10.5px/1 'IBM Plex Mono',monospace;letter-spacing:.35px;white-space:nowrap;flex:none}
@@ -287,12 +287,12 @@ function preBadge(name){
 
 function slotHtml(name,index){
   if(!name){
-    return `<div class="slot ${index===0?'leader-slot':''}"><span class="crown">${index===0?'♛':''}</span><span class="empty">${index===0?'Empty team leader':'Empty slot'}</span></div>`;
+    return `<div class="slot ${index===0?'leader-slot':''}"><span class="empty">${index===0?'Empty team leader':'Empty slot'}</span></div>`;
   }
   const m=members.get(name)||{name,cls:'Unknown'};
   const c=CLASS_COLORS[m.cls]||CLASS_COLORS.Unknown;
   return `<div class="slot ${index===0?'leader-slot':''}">
-    <span class="${index===0?'crown':'dot'}" style="${index===0?'':'background:'+c+';color:'+c}">${index===0?'♛':''}</span>
+    ${index===0?'':`<span class="dot" style="background:${c};color:${c}"></span>`}
     <div class="member"><div class="member-name">${esc(name)}</div>${preBadge(name)}</div>
     <span class="job-class" style="color:${c}">${esc(m.cls)}</span>
   </div>`;
