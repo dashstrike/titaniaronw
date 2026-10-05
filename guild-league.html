@@ -190,7 +190,7 @@ function normalize(raw){
     published:raw.published===true,
     roster,
     assignments,
-    raidLeaders:raw.raidLeaders||{},
+    raidCommanders:raw.raidCommanders||{},
     raidModes:raw.raidModes||{},
     finishedDungeons:Array.isArray(raw.finishedDungeons)?raw.finishedDungeons.map(Number):[],
     preAttendance:raw.preAttendance&&typeof raw.preAttendance==='object'?raw.preAttendance:{},
@@ -238,11 +238,11 @@ function renderPolarity(){
   let html=section('★ Star Dungeon','star');
   html+=STAR_RAIDS.map(r=>raidBlock(r,'star',true)).join('');
   DUNGEONS.forEach(d=>{
-    const leader=str(state.raidLeaders[d.id])||'Not assigned';
+    const commander=str(state.raidCommanders[d.id])||'Not assigned';
     const finished=state.finishedDungeons.includes(d.dungeon);
     html+=`<div class="raid-block dungeon-block">
       <div class="raid-head">
-        <div class="raid-name">NORMAL DUNGEON ${d.dungeon} · TEAM <b>${esc(leader)}</b></div>
+        <div class="raid-name">NORMAL DUNGEON ${d.dungeon} · TEAM <b>${esc(commander)}</b></div>
         ${finished?'<span class="finished">✓ Run Finished</span>':''}
         <div class="raid-line"></div>
       </div>
@@ -253,9 +253,9 @@ function renderPolarity(){
 }
 
 function raidBlock(raid,kind,five){
-  const leader=str(state.raidLeaders[raid.id])||'Not assigned';
+  const commander=str(state.raidCommanders[raid.id])||'Not assigned';
   const mode=MAIN_RAIDS.some(r=>r.id===raid.id)?(str(state.raidModes[raid.id]).toUpperCase()==='DEF'?'DEF':'ATK'):'';
-  const raidTitle=kind==='star'?`RAID TEAM — <b>${esc(leader)}</b>`:`${esc(raid.label.toUpperCase())} · TEAM <b>${esc(leader)}</b>`;
+  const raidTitle=kind==='star'?`RAID TEAM — <b>${esc(commander)}</b>`:`${esc(raid.label.toUpperCase())} · TEAM <b>${esc(commander)}</b>`;
   return `<div class="raid-block">
     <div class="raid-head">
       <div class="raid-name">${raidTitle}</div>
@@ -270,9 +270,9 @@ function teamCard(key,kind,label){
   const s=slots(key);
   const noHealer=teamNoHealer(key);
   const raid=[...MAIN_RAIDS,...SUB_RAIDS,...STAR_RAIDS,...DUNGEONS].find(item=>item.keys.includes(key));
-  const raidLeaderName=raid?(str(state.raidLeaders[raid.id])||'Not assigned'):'Not assigned';
+  const raidCommanderName=raid?(str(state.raidCommanders[raid.id])||'Not assigned'):'Not assigned';
   return `<article class="team-card ${kind}">
-    <div class="team-head"><div class="team-name">${esc(label||teamLabel(key))}</div><div class="team-count" title="Team ${esc(raidLeaderName)}">TEAM ${esc(raidLeaderName)}</div></div>
+    <div class="team-head"><div class="team-name">${esc(label||teamLabel(key))}</div><div class="team-count" title="Team ${esc(raidCommanderName)}">TEAM ${esc(raidCommanderName)}</div></div>
     ${s.map((name,i)=>slotHtml(name,i)).join('')}
     ${noHealer?'<div class="no-healer">⚠ No healer</div>':''}
   </article>`;
