@@ -52,8 +52,8 @@ button{font:inherit}
 .team-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:6px}
 .team-name{font-size:15px;font-weight:700}.team-count{font:600 11.5px 'IBM Plex Mono',monospace;color:var(--muted)}
 .slot{display:flex;align-items:center;gap:8px;padding:7px;border-bottom:1px solid var(--lineSoft);min-height:40px}
-.slot:last-of-type{border-bottom:none}.slot.leader-slot{background:var(--leaderSlot);border-radius:6px;border-bottom-color:transparent}
-.crown{color:var(--amber);font-size:12px;width:13px;flex:none}.dot{width:9px;height:9px;border-radius:50%;flex:none;box-shadow:0 0 4px currentColor}
+.slot:last-of-type{border-bottom:none}.slot.leader-slot{background:var(--leaderSlot);border:1px solid var(--amber);border-radius:6px}
+.dot{width:9px;height:9px;border-radius:50%;flex:none;box-shadow:0 0 4px currentColor}
 .member{min-width:0;flex:1}.member-name{font-size:13.5px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .job-class{font-size:12.5px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:45%;text-align:right}
 .empty{font-size:11px;color:var(--muted2);font-style:italic}.no-healer{font-size:10.5px;color:var(--red);font-weight:700;margin:5px 0 0}
