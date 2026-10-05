@@ -524,10 +524,18 @@
       .main-raid-head{flex-wrap:wrap}.main-raid-line{min-width:40px}.raid-leader-control{margin-left:auto}
     }
     @media(max-width:900px){
-      .sidebar{position:relative;top:0;height:auto;width:100%;min-width:0;border-right:none;border-bottom:1px solid var(--line-soft);max-height:360px;}
-      .body-wrap{flex-direction:column}.member-list{min-height:130px;padding-bottom:20px}.class-breakdown{display:none}.main{padding:18px 16px 60px;width:100%}.topbar{position:relative}.brand,.actions{margin:0}.event-tabs{order:2}.stats{order:4}.actions{order:3}
+      .sidebar{position:relative;top:0;height:auto;width:100%;min-width:0;border-right:none;border-bottom:1px solid var(--line-soft);max-height:none;overflow:visible;}
+      .body-wrap{flex-direction:column}
+      .member-list{flex:none;height:300px;min-height:300px;max-height:300px;overflow-y:auto;padding:10px 12px 20px;}
+      .member-card{min-height:72px;}
+      .class-breakdown{display:none}
+      .main{padding:18px 16px 60px;width:100%}
+      .topbar{position:relative}.brand,.actions{margin:0}.event-tabs{order:2}.stats{order:4}.actions{order:3}
     }
     @media(max-width:680px){
+      .member-list{height:260px;min-height:260px;max-height:260px;}
+      .member-card{gap:8px;padding:8px 9px;}
+
       .topbar{padding:12px}.brand{min-width:0;width:100%;justify-content:center}.brand-logo{width:54px;height:47px}.brand-text h1{font-size:15px;letter-spacing:1.2px}.brand-text p{text-align:center}.event-tabs{width:100%;justify-content:center}.event-tab{flex:1;justify-content:center;padding:8px 7px;font-size:11.5px}.actions{justify-content:center;width:100%}.save-flag{width:100%;justify-content:center}.team-grid{grid-template-columns:1fr}.section-head{flex-wrap:wrap}.section-line{min-width:30px}.form-grid{grid-template-columns:1fr}.dash-manage-name{width:90px}.dash-status-info{width:125px}.dash-row-class{max-width:120px}.dash-row-gr{width:80px}.dash-last-updated{width:100%;margin-left:28px}.dash-manage-actions{width:100%;margin-left:28px;justify-content:flex-end}.event-last-updated{width:100%;margin-left:0;justify-content:flex-end}.dash-bar-name{width:80px}.dash-bar-avg{display:none}.history-row{grid-template-columns:1fr 110px}.history-date,.history-reason{grid-column:2}.print-content{padding:20px 16px}.print-doc-head{align-items:flex-start;flex-direction:column}.print-doc-meta{text-align:left}
     }
     @page{size:A4 landscape;margin:8mm;}
