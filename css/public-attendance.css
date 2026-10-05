@@ -6,7 +6,7 @@
   width:30px;
   min-width:30px;
   min-height:24px;
-  margin-left:7px;
+  margin-left:0;
   padding:0;
   border:1.5px solid #566079;
   border-radius:999px;
@@ -27,7 +27,7 @@
 .public-pre-attendance.pre-not-going{background:#35161d;border-color:#a94252;color:#ff9caa;}
 .public-pre-attendance.pre-no-response{background:#20263a;border-color:#566079;color:#c7cde0;}
 @media(max-width:720px){
-  .public-pre-attendance{width:28px;min-width:28px;min-height:23px;margin-left:5px;font-size:0;}
+  .public-pre-attendance{width:28px;min-width:28px;min-height:23px;margin-left:0;font-size:0;}
 }
 @media(max-width:720px){.public-pre-attendance::after{font-size:13px;}}
 @media print{
