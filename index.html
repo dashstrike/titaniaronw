@@ -174,6 +174,8 @@
     .member-card.assigned:hover{transform:none;border-color:var(--line-soft);}
     .member-card.dragging{opacity:.3;}
     .class-dot{width:9px;height:9px;border-radius:50%;flex:none;box-shadow:0 0 6px currentColor;}
+    .title-icon{display:inline-block;width:28px;height:28px;min-width:28px;flex:none;background-repeat:no-repeat;background-position:center;background-size:contain;vertical-align:middle;}
+    .slot .title-icon{width:26px;height:26px;min-width:26px;}
     .m-info{flex:1;min-width:0;}
     .m-name{font-size:14.5px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
     .m-sub{font-size:11.5px;color:var(--muted);display:flex;gap:6px;margin-top:1px;flex-wrap:wrap;}
@@ -1168,6 +1170,10 @@
   let currentAuthUser = null;
   let currentProfile = null;
   let passwordRecoveryMode = false;
+  const TITLE_ICON_BASE='./assets/images/title/';
+  const TITLE_ICON_SERIES=Object.freeze({traveler:'traveler_green',explorer:'explorer_blue',pathfinder:'pathfinder_purple',trailblazer:'trailblazer_orange',pioneer:'pioneer_red',dawnbringer:'dawnbringer_rainbow'});
+  const TITLE_ICON_LEVELS=Object.freeze({i:1,ii:2,iii:3,iv:4,v:5,'1':1,'2':2,'3':3,'4':4,'5':5});
+  let memberTitleById=Object.create(null);
 
   function configReady(){
     const cfg=window.TITANIA_CONFIG||{};
@@ -1362,6 +1368,41 @@
     }));
   }
 
+  function titleAssetPath(title){
+    const value=stringValue(title).trim();
+    if(!value)return '';
+    const match=value.match(/^([A-Za-z]+)\s+([IVX]+|[1-5])$/i);
+    if(!match)return '';
+    const series=TITLE_ICON_SERIES[match[1].toLowerCase()];
+    const level=TITLE_ICON_LEVELS[match[2].toLowerCase()];
+    if(!series||!level)return '';
+    return `${TITLE_ICON_BASE}${series}_${level}_star${level===1?'':'s'}.png`;
+  }
+
+  async function loadMemberTitles(){
+    memberTitleById=Object.create(null);
+    if(!supabaseClient)return;
+    const {data,error}=await supabaseClient.from('member_csv_data').select('member_id,title');
+    if(error){
+      console.warn('[Titania] Could not load member title icons:',error);
+      return;
+    }
+    (data||[]).forEach(row=>{
+      const id=stringValue(row&&row.member_id).trim();
+      if(id)memberTitleById[id]=stringValue(row&&row.title).trim();
+    });
+  }
+
+  function memberBoardIconHtml(member,slot=false){
+    const color=classColor(member&&member.cls);
+    if(currentEvent==='guild_league'||currentEvent==='siege'){
+      const title=memberTitleById[stringValue(member&&member.id)];
+      const src=titleAssetPath(title);
+      if(src)return `<span class="title-icon" style="background-image:url('${src}')" title="${escapeAttr(title)}" aria-label="${escapeAttr(title)} title icon"></span>`;
+    }
+    return `<span class="class-dot" style="background:${color};color:${color}"></span>`;
+  }
+
   async function initPlanner(){
     wireStaticControls();
     populateClassOptions(document.getElementById('memberClassInput'),'Hunter');
@@ -1372,6 +1413,7 @@
       state.updatedAt = stringValue(loaded && loaded.updatedAt);
       state.updatedBy = stringValue(loaded && loaded.updatedBy);
       state.spreadsheetName = stringValue(loaded && loaded.spreadsheetName);
+      await loadMemberTitles();
       rebuildIndex();
       syncedStateSnapshot = plannerSnapshot(state);
       setSaveFlag('ok','Loaded');
@@ -1964,7 +2006,7 @@
     const color=classColor(member.cls);
     const tags=status.labels.map(label=>`<span class="status-tag ${statusTagClass(label)}">${escapeHtml(label)}</span>`).join('');
     return `<div class="member-card ${status.assigned?'assigned':''} ${selected?'selected':''}" draggable="${status.assigned?'false':'true'}" data-name="${escapeAttr(member.name)}">
-      <span class="class-dot" style="background:${color};color:${color}"></span>
+      ${memberBoardIconHtml(member)}
       <div class="m-info"><div class="m-name">${escapeHtml(member.name)}</div><div class="m-sub"><span>${escapeHtml(member.cls)}</span>${tags}${status.assignmentText?`<span class="assigned-flag">${escapeHtml(status.assignmentText)}</span>`:''}</div></div>
       <span class="m-gr">${formatNumber(member.gr)}</span>
       <div class="card-tools"><button class="icon-btn" data-edit-member="${escapeAttr(member.name)}" title="Edit member">✎</button><button class="icon-btn" data-inactivate-member="${escapeAttr(member.name)}" title="Mark inactive">⏸</button></div>
@@ -2083,7 +2125,7 @@
       return `<div class="slot ${leader?'leader':''} ${selected?'slot-selected':''}" data-team="${key}" data-slot="${index}" role="button" tabindex="0" aria-label="${leader?'Empty team leader slot':'Empty member slot'}">${leader?crownIcon():''}<span class="slot-empty-label">${leader?'Team Leader — drop here':'Empty slot'}</span></div>`;
     }
     const member=memberByName[name]||{name,cls:'Unknown',gr:0};const color=classColor(member.cls);
-    return `<div class="slot filled ${leader?'leader':''} ${selected?'slot-selected':''}" draggable="true" data-team="${key}" data-slot="${index}" role="button" tabindex="0" aria-label="${escapeAttr(name)} in ${escapeAttr(teamLongLabel(key))}">${leader?crownIcon():`<span class="class-dot" style="background:${color};color:${color}"></span>`}<div class="slot-info"><span class="slot-name">${escapeHtml(name)}</span><span class="slot-class" style="color:${color}">${escapeHtml(member.cls)}</span></div><span class="slot-gr">${formatNumber(member.gr)}</span><button class="slot-remove" data-remove-team="${key}" data-remove-slot="${index}" title="Remove from slot" aria-label="Remove ${escapeAttr(name)}">✕</button></div>`;
+    return `<div class="slot filled ${leader?'leader':''} ${selected?'slot-selected':''}" draggable="true" data-team="${key}" data-slot="${index}" role="button" tabindex="0" aria-label="${escapeAttr(name)} in ${escapeAttr(teamLongLabel(key))}">${leader?crownIcon():memberBoardIconHtml(member,true)}<div class="slot-info"><span class="slot-name">${escapeHtml(name)}</span><span class="slot-class" style="color:${color}">${escapeHtml(member.cls)}</span></div><span class="slot-gr">${formatNumber(member.gr)}</span><button class="slot-remove" data-remove-team="${key}" data-remove-slot="${index}" title="Remove from slot" aria-label="Remove ${escapeAttr(name)}">✕</button></div>`;
   }
 
   function crownIcon(){return `<svg class="leader-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M5 16L3 6l5.5 4L12 4l3.5 6L21 6l-2 10H5zm0 2h14v2H5v-2z"/></svg>`;}
