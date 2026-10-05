@@ -248,6 +248,15 @@
     .raid-commander-drop.empty .raid-commander-drop-name{color:var(--muted-2);font-weight:500;}
     .raid-commander-drop.dragover{border-color:#f0b429;background:#1b1a11;box-shadow:0 0 0 2px #f0b42922;}
     .raid-commander-drop.invalid{border-color:#ff6b7a;box-shadow:0 0 0 2px #ff6b7a22;}
+    .raid-leader-control{display:flex;align-items:center;gap:7px;color:var(--muted);font-size:12px;white-space:nowrap;}
+    .raid-leader-control b{font-weight:600;color:#f0b429;}
+    .raid-leader-drop{min-width:180px;max-width:260px;display:flex;align-items:center;gap:7px;background:#0f1424;color:var(--muted);border:1px solid #3a466d;border-radius:7px;padding:7px 10px;font:600 12px 'IBM Plex Sans',sans-serif;outline:none;cursor:default;transition:.15s;}
+    .raid-leader-drop svg{width:18px;height:18px;color:#f0b429;flex:none;}
+    .raid-leader-drop-name{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--text);}
+    .raid-leader-drop.empty .raid-leader-drop-name{color:var(--muted-2);font-weight:500;}
+    .raid-leader-drop.dragover{border-color:#f0b429;background:#1b1a11;box-shadow:0 0 0 2px #f0b42922;}
+    .raid-leader-drop.invalid{border-color:#ff6b7a;box-shadow:0 0 0 2px #ff6b7a22;}
+    .slot.raid-leader-selected{border-color:#f0b429!important;box-shadow:0 0 0 1px #f0b42966,0 0 12px #f0b42922;}
     .main-raid-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;}
     .main-raid-grid.five{grid-template-columns:repeat(5,minmax(0,1fr));}
     .pz-star-raid-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:14px;}
@@ -525,7 +534,7 @@
     }
     @media(max-width:1100px){
       .main-raid-grid,.pz-star-raid-grid,.pz-normal-raid-grid{grid-template-columns:repeat(2,minmax(0,1fr));}
-      .main-raid-head{flex-wrap:wrap}.main-raid-line{min-width:40px}.raid-commander-control{margin-left:auto}
+      .main-raid-head{flex-wrap:wrap}.main-raid-line{min-width:40px}.raid-commander-control{margin-left:auto}.raid-leader-control{margin-left:0}
     }
     @media(max-width:900px){
       .sidebar{position:relative;top:0;height:auto;width:100%;min-width:0;border-right:none;border-bottom:1px solid var(--line-soft);max-height:none;overflow:visible;}
@@ -543,7 +552,7 @@
       .topbar{padding:12px}.brand{min-width:0;width:100%;justify-content:center}.brand-logo{width:54px;height:47px}.brand-text h1{font-size:15px;letter-spacing:1.2px}.brand-text p{text-align:center}.event-tabs{width:100%;justify-content:center}.event-tab{flex:1;justify-content:center;padding:8px 7px;font-size:11.5px}.actions{justify-content:center;width:100%}.save-flag{width:100%;justify-content:center}.team-grid{grid-template-columns:1fr}.section-head{flex-wrap:wrap}.section-line{min-width:30px}.form-grid{grid-template-columns:1fr}.dash-manage-name{width:90px}.dash-status-info{width:125px}.dash-row-class{max-width:120px}.dash-row-gr{width:80px}.dash-last-updated{width:100%;margin-left:28px}.dash-manage-actions{width:100%;margin-left:28px;justify-content:flex-end}.event-last-updated{width:100%;margin-left:0;justify-content:flex-end}.dash-bar-name{width:80px}.dash-bar-avg{display:none}.history-row{grid-template-columns:1fr 110px}.history-date,.history-reason{grid-column:2}.print-content{padding:20px 16px}.print-doc-head{align-items:flex-start;flex-direction:column}.print-doc-meta{text-align:left}
     }
     @page{size:A4 landscape;margin:8mm;}
-    @media(max-width:640px){.main-raid-grid,.pz-star-raid-grid,.pz-normal-raid-grid,.pz-dungeon-team-grid{grid-template-columns:1fr}.main-raid-line{display:none}.raid-commander-control{width:100%;margin-left:0;flex-wrap:wrap}.raid-commander-drop{width:100%;max-width:none}.pz-dungeon-group-head{flex-wrap:wrap}.pz-dungeon-group-head .raid-commander-control{margin-left:0}.pz-dungeon-group-actions{width:100%}}
+    @media(max-width:640px){.main-raid-grid,.pz-star-raid-grid,.pz-normal-raid-grid,.pz-dungeon-team-grid{grid-template-columns:1fr}.main-raid-line{display:none}.raid-commander-control,.raid-leader-control{width:100%;margin-left:0;flex-wrap:wrap}.raid-commander-drop,.raid-leader-drop{width:100%;max-width:none}.pz-dungeon-group-head{flex-wrap:wrap}.pz-dungeon-group-head .raid-commander-control{margin-left:0}.pz-dungeon-group-actions{width:100%}}
     @media print{
       html,body{
         width:100%!important;
@@ -1128,6 +1137,7 @@
     assignments:createEmptyAssignments(),
     finishedDungeons:[],
     raidCommanders:createDefaultRaidCommanders(),
+    raidLeaders:createDefaultRaidLeaders(),
     raidModes:createDefaultRaidModes(),
     siegeRaidGroups:createDefaultSiegeRaidGroups(),
     membershipHistory:[],
@@ -1540,6 +1550,12 @@
       if(error)throw error;
       return data||{};
     }
+    if(method==='saveRaidLeaderSetting'){
+      if(!userCanEdit())throw new Error('READ_ONLY: Your account cannot edit Raid Leaders.');
+      const {data,error}=await supabaseClient.rpc('save_raid_leader_setting',{p_raid_id:stringValue(args[0]),p_member_name:stringValue(args[1])});
+      if(error)throw error;
+      return data||{};
+    }
     if(method==='saveRaidModeSetting'){
       if(!userCanEdit())throw new Error('READ_ONLY: Your account cannot edit raid modes.');
       const {data,error}=await supabaseClient.rpc('save_raid_mode_setting',{p_raid_id:stringValue(args[0]),p_mode:stringValue(args[1])});
@@ -1568,7 +1584,13 @@
     assignments.elite_1=['Kairo','Astra','YRDRY','Lumi','Nyx'];
     assignments.dungeon1_1=['Kairo','Astra','YRDRY','Lumi','Nyx'];
     const membershipHistory=[{id:'history_preview_1',memberId:'member_preview_former',memberName:'FormerMember',action:'inactive',effectiveDate:'2026-07-20',reason:'Left Guild',changedAt:'2026-07-20T10:00:00.000Z'}];
-    return {version:'preview',spreadsheetName:'Preview Sheet',roster,assignments,finishedDungeons:[],raidCommanders:createDefaultRaidCommanders(),raidModes:createDefaultRaidModes(),siegeRaidGroups:createDefaultSiegeRaidGroups(),membershipHistory,eventUpdates:{guildLeague:{updatedAt:'',updatedBy:''},siege:{updatedAt:'',updatedBy:''},polarityZone:{updatedAt:'',updatedBy:''}},revision:1,updatedAt:new Date().toISOString()};
+    return {version:'preview',spreadsheetName:'Preview Sheet',roster,assignments,finishedDungeons:[],raidCommanders:createDefaultRaidCommanders(),raidLeaders:createDefaultRaidLeaders(),raidModes:createDefaultRaidModes(),siegeRaidGroups:createDefaultSiegeRaidGroups(),membershipHistory,eventUpdates:{guildLeague:{updatedAt:'',updatedBy:''},siege:{updatedAt:'',updatedBy:''},polarityZone:{updatedAt:'',updatedBy:''}},revision:1,updatedAt:new Date().toISOString()};
+  }
+
+  function createDefaultRaidLeaders(){
+    const out={};
+    ALL_GUILD_STYLE_RAIDS.forEach(raid=>{out[raid.id]='';});
+    return out;
   }
 
   function createDefaultRaidCommanders(){
@@ -1617,10 +1639,27 @@
     return out;
   }
 
+  function normalizeRaidLeaders(raw,assignments,siegeRaidGroups){
+    const source=raw&&typeof raw==='object'?raw:{};
+    const out=createDefaultRaidLeaders();
+    ALL_GUILD_STYLE_RAIDS.forEach(raid=>{
+      const candidate=stringValue(source[raid.id]).trim();
+      if(candidate&&raidMemberNames(raid,assignments,siegeRaidGroups).has(candidate))out[raid.id]=candidate;
+    });
+    return out;
+  }
+
   function validateRaidCommanders(){
     ALL_RAIDS.forEach(raid=>{
       const selected=stringValue(state.raidCommanders&&state.raidCommanders[raid.id]).trim();
       if(selected&&!raidMemberNames(raid).has(selected))state.raidCommanders[raid.id]='';
+    });
+  }
+
+  function validateRaidLeaders(){
+    ALL_GUILD_STYLE_RAIDS.forEach(raid=>{
+      const selected=stringValue(state.raidLeaders&&state.raidLeaders[raid.id]).trim();
+      if(selected&&!raidMemberNames(raid).has(selected))state.raidLeaders[raid.id]='';
     });
   }
 
@@ -1683,6 +1722,7 @@
     const finishedDungeons=[...new Set(rawFinished.map(v=>toInt(v,0,999)).filter(v=>v>=1&&v<=CONFIG.dungeonCount))].sort((a,b)=>a-b);
     const siegeRaidGroups=normalizeSiegeRaidGroups(input.siegeRaidGroups||(input.srg&&typeof input.srg==='object'?input.srg:{}));
     const raidCommanders=normalizeRaidCommanders(input.raidCommanders||(input.rc&&typeof input.rc==='object'?input.rc:(input.rl&&typeof input.rl==='object'?input.rl:{})),assignments,siegeRaidGroups);
+    const raidLeaders=normalizeRaidLeaders(input.raidLeaders||(input.rlead&&typeof input.rlead==='object'?input.rlead:{}),assignments,siegeRaidGroups);
     const raidModes=normalizeRaidModes(input.raidModes||(input.rm&&typeof input.rm==='object'?input.rm:{}));
     const rawHistory=Array.isArray(input.membershipHistory)?input.membershipHistory:(Array.isArray(input.mh)?input.mh:[]);
     const usedHistoryIds=new Set();
@@ -1721,7 +1761,7 @@
       siege:normalizeEventUpdate(rawEventUpdates.siege,false),
       polarityZone:normalizeEventUpdate(rawEventUpdates.polarityZone)
     };
-    return {roster,assignments,finishedDungeons,raidCommanders,raidModes,siegeRaidGroups,membershipHistory:membershipHistory.slice(-CONFIG.maxHistory),publicVisibility,eventUpdates,revision:0,updatedAt:'',spreadsheetName:''};
+    return {roster,assignments,finishedDungeons,raidCommanders,raidLeaders,raidModes,siegeRaidGroups,membershipHistory:membershipHistory.slice(-CONFIG.maxHistory),publicVisibility,eventUpdates,revision:0,updatedAt:'',spreadsheetName:''};
   }
 
   function enforceUnique(assignments,keys){
@@ -2108,9 +2148,12 @@
       modeToggle=`<button class="raid-mode-toggle ${raidMode.toLowerCase()}" data-raid-mode-toggle="${raid.id}" type="button" title="${modeTitle}">${modeIcon} ${modeLabel}</button>`;
     }
     const title=isPolarityRaid?`RAID TEAM — ${displayCommander}`:`${raid.label.toUpperCase()} · TEAM ${displayCommander}`;
+    const selectedLeader=!isPolarityRaid?stringValue(state.raidLeaders&&state.raidLeaders[raid.id]).trim():'';
+    const leaderDropText=selectedLeader||'Drag member here';
+    const raidLeaderControl=isPolarityRaid?'':`<label class="raid-leader-control"><b>Raid Leader</b><span class="raid-leader-drop ${selectedLeader?'':'empty'}" data-raid-leader-drop="${raid.id}" role="button" tabindex="0" title="Drag the member who created this raid party here">${crownIcon()}<span class="raid-leader-drop-name">${escapeHtml(leaderDropText)}</span></span></label>`;
     let gridClass=raid.kind==='star'?'pz-star-raid-grid':raid.kind==='normal'?'pz-normal-raid-grid':'main-raid-grid';
     if(!isPolarityRaid&&raid.keys.length===5)gridClass+=' five';
-    return `<div class="main-raid-block" data-raid="${raid.id}"><div class="main-raid-head"><div class="main-raid-title">${escapeHtml(title)}</div>${modeToggle}<div class="main-raid-line"></div><label class="raid-commander-control"><b>Raid Commander</b><span class="raid-commander-drop ${selectedCommander?'':'empty'}" data-raid-commander-drop="${raid.id}" role="button" tabindex="0" title="Drag any member from this raid here to make them Raid Commander">${raidCommanderIcon()}<span class="raid-commander-drop-name">${escapeHtml(dropText)}</span></span></label></div><div class="${gridClass}">${raid.keys.map(teamCardHtml).join('')}</div></div>`;
+    return `<div class="main-raid-block" data-raid="${raid.id}"><div class="main-raid-head"><div class="main-raid-title">${escapeHtml(title)}</div>${modeToggle}<div class="main-raid-line"></div><label class="raid-commander-control"><b>Raid Commander</b><span class="raid-commander-drop ${selectedCommander?'':'empty'}" data-raid-commander-drop="${raid.id}" role="button" tabindex="0" title="Drag any member from this raid here to make them Raid Commander">${raidCommanderIcon()}<span class="raid-commander-drop-name">${escapeHtml(dropText)}</span></span></label>${raidLeaderControl}</div><div class="${gridClass}">${raid.keys.map(teamCardHtml).join('')}</div></div>`;
   }
 
   function raidForTeam(key){if(key.startsWith('siege_'))return currentSiegeRaids().find(raid=>raid.keys.includes(key))||null;return ALL_RAIDS.find(raid=>!raid.siege&&raid.keys.includes(key))||null;}
@@ -2137,7 +2180,9 @@
       return `<div class="slot ${leader?'leader':''} ${selected?'slot-selected':''}" data-team="${key}" data-slot="${index}" role="button" tabindex="0" aria-label="${leader?'Empty team leader slot':'Empty member slot'}">${leader?crownIcon():''}<span class="slot-empty-label">${leader?'Team Leader — drop here':'Empty slot'}</span></div>`;
     }
     const member=memberByName[name]||{name,cls:'Unknown',gr:0};const color=classColor(member.cls);
-    return `<div class="slot filled ${leader?'leader':''} ${selected?'slot-selected':''}" draggable="true" data-team="${key}" data-slot="${index}" role="button" tabindex="0" aria-label="${escapeAttr(name)} in ${escapeAttr(teamLongLabel(key))}"><div class="slot-member-main">${memberBoardIconHtml(member,true)}<div class="slot-info"><span class="slot-name">${escapeHtml(name)}</span><span class="slot-class" style="color:${color}">${escapeHtml(member.cls)}</span></div>${leader?`<span class="slot-leader-mark" title="Party Leader" aria-label="Party Leader">${crownIcon()}</span>`:''}</div><span class="slot-gr">${formatNumber(member.gr)}</span><button class="slot-remove" data-remove-team="${key}" data-remove-slot="${index}" title="Remove from slot" aria-label="Remove ${escapeAttr(name)}">✕</button></div>`;
+    const raid=raidForTeam(key);
+    const raidLeaderSelected=Boolean(raid&&state.raidLeaders&&state.raidLeaders[raid.id]===name);
+    return `<div class="slot filled ${leader?'leader':''} ${selected?'slot-selected':''} ${raidLeaderSelected?'raid-leader-selected':''}" draggable="true" data-team="${key}" data-slot="${index}" role="button" tabindex="0" aria-label="${escapeAttr(name)} in ${escapeAttr(teamLongLabel(key))}"><div class="slot-member-main">${memberBoardIconHtml(member,true)}<div class="slot-info"><span class="slot-name">${escapeHtml(name)}</span><span class="slot-class" style="color:${color}">${escapeHtml(member.cls)}</span></div>${leader?`<span class="slot-leader-mark" title="Party Leader" aria-label="Party Leader">${crownIcon()}</span>`:''}</div><span class="slot-gr">${formatNumber(member.gr)}</span><button class="slot-remove" data-remove-team="${key}" data-remove-slot="${index}" title="Remove from slot" aria-label="Remove ${escapeAttr(name)}">✕</button></div>`;
   }
 
   function raidCommanderIcon(){return '<i class="fa-solid fa-person-military-rifle raid-commander-icon" aria-hidden="true"></i>';}
@@ -2270,6 +2315,77 @@
         event.preventDefault();event.stopPropagation();
         if(selectedSlot){chooseFromSlot(selectedSlot);return;}
         showToast('Choose Raid Commander',`Drag a member from ${raid.label} here, or select a member slot first.`);
+      });
+      drop.addEventListener('keydown',event=>{
+        if(event.key==='Enter'||event.key===' '){event.preventDefault();drop.click();}
+      });
+    });
+    wrap.querySelectorAll('[data-raid-leader-drop]').forEach(drop=>{
+      const raid=raidById(drop.dataset.raidLeaderDrop);
+      if(!raid||raid.polarity)return;
+      const chooseFromSlot=source=>{
+        if(!source||!raid.keys.includes(source.team)){
+          drop.classList.add('invalid');setTimeout(()=>drop.classList.remove('invalid'),450);
+          showToast('Wrong raid',`Choose a member from ${raid.label} only.`,'warn');
+          return false;
+        }
+        const name=state.assignments[source.team]&&state.assignments[source.team][source.slot];
+        if(!name)return false;
+        const previous=stringValue(state.raidLeaders&&state.raidLeaders[raid.id]);
+        state.raidLeaders[raid.id]=name;
+        clearSelections(false);
+        validateRaidLeaders();rebuildIndex();renderAll();
+        if(raid.siege){
+          commitMutation('Siege Raid Leader updated');
+          showToast('Raid Leader updated',`${raid.label}: ${state.raidLeaders[raid.id]}`);
+          return true;
+        }
+        setSaveFlag('busy','Saving');quickSaveInFlight+=1;
+        callServer('saveRaidLeaderSetting',raid.id,name).then(result=>{
+          state.raidLeaders[raid.id]=stringValue(result&&result.memberName)||name;
+          state.revision=toInt(result&&result.revision,state.revision,Number.MAX_SAFE_INTEGER);
+          state.updatedAt=stringValue(result&&result.updatedAt);
+          state.updatedBy=currentEditorName();
+          touchEventUpdate('guild_league');
+          renderEventLastUpdated();
+          queueSave();
+          showToast('Raid Leader updated',`${raid.label}: ${state.raidLeaders[raid.id]}`);
+        }).catch(error=>{
+          state.raidLeaders[raid.id]=previous;validateRaidLeaders();rebuildIndex();renderAll();setSaveFlag('err','Save failed');showToast('Raid Leader save failed',errorMessage(error),'err');
+        }).finally(()=>{quickSaveInFlight=Math.max(0,quickSaveInFlight-1);});
+        return true;
+      };
+      const sourceFromDragEvent=event=>{
+        if(dragSourceSlot)return dragSourceSlot;
+        if(!event||!event.dataTransfer)return null;
+        try{
+          const raw=event.dataTransfer.getData('application/x-titania-slot');
+          if(raw){
+            const parsed=JSON.parse(raw);
+            if(parsed&&parsed.team&&Number.isInteger(Number(parsed.slot)))return {team:String(parsed.team),slot:Number(parsed.slot)};
+          }
+        }catch(_error){}
+        return null;
+      };
+      drop.addEventListener('dragover',event=>{
+        const source=sourceFromDragEvent(event);
+        if(!source)return;
+        event.preventDefault();event.stopPropagation();
+        const valid=raid.keys.includes(source.team);
+        drop.classList.toggle('dragover',valid);
+        drop.classList.toggle('invalid',!valid);
+        if(event.dataTransfer)event.dataTransfer.dropEffect=valid?'copy':'none';
+      });
+      drop.addEventListener('dragleave',()=>{drop.classList.remove('dragover');drop.classList.remove('invalid');});
+      drop.addEventListener('drop',event=>{
+        if(dragTeamSource&&dragTeamSource.startsWith('siege_'))return;
+        event.preventDefault();event.stopPropagation();drop.classList.remove('dragover');drop.classList.remove('invalid');
+        chooseFromSlot(sourceFromDragEvent(event));
+      });
+      drop.addEventListener('click',event=>{
+        event.preventDefault();event.stopPropagation();
+        if(selectedSlot){chooseFromSlot(selectedSlot);return;}
+        showToast('Choose Raid Leader',`Drag the member who created ${raid.label} here, or select a member slot first.`);
       });
       drop.addEventListener('keydown',event=>{
         if(event.key==='Enter'||event.key===' '){event.preventDefault();drop.click();}
@@ -2510,6 +2626,7 @@
       if(oldName!==member.name){
         ALL_KEYS.forEach(key=>state.assignments[key]=state.assignments[key].map(value=>value===oldName?member.name:value));
         ALL_RAIDS.forEach(raid=>{if(state.raidCommanders[raid.id]===oldName)state.raidCommanders[raid.id]=member.name;});
+        ALL_GUILD_STYLE_RAIDS.forEach(raid=>{if(state.raidLeaders[raid.id]===oldName)state.raidLeaders[raid.id]=member.name;});
         if(dashboardSelected.delete(oldName))dashboardSelected.add(member.name);
         if(selectedMember===oldName)selectedMember=member.name;
       }
@@ -2918,6 +3035,7 @@ Their team assignments and membership history will also be removed. Use Mark Ina
       assignments:value.assignments&&typeof value.assignments==='object'?value.assignments:createEmptyAssignments(),
       finishedDungeons:Array.isArray(value.finishedDungeons)?value.finishedDungeons:[],
       raidCommanders:value.raidCommanders&&typeof value.raidCommanders==='object'?value.raidCommanders:createDefaultRaidCommanders(),
+      raidLeaders:value.raidLeaders&&typeof value.raidLeaders==='object'?value.raidLeaders:createDefaultRaidLeaders(),
       raidModes:value.raidModes&&typeof value.raidModes==='object'?value.raidModes:createDefaultRaidModes(),
       siegeRaidGroups:value.siegeRaidGroups&&typeof value.siegeRaidGroups==='object'?value.siegeRaidGroups:createDefaultSiegeRaidGroups(),
       membershipHistory:Array.isArray(value.membershipHistory)?value.membershipHistory:[],
@@ -3005,6 +3123,10 @@ Their team assignments and membership history will also be removed. Use Mark Ina
       const id=raid.id;
       if(!sameJson(local.raidCommanders[id],base.raidCommanders[id]))merged.raidCommanders[id]=local.raidCommanders[id]||'';
     });
+    ALL_GUILD_STYLE_RAIDS.forEach(raid=>{
+      const id=raid.id;
+      if(!sameJson(local.raidLeaders[id],base.raidLeaders[id]))merged.raidLeaders[id]=local.raidLeaders[id]||'';
+    });
     [...MAIN_RAIDS,...ALL_SIEGE_RAIDS].forEach(raid=>{
       const id=raid.id;
       if(!sameJson(local.raidModes[id],base.raidModes[id]))merged.raidModes[id]=local.raidModes[id];
@@ -3040,6 +3162,10 @@ Their team assignments and membership history will also be removed. Use Mark Ina
       Object.keys(merged.raidCommanders).forEach(id=>{
         const text=stringValue(merged.raidCommanders[id]).trim();
         if(text&&renameMap.has(text.toLowerCase()))merged.raidCommanders[id]=renameMap.get(text.toLowerCase());
+      });
+      Object.keys(merged.raidLeaders).forEach(id=>{
+        const text=stringValue(merged.raidLeaders[id]).trim();
+        if(text&&renameMap.has(text.toLowerCase()))merged.raidLeaders[id]=renameMap.get(text.toLowerCase());
       });
     }
 
@@ -3100,6 +3226,7 @@ Their team assignments and membership history will also be removed. Use Mark Ina
     if(eventScope==='all'||eventScope==='both')touchEventUpdate('all');
     else if(eventScope!=='none'&&(currentEvent==='guild_league'||currentEvent==='siege'||currentEvent==='polarity_zone'))touchEventUpdate(currentEvent);
     validateRaidCommanders();
+    validateRaidLeaders();
     rebuildIndex();
     renderAll();
     queueSave();
@@ -3188,7 +3315,7 @@ Their team assignments and membership history will also be removed. Use Mark Ina
   }
 
   function exportLineup(){
-    const payload={type:'tempest-lineup-export',version:9,exportedAt:new Date().toISOString(),source:'Titania Supabase website',m:state.roster,a:state.assignments,fd:state.finishedDungeons,rc:state.raidCommanders,rm:state.raidModes,mh:state.membershipHistory,eu:state.eventUpdates};
+    const payload={type:'tempest-lineup-export',version:10,exportedAt:new Date().toISOString(),source:'Titania Supabase website',m:state.roster,a:state.assignments,fd:state.finishedDungeons,rc:state.raidCommanders,rlead:state.raidLeaders,rm:state.raidModes,mh:state.membershipHistory,eu:state.eventUpdates};
     const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});const url=URL.createObjectURL(blob);const link=document.createElement('a');link.href=url;link.download=`guild-lineup-${new Date().toISOString().slice(0,10)}.json`;document.body.appendChild(link);link.click();link.remove();URL.revokeObjectURL(url);showToast('Lineup exported','Roster status, membership history, Guild League, Siege, Polarity Zone, and finished-dungeon marks were included.');
   }
 
@@ -3200,7 +3327,7 @@ Their team assignments and membership history will also be removed. Use Mark Ina
       const imported=normalizeClientState(data);
       const when=data.exportedAt?new Date(data.exportedAt).toLocaleString():'an unknown time';
       if(!confirm(`Import the lineup exported on ${when}?\n\nThis will replace the current roster, Guild Status records, membership history, and all event lineups in the Titania database.`))return;
-      state.roster=imported.roster;state.assignments=imported.assignments;state.finishedDungeons=imported.finishedDungeons;state.raidCommanders=imported.raidCommanders;state.raidModes=imported.raidModes;state.siegeRaidGroups=imported.siegeRaidGroups;state.membershipHistory=imported.membershipHistory;dashboardSelected.clear();clearSelections(false);commitMutation('Lineup imported','all');showToast('Lineup imported','The roster, raid commanders, status history, and event data are being saved to Supabase.');
+      state.roster=imported.roster;state.assignments=imported.assignments;state.finishedDungeons=imported.finishedDungeons;state.raidCommanders=imported.raidCommanders;state.raidLeaders=imported.raidLeaders;state.raidModes=imported.raidModes;state.siegeRaidGroups=imported.siegeRaidGroups;state.membershipHistory=imported.membershipHistory;dashboardSelected.clear();clearSelections(false);commitMutation('Lineup imported','all');showToast('Lineup imported','The roster, raid commanders, status history, and event data are being saved to Supabase.');
     };
     reader.onerror=()=>showToast('Import failed','The file could not be read.','err');reader.readAsText(file);
   }
