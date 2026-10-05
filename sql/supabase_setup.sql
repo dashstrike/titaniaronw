@@ -194,9 +194,9 @@ $$;
 
 grant execute on function public.save_planner_state(jsonb,bigint) to authenticated;
 
--- Lightweight Raid Leader save. Any non-empty raid ID is supported so future
+-- Lightweight Raid Commander save. Any non-empty raid ID is supported so future
 -- Guild League / Polarity layouts do not require a database migration.
-create or replace function public.save_raid_leader_setting(p_raid_id text, p_member_name text)
+create or replace function public.save_raid_commander_setting(p_raid_id text, p_member_name text)
 returns jsonb
 language plpgsql
 security invoker
@@ -204,7 +204,7 @@ set search_path = public
 as $$
 declare
   v_state jsonb;
-  v_leaders jsonb;
+  v_commanders jsonb;
   v_revision bigint;
   v_updated_at timestamptz;
 begin
@@ -218,9 +218,9 @@ begin
   for update;
 
   v_state := coalesce(v_state, '{}'::jsonb);
-  v_leaders := coalesce(v_state -> 'raidLeaders', '{}'::jsonb);
-  v_leaders := jsonb_set(v_leaders, array[p_raid_id], to_jsonb(coalesce(p_member_name,'')), true);
-  v_state := jsonb_set(v_state, '{raidLeaders}', v_leaders, true);
+  v_commanders := coalesce(v_state -> 'raidCommanders', '{}'::jsonb);
+  v_commanders := jsonb_set(v_commanders, array[p_raid_id], to_jsonb(coalesce(p_member_name,'')), true);
+  v_state := jsonb_set(v_state, '{raidCommanders}', v_commanders, true);
 
   update public.planner_state
   set state = v_state,
@@ -239,7 +239,7 @@ begin
 end;
 $$;
 
-grant execute on function public.save_raid_leader_setting(text,text) to authenticated;
+grant execute on function public.save_raid_commander_setting(text,text) to authenticated;
 
 create or replace function public.save_raid_mode_setting(p_raid_id text, p_mode text)
 returns jsonb
