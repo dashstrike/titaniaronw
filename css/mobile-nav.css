@@ -215,6 +215,13 @@
   }
 
   /* Keep party member details readable instead of squeezing them. */
+  .title-icon,
+  .slot .title-icon {
+    width: 32px !important;
+    height: 32px !important;
+    min-width: 32px !important;
+  }
+
   .slot {
     min-width: 0;
   }
