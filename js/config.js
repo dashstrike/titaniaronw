@@ -50,7 +50,7 @@ const TITANIA_IS_MEMBER_PAGE = /\/member\.html$/i.test(window.location.pathname)
   if (document.querySelector('link[data-titania-mobile-nav]')) return;
   const link = document.createElement('link');
   link.rel = 'stylesheet';
-  link.href = './css/mobile-nav.css?v=20260910-fa-1';
+  link.href = './css/mobile-nav.css?v=20261006-mobile-pool-overlap-1';
   link.setAttribute('data-titania-mobile-nav', '1');
   document.head.appendChild(link);
 })();
