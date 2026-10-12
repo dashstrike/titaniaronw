@@ -140,7 +140,6 @@
           <button class="event-tab" data-event="siege">🏰 Siege</button>
           <button class="event-tab" data-event="polarity_zone">⚡ Polarity Zone</button>
         </nav>
-      <div class="col-12"><div class="row g-3 mb-4" id="statsRow"></div></div>
 
           <div class="event-action-row" id="eventActionRow" hidden>
             <button class="btn btn-outline-secondary" id="poolToggleBtn" type="button" aria-controls="sidebar" aria-expanded="true" title="Hide Member/Party Pool"><i class="fa-solid fa-angles-left" id="poolToggleIcon" aria-hidden="true"></i><span id="poolToggleText">Hide Pool</span></button>

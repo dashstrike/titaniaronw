@@ -1,16 +1,21 @@
 <header class="app-topbar" id="titania-topbar" @if($page === 'index') hidden @endif @if($publicPage) style="left:0" @endif>
     <div class="container-fluid">
         <div class="navbar-header">
-            <div class="d-flex align-items-center gap-3">
+            <div class="d-flex align-items-center gap-3 flex-grow-1 overflow-hidden">
                 @unless($publicPage)
-                    <div class="topbar-item">
+                    <div class="topbar-item flex-shrink-0">
                         <button class="button-toggle-menu topbar-button" type="button" aria-label="Toggle navigation">
                             <iconify-icon icon="solar:hamburger-menu-outline" class="fs-24 align-middle"></iconify-icon>
                         </button>
                     </div>
                 @endunless
+                @if($page === 'index')
+                    <div class="overflow-x-auto me-2" aria-label="Page statistics">
+                        <div id="statsRow" class="d-flex align-items-center gap-3 gap-xl-4 py-1"></div>
+                    </div>
+                @endif
             </div>
-            <div class="d-flex align-items-center gap-1 gap-sm-2">
+            <div class="d-flex align-items-center gap-1 gap-sm-2 flex-shrink-0">
                 @if($page === 'index')
                     <span class="save-flag d-flex align-items-center gap-1 small text-muted" id="saveFlag" role="status" aria-live="polite">
                         <i class="bx bxs-circle fs-10" aria-hidden="true"></i><span id="saveFlagText">Loading</span>

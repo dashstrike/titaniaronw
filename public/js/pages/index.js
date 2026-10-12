@@ -898,9 +898,7 @@
   }
 
   function statChip(value,label,warn){
-    const column=currentEvent==='dashboard'?'col-lg-4 col-xxl-2':currentEvent==='manage_members'?'col-xl-4':'col-xl-3';
-    const icons={'Active':'bx-group','Active Members':'bx-group','Inactive':'bx-user-minus','All Records':'bx-list-ul','Guild Slotted':'bx-shield','Siege Slotted':'bx-building-house','PZ Slotted':'bx-bolt-circle','Healers':'bx-heart','Slotted':'bx-user-check','Full Teams':'bx-group','No Healer':'bx-heart','Members':'bx-group','Pre Going':'bx-calendar-check','Present':'bx-check-circle','Absent':'bx-user-x'};
-    return `<div class="col-6 ${column}"><div class="card h-100 mb-0"><div class="card-body p-3"><div class="row flex-nowrap align-items-center g-2"><div class="col"><p class="text-muted mb-0 text-wrap" title="${escapeAttr(label)}">${escapeHtml(label)}</p><h3 class="${warn?'text-danger':'text-dark'} mt-2 mb-0">${escapeHtml(String(value))}</h3></div><div class="col-auto d-none d-md-block"><div class="ms-auto avatar-sm bg-soft-primary rounded"><i class="bx ${icons[label]||'bx-bar-chart-alt-2'} fs-24 avatar-title text-primary" aria-hidden="true"></i></div></div></div></div></div></div>`;
+    return `<div class="flex-shrink-0 text-nowrap"><div class="text-muted small">${escapeHtml(label)}</div><div class="fw-semibold fs-16 ${warn?'text-danger':'text-body'}">${escapeHtml(String(value))}</div></div>`;
   }
 
   function renderActionState(){

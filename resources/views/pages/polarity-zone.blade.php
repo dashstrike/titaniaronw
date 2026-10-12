@@ -13,6 +13,7 @@
   <header class="viewerbar card flex-row align-items-center justify-content-between gap-3 p-3 mb-4">
     <div class="mini-brand"><img class="logo" src="images/titania-logo.webp" alt="Titania guild logo"><div><b>TITANIA</b><span>Dark Lord Server</span></div></div>
     <nav class="nav gap-2">
+      @include('partials.theme-toggle')
       <a class="btn btn-outline-secondary" href="public/guild-league">🛡 Guild League</a>
       <a class="btn btn-outline-secondary" href="public/siege">🏰 Siege</a>
       <a class="btn btn-primary active" href="public/polarity-zone">⚡ Polarity Zone</a>
