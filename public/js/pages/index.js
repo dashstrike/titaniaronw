@@ -247,6 +247,8 @@
   }
 
   function showAuthView(view){
+    const loginUrl=new URL('login',document.baseURI);
+    if(location.pathname!==loginUrl.pathname)history.replaceState(null,'',loginUrl.pathname+location.search+location.hash);
     const screen=document.getElementById('authScreen');
     screen.hidden=false;
     const panels={login:'authLoginPanel',register:'authRegisterPanel',pending:'authPendingPanel',reset:'authResetPanel',config:'authConfigPanel'};
@@ -363,6 +365,10 @@
     if(!profile||!profile.approved||profile.role==='pending'){
       await showPendingForUser();
       return;
+    }
+    if(location.pathname===new URL('login',document.baseURI).pathname){
+      history.replaceState(null,'',new URL('dashboard',document.baseURI).pathname+location.search+location.hash);
+      window.dispatchEvent(new PopStateEvent('popstate'));
     }
     document.getElementById('authScreen').hidden=true;
     document.getElementById('app').hidden=false;

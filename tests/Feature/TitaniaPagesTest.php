@@ -11,6 +11,7 @@ class TitaniaPagesTest extends TestCase
     public static function pages(): array
     {
         return [
+            ['/login', 'authScreen'],
             ['/members', 'authScreen'],
             ['/dashboard', 'teamsWrap'],
             ['/guild-league', 'teamsWrap'],

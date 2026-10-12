@@ -13,6 +13,7 @@
     if (isPlanner && app) {
       navigation.hidden = app.hidden;
       topbar.hidden = app.hidden;
+      document.getElementById('titania-footer').hidden = app.hidden;
       content.style.marginLeft = app.hidden ? '0' : '';
       content.style.paddingTop = app.hidden ? '0' : '';
       if (!app.hidden && requestedEvent) {

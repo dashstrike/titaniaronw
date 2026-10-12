@@ -32,7 +32,7 @@
                 <div id="titania-content">
                     @yield('content')
                 </div>
-                <footer class="footer position-static mt-4">
+                <footer class="footer position-static mt-4" id="titania-footer" @if($page === 'index') hidden @endif>
                     <div class="container-fluid text-center text-muted">Titania Guild Management · Dark Lord Server</div>
                 </footer>
             </div>

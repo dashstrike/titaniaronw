@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', fn (Request $request) => redirect()->route('dashboard', $request->query()))->name('home');
 
 Route::get('/dashboard', [PageController::class, 'show'])->defaults('page', 'index')->name('dashboard');
+Route::get('/login', [PageController::class, 'show'])->defaults('page', 'index')->name('login');
 Route::get('/index', fn (Request $request) => redirect()->route('dashboard', $request->query(), 301))->name('index');
 Route::get('/home', fn (Request $request) => redirect()->route('dashboard', $request->query(), 301));
 
