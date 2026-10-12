@@ -1,0 +1,86 @@
+#titania-content .history-list{
+  display:grid!important;
+  grid-template-columns:repeat(2,minmax(0,1fr))!important;
+  gap:8px!important;
+  padding:10px!important;
+}
+#titania-content .history-row,
+#titania-content .history-row:last-child{
+  display:grid!important;
+  grid-template-columns:minmax(0,1fr) auto!important;
+  grid-template-areas:
+    "name action"
+    "reason date"!important;
+  gap:5px 12px!important;
+  align-items:center!important;
+  padding:11px 12px!important;
+  border:1px solid var(--line-soft)!important;
+  border-radius:9px!important;
+  background:var(--panel-2)!important;
+  min-width:0!important;
+}
+#titania-content .history-name{
+  grid-area:name;
+  min-width:0;
+}
+#titania-content .history-action{
+  grid-area:action;
+  justify-self:end;
+  white-space:nowrap;
+}
+#titania-content .history-date{
+  grid-area:date!important;
+  grid-column:auto!important;
+  justify-self:end;
+  white-space:nowrap;
+  color:var(--muted);
+}
+#titania-content .history-reason{
+  grid-area:reason!important;
+  grid-column:auto!important;
+  min-width:0;
+  color:var(--muted);
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+#titania-content .team-drag-handle{
+  margin-right:.5rem!important;
+}
+#titania-content .team-name.party-star-name{
+  gap:0!important;
+}
+#titania-content .party-star-toggle,
+#titania-content .party-star-public{
+  margin-left:.5rem!important;
+}
+body[data-event="guild_league"] #titania-content .body-wrap[data-event="guild_league"] .team-card.main-bf,
+body[data-event="guild_league"] #titania-content .body-wrap[data-event="guild_league"] .team-card.sub-bf{
+  box-shadow:none!important;
+  border:1px solid var(--violet)!important;
+}
+body[data-event="siege"] #titania-content .body-wrap[data-event="siege"] .team-card.main-bf,
+body[data-event="siege"] #titania-content .body-wrap[data-event="siege"] .team-card.sub-bf{
+  box-shadow:none!important;
+  border:1px solid var(--bs-danger)!important;
+}
+body[data-event="siege"] #titania-content .body-wrap[data-event="siege"] .team-card.main-bf.party-starred,
+body[data-event="siege"] #titania-content .body-wrap[data-event="siege"] .team-card.sub-bf.party-starred{
+  border:1px solid var(--bs-warning)!important;
+  box-shadow:0 0 0 1px rgba(var(--bs-warning-rgb),0.267),0 0 18px rgba(var(--bs-warning-rgb),0.071)!important;
+}
+@media(max-width:900px){#titania-content .history-list{grid-template-columns:minmax(0,1fr)!important;}
+
+}
+@media(max-width:520px){#titania-content .history-row,
+#titania-content .history-row:last-child{
+    grid-template-columns:minmax(0,1fr) auto!important;
+    grid-template-areas:
+      "name action"
+      "reason reason"
+      "date date"!important;
+  }
+#titania-content .history-date{justify-self:start;}
+
+}
+

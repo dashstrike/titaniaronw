@@ -1,0 +1,36 @@
+#titania-content .event-tab[data-event="polarity_zone"]{
+  display: none !important;
+}
+#titania-content a[href="public/polarity-zone"],
+#titania-content a[href="./public/polarity-zone"]{
+  display: none !important;
+}
+body[data-view="polarity"] #titania-content .page{
+  display: none !important;
+}
+body[data-view="polarity"] #titania-content{
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+body[data-view="polarity"] #titania-content::before{
+  content: "Polarity Zone is currently hidden.";
+  display: block;
+  width: min(520px, 100%);
+  padding: 28px 24px;
+  border: 1px solid var(--line, var(--bs-border-color));
+  border-radius: 14px;
+  background: var(--panel, var(--bs-secondary-bg));
+  color: var(--muted, var(--bs-secondary-color));
+  font: 600 16px/1.5 'IBM Plex Sans', Arial, sans-serif;
+  text-align: center;
+  box-shadow: 0 18px 50px #00000055;
+}
+@media (max-width: 720px){#titania-content .event-tabs{
+    grid-template-columns: repeat(6, minmax(0, 1fr)) !important;
+  }
+
+}
+

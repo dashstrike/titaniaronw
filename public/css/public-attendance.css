@@ -1,0 +1,36 @@
+#titania-content .public-pre-attendance{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  width:30px;
+  min-width:30px;
+  min-height:24px;
+  margin-left:0;
+  padding:0;
+  border:1.5px solid var(--bs-border-color);
+  border-radius:999px;
+  background:var(--bs-body-bg);
+  color:var(--bs-body-color);
+  font-family:var(--bs-body-font-family);
+  font-size:0;
+  font-weight:900;
+  line-height:1;
+  white-space:nowrap;
+  flex:none;
+}
+#titania-content .public-pre-attendance::after{font-family:"Font Awesome 6 Free";font-size:14px;font-weight:900;line-height:1;}
+#titania-content .public-pre-attendance.pre-going::after{content:'\f00c';}
+#titania-content .public-pre-attendance.pre-not-going::after{content:'\f00d';}
+#titania-content .public-pre-attendance.pre-no-response::after{content:'\3f';}
+#titania-content .public-pre-attendance.pre-going{background:var(--bs-success-bg-subtle);border-color:var(--bs-success);color:var(--bs-success);}
+#titania-content .public-pre-attendance.pre-not-going{background:var(--bs-danger-bg-subtle);border-color:var(--bs-danger);color:var(--bs-danger);}
+#titania-content .public-pre-attendance.pre-no-response{background:var(--bs-body-bg);border-color:var(--bs-border-color);color:var(--bs-body-color);}
+@media(max-width:720px){#titania-content .public-pre-attendance{width:28px;min-width:28px;min-height:23px;margin-left:0;font-size:0;}
+
+}
+@media(max-width:720px){#titania-content .public-pre-attendance::after{font-size:13px;}
+}
+@media print{#titania-content .public-pre-attendance{box-shadow:none!important;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+
+}
+

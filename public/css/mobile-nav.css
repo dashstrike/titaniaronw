@@ -1,0 +1,237 @@
+@media (max-width: 720px){#titania-content,
+#titania-content,
+#titania-content .app,
+#titania-content .app-inner,
+#titania-content .body-wrap,
+#titania-content .main{
+    width: 100%;
+    max-width: 100%;
+  }
+#titania-content,
+#titania-content{
+    overflow-x: visible;
+  }
+#titania-content .topbar{
+    width: 100%;
+    padding: 10px;
+    gap: 10px;
+    justify-content: center;
+    overflow: visible;
+  }
+#titania-content .brand{
+    width: 100%;
+    min-width: 0;
+    justify-content: center;
+    gap: 8px;
+  }
+#titania-content .brand-logo{
+    width: 44px;
+    height: 38px;
+  }
+#titania-content .brand-text{
+    min-width: 0;
+  }
+#titania-content .brand-text h1{
+    font-size: 16px !important;
+    letter-spacing: 1.2px;
+    white-space: normal;
+    text-align: center;
+    line-height: 1.15;
+  }
+#titania-content .brand-text p{
+    font-size: 11px !important;
+    letter-spacing: 1px;
+    text-align: center;
+  }
+#titania-content .event-tabs{
+    width: 100%;
+    max-width: 430px;
+    display: grid;
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+    gap: 4px;
+    padding: 4px;
+    margin: 0 auto;
+  }
+#titania-content .event-tab{
+    width: 100%;
+    min-width: 0;
+    height: 44px;
+    padding: 0 !important;
+    gap: 0;
+    justify-content: center;
+    overflow: hidden;
+    font-size: 0 !important;
+  }
+#titania-content .event-tab::before{ display: none; }
+#titania-content .event-tab i{ font-size: 21px; line-height: 1; }
+#titania-content .stats,
+#titania-content .actions{
+    width: 100%;
+    justify-content: center;
+  }
+#titania-content .body-wrap{
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    min-width: 0;
+    overflow: visible;
+  }
+#titania-content .sidebar{
+    position: relative;
+    top: 0;
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+    height: min(64vh, 520px);
+    max-height: 520px;
+    border-right: 0;
+    border-bottom: 1px solid var(--line-soft);
+    overflow: hidden;
+  }
+#titania-content .sidebar-head,
+#titania-content .member-list{
+    width: 100%;
+    min-width: 0;
+  }
+#titania-content .sidebar-head{
+    flex: none;
+  }
+#titania-content .member-list{
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding-bottom: 12px;
+    overscroll-behavior: contain;
+  }
+#titania-content .class-breakdown{
+    display: none;
+  }
+#titania-content .main{
+    flex: none;
+    min-width: 0;
+    padding: 16px 10px 60px;
+    overflow: visible;
+  }
+#titania-content .hint-bar,
+#titania-content .event-action-row,
+#titania-content #teamsWrap,
+#titania-content .main-raids,
+#titania-content .main-raid-block,
+#titania-content .pz-dungeon-group{
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+  }
+#titania-content .team-grid,
+#titania-content .main-raid-grid,
+#titania-content .main-raid-grid.five,
+#titania-content .pz-star-raid-grid,
+#titania-content .pz-normal-raid-grid,
+#titania-content .pz-dungeon-team-grid,
+#titania-content .pz-dungeon-team-grid.cols-4,
+#titania-content .pz-dungeon-team-grid.cols-5{
+    grid-template-columns: minmax(0, 1fr) !important;
+    width: 100%;
+    max-width: 100%;
+  }
+#titania-content .team-card{
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+  }
+#titania-content .main-raid-head,
+#titania-content .pz-dungeon-group-head{
+    width: 100%;
+    min-width: 0;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+#titania-content .main-raid-title,
+#titania-content .pz-dungeon-group-title{
+    max-width: 100%;
+    white-space: normal;
+  }
+#titania-content .main-raid-line,
+#titania-content .pz-dungeon-group-line{
+    display: none;
+  }
+#titania-content .raid-commander-control,
+#titania-content .raid-leader-control,
+#titania-content .pz-dungeon-group-head .raid-commander-control{
+    width: 100%;
+    min-width: 0;
+    margin-left: 0;
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    align-items: center;
+  }
+#titania-content .raid-commander-drop,
+#titania-content .raid-leader-drop{
+    width: 100%;
+    min-width: 0;
+    max-width: none;
+  }
+#titania-content .section-head{
+    width: 100%;
+    min-width: 0;
+  }
+#titania-content .section-title{
+    max-width: 100%;
+    white-space: normal;
+  }
+#titania-content .event-action-row{
+    align-items: stretch;
+  }
+#titania-content .event-action-row .btn:not([class*="btn-"]){
+    flex: 1 1 calc(50% - 8px);
+    min-width: 0;
+  }
+#titania-content .event-last-updated{
+    width: 100%;
+    margin-left: 0;
+    justify-content: flex-end;
+    white-space: normal;
+  }
+#titania-content .title-icon,
+#titania-content .slot .title-icon{
+    width: 32px !important;
+    height: 32px !important;
+    min-width: 32px !important;
+  }
+#titania-content .slot{
+    min-width: 0;
+  }
+#titania-content .slot-info,
+#titania-content .slot-name,
+#titania-content .slot-class{
+    min-width: 0;
+  }
+#titania-content .slot-gr{
+    white-space: nowrap;
+  }
+
+}
+@media (max-width: 420px){#titania-content .topbar{
+    padding-left: 8px;
+    padding-right: 8px;
+  }
+#titania-content .event-tabs{
+    gap: 3px;
+  }
+#titania-content .event-tab{
+    height: 42px;
+  }
+#titania-content .event-tab i{
+    font-size: 20px;
+  }
+#titania-content .main{
+    padding-left: 8px;
+    padding-right: 8px;
+  }
+#titania-content .event-action-row .btn:not([class*="btn-"]){
+    flex-basis: 100%;
+  }
+
+}
+

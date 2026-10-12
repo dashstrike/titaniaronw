@@ -1,0 +1,256 @@
+#titania-content .dash-gr-rank-grid .dash-bar-avg{
+  width: 145px !important;
+  min-width: 145px !important;
+  white-space: nowrap !important;
+  overflow: visible !important;
+  text-overflow: clip !important;
+  line-height: 1.2;
+}
+#titania-content .dash-gr-rank-grid .dash-bar-count{
+  flex: 0 0 80px;
+  white-space: nowrap;
+}
+@media (min-width: 1181px){#titania-content .topbar{
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas:
+      "brand tabs"
+      "stats actions";
+    align-items: center;
+  }
+#titania-content .topbar .brand{
+    grid-area: brand;
+  }
+#titania-content .topbar .event-tabs{
+    grid-area: tabs;
+    justify-self: end;
+  }
+#titania-content .topbar .stats{
+    grid-area: stats;
+    justify-content: flex-start;
+  }
+#titania-content .topbar .actions{
+    grid-area: actions;
+    justify-content: flex-end;
+  }
+
+}
+@media (min-width: 721px) and (max-width: 1180px){#titania-content,
+#titania-content,
+#titania-content .app,
+#titania-content .app-inner,
+#titania-content .body-wrap,
+#titania-content .main{
+    width: 100%;
+    max-width: 100%;
+  }
+#titania-content,
+#titania-content{
+    overflow-x: hidden;
+  }
+#titania-content .topbar{
+    position: relative;
+    display: flex !important;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    width: 100%;
+    max-width: 100%;
+    padding: 12px 14px;
+    gap: 10px;
+    overflow: visible;
+  }
+#titania-content .topbar .brand{
+    order: 1;
+    width: 100%;
+    min-width: 0 !important;
+    margin: 0 !important;
+    justify-content: center;
+  }
+#titania-content .topbar .brand-text{
+    min-width: 0;
+  }
+#titania-content .topbar .brand-text h1{
+    white-space: normal;
+    text-align: center;
+  }
+#titania-content .topbar .brand-text p{
+    text-align: center;
+  }
+#titania-content .topbar .event-tabs{
+    order: 2;
+    display: grid !important;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    width: 100%;
+    max-width: 100%;
+    margin: 0;
+  }
+#titania-content .topbar .event-tab{
+    min-width: 0;
+    width: 100%;
+    justify-content: center;
+    padding: 9px 8px;
+    overflow: hidden;
+  }
+#titania-content .topbar .stats{
+    order: 3;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(105px, 1fr));
+    width: 100%;
+    max-width: 100%;
+    gap: 8px;
+  }
+#titania-content .topbar .stat-chip{
+    min-width: 0;
+    width: 100%;
+  }
+#titania-content .topbar .actions{
+    order: 4;
+    width: 100%;
+    max-width: 100%;
+    margin: 0 !important;
+    justify-content: center !important;
+  }
+#titania-content .body-wrap{
+    flex-direction: column !important;
+    align-items: stretch;
+    min-width: 0;
+  }
+#titania-content .sidebar{
+    position: relative !important;
+    top: 0 !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+    height: auto !important;
+    max-height: 360px;
+    border-right: 0 !important;
+    border-bottom: 1px solid var(--line-soft);
+  }
+#titania-content .main{
+    flex: none;
+    min-width: 0;
+    padding: 18px 16px 60px;
+    overflow: visible;
+  }
+#titania-content .hint-bar,
+#titania-content .event-action-row,
+#titania-content #teamsWrap,
+#titania-content .main-raids,
+#titania-content .main-raid-block,
+#titania-content .pz-dungeon-group{
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+  }
+#titania-content .main-raid-grid,
+#titania-content .main-raid-grid.five,
+#titania-content .pz-star-raid-grid,
+#titania-content .pz-normal-raid-grid,
+#titania-content .pz-dungeon-team-grid,
+#titania-content .pz-dungeon-team-grid.cols-4,
+#titania-content .pz-dungeon-team-grid.cols-5{
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+#titania-content .event-action-row,
+#titania-content .main-raid-head,
+#titania-content .pz-dungeon-group-head,
+#titania-content .section-head{
+    flex-wrap: wrap;
+  }
+#titania-content .event-last-updated{
+    max-width: 100%;
+    white-space: normal;
+  }
+
+}
+@media (max-width: 900px){#titania-content .dash-gr-rank-grid .dash-bar-avg{
+    width: 135px !important;
+    min-width: 135px !important;
+  }
+
+}
+body[data-event="dashboard"] #titania-content .main{padding-bottom:32px;}
+body[data-event="dashboard"] #titania-content #teamsWrap > .section-head{margin-top:18px;margin-bottom:10px;}
+body[data-event="dashboard"] #titania-content #teamsWrap > .section-head:first-child{margin-top:0;}
+#titania-content .dash-gr-rank-col .section-head{margin-bottom:10px;}
+#titania-content .dash-gr-rank-grid .dash-bar-name{flex:1;min-width:0;width:auto;}
+#titania-content .dash-gr-rank-grid .dash-bar-count{margin-left:auto;}
+#titania-content .dash-gr-rank-col .section-title{white-space:normal;font-size:clamp(14px,1.15vw,18px)!important;}
+#titania-content .dash-attendance{margin-top:18px;padding:16px;min-width:0;}
+#titania-content .dash-att-head{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;}
+#titania-content .dash-att-head h2,
+#titania-content .dash-card-head h2{font-size:18px;line-height:1.35;margin:0;color:var(--text);}
+#titania-content .dash-att-head p,
+#titania-content .dash-card-head p{margin:4px 0 0;color:var(--muted);font-size:12px;}
+#titania-content .dash-att-controls{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+#titania-content .dash-att-controls select:not(.form-control):not(.form-select):not(.form-check-input){width:auto;max-width:100%;font:inherit;font-size:12px;}
+#titania-content .dash-att-legend{display:flex;flex-wrap:wrap;gap:8px 18px;margin:14px 0;font-size:12px;color:var(--muted);}
+#titania-content .dash-att-legend > span{display:inline-flex;align-items:center;gap:6px;}
+#titania-content .dash-att-legend b{color:var(--text);font-variant-numeric:tabular-nums;}
+#titania-content .dash-att-dot{width:9px;height:9px;border-radius:2px;display:inline-block;}
+#titania-content .dash-att-scroll{max-width:100%;overflow-x:auto;padding-bottom:4px;}
+#titania-content .dash-att-chart{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(76px,1fr);gap:12px;padding:0 4px;}
+#titania-content .dash-att-column{display:flex;flex-direction:column;align-items:center;gap:5px;font-size:12px;min-width:0;}
+#titania-content .dash-att-column > strong{font:600 15px var(--bs-body-font-family);color:var(--text);}
+#titania-content .dash-att-column > b{font-size:12px;white-space:nowrap;}
+#titania-content .dash-att-column > span,
+#titania-content .dash-att-column > small{color:var(--muted);font-size:11px;white-space:nowrap;}
+#titania-content .dash-att-column .dash-att-state{font-size:10px;}
+#titania-content .dash-att-bar{height:150px;width:48px;border:1px solid var(--line-soft);border-radius:5px;overflow:hidden;display:flex;flex-direction:column-reverse;background:var(--panel-2);flex:none;}
+#titania-content .dash-att-bar > span{display:block;flex:none;width:100%;}
+#titania-content .dash-att-bar:focus-visible,
+#titania-content .dash-att-scroll:focus-visible{outline:2px solid var(--violet);outline-offset:3px;}
+#titania-content .dash-attendance .present,
+#titania-content .dash-attendance .going{background:var(--teal);}
+#titania-content .dash-attendance .absent,
+#titania-content .dash-attendance .not_going{background:var(--red);}
+#titania-content .dash-attendance .excused{background:#4d8de8;}
+#titania-content .dash-attendance .afk{background:var(--amber);}
+#titania-content .dash-attendance .no_response{background:var(--muted-2);}
+#titania-content .dash-att-note{font-size:11px;line-height:1.6;color:var(--muted);margin:12px 0 0;}
+#titania-content .dash-att-message{font-size:13px;color:var(--muted);margin:16px 0 4px;}
+@media(max-width:600px){#titania-content .dash-gr-rank-grid .dash-bar-avg{display:none;}
+#titania-content .dash-gr-rank-grid .dash-bar-count{flex-basis:72px;}
+#titania-content .dash-gr-spread-panel .dash-bar-name{width:115px;font-size:12px!important;}
+#titania-content .dash-gr-spread-panel .dash-bar-count,
+#titania-content .dash-gr-spread-panel .dash-bar-pct{width:32px;}
+#titania-content .dash-attendance{padding:12px;}
+
+}
+body[data-event="dashboard"] #titania-content .dash-headed-card{padding:16px;}
+#titania-content .dash-card-head{width:100%;min-width:0;flex:none;margin-bottom:14px;text-align:left;}
+#titania-content .dash-card-head h2{font-family:var(--bs-body-font-family);font-weight:700;letter-spacing:0;text-transform:none;overflow-wrap:anywhere;}
+#titania-content .dash-card-head p{line-height:1.4;}
+#titania-content .dash-card > .dash-card-head{margin-bottom:8px;}
+#titania-content .dash-card > .dash-card-head h2{font-size:16px;}
+#titania-content .dash-card > .dash-card-head p{font-size:11px;}
+#titania-content .dash-class-pie-panel.dash-headed-card{justify-content:flex-start;}
+@media(max-width:600px){body[data-event="dashboard"] #titania-content .dash-headed-card{padding:12px;}
+}
+#titania-content .dash-class-analytics-grid,
+#titania-content .dash-gr-analytics-grid,
+#titania-content .dash-gr-rank-grid{
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  align-items:stretch;gap:16px;margin:16px 0 0;
+}
+#titania-content .dash-class-bars,
+#titania-content .dash-gr-spread-panel,
+#titania-content .dash-gr-rank-col > .dash-panel{
+  display:flex;flex-direction:column;min-width:0;
+}
+#titania-content .dash-class-bars > .dash-bar-row,
+#titania-content .dash-gr-spread-panel > .dash-bar-row,
+#titania-content .dash-gr-rank-col > .dash-panel > .dash-bar-row{flex:1;}
+#titania-content .dash-gr-rank-col{display:flex;flex-direction:column;}
+#titania-content .dash-gr-rank-col > .dash-panel{flex:1;}
+#titania-content .dash-class-pie-wrap{flex:1;width:100%;min-height:240px;aspect-ratio:auto;}
+#titania-content .dash-class-pie{position:absolute;inset:0;}
+#titania-content .dash-attendance{margin-top:16px;margin-bottom:0;}
+@media(max-width:1050px){#titania-content .dash-class-analytics-grid,
+#titania-content .dash-gr-analytics-grid,
+#titania-content .dash-gr-rank-grid{grid-template-columns:minmax(0,1fr);}
+#titania-content .dash-class-pie-panel{min-height:0;}
+
+}
+

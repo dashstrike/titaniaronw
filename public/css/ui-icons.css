@@ -1,0 +1,11 @@
+#titania-content .titania-ui-icon{pointer-events:none;vertical-align:baseline;}
+#titania-content .leader-icon.titania-ui-icon{font-size:26px;text-align:center;line-height:26px;}
+#titania-content .p-leader-icon.titania-ui-icon{font-size:12px;line-height:12px;}
+#titania-content .search-box > .titania-ui-icon{position:absolute;left:10px;top:50%;transform:translateY(-50%);width:14px;font-size:14px;color:var(--muted-2);}
+#titania-content .hint-bar > .titania-ui-icon{width:15px;font-size:15px;color:var(--violet);flex:none;margin-top:2px;}
+#titania-content .mr-2{margin-right:.5rem;}
+@media(max-width:720px){#titania-content .event-tab .mr-2{margin-right:0;}
+}
+@media(max-width:480px){#titania-content .att-actual-btn .mr-2{margin-right:0;}
+}
+

@@ -1,0 +1,305 @@
+/* Darkone theme integration using the planner's existing component selectors. */
+[hidden] { display: none !important; }
+#toastStack { z-index: 1200; }
+body[data-event="guild_league"] #classBreakdown,
+body[data-event="siege"] #classBreakdown { display: none; }
+#titania-content {
+  --bg: var(--bs-body-bg);
+  --panel: var(--bs-secondary-bg);
+  --panel-2: var(--bs-tertiary-bg);
+  --line: var(--bs-border-color);
+  --line-soft: var(--bs-border-color);
+  --text: var(--bs-body-color);
+  --muted: var(--bs-secondary-color);
+  --muted-2: var(--bs-secondary-color);
+  --violet: var(--bs-primary);
+  --teal: var(--bs-info);
+  color: var(--bs-body-color);
+  background: transparent;
+  font-family: var(--bs-body-font-family);
+  min-height: 0;
+}
+#titania-content .app { min-height: 0; }
+#titania-content .topbar {
+  position: static;
+  border-radius: var(--bs-border-radius);
+  background: var(--bs-secondary-bg);
+  margin-bottom: 20px;
+  padding: 16px;
+}
+#titania-content .topbar > .brand,
+#titania-content .topbar > .mini-brand { display: none; }
+#titania-content .wrap { max-width: none; margin: 0; padding: 0; }
+#titania-content .body-wrap { min-height: 65vh; }
+#titania-content main.main { min-width: 0; }
+#titania-content .sidebar { position: static; min-width: 0; }
+#titania-content .modal { display: block; position: relative; height: auto; }
+#titania-content .overlay,
+#titania-content .print-overlay { z-index: 1100; }
+#titania-content .loading-overlay { z-index: 1090; }
+#titania-content .auth-screen { background: transparent; min-height: 100vh; }
+#titania-content .auth-card,
+#titania-content .panel,
+#titania-content .dash-card,
+#titania-content .metric,
+#titania-content .team-card {
+  background: var(--bs-secondary-bg);
+  border-color: var(--bs-border-color);
+  border-radius: var(--bs-border-radius);
+}
+#titania-content button,
+#titania-content input,
+#titania-content select,
+#titania-content textarea { font-family: var(--bs-body-font-family); }
+#titania-content .btn { border-radius: var(--bs-border-radius); }
+#titania-content .btn.primary {
+  background: var(--bs-primary);
+  border-color: var(--bs-primary);
+  color: #fff;
+}
+#titania-navigation .logo-box img.logo-lg { height: 64px; width: auto; }
+#titania-navigation .logo-box img.logo-sm { height: 36px; width: auto; }
+#titania-navigation .nav-icon { display: flex; align-items: center; }
+body[data-titania-public="true"] .page-content { margin-left: 0; }
+@media (max-width: 720px) {
+  #titania-content .body-wrap { display: flex; flex-direction: column; }
+  #titania-content .sidebar { width: 100%; max-width: 100%; }
+  #titania-page-content > .container-fluid { padding-left: 10px; padding-right: 10px; }
+}
+@media print {
+  #titania-navigation, #titania-topbar, .footer { display: none !important; }
+  #titania-page-content { margin: 0 !important; padding: 0 !important; }
+}
+
+
+/* Darkone components throughout the legacy page layouts. */
+#titania-content {
+  --panel2: var(--bs-tertiary-bg);
+  --lineSoft: var(--bs-border-color);
+  --muted2: var(--bs-secondary-color);
+  --green: var(--bs-success);
+  --red: var(--bs-danger);
+  --amber: var(--bs-warning);
+  --shadow: var(--bs-box-shadow-sm);
+  font-size: var(--bs-body-font-size);
+  line-height: var(--bs-body-line-height);
+}
+#titania-content .section-title,
+#titania-content .att-page-head h1,
+#titania-content .page-head h1,
+#titania-content .page-head h2 {
+  font-family: var(--bs-body-font-family);
+  color: var(--bs-heading-color);
+  font-size: 1.25rem;
+  font-weight: 600;
+  letter-spacing: normal;
+  text-transform: none;
+}
+#titania-content .section-head { flex-wrap: wrap; margin: 0 0 1rem; }
+#titania-content .section-line { display: none; }
+#titania-content .section-note { margin-left: auto; color: var(--bs-secondary-color); }
+#titania-content .card {
+  background: var(--bs-card-bg);
+  border: var(--bs-card-border-width) solid var(--bs-card-border-color);
+  border-radius: var(--bs-card-border-radius);
+  box-shadow: var(--bs-box-shadow-sm);
+}
+#titania-content .card-header { background: transparent; }
+#titania-content .sub-raids .main-raid-head { background: rgba(143, 232, 221, .15); }
+#titania-content .sub-raids .main-raid-title { color: #8fe8dd; }
+#titania-content .sub-raids .team-card { border-color: #8fe8dd; }
+#titania-content .card-title { font-size: 1rem; font-weight: 600; letter-spacing: normal; text-transform: none; }
+#titania-content .panel h2 { font-size: 1rem; font-weight: 600; }
+#titania-content .panel,
+#titania-content .dash-panel,
+#titania-content .party-card,
+#titania-content .run-card { padding: 1.25rem; }
+#titania-content .team-card { margin-bottom: 0; }
+#titania-content .dash-card { padding: 1.25rem; }
+#titania-content .dash-card-label { text-transform: none; letter-spacing: normal; font-size: .875rem; }
+#titania-content .dash-card-value { font-size: 1.75rem; color: var(--bs-heading-color); }
+#titania-content .table { font-size: var(--bs-body-font-size); }
+#titania-content .table > :not(caption) > * > * {
+  padding: .85rem 1rem;
+  color: var(--bs-table-color-state, var(--bs-table-color-type, var(--bs-table-color)));
+  background-color: var(--bs-table-bg);
+  border-bottom: var(--bs-border-width) solid var(--bs-table-border-color);
+  box-shadow: inset 0 0 0 9999px var(--bs-table-bg-state, var(--bs-table-bg-type, var(--bs-table-accent-bg)));
+  vertical-align: middle;
+  font-size: inherit;
+  letter-spacing: normal;
+  text-transform: none;
+}
+#titania-content .table thead { --bs-table-bg: var(--bs-tertiary-bg); }
+#titania-content .table th { font-weight: 600; white-space: nowrap; }
+#titania-content .table .form-check-input { margin: 0; }
+#titania-content #dashManageTable { max-height: 65vh; }
+#titania-content #dashManageTable thead { position: sticky; top: 0; z-index: 1; }
+#titania-content .dash-manage-name { width: auto; min-width: 120px; }
+#titania-content .dash-row-class { min-width: 150px; }
+#titania-content .dash-row-gr { min-width: 100px; max-width: 140px; }
+#titania-content .dash-bulk-bar .form-control,
+#titania-content .dash-bulk-bar .form-select { width: 150px; }
+#titania-content .user-name { color: var(--bs-heading-color); font-weight: 600; }
+#titania-content .role-select { min-width: 180px; }
+#titania-content .viewerbar { position: static; backdrop-filter: none; }
+#titania-content .viewerbar .nav a { border-radius: var(--bs-border-radius); }
+#titania-content .sheet-brand { font-size: 1.75rem; letter-spacing: normal; text-transform: none; }
+#titania-content .sheet-head { border-bottom: 1px solid var(--bs-border-color); }
+#titania-content .run-type-heading { font-size: 1.125rem; color: var(--bs-heading-color); }
+#titania-content .hero { border-radius: var(--bs-border-radius); border-color: var(--bs-border-color); padding: 1.5rem; }
+#titania-content .hero-gr strong { color: #ffd34d; }
+#titania-content .auth-card { padding: 2rem; }
+#titania-content .auth-title { letter-spacing: normal; font-family: var(--bs-body-font-family); }
+#titania-content .auth-brand h1 { color: var(--bs-heading-color); background: none; -webkit-text-fill-color: currentColor; letter-spacing: normal; }
+#titania-content .form-control,
+#titania-content .form-select { min-width: 0; }
+
+#titania-content main.main { padding: 0 0 2rem; }
+#titania-content .body-wrap:not(.dashboard-mode):not(.pool-hidden) main.main { padding-left: 1.5rem; }
+#titania-content .page-head { margin-bottom: 1.5rem; }
+#titania-content .att-actual-btn { display: inline-flex; align-items: center; justify-content: center; gap: .35rem; }
+#titania-content .att-actual-btn em { font-style: normal; }
+#titania-content .public-run-type { font-size: 1.25rem; font-weight: 600; text-transform: none; }
+#titania-content .public-run-datetime { color: var(--bs-secondary-color); }
+#titania-content .dash-manage-name { font-size: var(--bs-body-font-size) !important; }
+#titania-content .run-picker-icon { display: none; }
+#titania-content .run-date-input,
+#titania-content .run-time-input { color-scheme: inherit; }
+#titania-content .auth-tabs { background: transparent; padding: 0; }
+#titania-content .auth-tab { flex: 1; }
+@media (max-width: 720px) {
+  #titania-content .body-wrap:not(.dashboard-mode):not(.pool-hidden) main.main { padding-left: 0; }
+  #titania-content .page-head { flex-wrap: wrap; gap: 1rem; }
+}
+
+/* Keep the template shell and planner within the phone viewport. */
+@media (max-width: 767.98px) {
+  .app-wrapper,
+  #titania-page-content,
+  #titania-page-content > .container-fluid,
+  #titania-content,
+  #titania-content .app,
+  #titania-content .app-inner { min-width: 0; width: 100%; max-width: 100%; }
+  #titania-content { overflow-x: visible; }
+  #titania-page-content { margin-left: 0; padding: 1rem .25rem 2rem; }
+  #titania-topbar { padding: 0 .25rem; }
+  #titania-topbar .container-fluid { padding: 0 .5rem; }
+  #titania-topbar .navbar-header { padding: 0; gap: .5rem; min-width: 0; }
+  #titania-topbar .topbar-button { padding: .4rem; }
+  #titania-content #statsRow { --bs-gutter-x: .75rem; --bs-gutter-y: .75rem; }
+  #titania-content #statsRow h3 { font-size: 1.25rem; }
+  #titania-content #statsRow p { font-size: .8125rem; }
+  #titania-content .body-wrap { flex-direction: column; align-items: stretch; }
+  #titania-content .sidebar { width: 100%; min-width: 0; max-width: 100%; height: auto; max-height: none; margin-bottom: 1rem; }
+  #titania-content .member-list { flex: auto; height: 240px; min-height: 0; max-height: 32vh; overflow-y: auto; }
+  #titania-content .party-pool-list { max-height: 32vh; padding-bottom: 1rem; }
+  #titania-content main.main { width: 100%; min-width: 0; padding: 0 0 2rem; }
+  #titania-content .body-wrap:not(.dashboard-mode):not(.pool-hidden) main.main { padding-left: 0; }
+  #titania-content #eventActionRow { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .5rem; margin-bottom: 1rem; }
+  #titania-content #eventActionRow > .btn { min-width: 0; width: 100%; padding: .5rem; white-space: normal; justify-content: center; }
+  #titania-content #eventActionRow .event-last-updated { grid-column: 1 / -1; min-width: 0; }
+  #titania-content .main-raids,
+  #titania-content .team-grid { grid-template-columns: minmax(0, 1fr); min-width: 0; }
+  #titania-content .main-raid-head { flex-wrap: wrap; min-width: 0; }
+  #titania-content .raid-commander-control,
+  #titania-content .raid-leader-control { min-width: 0; max-width: 100%; }
+  #titania-content .slot { gap: .375rem; padding-left: .5rem; padding-right: .5rem; }
+  #titania-content .slot-info { min-width: 0; }
+  #titania-content .slot-gr { font-size: .75rem !important; }
+  #titania-content .pre-attendance-badge { width: 32px; min-width: 32px; margin-left: .25rem; }
+}
+#titania-content .main-raid-grid,
+#titania-content .main-raid-grid.five {
+  grid-template-columns: none;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(340px, 1fr);
+  min-width: 0;
+  max-width: 100%;
+  overflow-x: auto;
+}
+body[data-view="guild"] #titania-content .lineup-sheet,
+body[data-view="siege"] #titania-content .lineup-sheet {
+  padding: 0;
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+}
+body[data-view="guild"] #titania-content .raid-head,
+body[data-view="siege"] #titania-content .raid-head {
+  margin: 0;
+  padding: 1rem;
+  border-left: 0;
+  flex-wrap: wrap;
+  background: var(--bs-primary-bg-subtle);
+  color: var(--bs-primary);
+}
+body[data-view="guild"] #titania-content .raid-block[data-kind="sub"] .raid-head {
+  background: rgba(143, 232, 221, .15);
+  color: #8fe8dd;
+}
+body[data-view="guild"] #titania-content .section-title.sub,
+body[data-view="guild"] #titania-content .raid-block[data-kind="sub"] .raid-name b {
+  color: #8fe8dd;
+}
+body[data-view="guild"] #titania-content .raid-name,
+body[data-view="siege"] #titania-content .raid-name {
+  font-size: .875rem;
+  white-space: normal;
+}
+body[data-view="guild"] #titania-content .team-grid,
+body[data-view="siege"] #titania-content .team-grid {
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr));
+  grid-auto-flow: row;
+  grid-auto-columns: auto;
+  overflow: visible;
+  min-width: 0;
+  gap: 1rem;
+}
+body[data-view="guild"] #titania-content .team-card,
+body[data-view="siege"] #titania-content .team-card {
+  padding: 0;
+  margin: 0;
+  border-top: var(--bs-card-border-width) solid var(--bs-card-border-color);
+}
+body[data-view="guild"] #titania-content .team-head,
+body[data-view="siege"] #titania-content .team-head {
+  padding: .75rem 1rem;
+  margin: 0;
+}
+body[data-view="guild"] #titania-content .team-name,
+body[data-view="siege"] #titania-content .team-name {
+  font-size: .9375rem;
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+}
+body[data-view="guild"] #titania-content .member-name,
+body[data-view="siege"] #titania-content .member-name {
+  flex: 1;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  font-size: .875rem;
+}
+body[data-view="guild"] #titania-content .sheet-head,
+body[data-view="siege"] #titania-content .sheet-head {
+  flex-wrap: wrap;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  text-align: right;
+}
+body[data-view="guild"] #titania-content .sheet-meta,
+body[data-view="siege"] #titania-content .sheet-meta { margin-left: auto; text-align: right; }
+body[data-view="guild"] #titania-content .sheet-brand,
+body[data-view="siege"] #titania-content .sheet-brand {
+  align-self: center;
+  text-align: left;
+}
+body[data-view="guild"] #titania-content .slot.leader-slot,
+body[data-view="siege"] #titania-content .slot.leader-slot {
+  border: 0;
+  border-bottom: 1px solid var(--bs-border-color);
+  border-radius: 0;
+  box-shadow: none;
+}

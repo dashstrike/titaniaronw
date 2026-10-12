@@ -1,0 +1,330 @@
+#titania-content{--bg:var(--bs-body-bg);--panel:var(--bs-secondary-bg);--panel2:var(--bs-tertiary-bg);--line:var(--bs-border-color);--line-soft:var(--bs-border-color);--text:var(--bs-body-color);--muted:var(--bs-secondary-color);--violet:var(--bs-primary);--green:var(--bs-success);--red:var(--bs-danger);--amber:var(--bs-warning)}
+#titania-content *{box-sizing:border-box}
+#titania-content,
+#titania-content{margin:0;min-height:100%}
+#titania-content{background:var(--bs-secondary-bg);color:var(--text);font-family:var(--bs-body-font-family);font-size:16px}
+#titania-content .topbar{position:sticky;top:0;z-index:20;display:flex;align-items:center;justify-content:space-between;gap:16px;padding:12px 18px;border-bottom:1px solid var(--line-soft);background:rgba(12,15,26,.95);backdrop-filter:blur(12px)}
+#titania-content .brand{display:flex;align-items:center;gap:10px;min-width:0}
+#titania-content .brand img{width:44px;height:40px;object-fit:contain}
+#titania-content .brand b{display:block;letter-spacing:1.2px;font-size:17px}
+#titania-content .brand span,
+#titania-content .muted{color:var(--muted)}
+#titania-content .brand span{display:block;font-size:13px;margin-top:2px}
+#titania-content .top-actions{display:flex;gap:8px}
+#titania-content .btn:not([class*="btn-"]){appearance:none;border:1px solid var(--line);background:var(--panel);color:var(--text);padding:10px 13px;border-radius:9px;text-decoration:none;cursor:pointer;font-weight:700;font-size:14px}
+#titania-content .btn:not([class*="btn-"]):hover{border-color:var(--violet)}
+#titania-content .btn:not([class*="btn-"]):disabled{opacity:.5;cursor:not-allowed}
+#titania-content .btn:not([class*="btn-"]).primary{background:var(--bs-secondary-bg);border-color:transparent;color:#fff}
+#titania-content .btn:not([class*="btn-"]).danger{border-color:rgba(var(--bs-danger-rgb),.45);color:var(--bs-danger)}
+#titania-content .wrap{width:min(1180px,calc(100% - 28px));margin:24px auto 50px}
+#titania-content .page-head{margin-bottom:14px}
+#titania-content .page-head h1,
+#titania-content .section-head h1{margin:0;font-size:30px}
+#titania-content .page-head p,
+#titania-content .section-head p{margin:6px 0 0;font-size:16px}
+#titania-content .panel{background:var(--panel);border:1px solid var(--line-soft);border-radius:14px;padding:18px;margin-bottom:14px}
+#titania-content .panel h2{margin:0 0 14px;font-size:23px}
+#titania-content .loading,
+#titania-content .error,
+#titania-content .notice{padding:16px;border-radius:11px;margin-bottom:14px}
+#titania-content .loading{text-align:center;color:var(--muted)}
+#titania-content .error{background:rgba(var(--bs-danger-rgb),.08);border:1px solid rgba(var(--bs-danger-rgb),.35);color:var(--bs-danger)}
+#titania-content .notice{background:rgba(var(--bs-warning-rgb),.08);border:1px solid rgba(var(--bs-warning-rgb),.35);color:var(--bs-warning)}
+#titania-content .create-grid,
+#titania-content .register-grid{display:grid;grid-template-columns:1.2fr 1fr 1fr 1fr auto;gap:12px;align-items:end}
+#titania-content .register-grid{grid-template-columns:minmax(260px,1fr) minmax(170px,220px) auto}
+#titania-content .create-grid label,
+#titania-content .register-grid label{display:grid;gap:6px;color:var(--muted);font-size:13px;font-weight:700}
+#titania-content .create-grid input:not(.form-control):not(.form-select):not(.form-check-input),
+#titania-content .create-grid select:not(.form-control):not(.form-select):not(.form-check-input),
+#titania-content .register-grid select:not(.form-control):not(.form-select):not(.form-check-input){width:100%;border:1px solid var(--line);background:var(--bs-body-bg);color:var(--text);border-radius:8px;padding:11px;font-size:15px}
+#titania-content .section-head{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;margin-bottom:12px}
+#titania-content .runs-list{display:grid;gap:10px}
+#titania-content .run-card{border:1px solid var(--line-soft);background:var(--panel2);border-radius:12px;padding:15px}
+#titania-content .run-card-head{display:flex;justify-content:space-between;align-items:flex-start;gap:14px}
+#titania-content .run-primary-editor{min-width:0;flex:1}
+#titania-content .run-heading-line{display:flex;align-items:center;gap:10px;min-width:0}
+#titania-content .run-title{font-size:21px;font-weight:800}
+#titania-content .run-title-input:not(.form-control){min-width:220px;max-width:520px;width:min(520px,55vw);appearance:none!important;-webkit-appearance:none!important;border:1px solid var(--line)!important;background:var(--bs-body-bg)!important;color:var(--text)!important;border-radius:8px!important;font-size:16px!important;font-weight:700!important;padding:9px 11px!important;outline:none!important}
+#titania-content .run-title-input:not(.form-control):focus{border-color:var(--violet)!important;box-shadow:0 0 0 2px rgba(var(--bs-primary-rgb),.15)!important}
+#titania-content .run-type-pill{display:inline-flex;align-items:center;padding:4px 10px;border-radius:999px;font-size:12px;font-weight:800;border:1px solid;white-space:nowrap}
+#titania-content .run-type-pill.mirage{color:#ff98a7;background:rgba(var(--bs-danger-rgb),.12);border-color:rgba(var(--bs-danger-rgb),.42)}
+#titania-content .run-type-pill.time-echo{color:var(--bs-primary);background:rgba(var(--bs-primary-rgb),.14);border-color:rgba(var(--bs-primary-rgb),.42)}
+#titania-content .run-public-label{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+#titania-content .run-public-title{font-size:21px;font-weight:800}
+#titania-content .run-meta{color:var(--muted);font-size:14px;margin-top:8px}
+#titania-content .run-meta-edit{display:flex;align-items:center;gap:7px;margin-top:8px;color:var(--muted)}
+#titania-content .run-picker-wrap{position:relative;display:inline-flex;align-items:center}
+#titania-content .run-meta-edit input:not(.form-control):not(.form-select):not(.form-check-input){border:1px solid var(--line)!important;background-color:var(--bs-body-bg)!important;color:var(--text)!important;border-radius:8px!important;font-size:14px!important;padding:8px 34px 8px 10px!important;outline:none!important;color-scheme:dark}
+#titania-content .run-date-input:not(.form-control){width:150px!important}
+#titania-content .run-time-input:not(.form-control){width:120px!important}
+#titania-content .run-meta-edit input:not(.form-control):not(.form-select):not(.form-check-input):focus{border-color:var(--violet)!important;box-shadow:0 0 0 2px rgba(var(--bs-primary-rgb),.15)!important}
+#titania-content .run-picker-icon{position:absolute;right:10px;top:50%;transform:translateY(-50%);width:16px;height:16px;color:var(--muted);pointer-events:none;display:flex;align-items:center;justify-content:center}
+#titania-content .run-picker-icon svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+#titania-content .run-date-input:not(.form-control)::-webkit-calendar-picker-indicator,
+#titania-content .run-time-input:not(.form-control)::-webkit-calendar-picker-indicator{position:absolute;right:0;width:34px;height:100%;opacity:0!important;cursor:pointer!important}
+#titania-content .run-note{margin-top:8px;color:var(--text);font-size:14px}
+#titania-content .autosave-state{min-width:48px;color:var(--green);font-size:12px}
+#titania-content .status{display:inline-flex;padding:4px 9px;border-radius:999px;font-size:12px;font-weight:800}
+#titania-content .status.open{color:var(--bs-success);background:rgba(var(--bs-success-rgb),.12);border:1px solid rgba(var(--bs-success-rgb),.3)}
+#titania-content .status.closed{color:var(--bs-warning);background:rgba(var(--bs-warning-rgb),.1);border:1px solid rgba(var(--bs-warning-rgb),.3)}
+#titania-content .status.ended{color:var(--bs-danger);background:rgba(var(--bs-danger-rgb),.1);border:1px solid rgba(var(--bs-danger-rgb),.28)}
+#titania-content .run-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+#titania-content .run-summary{margin-top:16px;padding-top:16px;border-top:1px solid var(--line-soft)}
+#titania-content .summary-counts{display:flex;gap:18px;color:var(--muted);font-size:14px;margin:0 0 14px}
+#titania-content .table-wrap{overflow:auto}
+#titania-content table{width:100%;border-collapse:collapse;font-size:14px}
+#titania-content th,
+#titania-content td{text-align:left;padding:9px;border-bottom:1px solid var(--line-soft)}
+#titania-content th{color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.5px}
+#titania-content .player-cell,
+#titania-content .player-row{display:flex;align-items:center;gap:9px}
+#titania-content .job-icon{width:28px;height:28px;object-fit:contain;flex:none}
+#titania-content .carry-switch{display:inline-flex;gap:5px;flex-wrap:wrap}
+#titania-content .carry-switch button:not(.btn){border:1px solid var(--line);background:var(--bs-body-bg);color:var(--muted);border-radius:7px;padding:6px 9px;font-size:12px;font-weight:800;cursor:pointer}
+#titania-content .carry-switch button:not(.btn).active.done{color:var(--bs-success);border-color:rgba(var(--bs-success-rgb),.45);background:rgba(var(--bs-success-rgb),.1)}
+#titania-content .carry-switch button:not(.btn).active.cancel{color:var(--bs-warning);border-color:rgba(var(--bs-warning-rgb),.45);background:rgba(var(--bs-warning-rgb),.1)}
+#titania-content .carry-switch button:not(.btn).active.mia{color:var(--bs-danger);border-color:rgba(var(--bs-danger-rgb),.45);background:rgba(var(--bs-danger-rgb),.1)}
+#titania-content .run-status-icon{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;min-width:22px;border-radius:50%;padding:0;font-family:var(--bs-body-font-family);font-size:15px;font-weight:900;line-height:1;vertical-align:middle;cursor:help}
+#titania-content .run-status-icon.done{color:var(--bs-success);border:1px solid rgba(var(--bs-success-rgb),.65);background:rgba(var(--bs-success-rgb),.12)}
+#titania-content .run-status-icon.cancel{color:var(--bs-danger);border:1px solid rgba(var(--bs-danger-rgb),.65);background:rgba(var(--bs-danger-rgb),.12)}
+#titania-content .run-status-icon.mia{color:var(--bs-warning);border:1px solid rgba(var(--bs-warning-rgb),.65);background:rgba(var(--bs-warning-rgb),.12)}
+#titania-content .public-register-form{margin-top:14px}
+#titania-content .registration-columns{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:18px}
+#titania-content .registration-columns>div{border:1px solid var(--line-soft);background:var(--panel2);border-radius:12px;padding:12px}
+#titania-content .registration-columns h3{margin:0 0 10px}
+#titania-content .count{color:var(--muted);font-size:12px}
+#titania-content .player-list{display:grid;gap:7px}
+#titania-content .player-row{padding:8px;border:1px solid var(--line-soft);border-radius:9px;background:var(--bs-body-bg)}
+#titania-content .empty{color:var(--muted);font-size:14px;padding:8px}
+#titania-content .select2-container{width:100%!important}
+#titania-content .select2-container--default .select2-selection--single{height:40px;background:var(--bs-body-bg);border:1px solid var(--line);border-radius:8px}
+#titania-content .select2-container--default .select2-selection--single .select2-selection__rendered{color:var(--text);line-height:38px}
+#titania-content .select2-container--default .select2-selection--single .select2-selection__arrow{height:38px}
+#titania-content .select2-dropdown{background:var(--bs-body-bg);border-color:var(--line)}
+#titania-content .select2-results__option{color:var(--text)}
+#titania-content .select2-container--default .select2-results__option--highlighted.select2-results__option--selectable{background:var(--bs-primary)}
+#titania-content .select2-search__field{background:var(--bs-body-bg)!important;color:var(--text)!important;border:1px solid var(--line)!important}
+#titania-content .select2-player{display:flex;align-items:center;gap:8px}
+#titania-content .select2-player img{width:24px;height:24px;object-fit:contain}
+#titania-content .public-closed-note{margin:14px 0 0}
+#titania-content .public-empty{text-align:center;padding:24px}
+#titania-content .create-grid input:not(.form-control):not(.form-select):not(.form-check-input)[type="date"],
+#titania-content .create-grid input:not(.form-control):not(.form-select):not(.form-check-input)[type="time"]{padding-right:36px!important;color-scheme:dark;background-color:var(--bs-body-bg)!important;background-repeat:no-repeat!important;background-position:right 10px center!important;background-size:16px 16px!important}
+#titania-content .create-grid input:not(.form-control):not(.form-select):not(.form-check-input)[type="date"]{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%238b93b0' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='3' y='5' width='18' height='16' rx='2' ry='2'/%3E%3Cline x1='16' y1='3' x2='16' y2='7'/%3E%3Cline x1='8' y1='3' x2='8' y2='7'/%3E%3Cline x1='3' y1='11' x2='21' y2='11'/%3E%3C/svg%3E")!important}
+#titania-content .create-grid input:not(.form-control):not(.form-select):not(.form-check-input)[type="time"]{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%238b93b0' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='9'/%3E%3Cpolyline points='12 7 12 12 15 14'/%3E%3C/svg%3E")!important}
+#titania-content .create-grid input:not(.form-control):not(.form-select):not(.form-check-input)[type="date"]::-webkit-calendar-picker-indicator,
+#titania-content .create-grid input:not(.form-control):not(.form-select):not(.form-check-input)[type="time"]::-webkit-calendar-picker-indicator{opacity:0!important;width:18px!important;height:18px!important;cursor:pointer!important}
+#titania-content .run-card-top{display:flex;align-items:center;justify-content:space-between;gap:18px;flex-wrap:wrap}
+#titania-content .run-identity{display:flex;align-items:center;gap:12px;min-width:0;flex-wrap:wrap}
+#titania-content .run-type-heading{margin:0;font-size:29px;line-height:1;font-weight:900;letter-spacing:.5px;color:var(--text);text-transform:uppercase}
+#titania-content .run-type-heading.mirage,
+#titania-content .run-type-heading.time-echo{color:var(--text)}
+#titania-content .run-public-link{color:var(--bs-primary);text-decoration:none;font-weight:700;font-size:14px}
+#titania-content .run-public-link:hover{text-decoration:underline;color:#d6d1ff}
+#titania-content .run-actions{margin-left:auto;justify-content:flex-end}
+#titania-content .btn:not([class*="btn-"]).danger-solid{background:var(--red);border-color:var(--red);color:#fff}
+#titania-content .btn:not([class*="btn-"]).danger-solid:hover{background:#d94d62;border-color:#d94d62;box-shadow:0 0 0 1px rgba(var(--bs-danger-rgb),0.333)}
+#titania-content .run-edit-row{display:grid;grid-template-columns:minmax(260px,1fr) 150px auto 120px auto;align-items:center;gap:10px;margin-top:14px;max-width:100%}
+#titania-content .run-edit-row .run-title-input:not(.form-control){width:100%!important;max-width:none!important;min-width:0}
+#titania-content .run-edit-row .run-picker-wrap{width:100%}
+#titania-content .run-edit-row .run-date-input:not(.form-control),
+#titania-content .run-edit-row .run-time-input:not(.form-control){width:100%!important;appearance:none!important;-webkit-appearance:none!important;border:1px solid var(--line)!important;background-color:var(--bs-body-bg)!important;color:var(--text)!important;border-radius:8px!important;font-size:14px!important;padding:8px 34px 8px 10px!important;outline:none!important;color-scheme:dark}
+#titania-content .run-edit-row .run-date-input:not(.form-control):focus,
+#titania-content .run-edit-row .run-time-input:not(.form-control):focus{border-color:var(--violet)!important;box-shadow:0 0 0 2px rgba(var(--bs-primary-rgb),.15)!important}
+#titania-content .run-edit-separator{color:var(--muted);text-align:center}
+#titania-content .run-card .run-summary{margin-top:16px}
+#titania-content .run-card .status{flex:none}
+#titania-content .public-run-card{padding:18px 20px}
+#titania-content .public-run-top{display:flex;align-items:center;justify-content:space-between;gap:18px}
+#titania-content .public-run-heading{display:flex;align-items:center;gap:12px;min-width:0}
+#titania-content .public-run-type{margin:0;font-size:31px;line-height:1;font-weight:900;letter-spacing:.4px;text-transform:uppercase;color:var(--text)!important}
+#titania-content .public-run-datetime{color:#9ba5c7;font-size:14px;white-space:nowrap}
+#titania-content .public-run-title{margin-top:16px;font-size:18px;font-weight:400;line-height:1.35;color:var(--text)}
+#titania-content .public-run-card .public-register-form{margin-top:22px}
+#titania-content .public-run-card .register-grid{grid-template-columns:minmax(0,1fr) minmax(180px,220px) auto;gap:12px;align-items:end}
+#titania-content .public-run-card .registration-columns{margin-top:18px}
+#titania-content,
+#titania-content{max-width:100%;overflow-x:hidden}
+#titania-content .topbar,
+#titania-content .wrap,
+#titania-content .panel,
+#titania-content .runs-list,
+#titania-content .run-card,
+#titania-content .create-grid,
+#titania-content .register-grid,
+#titania-content .registration-columns,
+#titania-content .run-card-top,
+#titania-content .run-identity,
+#titania-content .run-actions,
+#titania-content .run-edit-row,
+#titania-content .run-summary,
+#titania-content .table-wrap{min-width:0;max-width:100%}
+#titania-content .brand>div{min-width:0}
+#titania-content .brand b,
+#titania-content .brand span{overflow-wrap:anywhere}
+#titania-content .create-grid label,
+#titania-content .register-grid label,
+#titania-content .registration-columns>div{min-width:0}
+#titania-content .create-grid input:not(.form-control):not(.form-select):not(.form-check-input),
+#titania-content .create-grid select:not(.form-control):not(.form-select):not(.form-check-input),
+#titania-content .register-grid select:not(.form-control):not(.form-select):not(.form-check-input),
+#titania-content .run-title-input:not(.form-control),
+#titania-content .run-date-input:not(.form-control),
+#titania-content .run-time-input:not(.form-control){min-width:0;max-width:100%}
+#titania-content .select2-container{max-width:100%!important}
+#titania-content .table-wrap{width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch}
+@media(max-width:1024px){#titania-content .wrap{width:calc(100% - 24px);margin:18px auto 40px}
+#titania-content .topbar{padding:11px 14px}
+#titania-content .panel{padding:16px}
+body[data-guild-runs-page="organizer"] #titania-content .create-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+body[data-guild-runs-page="organizer"] #titania-content .create-grid .btn:not([class*="btn-"]){grid-column:1/-1;width:100%}
+body[data-guild-runs-page="organizer"] #titania-content .run-card-top{align-items:flex-start}
+body[data-guild-runs-page="organizer"] #titania-content .run-identity{flex:1 1 100%}
+body[data-guild-runs-page="organizer"] #titania-content .run-actions{width:100%;margin-left:0;justify-content:flex-start}
+body[data-guild-runs-page="organizer"] #titania-content .run-edit-row{grid-template-columns:minmax(0,1fr) 150px auto 120px}
+body[data-guild-runs-page="organizer"] #titania-content .run-edit-row .autosave-state{grid-column:1/-1}
+body[data-guild-runs-page="organizer"] #titania-content table{min-width:660px}
+body[data-guild-runs-page="public"] #titania-content .public-run-card .register-grid{grid-template-columns:minmax(0,1fr) minmax(170px,220px) auto}
+
+}
+@media(max-width:760px){#titania-content .wrap{width:calc(100% - 20px);margin:16px auto 32px}
+#titania-content .topbar{position:relative;display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:start;gap:10px;padding:10px 12px}
+#titania-content .brand{min-width:0;gap:8px}
+#titania-content .brand img{width:38px;height:36px}
+#titania-content .brand b{font-size:15px;line-height:1.2;letter-spacing:.8px}
+#titania-content .brand span{font-size:12px}
+#titania-content .top-actions{align-self:start}
+#titania-content .top-actions .btn:not([class*="btn-"]){padding:8px 10px;font-size:12px;white-space:nowrap}
+#titania-content .page-head h1,
+#titania-content .section-head h1{font-size:27px}
+#titania-content .page-head p,
+#titania-content .section-head p{font-size:14px;line-height:1.35}
+#titania-content .panel{padding:13px;border-radius:12px}
+#titania-content .panel h2{font-size:21px}
+body[data-guild-runs-page="organizer"] #titania-content .create-grid{grid-template-columns:1fr}
+body[data-guild-runs-page="organizer"] #titania-content .create-grid .btn:not([class*="btn-"]){grid-column:auto}
+body[data-guild-runs-page="organizer"] #titania-content .run-card{padding:13px}
+body[data-guild-runs-page="organizer"] #titania-content .run-card-top{display:block}
+body[data-guild-runs-page="organizer"] #titania-content .run-identity{width:100%;gap:8px 10px}
+body[data-guild-runs-page="organizer"] #titania-content .run-type-heading{font-size:25px}
+body[data-guild-runs-page="organizer"] #titania-content .run-public-link{flex-basis:100%;width:auto;font-size:13px}
+body[data-guild-runs-page="organizer"] #titania-content .run-actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:12px}
+body[data-guild-runs-page="organizer"] #titania-content .run-actions .btn:not([class*="btn-"]){width:100%;padding:9px 8px;font-size:12px}
+body[data-guild-runs-page="organizer"] #titania-content .run-actions .danger-solid{grid-column:1/-1}
+body[data-guild-runs-page="organizer"] #titania-content .run-edit-row{grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:8px;margin-top:12px}
+body[data-guild-runs-page="organizer"] #titania-content .run-edit-row .run-title-input:not(.form-control){grid-column:1/-1;width:100%!important}
+body[data-guild-runs-page="organizer"] #titania-content .run-edit-row .run-picker-wrap{width:100%}
+body[data-guild-runs-page="organizer"] #titania-content .run-edit-row .run-date-input:not(.form-control),
+body[data-guild-runs-page="organizer"] #titania-content .run-edit-row .run-time-input:not(.form-control){width:100%!important}
+body[data-guild-runs-page="organizer"] #titania-content .run-edit-separator{display:none}
+body[data-guild-runs-page="organizer"] #titania-content .run-edit-row .autosave-state{grid-column:1/-1}
+#titania-content .summary-counts{flex-wrap:wrap;gap:8px 16px}
+body[data-guild-runs-page="organizer"] #titania-content table{min-width:650px}
+body[data-guild-runs-page="public"] #titania-content .public-run-card{padding:15px}
+body[data-guild-runs-page="public"] #titania-content .public-run-top{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;flex-wrap:wrap}
+body[data-guild-runs-page="public"] #titania-content .public-run-heading{align-items:center!important;gap:10px}
+body[data-guild-runs-page="public"] #titania-content .public-run-type{font-size:25px}
+body[data-guild-runs-page="public"] #titania-content .public-run-datetime{width:100%;text-align:left;white-space:normal;font-size:13px}
+body[data-guild-runs-page="public"] #titania-content .public-run-title{margin-top:12px;font-size:16px}
+body[data-guild-runs-page="public"] #titania-content .public-run-card .register-grid{grid-template-columns:1fr}
+body[data-guild-runs-page="public"] #titania-content .public-register-form .btn:not([class*="btn-"]){width:100%}
+body[data-guild-runs-page="public"] #titania-content .registration-columns{grid-template-columns:1fr}
+
+}
+@media(max-width:420px){#titania-content .wrap{width:calc(100% - 16px);margin-top:12px}
+#titania-content .topbar{padding:9px 10px;gap:8px}
+#titania-content .brand img{width:34px;height:32px}
+#titania-content .brand b{font-size:14px;letter-spacing:.5px}
+#titania-content .top-actions .btn:not([class*="btn-"]){padding:7px 8px;font-size:11px}
+#titania-content .page-head h1,
+#titania-content .section-head h1{font-size:25px}
+#titania-content .panel{padding:11px}
+#titania-content .run-card{padding:12px}
+body[data-guild-runs-page="organizer"] #titania-content .run-actions{grid-template-columns:1fr}
+body[data-guild-runs-page="organizer"] #titania-content .run-actions .danger-solid{grid-column:auto}
+body[data-guild-runs-page="organizer"] #titania-content .run-edit-row{grid-template-columns:1fr}
+body[data-guild-runs-page="organizer"] #titania-content .run-edit-row .run-title-input:not(.form-control),
+body[data-guild-runs-page="organizer"] #titania-content .run-edit-row .autosave-state{grid-column:auto}
+body[data-guild-runs-page="public"] #titania-content .public-run-card{padding:13px}
+body[data-guild-runs-page="public"] #titania-content .public-run-type{font-size:24px}
+#titania-content .registration-columns>div{padding:10px}
+#titania-content .player-row{padding:8px 9px}
+
+}
+#titania-content .page-head-actions{display:flex;align-items:flex-end;justify-content:space-between;gap:16px}
+#titania-content .previous-run-meta{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:14px;padding:10px 12px;border:1px solid var(--line-soft);border-radius:9px;background:var(--bs-body-bg)}
+#titania-content .previous-run-meta strong{font-size:15px}
+#titania-content .previous-run-meta span{color:var(--muted);font-size:13px;white-space:nowrap}
+#titania-content .history-carry-status{display:inline-flex;padding:4px 8px;border-radius:999px;font-size:11px;font-weight:800;border:1px solid var(--line)}
+#titania-content .history-carry-status.done{color:var(--bs-success);border-color:rgba(var(--bs-success-rgb),.45);background:rgba(var(--bs-success-rgb),.1)}
+#titania-content .history-carry-status.cancel{color:var(--bs-warning);border-color:rgba(var(--bs-warning-rgb),.45);background:rgba(var(--bs-warning-rgb),.1)}
+#titania-content .history-carry-status.mia{color:var(--bs-danger);border-color:rgba(var(--bs-danger-rgb),.45);background:rgba(var(--bs-danger-rgb),.1)}
+@media(max-width:760px){#titania-content .page-head-actions{align-items:flex-start;flex-direction:column}
+#titania-content .previous-run-meta{align-items:flex-start;flex-direction:column}
+#titania-content .previous-run-meta span{white-space:normal}
+}
+#titania-content .btn:not([class*="btn-"]){
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  min-height:40px;
+  line-height:1;
+  white-space:nowrap;
+}
+#titania-content .create-grid input:not(.form-control):not(.form-select):not(.form-check-input),
+#titania-content .create-grid select:not(.form-control):not(.form-select):not(.form-check-input),
+#titania-content .create-grid > .btn:not([class*="btn-"]){
+  height:42px;
+  min-height:42px;
+}
+#titania-content .create-grid > .btn:not([class*="btn-"]){
+  align-self:end;
+  padding-top:0;
+  padding-bottom:0;
+}
+#titania-content .run-actions .btn:not([class*="btn-"]),
+#titania-content .top-actions .btn:not([class*="btn-"]),
+#titania-content .section-head-actions .btn:not([class*="btn-"]){
+  min-height:40px;
+}
+#titania-content .section-head-actions{
+  display:flex;
+  align-items:center;
+  justify-content:flex-end;
+  gap:10px;
+  flex-wrap:wrap;
+}
+#titania-content .section-head-actions .muted{
+  white-space:nowrap;
+}
+@media(max-width:760px){#titania-content .section-head-actions{width:100%;justify-content:space-between}
+
+}
+#titania-content .public-run-card .register-grid{
+  align-items:end;
+}
+#titania-content .public-run-card .register-grid > label{
+  min-width:0;
+}
+#titania-content .public-run-card .register-grid > .btn:not([class*="btn-"]){
+  height:40px;
+  min-height:40px;
+  align-self:end;
+  padding-top:0;
+  padding-bottom:0;
+}
+#titania-content .public-run-card .register-grid select:not(.form-control):not(.form-select):not(.form-check-input){
+  height:40px;
+  min-height:40px;
+}
+#titania-content .public-run-card .select2-container .select2-selection--single{
+  height:40px!important;
+}
+#titania-content .public-run-card .select2-container--default .select2-selection--single .select2-selection__rendered{
+  line-height:38px!important;
+}
+#titania-content .public-run-card .select2-container--default .select2-selection--single .select2-selection__arrow{
+  height:38px!important;
+}
+

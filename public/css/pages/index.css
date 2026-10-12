@@ -1,0 +1,863 @@
+#titania-content{
+      --bg:var(--bs-body-bg);
+      --panel:var(--bs-secondary-bg);
+      --panel-2:var(--bs-tertiary-bg);
+      --line:var(--bs-border-color);
+      --line-soft:var(--bs-border-color);
+      --text:var(--bs-body-color);
+      --muted:var(--bs-secondary-color);
+      --muted-2:var(--bs-secondary-color);
+      --violet:var(--bs-primary);
+      --violet-glow:rgba(var(--bs-primary-rgb),0.333);
+      --teal:var(--bs-info);
+      --teal-glow:rgba(var(--bs-info-rgb),0.333);
+      --amber:var(--bs-warning);
+      --red:var(--bs-danger);
+      --green:var(--bs-success);
+      --dungeon:var(--bs-warning);
+      --dungeon-glow:#ff8f5e55;
+    }
+#titania-content *{box-sizing:border-box;}
+#titania-content,
+#titania-content{margin:0;padding:0;min-height:100%;}
+#titania-content{
+      background:var(--bs-secondary-bg);
+      color:var(--text);
+      font-family:var(--bs-body-font-family);
+      min-height:100vh;
+    }
+#titania-content button,
+#titania-content input:not(.form-control):not(.form-select):not(.form-check-input),
+#titania-content select:not(.form-control):not(.form-select):not(.form-check-input),
+#titania-content textarea:not(.form-control):not(.form-select):not(.form-check-input){font:inherit;}
+#titania-content button:not(.btn){color:inherit;}
+#titania-content ::selection{background:var(--violet-glow);}
+#titania-content [hidden]{display:none!important;}
+#titania-content .app{display:flex;min-height:100vh;}
+#titania-content .app-inner{width:100%;min-width:0;}
+#titania-content .topbar{
+      position:sticky;top:0;z-index:30;
+      display:flex;align-items:center;justify-content:space-between;
+      gap:16px;padding:14px 22px;flex-wrap:wrap;
+      background:var(--bs-body-bg);backdrop-filter:blur(10px);
+      border-bottom:1px solid var(--line-soft);
+    }
+#titania-content .brand{display:flex;align-items:center;gap:12px;min-width:320px;}
+#titania-content .brand-logo{width:58px;height:50px;object-fit:contain;filter:drop-shadow(0 0 10px rgba(222,128,193,.32));flex:none;}
+#titania-content .brand-text h1{
+      font-family:var(--bs-body-font-family);font-weight:800;font-size:19px;letter-spacing:2px;
+      margin:0;background:var(--bs-secondary-bg);
+      -webkit-background-clip:text;background-clip:text;color:transparent;
+      white-space:nowrap;
+    }
+#titania-content .brand-text p{margin:0;font-size:11px;color:var(--muted-2);letter-spacing:1.5px;text-transform:none;}
+#titania-content .event-tabs{
+      display:flex;gap:6px;background:var(--panel-2);border:1px solid var(--line-soft);
+      border-radius:12px;padding:4px;width:fit-content;
+    }
+#titania-content .event-tab{
+      appearance:none;border:none;background:transparent;color:var(--muted);
+      font-size:14px;font-weight:600;cursor:pointer;padding:9px 17px;
+      border-radius:9px;display:flex;align-items:center;gap:7px;transition:.12s ease;
+      white-space:nowrap;
+    }
+#titania-content .event-tab:hover{color:var(--text);}
+#titania-content .event-tab.active{background:var(--panel);color:var(--text);box-shadow:0 1px 0 var(--line-soft) inset;}
+#titania-content .event-tab.active.db{color:#7ee8db;}
+#titania-content .event-tab.active.mm{color:#9f8cff;}
+#titania-content .event-tab.active.gl{color:var(--bs-primary);}
+#titania-content .event-tab.active.sg{color:#ff8f9e;}
+#titania-content .event-tab.active.pz{color:var(--bs-warning);}
+#titania-content .stats{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;}
+#titania-content .stat-chip{
+      display:flex;flex-direction:column;align-items:center;justify-content:center;
+      padding:6px 14px;border-radius:10px;background:var(--panel);border:1px solid var(--line-soft);
+      min-width:72px;
+    }
+#titania-content .stat-chip b{font-family:var(--bs-body-font-family);font-size:17px;line-height:1.1;}
+#titania-content .stat-chip span{font-size:10.5px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;}
+#titania-content .stat-chip.warn{border-color:rgba(var(--bs-danger-rgb),0.333);}
+#titania-content .stat-chip.warn b{color:var(--bs-danger);}
+#titania-content .actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap;}
+#titania-content .btn:not([class*="btn-"]){
+      font-size:14px;font-weight:600;letter-spacing:.3px;border-radius:9px;
+      border:1px solid var(--line-soft);background:var(--panel);color:var(--text);
+      padding:9px 14px;cursor:pointer;transition:.15s ease;
+      display:inline-flex;align-items:center;justify-content:center;gap:6px;white-space:nowrap;
+    }
+#titania-content .btn:not([class*="btn-"]):hover{border-color:var(--violet);box-shadow:0 0 0 1px var(--violet-glow);}
+#titania-content .btn:not([class*="btn-"]):disabled{opacity:.45;cursor:not-allowed;box-shadow:none;}
+#titania-content .btn:not([class*="btn-"]).danger:hover{border-color:var(--red);box-shadow:0 0 0 1px rgba(var(--bs-danger-rgb),0.333);}
+#titania-content .btn:not([class*="btn-"]).primary{background:var(--bs-secondary-bg);border:none;color:#fff;}
+#titania-content .btn:not([class*="btn-"]).primary:hover{box-shadow:0 0 16px var(--violet-glow);}
+#titania-content .btn:not([class*="btn-"]).teal{background:var(--bs-secondary-bg);border:none;color:#04211d;}
+#titania-content .btn:not([class*="btn-"]).small{padding:7px 11px;font-size:12.5px;border-radius:7px;}
+#titania-content .btn:not([class*="btn-"]).icon-only{width:34px;padding:8px;}
+#titania-content .public-toggle{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding-left:10px;padding-right:11px;}
+#titania-content .public-toggle .publish-switch{width:30px;height:16px;border-radius:999px;background:#3a425b;position:relative;flex:none;box-shadow:inset 0 0 0 1px #ffffff10;transition:.18s ease;}
+#titania-content .public-toggle .publish-switch::after{content:'';position:absolute;width:12px;height:12px;left:2px;top:2px;border-radius:50%;background:#aeb5ca;transition:.18s ease;}
+#titania-content .public-toggle.on{border-color:rgba(var(--bs-success-rgb),0.400);color:var(--bs-success);background:#102019;}
+#titania-content .public-toggle.on .publish-switch{background:#2a9c4f;}
+#titania-content .public-toggle.on .publish-switch::after{left:16px;background:#eaffef;}
+#titania-content .public-toggle.off{color:var(--bs-body-color);}
+#titania-content .save-flag{font-size:11.5px;color:var(--muted-2);display:flex;align-items:center;gap:5px;min-width:64px;}
+#titania-content .save-flag .dot{width:6px;height:6px;border-radius:50%;background:var(--muted-2);}
+#titania-content .save-flag.ok{color:var(--green);}
+#titania-content .save-flag.ok .dot{background:var(--green);box-shadow:0 0 5px var(--green);}
+#titania-content .save-flag.busy{color:var(--amber);}
+#titania-content .save-flag.busy .dot{background:var(--amber);box-shadow:0 0 5px var(--amber);animation:pulse 1s infinite;}
+#titania-content .save-flag.err{color:var(--red);}
+#titania-content .save-flag.err .dot{background:var(--red);box-shadow:0 0 5px var(--red);}
+@keyframes pulse{50%{opacity:.35;}}
+#titania-content .body-wrap{display:flex;width:100%;align-items:flex-start;}
+#titania-content .body-wrap.dashboard-mode .sidebar{display:none;}
+#titania-content .body-wrap.dashboard-mode .main{width:100%;}
+#titania-content .body-wrap.pool-hidden .sidebar{display:none!important;}
+#titania-content .body-wrap.pool-hidden .main{width:100%;}
+#titania-content .sidebar{
+      width:340px;min-width:340px;position:sticky;top:72px;height:calc(100vh - 72px);
+      display:flex;flex-direction:column;
+    }
+#titania-content .sidebar-head{padding:14px 16px 10px;border-bottom:1px solid var(--line-soft);}
+#titania-content .sidebar-title-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
+#titania-content .sidebar-head h2{margin:0;font-size:13.5px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);font-weight:600;}
+#titania-content .search-box{position:relative;margin-bottom:10px;}
+#titania-content .search-box input:not(.form-control):not(.form-select):not(.form-check-input){
+      width:100%;padding:9px 12px 9px 32px;border-radius:9px;border:1px solid var(--line-soft);
+      background:var(--panel);color:var(--text);font-size:14.5px;outline:none;
+    }
+#titania-content .search-box input:not(.form-control):not(.form-select):not(.form-check-input):focus{border-color:var(--violet);}
+#titania-content .search-box svg{position:absolute;left:10px;top:50%;transform:translateY(-50%);width:14px;height:14px;color:var(--muted-2);}
+#titania-content .filter-row{display:flex;gap:6px;flex-wrap:wrap;}
+#titania-content .pill:not(.btn){
+      font-size:12.5px;padding:5px 10px;border-radius:20px;border:1px solid var(--line-soft);
+      background:var(--panel);color:var(--muted);cursor:pointer;user-select:none;transition:.15s;
+      font-weight:600;letter-spacing:.2px;
+    }
+#titania-content .pill:not(.btn).active{background:var(--violet);border-color:var(--violet);color:#fff;}
+#titania-content .pill:not(.btn):hover{border-color:var(--violet);}
+#titania-content .class-select{
+      width:100%;margin-top:8px;padding:8px 10px;border-radius:9px;border:1px solid var(--line-soft);
+      background:var(--panel);color:var(--text);font-size:14px;outline:none;
+    }
+#titania-content .sort-row{display:flex;align-items:center;gap:6px;margin-top:8px;flex-wrap:wrap;}
+#titania-content .sort-label{font-size:11.5px;color:var(--muted-2);text-transform:uppercase;letter-spacing:.5px;margin-right:2px;}
+#titania-content .sort-pill{display:flex;align-items:center;gap:3px;}
+#titania-content .member-list{flex:1;overflow-y:auto;padding:10px 12px 100px;}
+#titania-content .member-list::-webkit-scrollbar,
+#titania-content .class-breakdown::-webkit-scrollbar,
+#titania-content .dash-manage-table::-webkit-scrollbar{width:8px;}
+#titania-content .member-list::-webkit-scrollbar-thumb,
+#titania-content .class-breakdown::-webkit-scrollbar-thumb,
+#titania-content .dash-manage-table::-webkit-scrollbar-thumb{background:var(--bs-border-color);border-radius:8px;}
+#titania-content .member-card{
+      display:flex;align-items:center;gap:10px;padding:9px 10px;margin-bottom:6px;
+      background:var(--panel);border:1px solid var(--line-soft);border-radius:10px;
+      cursor:grab;transition:.12s ease;position:relative;
+    }
+#titania-content .member-card:hover{border-color:var(--violet);transform:translateX(2px);}
+#titania-content .member-card.selected{border-color:var(--teal);box-shadow:0 0 0 1px var(--teal-glow);background:#152321;}
+#titania-content .member-card.assigned{opacity:.42;cursor:default;}
+#titania-content .member-card.assigned:hover{transform:none;border-color:var(--line-soft);}
+#titania-content .member-card.dragging{opacity:.3;}
+#titania-content .class-dot{width:9px;height:9px;border-radius:50%;flex:none;box-shadow:0 0 6px currentColor;}
+#titania-content .title-icon{display:inline-block;width:32px;height:32px;min-width:32px;flex:none;background-repeat:no-repeat;background-position:center;background-size:140% 140%;vertical-align:middle;}
+#titania-content .slot .title-icon{width:32px;height:32px;min-width:32px;}
+#titania-content .m-info{flex:1;min-width:0;}
+#titania-content .m-name{font-size:14.5px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+#titania-content .m-sub{font-size:11.5px;color:var(--muted);display:flex;gap:6px;margin-top:1px;flex-wrap:wrap;}
+#titania-content .m-gr{font-family:var(--bs-body-font-family);font-size:12.5px;color:var(--amber);font-weight:600;flex:none;}
+#titania-content .status-tag{font-size:9.5px;padding:2px 6px;border-radius:5px;font-weight:700;letter-spacing:.4px;flex:none;}
+#titania-content .tag-main{background:rgba(var(--bs-primary-rgb),0.173);color:#b3a8fb;}
+#titania-content .tag-sub{background:rgba(var(--bs-info-rgb),0.173);color:#7ee8db;}
+#titania-content .tag-elite{background:rgba(var(--bs-warning-rgb),0.157);color:var(--bs-warning);}
+#titania-content .tag-dungeon{background:#ff8f5e28;color:var(--bs-warning);}
+#titania-content .tag-siege{background:rgba(var(--bs-danger-rgb),0.141);color:var(--bs-danger);}
+#titania-content .tag-unassigned{background:var(--bs-secondary-color);color:var(--muted);}
+#titania-content .assigned-flag{font-size:10.5px;color:var(--muted-2);font-style:italic;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:120px;}
+#titania-content .card-tools{display:flex;gap:2px;flex:none;}
+#titania-content .icon-btn:not(.btn){
+      width:22px;height:22px;border-radius:6px;border:none;background:transparent;color:var(--muted-2);
+      cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:11px;transition:.12s;
+    }
+#titania-content .icon-btn:not(.btn):hover{background:var(--panel-2);color:var(--text);}
+#titania-content .icon-btn:not(.btn).del:hover{background:var(--red);color:#fff;}
+#titania-content .empty-note{text-align:center;color:var(--muted-2);font-size:12px;padding:30px 10px;}
+#titania-content .class-breakdown{border-top:1px solid var(--line-soft);padding:10px 14px 12px;flex:none;max-height:160px;overflow-y:auto;}
+#titania-content .cb-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;font-size:11.5px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;font-weight:600;}
+#titania-content .cb-row{display:flex;align-items:center;gap:8px;font-size:13.5px;padding:3px 0;}
+#titania-content .cb-name{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--text);}
+#titania-content .cb-count{font-family:var(--bs-body-font-family);font-size:12.5px;color:var(--muted);flex:none;}
+#titania-content .main{flex:1;padding:22px 26px 80px;min-width:0;}
+#titania-content .hint-bar{
+      display:flex;align-items:flex-start;gap:10px;padding:10px 14px;margin-bottom:20px;
+      background:var(--panel);border:1px solid var(--line-soft);border-radius:10px;
+      font-size:14px;color:var(--muted);line-height:1.55;
+    }
+#titania-content .event-action-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:0 0 14px;padding:0 2px;}
+#titania-content .event-action-row[hidden]{display:none!important;}
+#titania-content .event-action-row .btn:not([class*="btn-"]){min-height:34px;}
+#titania-content .event-last-updated{margin-left:auto;display:flex;align-items:center;gap:7px;min-height:34px;padding:0 4px;color:var(--muted);font-family:var(--bs-body-font-family);white-space:nowrap;}
+#titania-content .event-last-updated-label{font-size:10px;font-weight:800;letter-spacing:.55px;text-transform:uppercase;color:var(--muted-2);}
+#titania-content .event-last-updated-value{font-size:11px;color:var(--muted);}
+#titania-content .hint-bar svg{width:15px;height:15px;color:var(--violet);flex:none;margin-top:2px;}
+#titania-content .hint-bar b{color:var(--text);}
+#titania-content .section-head{display:flex;align-items:center;gap:12px;margin:0 0 14px;}
+#titania-content .section-head:not(:first-child){margin-top:34px;}
+#titania-content .section-title{
+      font-family:var(--bs-body-font-family);font-weight:700;font-size:17px;letter-spacing:1.5px;text-transform:uppercase;
+      display:flex;align-items:center;gap:8px;white-space:nowrap;
+    }
+#titania-content .section-title.main-bf{color:var(--bs-primary);}
+#titania-content .section-title.sub-bf{color:#8fe8dd;}
+#titania-content .section-title.elite-bf{color:var(--bs-warning);}
+#titania-content .section-title.dungeon-bf{color:var(--bs-warning);}
+#titania-content .section-line{flex:1;height:1px;background:var(--bs-secondary-bg);}
+#titania-content .section-note{font-size:12px;color:var(--muted-2);white-space:nowrap;}
+#titania-content .team-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:14px;}
+#titania-content .main-raids{display:flex;flex-direction:column;gap:18px;}
+#titania-content .polarity-star-raids{margin-bottom:24px;}
+#titania-content .main-raid-block{min-width:0;}
+#titania-content .main-raid-head{display:flex;align-items:center;gap:10px;margin:0;padding:12px 16px;}
+#titania-content .main-raid-title{font-size:12.5px;font-weight:700;letter-spacing:.75px;text-transform:uppercase;color:var(--bs-primary);white-space:nowrap;}
+#titania-content .raid-mode-toggle{display:inline-flex;align-items:center;gap:5px;min-width:70px;justify-content:center;border:1px solid var(--line);border-radius:999px;padding:5px 9px;background:var(--bs-body-bg);color:var(--text);font:700 11.5px 'IBM Plex Sans',sans-serif;letter-spacing:.4px;cursor:pointer;transition:.15s;white-space:nowrap;}
+#titania-content .raid-mode-toggle:hover{border-color:#59658c;background:#151c31;}
+#titania-content .raid-mode-toggle.atk{color:var(--bs-warning);border-color:#8a6a20;background:#1b180f;}
+#titania-content .raid-mode-toggle.def{color:#73b7ff;border-color:#315b85;background:#0e1724;}
+#titania-content .main-raid-line{height:1px;flex:1;background:var(--line-soft);min-width:20px;}
+#titania-content .raid-commander-control,
+#titania-content .raid-leader-control{display:flex;align-items:center;gap:7px;color:var(--muted);font-size:12px;white-space:nowrap;}
+#titania-content .raid-commander-control b,
+#titania-content .raid-leader-control b{font-weight:600;color:var(--bs-warning);}
+#titania-content .raid-commander-drop,
+#titania-content .raid-leader-drop{min-width:180px;max-width:260px;display:flex;align-items:center;gap:7px;background:var(--bs-body-bg);color:var(--muted);border:1px solid #3a466d;border-radius:7px;padding:7px 10px;font:600 12px 'IBM Plex Sans',sans-serif;outline:none;cursor:default;transition:.15s;}
+#titania-content .raid-commander-drop .raid-commander-icon{width:18px;height:18px;font-size:18px;line-height:18px;color:var(--bs-warning);flex:none;display:inline-flex;align-items:center;justify-content:center;}
+#titania-content .raid-leader-drop .raid-leader-icon{width:22px;height:22px;font-size:22px;line-height:22px;color:var(--bs-warning);flex:none;display:inline-flex;align-items:center;justify-content:center;}
+#titania-content .raid-commander-drop-name,
+#titania-content .raid-leader-drop-name{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--text);}
+#titania-content .raid-commander-drop.empty .raid-commander-drop-name,
+#titania-content .raid-leader-drop.empty .raid-leader-drop-name{color:var(--muted-2);font-weight:500;}
+#titania-content .raid-commander-drop.dragover,
+#titania-content .raid-leader-drop.dragover{border-color:var(--bs-warning);background:#1b1a11;box-shadow:0 0 0 2px rgba(var(--bs-warning-rgb),0.133);}
+#titania-content .raid-commander-drop.invalid,
+#titania-content .raid-leader-drop.invalid{border-color:#ff6b7a;box-shadow:0 0 0 2px #ff6b7a22;}
+#titania-content .slot-raid-commander-mark,
+#titania-content .slot-raid-leader-mark{display:inline-flex;align-items:center;justify-content:center;flex:none;margin-left:8px;margin-right:2px;color:var(--bs-warning);}
+#titania-content .slot-raid-commander-mark .raid-commander-slot-icon{font-size:18px;line-height:18px;}
+#titania-content .slot-raid-leader-mark .raid-leader-slot-icon{font-size:20px;line-height:20px;}
+#titania-content .main-raid-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;}
+#titania-content .main-raid-grid.five{grid-template-columns:repeat(5,minmax(0,1fr));}
+#titania-content .pz-star-raid-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:14px;}
+#titania-content .pz-normal-raid-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;}
+#titania-content .pz-dungeon-group{display:flex;flex-direction:column;gap:12px;margin:0 0 24px;}
+#titania-content .pz-dungeon-group-head{display:flex;align-items:center;gap:10px;min-height:46px;padding:8px 10px;border-bottom:1px solid var(--line-soft);background:transparent;}
+#titania-content .pz-dungeon-group-title{font-family:var(--bs-body-font-family);font-size:17px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:var(--bs-warning);white-space:nowrap;}
+#titania-content .pz-dungeon-group-team{font-size:11.5px;font-weight:800;letter-spacing:.5px;text-transform:uppercase;color:var(--bs-primary);background:#15182b;border:1px solid var(--bs-border-color);border-radius:2px;padding:7px 9px;white-space:nowrap;}
+#titania-content .pz-dungeon-group-line{height:1px;flex:1;background:var(--line-soft);min-width:20px;}
+#titania-content .pz-dungeon-group-head .raid-commander-control{margin-left:auto;}
+#titania-content .pz-dungeon-member-count{font-family:var(--bs-body-font-family);font-size:11.5px;color:var(--muted);white-space:nowrap;}
+#titania-content .pz-dungeon-group-actions{display:flex;gap:7px;align-items:center;flex-wrap:wrap;}
+#titania-content .pz-dungeon-team-grid{display:grid;gap:14px;}
+#titania-content .pz-dungeon-team-grid.cols-5{grid-template-columns:repeat(5,minmax(0,1fr));}
+#titania-content .pz-dungeon-team-grid.cols-4{grid-template-columns:repeat(4,minmax(0,1fr));}
+#titania-content .raid-commander-marker{display:inline-flex;align-items:center;gap:4px;margin-left:5px;color:var(--bs-warning);font-size:10px;font-weight:700;letter-spacing:.25px;text-transform:uppercase;}
+#titania-content .raid-commander-marker svg{width:10px;height:10px;flex:none;}
+#titania-content .team-card{
+      background:var(--panel);border:1px solid var(--line-soft);border-radius:14px;padding:12px;
+      display:flex;flex-direction:column;gap:8px;transition:.15s;min-width:0;
+    }
+#titania-content .team-card.main-bf{box-shadow:inset 3px 0 0 var(--bs-primary);}
+#titania-content .team-card.sub-bf{box-shadow:inset 3px 0 0 var(--bs-info);}
+#titania-content .team-card.elite-bf{box-shadow:inset 3px 0 0 var(--bs-warning);}
+#titania-content .team-card.dungeon-bf{box-shadow:inset 3px 0 0 var(--dungeon);}
+#titania-content .team-card.team-dragging{opacity:.35;}
+#titania-content .team-card.team-dropover{outline:2px dashed var(--dungeon);outline-offset:2px;background:#241a12;}
+#titania-content .main-raid-block.siege-raid-dropover{outline:2px dashed var(--bs-danger);outline-offset:5px;border-radius:10px;background:rgba(var(--bs-danger-rgb),0.031);}
+#titania-content .main-raid-block.siege-raid-dropinvalid{outline:2px dashed var(--bs-secondary-color);outline-offset:5px;border-radius:10px;}
+#titania-content .team-head{display:flex;align-items:center;justify-content:space-between;gap:8px;}
+#titania-content .team-name{font-size:14.5px;font-weight:700;letter-spacing:.3px;display:flex;align-items:center;gap:6px;min-width:0;}
+#titania-content .team-drag-handle{cursor:grab;color:var(--muted-2);font-size:13px;line-height:1;user-select:none;padding:2px 3px;border-radius:5px;transition:.12s;}
+#titania-content .team-drag-handle:hover{color:var(--text);background:var(--panel-2);}
+#titania-content .team-drag-handle.team-selected{color:var(--teal);background:#152321;box-shadow:0 0 0 1px var(--teal-glow);}
+#titania-content .team-meta{font-family:var(--bs-body-font-family);font-size:11.5px;color:var(--muted);display:flex;gap:6px;align-items:center;white-space:nowrap;}
+#titania-content .team-fill-dot{width:6px;height:6px;border-radius:50%;}
+#titania-content .team-fill-dot.full{background:var(--green);box-shadow:0 0 5px var(--green);}
+#titania-content .team-fill-dot.partial{background:var(--amber);}
+#titania-content .team-fill-dot.empty{background:var(--muted-2);}
+#titania-content .slot{
+      display:flex;align-items:center;gap:8px;padding:7px 8px;border-radius:9px;
+      border:1px dashed var(--line-soft);background:#0e1322;min-height:38px;position:relative;transition:.12s;
+      outline:none;
+    }
+#titania-content .slot.leader{border-style:solid;border-color:rgba(var(--bs-warning-rgb),0.333);background:#1c1a10;}
+#titania-content .slot.filled{border-style:solid;border-color:var(--line);background:var(--panel-2);cursor:grab;}
+#titania-content .slot.filled.leader{
+      border-color:var(--bs-secondary-color)!important;
+      background:var(--bs-secondary-bg);
+      box-shadow:inset 0 1px 0 rgba(255,255,255,.10),0 6px 14px rgba(0,0,0,.24);
+    }
+#titania-content .slot.filled.leader .slot-name{color:var(--bs-body-color);}
+#titania-content .slot.filled.leader .slot-class{filter:saturate(1.08) brightness(1.16);}
+#titania-content .slot.filled.leader .slot-gr{color:var(--bs-warning);}
+#titania-content .slot.filled.leader .slot-remove{color:#c5cfdd;}
+#titania-content .slot.filled.leader .slot-remove:hover{background:#2f4056;color:#fff;}
+#titania-content .slot.filled.leader .pre-attendance-badge.pre-no-response{background:var(--bs-secondary-color);border-color:var(--bs-secondary-color);color:var(--bs-body-color);}
+#titania-content .slot.filled.leader .pre-attendance-badge:hover{color:#fff;}
+#titania-content .slot.filled.leader .slot-raid-commander-mark,
+#titania-content .slot.filled.leader .slot-raid-leader-mark{color:var(--bs-warning);}
+#titania-content .slot:hover{border-color:#3a4568;}
+#titania-content .slot.dragover,
+#titania-content .slot.slot-selected{border-color:var(--teal);box-shadow:0 0 0 2px var(--teal-glow);background:#132322;}
+#titania-content .leader-icon{width:13px;height:13px;color:var(--amber);flex:none;}
+#titania-content .slot-leader-mark{display:inline-flex;align-items:center;justify-content:center;flex:none;margin-left:2px;margin-right:2px;}
+#titania-content .slot-empty-label{font-size:12.5px;color:var(--muted-2);flex:1;}
+#titania-content .slot .class-dot{width:8px;height:8px;}
+#titania-content .slot-info{flex:1;min-width:0;display:flex;flex-direction:column;gap:1px;}
+#titania-content .slot-member-main{display:flex;align-items:center;gap:8px;flex:1;min-width:0;}
+#titania-content .slot-member-main .slot-info{flex:0 1 auto;min-width:0;}
+#titania-content .slot-member-main .slot-leader-mark{margin-left:8px;margin-right:2px;}
+#titania-content .slot-name{font-size:13.5px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+#titania-content .slot-class{font-size:11px;font-weight:600;letter-spacing:.3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+#titania-content .slot-gr{font-family:var(--bs-body-font-family);font-size:11.5px;color:var(--amber);flex:none;}
+#titania-content .slot-remove{width:16px;height:16px;border-radius:50%;border:none;background:transparent;color:var(--muted-2);cursor:pointer;display:flex;align-items:center;justify-content:center;flex:none;transition:.12s;}
+#titania-content .slot-remove:hover{background:var(--red);color:#fff;}
+#titania-content .team-warn{display:flex;align-items:center;gap:5px;font-size:11.5px;font-weight:600;color:var(--bs-danger);background:rgba(var(--bs-danger-rgb),0.110);border:1px solid rgba(var(--bs-danger-rgb),0.271);border-radius:7px;padding:5px 7px;letter-spacing:.2px;}
+#titania-content .team-sent-badge{display:flex;align-items:center;gap:5px;flex-wrap:wrap;font-size:11.5px;font-weight:600;letter-spacing:.2px;color:var(--bs-warning);background:#ff8f5e1f;border:1px solid #ff8f5e40;border-radius:7px;padding:4px 7px;position:relative;z-index:1;}
+#titania-content .team-card.elite-bf.sent{position:relative;opacity:.5;filter:grayscale(.35);}
+#titania-content .team-card.elite-bf.sent::after{content:'';position:absolute;inset:0;border-radius:14px;pointer-events:none;background:var(--bs-secondary-bg);}
+#titania-content .team-card.elite-bf.sent:hover{opacity:.75;}
+#titania-content .dungeon-finished-badge{display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:700;letter-spacing:.3px;color:var(--bs-success);background:rgba(var(--bs-success-rgb),0.133);border:1px solid rgba(var(--bs-success-rgb),0.333);border-radius:20px;padding:4px 10px;white-space:nowrap;}
+#titania-content .dungeon-finish-btn.active{border-color:var(--green);color:var(--green);box-shadow:0 0 0 1px rgba(var(--bs-success-rgb),0.333);}
+#titania-content .team-card.dungeon-bf.run-finished{position:relative;opacity:.42;filter:grayscale(.55);}
+#titania-content .team-card.dungeon-bf.run-finished::after{content:'';position:absolute;inset:0;border-radius:14px;pointer-events:none;background:var(--bs-secondary-bg);}
+#titania-content .team-card.dungeon-bf.run-finished:hover{opacity:.7;}
+#titania-content .body-wrap[data-event="siege"] .team-card.main-bf,
+#titania-content .body-wrap[data-event="siege"] .team-card.sub-bf{box-shadow:inset 3px 0 0 var(--bs-danger);}
+body[data-event="siege"] #titania-content .print-team-card.siege-party{border-left:3px solid var(--bs-danger);}
+#titania-content .dash-class-analytics-grid{display:grid;grid-template-columns:minmax(0,3fr) minmax(230px,1fr);gap:14px;align-items:stretch;margin-bottom:8px;}
+#titania-content .dash-class-analytics-grid .dash-panel{margin-bottom:0;}
+#titania-content .dash-class-bars{min-width:0;}
+#titania-content .dash-class-pie-panel{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;min-width:0;padding:16px 12px;overflow:visible;}
+#titania-content .dash-class-pie-title{font-size:11px;color:var(--muted);font-weight:700;letter-spacing:.75px;text-transform:uppercase;margin-bottom:8px;text-align:center;}
+#titania-content .dash-class-pie-wrap{position:relative;width:min(100%,280px);aspect-ratio:1;display:flex;align-items:center;justify-content:center;}
+#titania-content .dash-class-pie{width:100%;height:100%;overflow:visible;filter:drop-shadow(0 6px 14px #00000030);}
+#titania-content .dash-class-pie-slice{stroke:var(--bs-secondary-bg);stroke-width:1.6;cursor:pointer;transform-origin:110px 110px;transition:transform .12s ease,filter .12s ease,opacity .12s ease;}
+#titania-content .dash-class-pie-slice:hover,
+#titania-content .dash-class-pie-slice.is-hovered{transform:scale(1.035);filter:brightness(1.15);}
+#titania-content .dash-class-pie.has-hover .dash-class-pie-slice:not(.is-hovered){opacity:.7;}
+#titania-content .dash-class-pie-tooltip{position:absolute;z-index:8;pointer-events:none;display:none;min-width:130px;max-width:210px;padding:8px 10px;border-radius:8px;background:#090d18f2;border:1px solid var(--line);box-shadow:0 8px 24px #00000088;color:var(--text);font-size:12px;line-height:1.35;white-space:nowrap;transform:translate(10px,-50%);}
+#titania-content .dash-class-pie-tooltip.show{display:block;}
+#titania-content .dash-class-pie-tooltip b{display:block;font-size:13px;margin-bottom:2px;}
+#titania-content .dash-class-pie-tooltip span{color:var(--muted);font-family:var(--bs-body-font-family);font-size:11.5px;}
+#titania-content .dash-class-pie-note{margin-top:7px;color:var(--muted-2);font-size:11px;text-align:center;}
+@media(max-width:1050px){#titania-content .dash-class-analytics-grid{grid-template-columns:1fr;}
+#titania-content .dash-class-pie-wrap{width:min(300px,75vw);}
+#titania-content .dash-class-pie-panel{min-height:300px;}
+}
+#titania-content .dash-gr-analytics-grid{display:grid;grid-template-columns:minmax(0,3fr) minmax(260px,1fr);gap:14px;align-items:stretch;margin-bottom:8px;}
+#titania-content .dash-gr-analytics-grid .dash-panel{margin-bottom:0;}
+#titania-content .dash-gr-spread-panel{min-width:0;}
+#titania-content .dash-gr-class-chart-panel{position:relative;min-width:0;padding:12px 12px 10px;display:flex;flex-direction:column;overflow:visible;}
+#titania-content .dash-gr-class-chart-title{font-size:11px;color:var(--muted);font-weight:700;letter-spacing:.75px;text-transform:uppercase;text-align:center;margin:0 0 8px;}
+#titania-content .dash-gr-class-chart-wrap{position:relative;flex:1;min-height:190px;display:flex;align-items:stretch;}
+#titania-content .dash-gr-class-chart{width:100%;display:grid;grid-auto-flow:column;grid-auto-columns:minmax(18px,1fr);gap:5px;align-items:end;padding:10px 2px 30px;border-bottom:1px solid var(--line-soft);position:relative;}
+#titania-content .dash-gr-class-bar-item{height:100%;min-width:0;display:flex;flex-direction:column;justify-content:flex-end;align-items:stretch;position:relative;cursor:pointer;outline:none;}
+#titania-content .dash-gr-class-bar-track{height:100%;min-height:120px;display:flex;align-items:flex-end;justify-content:center;border-radius:5px 5px 2px 2px;background:var(--bs-secondary-bg);position:relative;overflow:visible;}
+#titania-content .dash-gr-class-bar{width:min(24px,72%);min-width:8px;border-radius:5px 5px 2px 2px;opacity:.9;box-shadow:0 0 0 1px #ffffff0a inset;transition:filter .12s ease,transform .12s ease,opacity .12s ease;transform-origin:bottom center;}
+#titania-content .dash-gr-class-bar-item:hover .dash-gr-class-bar,
+#titania-content .dash-gr-class-bar-item:focus .dash-gr-class-bar{filter:brightness(1.18);transform:scaleX(1.08);opacity:1;}
+#titania-content .dash-gr-class-bar-label{position:absolute;left:50%;bottom:-26px;transform:translateX(-50%);font:700 9px var(--bs-body-font-family);color:var(--muted);white-space:nowrap;}
+#titania-content .dash-gr-class-chart-tooltip{position:absolute;z-index:10;pointer-events:none;display:none;min-width:150px;max-width:230px;padding:8px 10px;border-radius:8px;background:#090d18f2;border:1px solid var(--line);box-shadow:0 8px 24px #00000088;color:var(--text);font-size:12px;line-height:1.35;white-space:nowrap;transform:translate(-50%,-100%);}
+#titania-content .dash-gr-class-chart-tooltip.show{display:block;}
+#titania-content .dash-gr-class-chart-tooltip b{display:block;font-size:13px;margin-bottom:3px;}
+#titania-content .dash-gr-class-chart-tooltip span{display:block;color:var(--muted);font-family:var(--bs-body-font-family);font-size:11.5px;}
+#titania-content .dash-gr-class-chart-note{margin-top:8px;color:var(--muted-2);font-size:11px;text-align:center;}
+@media(max-width:1050px){#titania-content .dash-gr-analytics-grid{grid-template-columns:1fr;}
+#titania-content .dash-gr-class-chart-wrap{min-height:250px;}
+#titania-content .dash-gr-class-chart-panel{min-height:290px;}
+}
+#titania-content .dash-gr-rank-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:28px;align-items:start;margin-top:24px;}
+#titania-content .dash-gr-rank-col{min-width:0;}
+#titania-content .dash-gr-rank-col .section-head{margin-top:0;margin-bottom:20px;}
+#titania-content .dash-gr-rank-col .dash-panel{margin-bottom:0;}
+@media(max-width:900px){#titania-content .dash-gr-rank-grid{grid-template-columns:1fr;gap:18px;}
+}
+#titania-content .dash-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-bottom:8px;}
+#titania-content .dash-card{background:var(--panel);border:1px solid var(--line-soft);border-radius:12px;padding:14px 16px;display:flex;flex-direction:column;gap:4px;min-width:0;}
+#titania-content .dash-card.highlight{border-color:var(--amber);box-shadow:0 0 0 1px rgba(var(--bs-warning-rgb),0.200);}
+#titania-content .dash-card-label{font-size:10.5px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;font-weight:600;}
+#titania-content .dash-card-value{font-family:var(--bs-body-font-family);font-size:20px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+#titania-content .dash-card-sub{font-size:11px;color:var(--muted);font-family:var(--bs-body-font-family);}
+#titania-content .dash-panel{background:var(--panel);border:1px solid var(--line-soft);border-radius:12px;padding:6px 16px;margin-bottom:8px;}
+#titania-content .dash-bar-row{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--line-soft);font-size:12.5px;}
+#titania-content .dash-bar-row:last-child{border-bottom:none;}
+#titania-content .dash-bar-name{width:120px;flex:none;color:var(--text);font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+#titania-content .dash-bar-track{flex:1;height:8px;border-radius:6px;background:var(--panel-2);overflow:hidden;min-width:40px;}
+#titania-content .dash-bar-fill{height:100%;border-radius:6px;opacity:.85;}
+#titania-content .dash-bar-count{font-family:var(--bs-body-font-family);font-size:12px;color:var(--text);flex:none;width:42px;text-align:right;}
+#titania-content .dash-bar-pct{font-family:var(--bs-body-font-family);font-size:11px;color:var(--muted);flex:none;width:42px;text-align:right;}
+#titania-content .dash-bar-avg{font-family:var(--bs-body-font-family);font-size:11px;color:var(--amber);flex:none;width:92px;text-align:right;}
+#titania-content .dash-rank{font-family:var(--bs-body-font-family);font-size:11.5px;color:var(--muted-2);flex:none;width:24px;}
+#titania-content .dash-manage-toolbar{display:flex;flex-wrap:wrap;align-items:center;gap:12px;margin-bottom:10px;}
+#titania-content .dash-manage-sort{display:flex;align-items:center;gap:6px;flex-wrap:wrap;}
+#titania-content .dash-manage-sort-label{font-size:10px;color:var(--muted-2);font-weight:800;letter-spacing:.5px;text-transform:uppercase;}
+#titania-content .dash-class-filter{width:auto;min-width:165px;max-width:220px;padding:7px 28px 7px 10px;}
+#titania-content .edit-input:not(.form-control):not(.form-select){min-width:0;padding:7px 9px;border-radius:7px;border:1px solid var(--line-soft);background:var(--bg);color:var(--text);font-size:12.5px;outline:none;}
+#titania-content .edit-input:not(.form-control):not(.form-select):focus{border-color:var(--violet);}
+#titania-content .dash-selectall{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--muted);cursor:pointer;user-select:none;}
+#titania-content .dash-selected-count{font-size:11px;color:var(--muted-2);font-family:var(--bs-body-font-family);}
+#titania-content .dash-bulk-bar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;background:var(--panel-2);border:1px solid var(--violet);border-radius:10px;padding:10px;margin-bottom:12px;}
+#titania-content .dash-bulk-bar .edit-input:not(.form-control):not(.form-select){width:150px;}
+#titania-content .dash-bulk-label{font-size:11px;color:var(--muted-2);text-transform:uppercase;letter-spacing:.5px;margin-right:-2px;}
+#titania-content .dash-manage-table{max-height:560px;overflow-y:auto;padding-right:4px;}
+#titania-content .dash-manage-row:not(tr){display:flex;align-items:center;gap:10px;padding:8px 4px;border-bottom:1px solid var(--line-soft);font-size:12.5px;flex-wrap:wrap;}
+#titania-content .dash-manage-row:not(tr):last-child{border-bottom:none;}
+#titania-content .dash-manage-row:not(tr).checked{background:rgba(var(--bs-primary-rgb),0.078);border-radius:8px;}
+#titania-content .dash-manage-name{width:150px;flex:none;color:var(--text);font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+#titania-content .dash-row-class:not(.form-select){flex:1;max-width:180px;}
+#titania-content .dash-row-gr:not(.form-control){width:110px;flex:none;}
+#titania-content .dash-last-updated{width:205px;flex:none;display:flex;flex-direction:column;gap:2px;min-width:0;color:var(--muted);}
+#titania-content .dash-last-updated-label{font-size:9px;font-weight:800;letter-spacing:.55px;text-transform:uppercase;color:var(--muted-2);}
+#titania-content .dash-last-updated-value{font-size:10.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+#titania-content .dash-status-filters{display:flex;align-items:center;gap:6px;flex-wrap:wrap;}
+#titania-content .member-state-badge{display:inline-flex;align-items:center;gap:5px;width:fit-content;font-size:9px;font-weight:800;letter-spacing:.65px;text-transform:uppercase;padding:3px 7px;border-radius:20px;border:1px solid transparent;}
+#titania-content .member-state-badge.active{color:var(--bs-success);background:rgba(var(--bs-success-rgb),0.106);border-color:rgba(var(--bs-success-rgb),0.333);}
+#titania-content .member-state-badge.inactive{color:var(--bs-danger);background:rgba(var(--bs-danger-rgb),0.106);border-color:rgba(var(--bs-danger-rgb),0.333);}
+#titania-content .member-state-badge::before{content:'';width:5px;height:5px;border-radius:50%;background:currentColor;box-shadow:0 0 5px currentColor;}
+#titania-content .dash-status-info{width:155px;flex:none;display:flex;flex-direction:column;gap:3px;min-width:0;}
+#titania-content .dash-status-detail{font-size:10px;color:var(--muted-2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+#titania-content .dash-manage-actions{display:flex;align-items:center;gap:5px;margin-left:auto;flex:none;}
+#titania-content .status-action.active{border-color:rgba(var(--bs-success-rgb),0.400);color:var(--bs-success);}
+#titania-content .status-action.inactive{border-color:rgba(var(--bs-danger-rgb),0.400);color:var(--bs-danger);}
+#titania-content .dash-manage-row:not(tr).inactive{opacity:.78;background:rgba(var(--bs-danger-rgb),0.031);border-radius:8px;}
+#titania-content .history-list{padding:0 4px;}
+#titania-content .history-row{display:grid;grid-template-columns:minmax(130px,1.1fr) 130px 120px minmax(180px,1.6fr);gap:12px;align-items:center;padding:9px 4px;border-bottom:1px solid var(--line-soft);font-size:12px;}
+#titania-content .history-row:last-child{border-bottom:none;}
+#titania-content .history-name{font-weight:700;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+#titania-content .history-action{font-size:10px;font-weight:800;letter-spacing:.5px;text-transform:uppercase;}
+#titania-content .history-action.inactive{color:var(--bs-danger);}
+#titania-content .history-action.reactivated{color:var(--bs-success);}
+#titania-content .history-date{font-family:var(--bs-body-font-family);color:var(--muted);font-size:10.5px;}
+#titania-content .history-reason{color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+#titania-content .member-status-notice{margin-top:12px;}
+#titania-content .status-member-summary{background:var(--panel-2);border:1px solid var(--line-soft);border-radius:10px;padding:11px 12px;margin-bottom:12px;color:var(--text);}
+#titania-content .status-member-summary b{display:block;font-size:14px;margin-bottom:2px;}
+#titania-content .status-member-summary span{font-size:11.5px;color:var(--muted);}
+#titania-content .status-impact{margin-top:12px;background:rgba(var(--bs-warning-rgb),0.071);border:1px solid rgba(var(--bs-warning-rgb),0.271);border-radius:10px;padding:10px 12px;color:var(--text);font-size:12px;line-height:1.5;}
+#titania-content .dash-card-label{font-size:12px;}
+#titania-content .dash-card-value{font-size:24px;}
+#titania-content .dash-card-sub{font-size:12.5px;}
+#titania-content .dash-bar-row{font-size:14px;}
+#titania-content .dash-bar-name{font-size:14px;}
+#titania-content .dash-bar-count{font-size:13.5px;}
+#titania-content .dash-bar-pct{font-size:12.5px;}
+#titania-content .dash-bar-avg{font-size:12.5px;}
+#titania-content .dash-rank{font-size:12.5px;}
+#titania-content .dash-manage-toolbar .pill:not(.btn){font-size:13.5px;padding:7px 12px;}
+#titania-content .dash-manage-sort-label{font-size:11.5px;}
+#titania-content .dash-manage-toolbar .edit-input:not(.form-control):not(.form-select),
+#titania-content .dash-manage-row:not(tr) .edit-input:not(.form-control):not(.form-select),
+#titania-content .dash-bulk-bar .edit-input:not(.form-control):not(.form-select){font-size:13.5px;}
+#titania-content .dash-selectall{font-size:13.5px;}
+#titania-content .dash-selected-count{font-size:12.5px;}
+#titania-content .dash-bulk-label{font-size:12px;}
+#titania-content .dash-manage-row:not(tr){font-size:14px;padding:10px 4px;}
+#titania-content .dash-manage-name{font-size:14.5px;}
+#titania-content .member-state-badge{font-size:10.5px;padding:4px 8px;}
+#titania-content .dash-status-detail{font-size:11.5px;}
+#titania-content .dash-last-updated-label{font-size:10px;}
+#titania-content .dash-last-updated-value{font-size:11.5px;}
+#titania-content .history-row{font-size:13.5px;padding:11px 4px;}
+#titania-content .history-action{font-size:11.5px;}
+#titania-content .history-date{font-size:12px;}
+#titania-content .history-reason{font-size:13px;}
+#titania-content #toastStack{position:fixed;top:16px;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;gap:8px;z-index:1200;pointer-events:none;width:min(430px,calc(100vw - 24px));}
+#titania-content .toast{pointer-events:auto;background:var(--panel-2);border:1px solid var(--line-soft);border-left:3px solid var(--teal);border-radius:10px;padding:10px 14px;font-size:12.5px;color:var(--text);box-shadow:0 8px 24px #00000055;display:flex;align-items:flex-start;gap:8px;animation:toast-in .18s ease-out;}
+#titania-content .toast.err{border-left-color:var(--red);}
+#titania-content .toast.warn{border-left-color:var(--amber);}
+#titania-content .toast-body{flex:1}
+#titania-content .toast-title{font-weight:600;margin-bottom:2px}
+#titania-content .toast-msg{color:var(--muted);line-height:1.4;}
+@keyframes toast-in{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}}
+#titania-content .overlay{position:fixed;inset:0;z-index:1000;background:#05060ccc;backdrop-filter:blur(6px);display:flex;align-items:center;justify-content:center;padding:16px;}
+#titania-content .modal{width:min(520px,100%);max-height:88vh;overflow-y:auto;background:var(--panel);border:1px solid var(--line-soft);border-radius:16px;box-shadow:0 20px 60px #000000aa;}
+#titania-content .modal-head{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:16px 18px;border-bottom:1px solid var(--line-soft);}
+#titania-content .modal-head h3{margin:0;font-size:15px;color:var(--text);}
+#titania-content .modal-body{padding:16px 18px;font-size:13px;color:var(--muted);line-height:1.55;}
+#titania-content .modal-foot{display:flex;justify-content:flex-end;gap:8px;padding:12px 18px 16px;border-top:1px solid var(--line-soft);}
+#titania-content .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+#titania-content .form-field{display:flex;flex-direction:column;gap:5px;}
+#titania-content .form-field.full{grid-column:1/-1;}
+#titania-content .form-field label{font-size:10.5px;text-transform:uppercase;letter-spacing:.8px;color:var(--muted-2);font-weight:700;}
+#titania-content .form-field input:not(.form-control):not(.form-select):not(.form-check-input),
+#titania-content .form-field select:not(.form-control):not(.form-select):not(.form-check-input),
+#titania-content .form-field textarea:not(.form-control):not(.form-select):not(.form-check-input){width:100%;padding:9px 10px;border-radius:8px;border:1px solid var(--line-soft);background:var(--bg);color:var(--text);outline:none;}
+#titania-content .form-field textarea:not(.form-control):not(.form-select):not(.form-check-input){min-height:78px;resize:vertical;}
+#titania-content .form-field input:not(.form-control):not(.form-select):not(.form-check-input):focus,
+#titania-content .form-field select:not(.form-control):not(.form-select):not(.form-check-input):focus,
+#titania-content .form-field textarea:not(.form-control):not(.form-select):not(.form-check-input):focus{border-color:var(--violet);}
+#titania-content .guide-step{display:flex;gap:12px;align-items:flex-start;margin-bottom:14px;}
+#titania-content .guide-step-num{flex:none;width:22px;height:22px;border-radius:50%;background:var(--panel-2);border:1px solid var(--violet);color:var(--violet);display:flex;align-items:center;justify-content:center;font-size:11.5px;font-weight:700;}
+#titania-content .guide-step b{color:var(--text);}
+#titania-content .guide-note{background:rgba(var(--bs-info-rgb),0.078);border:1px solid rgba(var(--bs-info-rgb),0.267);border-radius:10px;padding:10px 12px;color:var(--text);font-size:12.5px;}
+#titania-content .loading-overlay{position:fixed;inset:0;z-index:1400;background:var(--bg);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:12px;}
+#titania-content .loader{width:38px;height:38px;border:3px solid var(--line);border-top-color:var(--violet);border-radius:50%;animation:spin .8s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg)}}
+#titania-content .loading-text{color:var(--muted);font-size:13px;}
+#titania-content .print-overlay{position:fixed;inset:0;z-index:1100;background:#05060ce6;backdrop-filter:blur(6px);display:flex;align-items:flex-start;justify-content:center;padding:24px 16px;overflow-y:auto;}
+#titania-content .print-shell{width:min(1100px,100%);}
+#titania-content .print-toolbar{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:14px;position:sticky;top:0;z-index:1;}
+#titania-content .print-toolbar h3{margin:0;font-size:14px;color:var(--text);}
+#titania-content .print-content{background:#fff;color:var(--bs-body-bg);border-radius:14px;padding:28px 30px 34px;box-shadow:0 20px 60px #000000aa;font-family:var(--bs-body-font-family);}
+#titania-content .print-doc-head{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:6px;border-bottom:2px solid var(--bs-body-bg);padding-bottom:14px;}
+#titania-content .print-doc-head h1{font-family:var(--bs-body-font-family);font-weight:700;font-size:20px;letter-spacing:.2px;margin:0;color:var(--bs-body-bg);}
+#titania-content .print-sub{font-family:var(--bs-body-font-family);font-size:12px;font-weight:500;color:var(--bs-border-color);margin-top:4px;}
+#titania-content .print-doc-meta{font-family:var(--bs-body-font-family);font-size:11px;font-weight:500;color:var(--bs-border-color);text-align:right;line-height:1.55;}
+#titania-content .print-section-title{font-family:var(--bs-body-font-family);font-weight:700;font-size:13px;letter-spacing:.8px;text-transform:uppercase;color:#4a3f8f;margin:22px 0 12px;}
+#titania-content .print-team-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px;}
+#titania-content .print-raid-block{margin:0 0 15px;break-inside:avoid;page-break-inside:avoid;}
+#titania-content .print-raid-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:0 0 7px;padding:5px 8px;border-left:3px solid var(--bs-primary);background:#f2f0ff;color:#343054;font-family:var(--bs-body-font-family);font-size:10px;font-weight:600;break-after:avoid;page-break-after:avoid;}
+#titania-content .print-raid-mode{display:inline-flex;align-items:center;gap:4px;margin-left:7px;padding:2px 6px;border-radius:999px;font-size:9px;font-weight:700;letter-spacing:.2px;white-space:nowrap;}
+#titania-content .print-raid-mode.atk{color:#8b6500;background:#fff2bd;border:1px solid #e5c65f;}
+#titania-content .print-raid-mode.def{color:#245b8f;background:#e5f1ff;border:1px solid #9dc7ef;}
+#titania-content .print-raid-commander{color:#8a6400;font-weight:600;text-align:right;}
+#titania-content .print-main-raid-grid{grid-template-columns:repeat(4,minmax(0,1fr));}
+#titania-content .print-main-raid-grid.five{grid-template-columns:repeat(5,minmax(0,1fr));}
+#titania-content .print-polarity-grid{grid-template-columns:repeat(5,minmax(0,1fr));gap:8px;}
+#titania-content .print-team-card{border:1px solid #d9dcec;border-radius:10px;padding:10px 12px;background:#f8f9fd;break-inside:avoid;page-break-inside:avoid;}
+#titania-content .print-team-card.no-healer{border-color:#e58a99;background:#fdf1f3;}
+#titania-content .print-team-head{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:8px;}
+#titania-content .print-team-head b{font-family:var(--bs-body-font-family);font-size:12.5px;font-weight:700;color:var(--bs-body-bg);flex:none;}
+#titania-content .print-team-head span{display:inline-flex;align-items:center;max-width:70%;margin-left:5px;padding:3px 8px;border:1px solid #55b8d4;border-radius:999px;background:#e8f7fb;font-family:var(--bs-body-font-family);font-size:12.5px;font-weight:800;line-height:1.1;color:#176b87;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+#titania-content .print-slot-row{display:flex;align-items:center;gap:7px;font-family:var(--bs-body-font-family);font-size:12px;line-height:1.35;padding:3px 0;color:var(--bs-body-bg);}
+#titania-content .print-slot-row.p-party-leader{border:1px solid var(--bs-warning);border-radius:5px;padding:3px 4px;}
+#titania-content .p-dot{width:7px;height:7px;border-radius:50%;flex:none;}
+#titania-content .p-name{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-family:var(--bs-body-font-family);font-weight:600;color:var(--bs-body-bg);}
+#titania-content .p-name-row{display:flex;align-items:center;gap:4px;flex:1;min-width:0;}
+#titania-content .p-name-row .p-name{flex:0 1 auto;min-width:0;}
+#titania-content .p-leader-icon{width:12px;height:12px;color:var(--bs-warning);flex:none;display:inline-block;vertical-align:middle;}
+#titania-content .p-cls{font-family:var(--bs-body-font-family);color:var(--bs-border-color);font-size:10px;font-weight:500;flex:none;}
+#titania-content .p-empty{color:#a8adc4;font-style:italic;}
+#titania-content .print-team-warn{margin-top:6px;font-family:var(--bs-body-font-family);font-size:10px;font-weight:700;color:#c23c56;}
+#titania-content .print-footer-note{margin-top:24px;font-family:var(--bs-body-font-family);font-size:10px;color:#9095ac;text-align:center;}
+@media(max-width:1500px){#titania-content .brand{min-width:285px}
+#titania-content .brand-logo{width:52px;height:45px}
+#titania-content .brand-text h1{font-size:16px}
+#titania-content .event-tab{padding:8px 11px}
+#titania-content .btn:not([class*="btn-"]){padding:8px 10px}
+#titania-content .stat-chip{min-width:62px;padding:6px 10px}
+
+    }
+@media(max-width:1180px){#titania-content .topbar{justify-content:center}
+#titania-content .brand{margin-right:auto}
+#titania-content .actions{margin-left:auto}
+#titania-content .stats{order:3;width:100%}
+
+    }
+@media(max-width:1100px){#titania-content .main-raid-grid,
+#titania-content .pz-star-raid-grid,
+#titania-content .pz-normal-raid-grid{grid-template-columns:repeat(2,minmax(0,1fr));}
+#titania-content .main-raid-head{flex-wrap:wrap}
+#titania-content .main-raid-line{min-width:40px}
+#titania-content .raid-commander-control{margin-left:auto}
+#titania-content .raid-leader-control{margin-left:0}
+
+    }
+@media(max-width:900px){#titania-content .sidebar{position:relative;top:0;height:auto;width:100%;min-width:0;max-height:none;overflow:visible;}
+#titania-content .body-wrap{flex-direction:column}
+#titania-content .member-list{flex:none;height:300px;min-height:300px;max-height:300px;overflow-y:auto;padding:10px 12px 20px;}
+#titania-content .member-card{min-height:72px;}
+#titania-content .class-breakdown{display:none}
+#titania-content .main{padding:18px 16px 60px;width:100%}
+#titania-content .topbar{position:relative}
+#titania-content .brand,
+#titania-content .actions{margin:0}
+#titania-content .event-tabs{order:2}
+#titania-content .stats{order:4}
+#titania-content .actions{order:3}
+
+    }
+@media(max-width:680px){#titania-content .member-list{height:260px;min-height:260px;max-height:260px;}
+#titania-content .member-card{gap:8px;padding:8px 9px;}
+#titania-content .topbar{padding:12px}
+#titania-content .brand{min-width:0;width:100%;justify-content:center}
+#titania-content .brand-logo{width:54px;height:47px}
+#titania-content .brand-text h1{font-size:15px;letter-spacing:1.2px}
+#titania-content .brand-text p{text-align:center}
+#titania-content .event-tabs{width:100%;justify-content:center}
+#titania-content .event-tab{flex:1;justify-content:center;padding:8px 7px;font-size:11.5px}
+#titania-content .actions{justify-content:center;width:100%}
+#titania-content .save-flag{width:100%;justify-content:center}
+#titania-content .team-grid{grid-template-columns:1fr}
+#titania-content .section-head{flex-wrap:wrap}
+#titania-content .section-line{min-width:30px}
+#titania-content .form-grid{grid-template-columns:1fr}
+#titania-content .dash-manage-name{width:90px}
+#titania-content .dash-status-info{width:125px}
+#titania-content .dash-row-class:not(.form-select){max-width:120px}
+#titania-content .dash-row-gr:not(.form-control){width:80px}
+#titania-content .dash-last-updated{width:100%;margin-left:28px}
+#titania-content .dash-manage-actions{width:100%;margin-left:28px;justify-content:flex-end}
+#titania-content .event-last-updated{width:100%;margin-left:0;justify-content:flex-end}
+#titania-content .dash-bar-name{width:80px}
+#titania-content .dash-bar-avg{display:none}
+#titania-content .history-row{grid-template-columns:1fr 110px}
+#titania-content .history-date,
+#titania-content .history-reason{grid-column:2}
+#titania-content .print-content{padding:20px 16px}
+#titania-content .print-doc-head{align-items:flex-start;flex-direction:column}
+#titania-content .print-doc-meta{text-align:left}
+
+    }
+@page{size:A4 landscape;margin:8mm;}
+@media(max-width:640px){#titania-content .main-raid-grid,
+#titania-content .pz-star-raid-grid,
+#titania-content .pz-normal-raid-grid,
+#titania-content .pz-dungeon-team-grid{grid-template-columns:1fr}
+#titania-content .main-raid-line{display:none}
+#titania-content .raid-commander-control,
+#titania-content .raid-leader-control{width:100%;margin-left:0;flex-wrap:wrap}
+#titania-content .raid-commander-drop,
+#titania-content .raid-leader-drop{width:100%;max-width:none}
+#titania-content .pz-dungeon-group-head{flex-wrap:wrap}
+#titania-content .pz-dungeon-group-head .raid-commander-control{margin-left:0}
+#titania-content .pz-dungeon-group-actions{width:100%}
+}
+@media print{#titania-content,
+#titania-content{
+        width:100%!important;
+        min-height:0!important;
+        height:auto!important;
+        margin:0!important;
+        padding:0!important;
+        overflow:visible!important;
+        background:#fff!important;
+        color:var(--bs-body-bg)!important;
+        -webkit-print-color-adjust:exact!important;
+        print-color-adjust:exact!important;
+      }
+body.print-mode #titania-content > *{display:none!important;}
+body.print-mode #titania-content > #printOverlay{display:block!important;}
+body.print-mode #titania-content #printOverlay{
+        position:static!important;
+        inset:auto!important;
+        z-index:auto!important;
+        width:auto!important;
+        min-height:0!important;
+        margin:0!important;
+        padding:0!important;
+        overflow:visible!important;
+        background:#fff!important;
+        backdrop-filter:none!important;
+      }
+body.print-mode #titania-content #printOverlay .print-shell{
+        display:block!important;
+        width:100%!important;
+        max-width:none!important;
+        margin:0!important;
+        padding:0!important;
+      }
+body.print-mode #titania-content #printOverlay .print-toolbar{display:none!important;}
+body.print-mode #titania-content #printOverlay .print-content{
+        display:block!important;
+        position:static!important;
+        width:100%!important;
+        max-width:none!important;
+        min-height:0!important;
+        margin:0!important;
+        padding:0!important;
+        overflow:visible!important;
+        background:#fff!important;
+        color:var(--bs-body-bg)!important;
+        box-shadow:none!important;
+        border-radius:0!important;
+      }
+body.print-mode #titania-content .print-doc-head{margin-top:0!important;}
+body.print-mode #titania-content .print-section-title{
+        break-after:avoid-page;
+        page-break-after:avoid;
+      }
+body.print-mode #titania-content .print-team-grid{
+        grid-template-columns:repeat(4,minmax(0,1fr))!important;
+        gap:4mm!important;
+      }
+body.print-mode #titania-content .print-main-raid-grid{grid-template-columns:repeat(4,minmax(0,1fr))!important;}
+body.print-mode #titania-content .print-polarity-grid{grid-template-columns:repeat(5,minmax(0,1fr))!important;gap:3mm!important;}
+body.print-mode #titania-content .print-raid-block{
+        display:block!important;
+        break-inside:avoid-page!important;
+        page-break-inside:avoid!important;
+      }
+body.print-mode #titania-content .print-raid-head{
+        break-after:avoid-page!important;
+        page-break-after:avoid!important;
+      }
+body.print-mode #titania-content .print-team-card{
+        break-inside:avoid-page!important;
+        page-break-inside:avoid!important;
+      }
+
+    }
+#titania-content .auth-screen{
+      position:fixed;inset:0;z-index:2000;display:flex;align-items:center;justify-content:center;
+      padding:22px;background:var(--bs-secondary-bg);
+    }
+#titania-content .auth-shell{width:min(450px,100%);}
+#titania-content .auth-brand{text-align:center;margin-bottom:18px;}
+#titania-content .auth-brand .auth-logo{display:block;width:76px;height:76px;object-fit:contain;margin:0 auto 10px;filter:drop-shadow(0 8px 18px rgba(0,0,0,.35));}
+#titania-content .auth-brand h1{font-family:var(--bs-body-font-family);font-size:24px;letter-spacing:2px;margin:0;background:var(--bs-secondary-bg);-webkit-background-clip:text;background-clip:text;color:transparent;}
+#titania-content .auth-brand p{margin:5px 0 0;color:var(--muted);font-size:12px;letter-spacing:1px;}
+#titania-content .auth-card{background:var(--panel);border:1px solid var(--line-soft);border-radius:16px;padding:20px;box-shadow:0 24px 70px #00000088;}
+#titania-content .auth-tabs{display:flex;gap:6px;background:var(--panel-2);padding:4px;border-radius:10px;margin-bottom:17px;}
+#titania-content .auth-tab:not(.btn){flex:1;border:0;background:transparent;color:var(--muted);padding:8px 10px;border-radius:8px;font-weight:700;cursor:pointer;}
+#titania-content .auth-tab:not(.btn).active{background:var(--panel);color:var(--text);box-shadow:0 1px 0 var(--line-soft) inset;}
+#titania-content .auth-panel{display:flex;flex-direction:column;gap:12px;}
+#titania-content .auth-title{font-size:17px;font-weight:700;margin:0;color:var(--text);}
+#titania-content .auth-copy{font-size:14px;color:var(--muted);line-height:1.55;margin:0;}
+#titania-content .auth-field{display:flex;flex-direction:column;gap:5px;}
+#titania-content .auth-field label{font-size:10.5px;text-transform:uppercase;letter-spacing:.75px;color:var(--muted-2);font-weight:700;}
+#titania-content .auth-field input:not(.form-control):not(.form-select):not(.form-check-input){width:100%;padding:10px 11px;border-radius:9px;border:1px solid var(--line-soft);background:var(--bg);color:var(--text);outline:none;}
+#titania-content .auth-field input:not(.form-control):not(.form-select):not(.form-check-input):focus{border-color:var(--violet);}
+#titania-content .auth-row{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;}
+#titania-content .auth-link{border:0;background:transparent;padding:0;color:#b3a8fb;font-size:12px;cursor:pointer;}
+#titania-content .auth-link:hover{text-decoration:underline;}
+#titania-content .auth-message{font-size:12px;color:var(--muted);line-height:1.45;min-height:18px;}
+#titania-content .auth-message.err{color:var(--bs-danger);}
+#titania-content .auth-message.ok{color:var(--bs-success);}
+#titania-content .auth-message.warn{color:var(--bs-warning);}
+#titania-content .pending-box{background:rgba(var(--bs-warning-rgb),0.071);border:1px solid rgba(var(--bs-warning-rgb),0.271);border-radius:10px;padding:11px 12px;font-size:12.5px;line-height:1.5;color:var(--text);}
+#titania-content .account-role{font-size:9px;padding:2px 6px;border-radius:999px;background:rgba(var(--bs-primary-rgb),0.173);color:var(--bs-primary);text-transform:uppercase;letter-spacing:.5px;}
+#titania-content .admin-users-list{display:flex;flex-direction:column;gap:8px;}
+#titania-content .admin-user-row{display:grid;grid-template-columns:minmax(150px,1.4fr) minmax(130px,1fr) 110px 96px;gap:8px;align-items:center;padding:9px;border:1px solid var(--line-soft);border-radius:9px;background:var(--panel-2);}
+#titania-content .admin-user-name{font-size:12.5px;font-weight:700;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+#titania-content .admin-user-email{font-size:10.5px;color:var(--muted);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+#titania-content .admin-user-row select:not(.form-control):not(.form-select):not(.form-check-input){padding:7px;border-radius:7px;border:1px solid var(--line-soft);background:var(--bg);color:var(--text);font-size:11px;}
+#titania-content .admin-approved{display:flex;align-items:center;gap:5px;color:var(--muted);font-size:11px;}
+body.readonly-mode #titania-content #addMemberBtn,
+body.readonly-mode #titania-content #autoFillBtn,
+body.readonly-mode #titania-content #importBtn,
+body.readonly-mode #titania-content #clearBtn,
+body.readonly-mode #titania-content #publicToggleBtn,
+body.readonly-mode #titania-content .card-tools,
+body.readonly-mode #titania-content .slot-remove,
+body.readonly-mode #titania-content [data-raid-mode-toggle],
+body.readonly-mode #titania-content [data-autofill-dungeon],
+body.readonly-mode #titania-content [data-finish-dungeon],
+body.readonly-mode #titania-content .team-drag-handle,
+body.readonly-mode #titania-content #dashAddMember,
+body.readonly-mode #titania-content .dash-bulk-bar,
+body.readonly-mode #titania-content .dash-manage-actions{display:none!important;}
+body.readonly-mode #titania-content .member-card,
+body.readonly-mode #titania-content .slot,
+body.readonly-mode #titania-content .raid-commander-drop,
+body.readonly-mode #titania-content .raid-leader-drop{pointer-events:none;}
+body.readonly-mode #titania-content .dash-row-class:not(.form-select),
+body.readonly-mode #titania-content .dash-row-gr:not(.form-control),
+body.readonly-mode #titania-content .dash-row-check,
+body.readonly-mode #titania-content #dashSelectAll{pointer-events:none;opacity:.6;}
+@media(max-width:680px){#titania-content .admin-user-row{grid-template-columns:1fr 1fr}
+#titania-content .admin-user-row .admin-user-ident{grid-column:1/-1;}
+}
+@media screen{#titania-content .brand-text h1{font-size:21px!important;}
+#titania-content .brand-text p{font-size:13px!important;}
+#titania-content .event-tab{font-size:16px!important;padding:10px 19px!important;}
+#titania-content .btn:not([class*="btn-"]){font-size:15.5px!important;}
+#titania-content .btn:not([class*="btn-"]).small{font-size:14px!important;}
+#titania-content .save-flag{font-size:13px!important;}
+#titania-content .stat-chip b{font-size:19px!important;}
+#titania-content .stat-chip span{font-size:12px!important;}
+#titania-content .sidebar-head h2{font-size:15px!important;}
+#titania-content .search,
+#titania-content .class-select{font-size:15.5px!important;}
+#titania-content .pill:not(.btn){font-size:14px!important;}
+#titania-content .sort-label{font-size:13px!important;}
+#titania-content .m-name{font-size:16px!important;}
+#titania-content .m-sub{font-size:13px!important;}
+#titania-content .m-gr{font-size:14px!important;}
+#titania-content .status-tag{font-size:11px!important;}
+#titania-content .assigned-flag{font-size:12px!important;}
+#titania-content .empty-note{font-size:14px!important;}
+#titania-content .cb-head{font-size:13px!important;}
+#titania-content .cb-row{font-size:15px!important;}
+#titania-content .cb-count{font-size:14px!important;}
+#titania-content .hint-bar{font-size:15px!important;}
+#titania-content .event-last-updated-label{font-size:12px!important;}
+#titania-content .event-last-updated-value{font-size:13px!important;}
+#titania-content .section-title{font-size:19px!important;}
+#titania-content .section-note{font-size:13.5px!important;}
+#titania-content .main-raid-title{font-size:14px!important;}
+#titania-content .raid-commander-control,
+#titania-content .raid-leader-control{font-size:13.5px!important;}
+#titania-content .pz-dungeon-group-title{font-size:19px!important;}
+#titania-content .pz-dungeon-group-team{font-size:13px!important;}
+#titania-content .pz-dungeon-member-count{font-size:13px!important;}
+#titania-content .raid-commander-marker{font-size:11.5px!important;}
+#titania-content .team-name{font-size:16px!important;}
+#titania-content .team-drag-handle{font-size:15px!important;}
+#titania-content .team-meta{font-size:13px!important;}
+#titania-content .slot-empty-label{font-size:14px!important;}
+#titania-content .slot-name{font-size:15px!important;}
+#titania-content .slot-class{font-size:12.5px!important;}
+#titania-content .slot-gr{font-size:13px!important;}
+#titania-content .team-warn,
+#titania-content .team-sent-badge{font-size:13px!important;}
+#titania-content .dungeon-finished-badge{font-size:13.5px!important;}
+#titania-content .dash-card-label{font-size:13.5px!important;}
+#titania-content .dash-card-value{font-size:27px!important;}
+#titania-content .dash-card-sub{font-size:14px!important;}
+#titania-content .dash-bar-row,
+#titania-content .dash-bar-name{font-size:15.5px!important;}
+#titania-content .dash-bar-count{font-size:15px!important;}
+#titania-content .dash-bar-pct,
+#titania-content .dash-bar-avg,
+#titania-content .dash-rank{font-size:14px!important;}
+#titania-content .dash-manage-toolbar .pill:not(.btn){font-size:15px!important;}
+#titania-content .dash-manage-sort-label{font-size:13px!important;}
+#titania-content .dash-manage-toolbar .edit-input:not(.form-control):not(.form-select),
+#titania-content .dash-manage-row:not(tr) .edit-input:not(.form-control):not(.form-select),
+#titania-content .dash-bulk-bar .edit-input:not(.form-control):not(.form-select){font-size:15px!important;}
+#titania-content .dash-selectall{font-size:15px!important;}
+#titania-content .dash-selected-count{font-size:14px!important;}
+#titania-content .dash-bulk-label{font-size:13.5px!important;}
+#titania-content .dash-manage-row:not(tr){font-size:15.5px!important;}
+#titania-content .dash-manage-name{font-size:16px!important;}
+#titania-content .member-state-badge{font-size:12px!important;}
+#titania-content .dash-status-detail{font-size:13px!important;}
+#titania-content .dash-last-updated-label{font-size:11.5px!important;}
+#titania-content .dash-last-updated-value{font-size:13px!important;}
+#titania-content .history-row{font-size:15px!important;}
+#titania-content .history-action{font-size:13px!important;}
+#titania-content .history-date{font-size:13.5px!important;}
+#titania-content .history-reason{font-size:14.5px!important;}
+#titania-content .status-member-summary b{font-size:16px!important;}
+#titania-content .status-member-summary span{font-size:13px!important;}
+#titania-content .status-impact{font-size:14px!important;}
+#titania-content .toast{font-size:14px!important;}
+#titania-content .modal-head h3{font-size:17px!important;}
+#titania-content .modal-body{font-size:15px!important;}
+#titania-content .form-field label{font-size:12px!important;}
+#titania-content .form-field input:not(.form-control):not(.form-select):not(.form-check-input),
+#titania-content .form-field select:not(.form-control):not(.form-select):not(.form-check-input),
+#titania-content .form-field textarea:not(.form-control):not(.form-select):not(.form-check-input){font-size:15px!important;}
+#titania-content .guide-step-num{font-size:13px!important;}
+#titania-content .guide-note{font-size:14px!important;}
+#titania-content .loading-text{font-size:15px!important;}
+#titania-content .auth-brand h1{font-size:28px!important;}
+#titania-content .auth-brand p{font-size:14px!important;}
+#titania-content .auth-title{font-size:20px!important;}
+#titania-content .auth-copy{font-size:16px!important;}
+#titania-content .auth-field label{font-size:12px!important;}
+#titania-content .auth-field input:not(.form-control):not(.form-select):not(.form-check-input){font-size:16px!important;}
+#titania-content .auth-link{font-size:14px!important;}
+#titania-content .auth-message{font-size:14px!important;}
+#titania-content .pending-box{font-size:14.5px!important;}
+#titania-content .account-role{font-size:11px!important;}
+#titania-content .admin-user-name{font-size:14.5px!important;}
+#titania-content .admin-user-email{font-size:12.5px!important;}
+#titania-content .admin-user-row select:not(.form-control):not(.form-select):not(.form-check-input){font-size:13px!important;}
+#titania-content .admin-approved{font-size:13px!important;}
+
+    }
+
+
+  

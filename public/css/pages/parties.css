@@ -1,0 +1,62 @@
+#titania-content{--bg:var(--bs-body-bg);--panel:var(--bs-secondary-bg);--panel-2:var(--bs-tertiary-bg);--line:var(--bs-border-color);--line-soft:var(--bs-border-color);--text:var(--bs-body-color);--muted:var(--bs-secondary-color);--muted-2:var(--bs-secondary-color);--violet:var(--bs-primary);--teal:var(--bs-info);--amber:var(--bs-warning);--red:var(--bs-danger);--green:var(--bs-success)}
+#titania-content *{box-sizing:border-box}
+#titania-content{margin:0;background:var(--bg);color:var(--text);font-family:var(--bs-body-font-family);min-height:100vh}
+#titania-content button,
+#titania-content select:not(.form-control):not(.form-select):not(.form-check-input){font:inherit}
+#titania-content .mr-2{margin-right:.5rem}
+#titania-content .topbar{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:14px 20px;border-bottom:1px solid var(--line-soft);background:var(--bs-body-bg);position:sticky;top:0;z-index:10;backdrop-filter:blur(10px)}
+#titania-content .brand{display:flex;align-items:center;gap:10px}
+#titania-content .brand img{width:42px;height:38px;object-fit:contain}
+#titania-content .brand h1{font-family:var(--bs-body-font-family);font-size:17px;letter-spacing:1.7px;margin:0}
+#titania-content .brand p{margin:1px 0 0;color:var(--muted);font-size:11px}
+#titania-content .btn:not([class*="btn-"]){border:1px solid var(--line-soft);background:var(--panel);color:var(--text);border-radius:8px;padding:9px 12px;cursor:pointer;font-weight:600;display:inline-flex;align-items:center;justify-content:center;text-decoration:none}
+#titania-content .btn:not([class*="btn-"]):hover{border-color:var(--violet)}
+#titania-content .btn:not([class*="btn-"]):disabled{opacity:.5;cursor:not-allowed}
+#titania-content .btn:not([class*="btn-"]).primary{background:var(--bs-secondary-bg);border:none;color:#fff}
+#titania-content main{max-width:1500px;margin:0 auto;padding:22px 20px 60px}
+#titania-content .page-head{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:18px}
+#titania-content .page-head h2{margin:0;font-size:22px}
+#titania-content .page-head p{margin:4px 0 0;color:var(--muted);font-size:var(--bs-body-font-size)}
+#titania-content .summary{font:600 .875rem var(--bs-body-font-family);color:var(--muted);white-space:nowrap}
+#titania-content .notice{background:rgba(var(--bs-info-rgb),0.051);border:1px solid rgba(var(--bs-info-rgb),0.227);color:var(--bs-info);border-radius:9px;padding:10px 12px;margin-bottom:16px;font-size:var(--bs-body-font-size)}
+#titania-content .party-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+#titania-content .party-card{background:var(--panel);border:1px solid var(--line-soft);border-radius:12px;padding:13px}
+#titania-content .party-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px}
+#titania-content .party-head h3{margin:0;font-size:1rem}
+#titania-content .party-count{font:600 .875rem var(--bs-body-font-family);color:var(--muted)}
+#titania-content .party-slots{display:grid;gap:7px}
+#titania-content .party-slot{display:grid;grid-template-columns:24px minmax(0,1fr);align-items:center;gap:8px;min-width:0}
+#titania-content .party-slot>span:not(.select2-container){font:600 .875rem var(--bs-body-font-family);color:var(--muted-2);text-align:center}
+#titania-content .party-actions{display:flex;justify-content:flex-end;margin-top:10px}
+#titania-content .saved{color:var(--green)!important;border-color:rgba(var(--bs-success-rgb),0.333)!important}
+#titania-content .state{text-align:center;color:var(--muted);padding:40px 20px;background:var(--panel);border:1px dashed var(--line);border-radius:12px}
+#titania-content .state.error{color:var(--bs-danger)}
+#titania-content .select2-container{width:100%!important;min-width:0;font-size:var(--bs-body-font-size);text-align:left}
+#titania-content .select2-container--default .select2-selection--single{height:38px;background:var(--bs-body-bg);border:1px solid var(--line);border-radius:7px}
+#titania-content .select2-container--default .select2-selection--single .select2-selection__rendered{color:var(--text);line-height:36px;padding-left:9px;padding-right:30px}
+#titania-content .select2-container--default .select2-selection--single .select2-selection__arrow{height:36px}
+#titania-content .select2-container--default .select2-selection--single .select2-selection__placeholder{color:var(--muted)}
+#titania-content .select2-dropdown{background:var(--bs-body-bg);border-color:var(--line);z-index:9999}
+#titania-content .select2-results__option{color:var(--text);padding:7px 9px}
+#titania-content .select2-container--default .select2-results__option--highlighted.select2-results__option--selectable{background:var(--bs-primary)}
+#titania-content .select2-search--dropdown{padding:7px}
+#titania-content .select2-search__field{background:var(--bs-body-bg)!important;color:var(--text)!important;border:1px solid var(--line)!important;border-radius:6px;padding:7px!important;outline:none}
+#titania-content .select2-search__field:focus{border-color:var(--violet)!important}
+#titania-content .select2-member{display:flex;align-items:center;gap:8px;min-width:0}
+#titania-content .select2-member img{width:24px;height:24px;object-fit:contain;flex:none}
+#titania-content .select2-member-main{display:flex;align-items:baseline;gap:7px;min-width:0}
+#titania-content .select2-member-name{font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#titania-content .select2-member-class{color:var(--muted);font-size:.875rem;white-space:nowrap}
+#titania-content .party-slot.duplicate .select2-selection--single{border-color:var(--red)!important;box-shadow:0 0 0 1px rgba(var(--bs-danger-rgb),0.267)!important}
+#titania-content .select2-container--default.select2-container--disabled .select2-selection--single{opacity:.6;background:var(--bs-body-bg)}
+@media(max-width:1100px){#titania-content .party-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media(max-width:680px){#titania-content .topbar,
+#titania-content .page-head{align-items:flex-start;flex-direction:column}
+#titania-content .topbar .btn:not([class*="btn-"]){width:100%}
+#titania-content .party-grid{grid-template-columns:1fr}
+#titania-content main{padding:16px 10px 40px}
+#titania-content .page-head{margin-bottom:12px}
+}
+
+  

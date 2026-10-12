@@ -1,0 +1,123 @@
+
+700;800&family=IBM+Plex+Mono:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600;700&family=Lexend:wght@400;500;600;700&display=swap');#titania-content{
+  --bg:var(--bs-body-bg);--sheet:var(--bs-secondary-bg);--panel:var(--bs-secondary-bg);--panel2:var(--bs-tertiary-bg);--line:var(--bs-border-color);--lineSoft:var(--bs-border-color);
+  --text:var(--bs-body-color);--muted:var(--bs-secondary-color);--muted2:var(--bs-secondary-color);--violet:var(--bs-primary);--teal:var(--bs-info);
+  --amber:var(--bs-warning);--green:var(--bs-success);--red:var(--bs-danger);--dungeon:var(--bs-warning);--bar:var(--bs-secondary-bg);
+  --leaderSlot:var(--bs-warning-bg-subtle);--shadow:0 18px 50px rgba(0,0,0,.28);
+}
+html[data-theme="light"] #titania-content{
+  --bg:var(--bs-body-bg);--sheet:var(--bs-secondary-bg);--panel:var(--bs-secondary-bg);--panel2:var(--bs-tertiary-bg);--line:var(--bs-border-color);--lineSoft:var(--bs-border-color);
+  --text:var(--bs-body-color);--muted:var(--bs-secondary-color);--muted2:var(--bs-secondary-color);--violet:var(--bs-primary);--teal:var(--bs-info);
+  --amber:var(--bs-warning);--green:var(--bs-success);--red:var(--bs-danger);--dungeon:var(--bs-warning);--bar:var(--bs-secondary-bg);
+  --leaderSlot:var(--bs-warning-bg-subtle);--shadow:0 16px 40px rgba(38,45,72,.10);
+}
+#titania-content *{box-sizing:border-box}
+#titania-content,
+#titania-content{margin:0;min-height:100%}
+#titania-content{background:var(--bg);color:var(--text);font-family:var(--bs-body-font-family);font-size:18px;transition:background .2s,color .2s}
+#titania-content .page{min-height:100vh}
+#titania-content button{font:inherit}
+#titania-content .viewerbar{position:sticky;top:0;z-index:30;background:var(--bar);backdrop-filter:blur(12px);border-bottom:1px solid var(--lineSoft);padding:10px 18px;display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap}
+#titania-content .mini-brand{display:flex;align-items:center;gap:10px}
+#titania-content .logo{width:46px;height:42px;object-fit:contain;filter:drop-shadow(0 0 8px rgba(222,128,193,.25))}
+#titania-content .mini-brand b{display:block;font-family:var(--bs-body-font-family);font-size:19px;letter-spacing:1.7px}
+#titania-content .mini-brand span{display:block;font-size:12px;color:var(--muted);letter-spacing:.9px;margin-top:1px}
+#titania-content .nav{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+#titania-content .nav a:not(.btn),
+#titania-content .tool-btn:not(.btn){border:1px solid var(--lineSoft);background:var(--panel);color:var(--muted);padding:10px 14px;border-radius:10px;text-decoration:none;font-size:14.5px;font-weight:700;cursor:pointer}
+#titania-content .nav a:not(.btn):hover,
+#titania-content .tool-btn:not(.btn):hover{border-color:var(--violet);color:var(--text)}
+#titania-content .nav a:not(.btn).active{background:#a93446;border-color:#d64b61;color:#fff;box-shadow:0 0 0 1px #ff6b7a22 inset}
+#titania-content .theme-icon{width:16px;display:inline-block;text-align:center}
+#titania-content .content{width:min(1760px,calc(100% - 22px));margin:12px auto 30px}
+#titania-content .lineup-sheet{background:var(--sheet);border:1px solid var(--lineSoft);border-radius:14px;padding:24px 26px 30px;box-shadow:var(--shadow)}
+#titania-content .sheet-head{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;padding-bottom:16px;margin-bottom:18px;border-bottom:2px solid var(--text)}
+#titania-content .sheet-brand{font-family:var(--bs-body-font-family);font-weight:800;font-size:42px;letter-spacing:1.3px;text-transform:uppercase}
+#titania-content .sheet-meta{text-align:right;font-size:13px;color:var(--muted);line-height:1.65;font-family:var(--bs-body-font-family)}
+#titania-content .section-head{display:flex;align-items:center;gap:10px;margin:22px 0 11px}
+#titania-content .section-title{font-family:var(--bs-body-font-family);font-weight:700;font-size:23px;letter-spacing:1px;text-transform:uppercase;white-space:nowrap}
+#titania-content .section-title.main{color:var(--bs-primary)}
+#titania-content .section-title.sub{color:var(--teal)}
+#titania-content .section-title.star{color:var(--amber)}
+#titania-content .section-line{height:1px;background:var(--bs-secondary-bg);flex:1}
+#titania-content .raid-block{margin-bottom:16px;break-inside:avoid}
+#titania-content .raid-block.dungeon-block{margin-top:20px}
+#titania-content .raid-head{display:flex;align-items:center;gap:9px;padding:10px 12px;border-left:3px solid var(--violet);background:var(--panel2);margin-bottom:10px;min-height:42px}
+#titania-content .dungeon-block .raid-head{border-left-color:var(--dungeon)}
+#titania-content .raid-name{font-size:16.5px;font-weight:700;letter-spacing:.35px;text-transform:uppercase;white-space:nowrap}
+#titania-content .raid-name b{color:var(--text)}
+#titania-content .raid-line{height:1px;flex:1;background:var(--lineSoft)}
+#titania-content .mode{font-size:12.5px;font-weight:700;border-radius:999px;padding:4px 9px;border:1px solid currentColor;white-space:nowrap}
+#titania-content .mode.atk{color:var(--bs-warning);background:rgba(var(--bs-warning-rgb),.09)}
+#titania-content .mode.def{color:var(--bs-info);background:rgba(71,145,220,.08)}
+#titania-content .finished{display:inline-flex;align-items:center;gap:4px;color:var(--green);font-size:12.5px;font-weight:800;border:1px solid color-mix(in srgb,var(--green) 45%,transparent);padding:4px 9px;border-radius:20px;white-space:nowrap}
+#titania-content .team-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}
+#titania-content .team-grid.five{grid-template-columns:repeat(5,minmax(0,1fr))}
+#titania-content .team-card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:13px 14px;min-width:0;break-inside:avoid}
+#titania-content .team-card.main,
+#titania-content .team-card.sub,
+#titania-content .team-card.siege{border-top:2px solid var(--bs-danger)}
+#titania-content .team-card.star{border-top:2px solid var(--bs-warning)}
+#titania-content .team-card.normal{border-top:2px solid var(--dungeon)}
+#titania-content .team-head{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:8px}
+#titania-content .team-name{font-size:17px;font-weight:700;flex:none}
+#titania-content .team-count{display:inline-flex;align-items:center;justify-content:center;max-width:70%;margin-left:5px;padding:4px 10px;border:1px solid color-mix(in srgb,var(--teal) 62%,var(--line));border-radius:999px;background:color-mix(in srgb,var(--teal) 13%,var(--panel2));font-family:var(--bs-body-font-family);font-size:17px;font-weight:800;line-height:1.15;letter-spacing:.15px;color:var(--teal);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#titania-content .slot{display:flex;align-items:center;gap:8px;padding:7px;border-bottom:1px solid var(--lineSoft);min-height:44px}
+#titania-content .slot:last-of-type{border-bottom:none}
+#titania-content .slot.leader-slot{background:var(--bs-secondary-bg);border:1px solid var(--bs-secondary-color);border-radius:6px;box-shadow:inset 0 1px 0 rgba(255,255,255,.10)}
+#titania-content .public-title-icon{width:32px;height:32px;min-width:32px;display:inline-block;flex:none;background-repeat:no-repeat;background-position:center;background-size:140% 140%}
+#titania-content .public-title-icon.is-empty{opacity:0}
+#titania-content .member{min-width:0;flex:1;display:flex;align-items:center;gap:7px}
+#titania-content .member-name{font-size:15.5px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+#titania-content .job-class-source{position:absolute!important;width:1px!important;height:1px!important;padding:0!important;margin:-1px!important;overflow:hidden!important;clip:rect(0,0,0,0)!important;white-space:nowrap!important;border:0!important}
+#titania-content .public-job-icon{display:inline-block!important;width:32px!important;height:32px!important;min-width:32px!important;flex:none!important;background-repeat:no-repeat;background-position:center;background-size:contain;margin-left:4px}
+#titania-content .slot.leader-slot .member-name{color:var(--bs-body-color)}
+#titania-content .slot.leader-slot .public-pre-attendance.pre-no-response{background:var(--bs-secondary-color);border-color:var(--bs-secondary-color);color:var(--bs-body-color)}
+#titania-content .public-raid-leader{display:inline-flex;align-items:center;justify-content:center;width:20px;min-width:20px;height:20px;color:var(--bs-warning);font-size:17px;line-height:1;flex:none}
+#titania-content .public-raid-leader i{line-height:1}
+#titania-content .public-pre-attendance{display:inline-flex;align-items:center;justify-content:center;min-height:24px;padding:4px 8px;border:1.5px solid var(--bs-border-color);border-radius:999px;background:var(--bs-body-bg);color:var(--bs-body-color);font:800 10.5px/1 var(--bs-body-font-family);letter-spacing:.35px;white-space:nowrap;flex:none}
+#titania-content .public-pre-attendance.pre-going{background:var(--bs-success-bg-subtle);border-color:var(--bs-success);color:var(--bs-success)}
+#titania-content .public-pre-attendance.pre-not-going{background:var(--bs-danger-bg-subtle);border-color:var(--bs-danger);color:var(--bs-danger)}
+#titania-content .public-pre-attendance.pre-no-response{background:var(--bs-body-bg);border-color:var(--bs-border-color);color:var(--bs-body-color)}
+#titania-content .empty{font-size:12.5px;color:var(--muted2);font-style:italic}
+#titania-content .no-healer{font-size:12px;color:var(--red);font-weight:700;margin:5px 0 0}
+#titania-content .loading,
+#titania-content .error-box{max-width:720px;margin:90px auto;padding:24px;border:1px solid var(--lineSoft);background:var(--sheet);border-radius:12px;text-align:center;color:var(--muted);box-shadow:var(--shadow);font-size:15px}
+#titania-content .spinner{width:28px;height:28px;border:3px solid var(--line);border-top-color:var(--violet);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 10px}
+@keyframes spin{to{transform:rotate(360deg)}}
+#titania-content .error-box b{display:block;color:var(--red);margin-bottom:7px;font-size:17px}
+#titania-content .error-note{font-size:13px}
+#titania-content .unpublished-box{min-height:420px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:50px 20px;color:var(--muted)}
+#titania-content .unpublished-icon{font-size:38px;margin-bottom:12px;opacity:.8}
+#titania-content .unpublished-box h2{margin:0 0 10px;color:var(--text);font-family:var(--bs-body-font-family);font-size:27px;letter-spacing:.5px}
+#titania-content .unpublished-box p{margin:0;font-size:17px;line-height:1.7}
+@media(max-width:1200px){#titania-content .team-grid.five{grid-template-columns:repeat(3,minmax(0,1fr))}
+#titania-content .team-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media(max-width:720px){#titania-content .viewerbar{padding:8px 10px}
+#titania-content .mini-brand{width:100%;justify-content:center}
+#titania-content .nav{width:100%;justify-content:center}
+#titania-content .content{width:calc(100% - 12px);margin-top:8px}
+#titania-content .lineup-sheet{padding:14px 10px 20px}
+#titania-content .sheet-head{align-items:flex-start;flex-direction:column}
+#titania-content .sheet-brand{font-size:32px}
+#titania-content .sheet-meta{text-align:left}
+#titania-content .team-grid,
+#titania-content .team-grid.five{grid-template-columns:1fr}
+#titania-content .raid-head{flex-wrap:wrap}
+#titania-content .raid-line{display:none}
+#titania-content .public-title-icon{width:32px;height:32px;min-width:32px}
+#titania-content .public-job-icon{width:28px!important;height:28px!important;min-width:28px!important;margin-left:3px}
+#titania-content .public-raid-leader{width:18px;min-width:18px;height:18px;font-size:15px}
+#titania-content .public-pre-attendance{min-height:23px;padding:4px 7px;font-size:10px}
+}
+@media print{#titania-content .viewerbar{display:none!important}
+#titania-content{background:#fff!important}
+#titania-content .content{width:100%!important;margin:0!important}
+#titania-content .lineup-sheet{box-shadow:none!important;border:none!important;border-radius:0!important;padding:0!important;background:#fff!important;color:var(--bs-body-bg)!important}
+#titania-content .team-card,
+#titania-content .raid-head{break-inside:avoid;page-break-inside:avoid}
+#titania-content .public-pre-attendance{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+}
+
+
