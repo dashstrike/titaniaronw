@@ -248,7 +248,7 @@
 
   function showAuthView(view){
     const loginUrl=new URL('login',document.baseURI);
-    if(location.pathname!==loginUrl.pathname)history.replaceState(null,'',loginUrl.pathname+location.search+location.hash);
+    if(location.pathname.replace(/\/$/,'')!==loginUrl.pathname)history.replaceState(null,'',loginUrl.pathname+location.search+location.hash);
     const screen=document.getElementById('authScreen');
     screen.hidden=false;
     const panels={login:'authLoginPanel',register:'authRegisterPanel',pending:'authPendingPanel',reset:'authResetPanel',config:'authConfigPanel'};
@@ -366,7 +366,7 @@
       await showPendingForUser();
       return;
     }
-    if(location.pathname===new URL('login',document.baseURI).pathname){
+    if(location.pathname.replace(/\/$/,'')===new URL('login',document.baseURI).pathname){
       history.replaceState(null,'',new URL('dashboard',document.baseURI).pathname+location.search+location.hash);
       window.dispatchEvent(new PopStateEvent('popstate'));
     }

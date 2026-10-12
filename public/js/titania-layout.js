@@ -37,7 +37,7 @@
     const links = [...document.querySelectorAll('[data-planner-event]')];
     const legacy = events.has(event) && links.find(link => link.dataset.plannerEvent === event);
     if (legacy) history.replaceState(null, '', new URL(legacy.href).pathname + location.search);
-    const active = links.find(link => new URL(link.href).pathname === location.pathname);
+    const active = links.find(link => new URL(link.href).pathname.replace(/\/$/, '') === location.pathname.replace(/\/$/, ''));
     requestedEvent = active ? active.dataset.plannerEvent : 'dashboard';
     updateNavigation();
   }
@@ -61,7 +61,7 @@
       if (!isPlanner) return;
       event.preventDefault();
       requestedEvent = link.dataset.plannerEvent;
-      if (location.pathname !== new URL(link.href).pathname) history.pushState(null, '', link.href);
+      if (location.pathname.replace(/\/$/, '') !== new URL(link.href).pathname.replace(/\/$/, '')) history.pushState(null, '', link.href);
       updateNavigation();
       document.documentElement.classList.remove('sidebar-enable');
       document.querySelector('.offcanvas-backdrop')?.click();

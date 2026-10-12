@@ -1,5 +1,35 @@
 # Titania Guild Management
 
+## GitHub Pages deployment
+
+`main` builds and publishes the static site through `.github/workflows/pages.yml`.
+Laravel renders the HTML during the build; GitHub Pages serves the generated files.
+Supabase still handles authentication and data at runtime. No database changes are required.
+
+- Site: https://dashstrike.github.io/titaniaronw/
+- Laravel backup: `backup/v2-laravel` (the `v2` branch is also retained).
+- Original static version: `v1`.
+- Repository Actions variables: `SUPABASE_URL` and `SUPABASE_PUBLISHABLE_KEY`.
+  Use only a publishable or legacy anon key. The exporter rejects privileged keys.
+- Pages publishing source: **GitHub Actions**.
+
+To build locally with the public settings from `.env`:
+
+```sh
+php artisan pages:export --url=https://dashstrike.github.io/titaniaronw
+```
+
+Output is written to `storage/app/pages`, which is ignored by Git. Only browser
+assets and rendered HTML are deployed; `.env`, PHP source, SQL, logs, and server
+dependencies are excluded. Clean routes use directories such as `login/index.html`
+and `public/siege/index.html`. Existing `.html` bookmarks redirect while retaining
+query strings and fragments, including Supabase recovery callbacks.
+
+Supabase email-confirmation and password-recovery redirect settings must permit
+the site root above. After deployment, check sign-in, sign-out, recovery, public
+lineups, and authenticated saves in a browser. GitHub Pages cannot execute future
+PHP endpoints; those would require a server or a Supabase function.
+
 Laravel 13 with Blade views, the supplied Darkone Bootstrap 5 template, and the existing Supabase backend. Requires PHP 8.3 or newer and Composer.
 
 Laravel serves the pages and public configuration. Supabase continues to handle authentication, profiles, role authorization, planner saves, public lineup functions, attendance, member history, CSV imports, and guild runs. No database schema or data was changed during conversion. No local application database is required; Laravel uses file sessions/cache and synchronous queues.
