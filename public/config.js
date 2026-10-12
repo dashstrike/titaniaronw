@@ -15,7 +15,7 @@ document.write('<script src="./js/attendance-delete.js?v=clean-routes-1"><\/scri
 document.write('<script src="./js/attendance-layout.js?v=clean-routes-1"><\/script>');
 document.write('<script src="./js/party-pool.js?v=clean-routes-1"><\/script>');
 document.write('<script src="./js/siege-polarity-label.js?v=clean-routes-1"><\/script>');
-document.write('<script src="./js/dashboard-weekly-ranking.js?v=clean-routes-1"><\/script>');
+document.write('<script src="./js/dashboard-weekly-ranking.js?v=stable-ranking-1"><\/script>');
 
 document.addEventListener('DOMContentLoaded',()=>{
   if(document.querySelector('script[data-titania-party-stars]'))return;

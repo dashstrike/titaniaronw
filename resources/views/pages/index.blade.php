@@ -123,21 +123,6 @@
     </div>
   </div>
 
-  <div class="overlay" id="guideOverlay" hidden>
-    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="guideTitle">
-      <div class="modal-head"><h3 id="guideTitle">How this Titania website works</h3><button class="icon-btn btn btn-outline-secondary btn-sm" id="guideClose">✕</button></div>
-      <div class="modal-body">
-        <div class="guide-step"><div class="guide-step-num">1</div><div><b>Shared storage</b> — roster and lineup edits are saved securely in Supabase, so approved guild leaders can work from the same data.</div></div>
-        <div class="guide-step"><div class="guide-step-num">2</div><div><b>Place members</b> — drag an unassigned member onto a slot, or tap/click the member and then a slot. Tap two filled slots to swap them.</div></div>
-        <div class="guide-step"><div class="guide-step-num">3</div><div><b>Polarity Zone raids</b> — STAR and Normal Dun are grouped into raid rows. Drag any member from a raid into its Raid Commander box, just like Guild League or Siege. Team-handle transfer still works: STAR is copied; Normal Dun teams are moved.</div></div>
-        <div class="guide-step"><div class="guide-step-num">4</div><div><b>People leaving or returning</b> — use <b>Mark Inactive</b> instead of deleting a member. Inactive members leave every current team and disappear from the Member Pool. Reactivate them from Dashboard when they return.</div></div>
-        <div class="guide-step"><div class="guide-step-num">5</div><div><b>Website access</b> — approved users sign in through this site. Leaders/Admins can edit; Viewers are read-only.</div></div>
-        <div class="guide-note">Export/import contains the full roster, Guild Status, membership history, Guild League, Siege, Polarity Zone, and finished-dungeon marks.</div>
-      </div>
-      <div class="modal-foot"><button class="btn primary btn-primary" id="guideDone">Got it</button></div>
-    </div>
-  </div>
-
   <div class="print-overlay" id="printOverlay" hidden>
     <div class="print-shell">
       <div class="print-toolbar"><h3>🖨 Print / Share View</h3><div class="actions"><button class="btn primary small btn-primary btn-sm" id="printNowBtn">🖨 Print / Save as PDF</button><button class="btn small btn-outline-secondary btn-sm" id="printCloseBtn">✕ Close</button></div></div>

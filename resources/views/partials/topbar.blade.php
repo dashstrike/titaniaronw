@@ -33,11 +33,9 @@
                                 <div class="fw-semibold" id="accountName">Account</div>
                                 <span class="badge bg-primary-subtle text-primary" id="accountRole"></span>
                             </div>
-                            @if($page === 'index')
-                                <button class="dropdown-item" id="helpBtn" type="button">
+                                <a class="dropdown-item" id="helpBtn" href="{{ route('help') }}">
                                     <iconify-icon icon="solar:help-outline" class="align-middle me-2 fs-18"></iconify-icon><span class="align-middle">Help</span>
-                                </button>
-                            @endif
+                                </a>
                             <div class="dropdown-divider my-1"></div>
                             <button class="dropdown-item text-danger" id="logoutBtn" type="button" hidden>
                                 <iconify-icon icon="solar:logout-3-outline" class="align-middle me-2 fs-18"></iconify-icon><span class="align-middle">Logout</span>

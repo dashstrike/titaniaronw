@@ -12,6 +12,7 @@ class TitaniaPagesTest extends TestCase
     {
         return [
             ['/login', 'authScreen'],
+            ['/help', 'titania-content'],
             ['/members', 'authScreen'],
             ['/dashboard', 'teamsWrap'],
             ['/guild-league', 'teamsWrap'],

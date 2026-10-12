@@ -7,6 +7,7 @@
   let cachedRows=[];
   let cachedUser='';
   let renderQueued=false;
+  const renderedPanels=new WeakMap();
 
   function esc(value){return String(value==null?'':value).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
   function fmt(value){const n=Number(value||0);return Number.isFinite(n)?Math.round(n).toLocaleString():'0';}
@@ -25,7 +26,7 @@
     try{client=supabaseClient;}catch(_e){client=null;}
     const user=currentUserId();
     if(!client||!user)return [];
-    if(cachedUser===user&&cachedRows.length)return cachedRows;
+    if(cachedUser===user)return cachedRows;
     if(pending)return pending;
 
     pending=client.from('member_csv_data')
@@ -51,15 +52,15 @@
     if(topPanel){
       const title=topPanel.querySelector('.dash-card-head h2');
       const subtitle=topPanel.querySelector('.dash-card-head p');
-      if(title)title.innerHTML='<i class="fa-solid fa-trophy mr-2" aria-hidden="true"></i>Top 5 Active Members(Weekly)';
-      if(subtitle)subtitle.textContent='Ranked by Weekly Contribution - highest first';
+      if(title&&title.textContent!=='Top 5 Active Members(Weekly)')title.innerHTML='<i class="fa-solid fa-trophy mr-2" aria-hidden="true"></i>Top 5 Active Members(Weekly)';
+      if(subtitle&&subtitle.textContent!=='Ranked by Weekly Contribution - highest first')subtitle.textContent='Ranked by Weekly Contribution - highest first';
     }
 
     if(lowPanel){
       const title=lowPanel.querySelector('.dash-card-head h2');
       const subtitle=lowPanel.querySelector('.dash-card-head p');
-      if(title)title.innerHTML='<i class="fa-solid fa-arrow-trend-down mr-2" aria-hidden="true"></i>Lowest GR Member';
-      if(subtitle)subtitle.textContent='Ranked by Gear Rating - lowest first';
+      if(title&&title.textContent!=='Lowest GR Member')title.innerHTML='<i class="fa-solid fa-arrow-trend-down mr-2" aria-hidden="true"></i>Lowest GR Member';
+      if(subtitle&&subtitle.textContent!=='Ranked by Gear Rating - lowest first')subtitle.textContent='Ranked by Gear Rating - lowest first';
     }
 
     return topPanel;
@@ -73,7 +74,10 @@
       .sort((a,b)=>b.value-a.value||Number(b.member.gr||0)-Number(a.member.gr||0)||String(a.member.name||'').localeCompare(String(b.member.name||''),undefined,{sensitivity:'base'}))
       .slice(0,5);
 
-    panel.querySelectorAll(':scope > .dash-bar-row').forEach(row=>row.remove());
+    const signature=JSON.stringify(ranked.map(({member,value})=>[member.id,member.name,member.cls,value,colorFor(member.cls)]));
+    const previous=renderedPanels.get(panel);
+    if(previous&&previous.signature===signature&&previous.nodes.every(node=>node.parentNode===panel))return;
+    panel.querySelectorAll(':scope > .dash-bar-row, :scope > .empty-note').forEach(row=>row.remove());
 
     if(!ranked.length){
       const empty=document.createElement('div');
@@ -81,6 +85,7 @@
       empty.style.padding='18px 10px';
       empty.textContent='No Weekly Contribution data yet. Upload a member CSV to populate this ranking.';
       panel.appendChild(empty);
+      renderedPanels.set(panel,{signature,nodes:[empty]});
       return;
     }
 
@@ -91,6 +96,7 @@
       row.innerHTML=`<span class="dash-rank">#${index+1}</span><span class="class-dot" style="background:${esc(color)};color:${esc(color)}"></span><span class="dash-bar-name" style="flex:1">${esc(member.name)}</span><span class="dash-bar-avg">${esc(member.cls)}</span><span class="dash-bar-count" style="width:80px">${fmt(value)}</span>`;
       panel.appendChild(row);
     });
+    renderedPanels.set(panel,{signature,nodes:[...panel.querySelectorAll(':scope > .dash-bar-row')]});
   }
 
   async function refresh(){

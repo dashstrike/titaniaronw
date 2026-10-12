@@ -522,7 +522,6 @@
       if(file) importLineupFile(file);
       event.target.value = '';
     });
-    document.getElementById('helpBtn').addEventListener('click',()=>{document.getElementById('guideOverlay').hidden=false;});
     document.getElementById('clearBtn').addEventListener('click',clearCurrentEvent);
 
     document.getElementById('memberModalClose').addEventListener('click',closeMemberModal);
@@ -537,10 +536,6 @@
     document.getElementById('statusModal').addEventListener('click',event=>{if(event.target.id==='statusModal') closeStatusModal();});
     document.getElementById('statusReasonInput').addEventListener('change',syncStatusOtherReason);
 
-    const closeGuide=()=>{document.getElementById('guideOverlay').hidden=true;};
-    document.getElementById('guideClose').addEventListener('click',closeGuide);
-    document.getElementById('guideDone').addEventListener('click',closeGuide);
-    document.getElementById('guideOverlay').addEventListener('click',event=>{if(event.target.id==='guideOverlay') closeGuide();});
 
     document.getElementById('printCloseBtn').addEventListener('click',closePrintView);
     document.getElementById('printNowBtn').addEventListener('click',printCurrentLineup);
@@ -556,7 +551,6 @@
       if(event.key!=='Escape') return;
       if(!document.getElementById('memberModal').hidden) closeMemberModal();
       else if(!document.getElementById('statusModal').hidden) closeStatusModal();
-      else if(!document.getElementById('guideOverlay').hidden) closeGuide();
       else if(!document.getElementById('printOverlay').hidden) closePrintView();
       else clearSelections();
     });
