@@ -21,7 +21,7 @@
         if (tab) { requestedEvent = null; tab.click(); }
       }
     }
-    document.querySelectorAll('[data-planner-event]').forEach(link => {
+    document.querySelectorAll('a[data-planner-event][href]').forEach(link => {
       const active = isPlanner && link.dataset.plannerEvent === document.body.dataset.event;
       link.classList.toggle('active', active);
       if (active) link.setAttribute('aria-current', 'page');
@@ -34,10 +34,10 @@
     if (!isPlanner) return;
     const hash = location.hash.slice(1);
     const event = hash === 'members' ? 'manage_members' : hash;
-    const links = [...document.querySelectorAll('[data-planner-event]')];
+    const links = [...document.querySelectorAll('a[data-planner-event][href]')];
     const legacy = events.has(event) && links.find(link => link.dataset.plannerEvent === event);
-    if (legacy) history.replaceState(null, '', new URL(legacy.href).pathname + location.search);
-    const active = links.find(link => new URL(link.href).pathname.replace(/\/$/, '') === location.pathname.replace(/\/$/, ''));
+    if (legacy) history.replaceState(null, '', new URL(legacy.getAttribute('href'), document.baseURI).pathname + location.search);
+    const active = links.find(link => new URL(link.getAttribute('href'), document.baseURI).pathname.replace(/\/$/, '') === location.pathname.replace(/\/$/, ''));
     requestedEvent = active ? active.dataset.plannerEvent : 'dashboard';
     updateNavigation();
   }

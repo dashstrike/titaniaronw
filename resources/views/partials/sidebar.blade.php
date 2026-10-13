@@ -19,7 +19,7 @@
             ] as [$event, $label, $icon])
                 <li class="nav-item">
                     <a class="nav-link" href="{{ route($event === 'dashboard' ? 'dashboard' : 'planner.'.$event) }}" data-planner-event="{{ $event }}">
-                        <span class="nav-icon">@if($event === 'siege')<i class="fa-regular fa-chess-rook" aria-hidden="true"></i>@else<iconify-icon icon="bx:{{ substr($icon, 3) }}"></iconify-icon>@endif</span>
+                        <span class="nav-icon">@if($event === 'dashboard')<i class="fa-solid fa-chart-pie" aria-hidden="true"></i>@elseif($event === 'siege')<i class="fa-regular fa-chess-rook" aria-hidden="true"></i>@else<iconify-icon icon="bx:{{ substr($icon, 3) }}"></iconify-icon>@endif</span>
                         <span class="nav-text">{{ $label }}</span>
                     </a>
                 </li>

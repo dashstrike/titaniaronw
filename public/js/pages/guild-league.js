@@ -167,7 +167,7 @@ function teamCard(key,kind,label){
   const s=slots(key);
   const noHealer=teamNoHealer(key);
   return `<article class="team-card ${kind} card">
-    <div class="team-head card-header d-flex align-items-center justify-content-between gap-2"><div class="team-name">${esc(label||teamLabel(key))}</div><h3 class="ms-auto mb-0 text-end"><span class="badge rounded-pill text-wrap badge-outline-primary"${kind==='sub'?' style="color:#8fe8dd;border-color:currentColor"':''}>TEAM ${esc(teamName)}</span></h3></div>
+    <div class="team-head card-header d-flex align-items-center justify-content-between gap-2"><div class="team-name">${esc(label||teamLabel(key))}</div><h3 class="ms-auto mb-0 text-end"><span class="badge text-wrap badge-outline-success">TEAM ${esc(teamName)}</span></h3></div>
     <div class="card-body p-2">${s.map((name,i)=>slotHtml(name,i,key)).join('')}</div>
     ${noHealer?'<div class="no-healer">⚠ No healer</div>':''}
   </article>`;

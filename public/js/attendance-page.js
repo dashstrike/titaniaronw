@@ -3,8 +3,8 @@
   'use strict';
 
   const EVENT_META={
-    guild_league_tuesday:{label:'Guild League (Tuesday)',short:'GL Tue',day:2,icon:'🛡️',planner:'guild_league'},
-    guild_league_thursday:{label:'Guild League (Thursday)',short:'GL Thu',day:4,icon:'🛡️',planner:'guild_league'},
+    guild_league_tuesday:{label:'Guild League (Tuesday)',short:'GL Tue',day:2,icon:'<i class="fa-solid fa-shield-heart mr-2" aria-hidden="true"></i>' ,planner:'guild_league'},
+    guild_league_thursday:{label:'Guild League (Thursday)',short:'GL Thu',day:4,icon:'<i class="fa-solid fa-shield-heart mr-2" aria-hidden="true"></i>' ,planner:'guild_league'},
     siege:{label:'Siege',short:'Siege',day:0,icon:'<i class="fa-regular fa-chess-rook mr-2" aria-hidden="true"></i>',planner:'siege'}
   };
   const EVENT_ORDER=['guild_league_tuesday','guild_league_thursday','siege'];

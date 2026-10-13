@@ -338,3 +338,26 @@ body[data-view="siege"] #titania-content .slot.leader-slot {
 #titania-content .select2-container--default .select2-selection--single.select2-selection--clearable .select2-selection__rendered{
   padding-right:54px;
 }
+
+/* Team labels use plain text in public lineups and print previews. */
+#titania-content .team-count,
+#titania-content .print-team-head span{
+  border:0;
+  border-radius:0;
+  background:transparent;
+  padding:0;
+}
+
+body[data-view="guild"] #titania-content .team-card.main{
+  border:1px solid var(--bs-primary);
+}
+body[data-view="guild"] #titania-content .team-card.sub{
+  border:1px solid #8fe8dd;
+}
+
+body[data-view="siege"] #titania-content .team-card{
+  border:1px solid var(--bs-primary);
+}
+body[data-view="siege"] #titania-content .team-card.party-starred{
+  border:2px solid var(--bs-warning)!important;
+}

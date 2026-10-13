@@ -54,10 +54,13 @@
 #titania-content .party-star-public{
   margin-left:.5rem!important;
 }
-body[data-event="guild_league"] #titania-content .body-wrap[data-event="guild_league"] .team-card.main-bf,
-body[data-event="guild_league"] #titania-content .body-wrap[data-event="guild_league"] .team-card.sub-bf{
+body[data-event="guild_league"] #titania-content .body-wrap[data-event="guild_league"] .team-card.main-bf{
   box-shadow:none!important;
   border:1px solid var(--violet)!important;
+}
+body[data-event="guild_league"] #titania-content .body-wrap[data-event="guild_league"] .team-card.sub-bf{
+  box-shadow:none!important;
+  border:1px solid #8fe8dd!important;
 }
 body[data-event="siege"] #titania-content .body-wrap[data-event="siege"] .team-card.main-bf,
 body[data-event="siege"] #titania-content .body-wrap[data-event="siege"] .team-card.sub-bf{
