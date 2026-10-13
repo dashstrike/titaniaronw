@@ -85,7 +85,7 @@ const TITANIA_IS_MEMBER_PAGE = document.documentElement.dataset.titaniaPage==='m
   const loadScript = () => {
     if (document.querySelector('script[data-titania-pre-attendance]')) return;
     const script = document.createElement('script');
-    script.src = './js/attendance-pre.js?v=clean-routes-1';
+    script.src = './js/attendance-pre.js?v=planner-confirmation-1';
     script.setAttribute('data-titania-pre-attendance', '1');
     document.body.appendChild(script);
   };

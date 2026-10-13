@@ -41,6 +41,16 @@ class PagesExportTest extends TestCase
         $this->assertFileDoesNotExist($output.'/.env');
         $this->assertFileDoesNotExist($output.'/composer.json');
         $this->assertStringContainsString('location.search+location.hash', File::get($output.'/index.html'));
+
+        // Pages resolves /guild-league and /siege through the matching .html alias.
+        foreach (['guild-league', 'siege'] as $page) {
+            $alias = File::get($output.'/'.$page.'.html');
+            $target = json_encode($base.$page.'/', JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT);
+            $this->assertStringContainsString('location.replace('.$target.'+location.search+location.hash)', $alias);
+            $this->assertStringNotContainsString('public', $alias);
+            $this->assertStringContainsString('data-titania-page="index"', File::get($output.'/'.$page.'/index.html'));
+            $this->assertStringContainsString('data-titania-public="true"', File::get($output.'/public/'.$page.'/index.html'));
+        }
     }
 
     public function test_export_rejects_privileged_keys(): void

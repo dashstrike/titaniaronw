@@ -304,7 +304,7 @@
     if(!key)return;
     const [eventType,eventDate]=key.split(':');
     const label=EVENT_LABELS[eventType]||eventType;
-    if(!window.confirm(`Reset ALL pre-attendance for ${label} on ${eventDate} back to PRE ?\n\nThis will not change the party lineup or actual attendance.`))return;
+    if(!await window.confirmPlannerAction(`Reset all pre-attendance for ${label} on ${eventDate}?`,'All members will return to PRE ?. The party lineup and actual attendance will stay unchanged.','Reset pre-attendance',true)||!canEdit()||key!==currentKey())return;
 
     const btn=document.getElementById('preResetAllBtn');
     if(btn){btn.disabled=true;btn.textContent='Resetting…';}

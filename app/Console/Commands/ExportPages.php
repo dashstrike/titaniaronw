@@ -66,7 +66,9 @@ class ExportPages extends Command
             if ($page === 'index') {
                 continue;
             }
-            $redirects[$page.'.html'] = in_array($page, ['guild-league', 'siege', 'polarity-zone'], true) ? 'public/'.$page : $page;
+            // GitHub Pages can serve foo.html for /foo before foo/index.html.
+            // Keep these aliases on the same page as their clean management URLs.
+            $redirects[$page.'.html'] = $page === 'polarity-zone' ? 'public/'.$page : $page;
         }
         foreach ($redirects as $file => $target) {
             File::ensureDirectoryExists(dirname($output.'/'.$file));

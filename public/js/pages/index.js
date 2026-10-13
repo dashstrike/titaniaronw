@@ -496,7 +496,70 @@
     document.getElementById('loadingOverlay').hidden = true;
   }
 
+  let plannerConfirmationPending=false;
+  async function confirmPlannerAction(title,text,confirmButtonText='Proceed',danger=false){
+    if(plannerConfirmationPending)return false;
+    if(!window.Swal){showToast('Confirmation unavailable','Refresh the page and try again. No action was taken.','warn');return false;}
+    const event=currentEvent;
+    plannerConfirmationPending=true;
+    try{
+      const result=await Swal.fire({
+        title,text,icon:danger?'warning':'question',showCancelButton:true,
+        confirmButtonText,cancelButtonText:'Cancel',focusCancel:true,reverseButtons:true,
+        confirmButtonColor:danger?'var(--bs-danger)':'var(--bs-primary)',
+        cancelButtonColor:'var(--bs-secondary)',background:'var(--bs-secondary-bg)',color:'var(--bs-body-color)'
+      });
+      return result.isConfirmed&&event===currentEvent;
+    }finally{plannerConfirmationPending=false;}
+  }
+
+  function wirePlannerScrolling(){
+    const pool=document.getElementById('sidebar');
+    const topbar=document.getElementById('titania-topbar');
+    const updateOffset=()=>pool.style.setProperty('--pool-top',`${(topbar&&!topbar.hidden?topbar.getBoundingClientRect().bottom:0)+12}px`);
+    updateOffset();
+    if(topbar)new ResizeObserver(updateOffset).observe(topbar);
+    window.addEventListener('resize',updateOffset);
+    let dragging=false,point=null,frame=0,lastTime=0;
+    const stop=()=>{dragging=false;point=null;cancelAnimationFrame(frame);frame=0;lastTime=0;};
+    const speed=(y,top,bottom)=>{
+      const edge=Math.min(72,(bottom-top)/3);
+      if(y<top+edge)return -Math.min(1,Math.max(0,(top+edge-y)/edge))*650;
+      if(y>bottom-edge)return Math.min(1,Math.max(0,(y-bottom+edge)/edge))*650;
+      return 0;
+    };
+    const scroll=time=>{
+      if(!dragging)return;
+      const elapsed=lastTime?Math.min(time-lastTime,32)/1000:0;
+      lastTime=time;
+      if(point){
+        const hit=document.elementFromPoint(point.x,point.y);
+        const overPool=hit&&pool.contains(hit);
+        const list=overPool?pool.querySelector('#memberList:not([hidden]), #partyPoolList:not([hidden])'):null;
+        if(list&&getComputedStyle(list).display!=='none'){
+          const bounds=list.getBoundingClientRect();
+          list.scrollTop+=speed(point.y,bounds.top,Math.min(bounds.bottom,innerHeight))*elapsed;
+        }else if(!overPool){
+          const top=topbar&&!topbar.hidden?topbar.getBoundingClientRect().bottom:0;
+          window.scrollBy(0,speed(point.y,top,innerHeight)*elapsed);
+        }
+      }
+      frame=requestAnimationFrame(scroll);
+    };
+    document.addEventListener('dragstart',event=>{
+      if(!event.target.closest('#bodyWrap [draggable="true"]'))return;
+      stop();dragging=true;frame=requestAnimationFrame(scroll);
+    },true);
+    document.addEventListener('dragover',event=>{if(dragging)point={x:event.clientX,y:event.clientY};},true);
+    document.addEventListener('dragleave',event=>{if(!event.relatedTarget)point=null;},true);
+    document.addEventListener('drop',stop,true);
+    document.addEventListener('dragend',stop,true);
+    document.addEventListener('keydown',event=>{if(event.key==='Escape')stop();},true);
+    window.addEventListener('blur',stop);
+  }
+
   function wireStaticControls(){
+    wirePlannerScrolling();
     document.getElementById('eventTabs').addEventListener('click',event=>{
       const button = event.target.closest('[data-event]');
       if(!button) return;
@@ -511,12 +574,12 @@
       renderMemberList();
     });
     document.getElementById('addMemberBtn').addEventListener('click',()=>openMemberModal(null));
-    document.getElementById('autoFillBtn').addEventListener('click',autoFillCurrent);
-    document.getElementById('printBtn').addEventListener('click',openPrintView);
-    document.getElementById('poolToggleBtn').addEventListener('click',togglePoolVisibility);
+    document.getElementById('autoFillBtn').addEventListener('click',async()=>{if(await confirmPlannerAction('Auto-fill lineup?','Fill the remaining slots by Gear Rating. Existing assignments will be kept.','Auto-fill')&&userCanEdit())autoFillCurrent();});
+    document.getElementById('printBtn').addEventListener('click',async()=>{if(await confirmPlannerAction('Open Print/Share?','Open the print and share preview for this event.','Open preview'))openPrintView();});
+    document.getElementById('poolToggleBtn').addEventListener('click',async()=>{if(await confirmPlannerAction('Change pool visibility?','Show or hide the Member/Party Pool.','Proceed'))togglePoolVisibility();});
     document.getElementById('publicToggleBtn').addEventListener('click',togglePublicVisibility);
-    document.getElementById('exportBtn').addEventListener('click',exportLineup);
-    document.getElementById('importBtn').addEventListener('click',()=>document.getElementById('importFileInput').click());
+    document.getElementById('exportBtn').addEventListener('click',async()=>{if(await confirmPlannerAction('Export lineup?','Download the roster, membership history and all event lineups as a JSON file.','Export'))exportLineup();});
+    document.getElementById('importBtn').addEventListener('click',async()=>{if(await confirmPlannerAction('Import lineup?','Choose an exported JSON file. You will confirm replacing the data after the file is checked.','Choose file')&&userCanEdit())document.getElementById('importFileInput').click();});
     document.getElementById('importFileInput').addEventListener('change',event=>{
       const file = event.target.files && event.target.files[0];
       if(file) importLineupFile(file);
@@ -996,31 +1059,11 @@
     const label=currentEventPublicLabel();
     if(!state.publicVisibility||typeof state.publicVisibility!=='object')state.publicVisibility={guildLeague:false,siege:false,polarityZone:false};
     const next=!Boolean(state.publicVisibility[key]);
-    if(next){
-      if(!window.Swal){showToast('Confirmation unavailable','Refresh the page and try again. The lineup was not published.','warn');return;}
-      const button=document.getElementById('publicToggleBtn');
-      if(button.disabled)return;
-      button.disabled=true;
-      try{
-        const result=await Swal.fire({
-          title:`Publish the ${label} lineup?`,
-          text:'Anyone with the public link will be able to view this lineup.',
-          icon:'question',
-          showCancelButton:true,
-          confirmButtonText:'Publish lineup',
-          cancelButtonText:'Cancel',
-          focusCancel:true,
-          reverseButtons:true,
-          confirmButtonColor:'var(--bs-primary)',
-          cancelButtonColor:'var(--bs-secondary)',
-          background:'var(--bs-secondary-bg)',
-          color:'var(--bs-body-color)'
-        });
-        if(!result.isConfirmed||!userCanEdit()||key!==currentPublicVisibilityKey())return;
-      }finally{
-        button.disabled=false;
-      }
-    }
+    if(!await confirmPlannerAction(
+      `${next?'Publish':'Hide'} the ${label} lineup?`,
+      next?'Anyone with the public link will be able to view this lineup.':'The lineup will no longer be visible to public visitors.',
+      next?'Publish lineup':'Hide lineup'
+    )||!userCanEdit()||key!==currentPublicVisibilityKey())return;
     state.publicVisibility[key]=next;
     commitMutation(`${label} public lineup ${next?'published':'hidden'}`,'none');
     showToast(next?'Public view published':'Public view hidden',next?`${label} is now visible on the public page.`:`${label} is now private. Public visitors will see that no lineup is published.`);
@@ -1649,9 +1692,9 @@
     commitMutation('Dungeon status changed');
   }
 
-  function clearCurrentEvent(){
+  async function clearCurrentEvent(){
     const label=currentEventPublicLabel();
-    if(!confirm(`Clear every ${label} team assignment? The roster and the other events will remain unchanged.`)) return;
+    if(!userCanEdit()||!await confirmPlannerAction(`Clear every ${label} assignment?`,'The roster and the other events will remain unchanged.','Clear all',true)||!userCanEdit())return;
     currentTeamKeys().forEach(key=>{state.assignments[key]=new Array(CONFIG.teamSize).fill(null);});
     if(currentEvent==='polarity_zone') state.finishedDungeons=[];
     clearSelections(false);
@@ -2415,12 +2458,12 @@ Their team assignments and membership history will also be removed. Use Mark Ina
 
   function importLineupFile(file){
     const reader=new FileReader();
-    reader.onload=()=>{
+    reader.onload=async()=>{
       let data;try{data=JSON.parse(reader.result);}catch(error){showToast('Import failed','The selected file is not valid JSON.','err');return;}
       if(!data||(!Array.isArray(data.m)&&!Array.isArray(data.roster))){showToast('Import failed','This file does not contain a roster.','err');return;}
       const imported=normalizeClientState(data);
       const when=data.exportedAt?new Date(data.exportedAt).toLocaleString():'an unknown time';
-      if(!confirm(`Import the lineup exported on ${when}?\n\nThis will replace the current roster, Guild Status records, membership history, and all event lineups in the Titania database.`))return;
+      if(!userCanEdit()||!await confirmPlannerAction(`Import the lineup exported on ${when}?`,'This will replace the current roster, Guild Status records, membership history, and all event lineups in the Titania database.','Replace data',true)||!userCanEdit())return;
       state.roster=imported.roster;state.assignments=imported.assignments;state.finishedDungeons=imported.finishedDungeons;state.raidCommanders=imported.raidCommanders;state.raidLeaders=imported.raidLeaders;state.raidModes=imported.raidModes;state.siegeRaidGroups=imported.siegeRaidGroups;state.membershipHistory=imported.membershipHistory;dashboardSelected.clear();clearSelections(false);commitMutation('Lineup imported','all');showToast('Lineup imported','The roster, raid commanders, status history, and event data are being saved to Supabase.');
     };
     reader.onerror=()=>showToast('Import failed','The file could not be read.','err');reader.readAsText(file);

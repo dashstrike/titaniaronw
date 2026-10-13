@@ -33,6 +33,17 @@ body[data-event="siege"] #classBreakdown { display: none; }
 #titania-content .body-wrap { min-height: 65vh; }
 #titania-content main.main { min-width: 0; }
 #titania-content .sidebar { position: static; min-width: 0; }
+@media (min-width: 901px) {
+  #titania-content .sidebar {
+    position: sticky;
+    top: var(--pool-top, 82px);
+    height: calc(100dvh - var(--pool-top, 82px) - 12px);
+    flex-shrink: 0;
+  }
+  #titania-content .sidebar-head { flex-shrink: 0; }
+  #titania-content .member-list,
+  #titania-content .party-pool-list { min-height: 0; overflow-y: auto; overscroll-behavior-y: contain; }
+}
 #titania-content .modal { display: block; position: relative; height: auto; }
 #titania-content .overlay,
 #titania-content .print-overlay { z-index: 1100; }

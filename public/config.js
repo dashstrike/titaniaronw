@@ -1,6 +1,6 @@
 /* Compatibility bootstrap. Real configuration lives in ./js/config.js. */
 document.write('<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"><\/script>');
-document.write('<script src="./js/config.js?v=mobile-layout-1"><\/script>');
+document.write('<script src="./js/config.js?v=planner-confirmation-1"><\/script>');
 document.write('<script src="./js/job-icons-global.js?v=clean-routes-1"><\/script>');
 document.write('<link rel="stylesheet" href="./css/crowns.css?v=clean-routes-1">');
 document.write('<link rel="stylesheet" href="./css/party-stars.css?v=gold-star-1">');
