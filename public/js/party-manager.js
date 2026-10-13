@@ -98,6 +98,7 @@
         templateResult:select2Template,
         templateSelection:select2Template,
         matcher(params,data){
+          if(data.id&&String(data.id)!==select.value&&selectedIds().includes(String(data.id)))return null;
           const term=String(params.term||'').trim().toLowerCase();
           if(!term||!data.id)return data;
           return String(data.text||'').toLowerCase().includes(term)?data:null;

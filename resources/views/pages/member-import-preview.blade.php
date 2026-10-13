@@ -38,5 +38,5 @@
     <div class="table-wrap table-responsive" id="tableWrap" hidden><table><thead><tr><th>CSV Player</th><th>Titania Member</th><th>Match</th><th>Class</th><th>Gear Score</th><th>Title</th><th>This Week Activity</th><th>Weekly Contribution</th><th>Total Contribution</th><th>Action</th></tr></thead><tbody id="rowsBody"></tbody></table></div>
     <div class="footer-bar" id="footerBar" hidden><div class="footer-msg" id="footerMsg"></div><div class="footer-actions"><a class="btn btn-outline-secondary" href="./members">Cancel</a><button class="btn primary btn-primary" id="applyBtn" type="button" disabled><i class="fa-solid fa-cloud-arrow-up mr-2" aria-hidden="true"></i>Apply Updates</button></div></div>
   </main>
-  <script src="./js/member-import-preview.js?v=select2-theme-1"></script>
+  <script src="{{ asset('js/member-import-preview.js') }}?v={{ filemtime(public_path('js/member-import-preview.js')) }}"></script>
 @endsection

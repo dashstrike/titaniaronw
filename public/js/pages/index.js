@@ -882,6 +882,7 @@
     memberByName=Object.create(null);
     memberById=Object.create(null);
     state.roster.forEach(member=>{memberByName[member.name]=member;memberById[member.id]=member;});
+    window.dispatchEvent(new Event('titania:roster-updated'));
   }
 
   function renderAll(){

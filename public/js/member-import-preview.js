@@ -166,7 +166,7 @@
   function isReactivation(row){const m=currentMember(row);return Boolean(!row.ignored&&!row.newMember&&m&&m.status==='inactive');}
   function classChanged(row){const m=currentMember(row);return Boolean(m&&!row.ignored&&!row.newMember&&String(m.cls||'')!==String(row.cls||''));}
   function grChanged(row){const m=currentMember(row);return Boolean(m&&!row.ignored&&!row.newMember&&Number(m.gr||0)!==Number(row.gr||0));}
-  function nameMapping(row){const m=currentMember(row);return Boolean(m&&!row.ignored&&!row.newMember&&exactKey(m.name)!==exactKey(row.csvName));}
+  function nameMapping(row){const m=currentMember(row);return Boolean(m&&!row.ignored&&!row.newMember&&String(m.name||'')!==String(row.csvName||'').trim().slice(0,120));}
 
   function statusLabel(row){
     if(row.ignored)return ['ignored','Ignored'];
@@ -368,6 +368,7 @@
 
   function applyToState(){
     const next=clone(plannerState);
+    const renamed=new Map();
     if(!Array.isArray(next.roster))next.roster=[];
     const byId=new Map(next.roster.map(member=>[String(member.id||''),member]));
     const editor=(currentProfile&&String(currentProfile.display_name||currentProfile.email||'').trim())||'CSV Import';
@@ -389,6 +390,7 @@
 
     for(const row of rows){
       if(row.ignored)continue;
+      if(!row.newMember&&(!row.memberId||row.needsReview))throw new Error('Confirm all member mappings before applying.');
       if(row.newMember){
         const id=row.newMemberId||makeId('member');
         row.newMemberId=id;
@@ -413,6 +415,13 @@
       if(!row.memberId)continue;
       const member=byId.get(String(row.memberId));if(!member)continue;
       let changed=false;
+      const newName=String(row.csvName||'').trim().slice(0,120);
+      if(!newName)throw new Error('CSV player names cannot be empty.');
+      if(member.name!==newName){
+        renamed.set(member.name,newName);
+        member.name=newName;
+        changed=true;
+      }
       if(member.status==='inactive'){
         member.status='active';
         member.lastReturned=date;
@@ -426,6 +435,21 @@
       if(String(member.cls||'')!==newClass){member.cls=newClass;changed=true;}
       if(Number(member.gr||0)!==newGr){member.gr=newGr;changed=true;}
       if(changed){member.updatedAt=now;member.updatedBy=editor;}
+    }
+    const finalNames=new Set();
+    for(const member of next.roster){
+      const key=exactKey(member.name);
+      if(finalNames.has(key))throw new Error(`The name ${member.name} belongs to more than one member. Review the CSV mappings before applying.`);
+      finalNames.add(key);
+    }
+    if(renamed.size){
+      const rename=name=>renamed.has(name)?renamed.get(name):name;
+      Object.keys(next.assignments||{}).forEach(key=>{
+        if(Array.isArray(next.assignments[key]))next.assignments[key]=next.assignments[key].map(rename);
+      });
+      for(const field of ['raidCommanders','raidLeaders']){
+        Object.keys(next[field]||{}).forEach(key=>{next[field][key]=rename(next[field][key]);});
+      }
     }
     return next;
   }
@@ -453,7 +477,7 @@
     const aliasCount=active.filter(nameMapping).length;
     const result=await Swal.fire({
       icon:'question',title:'Update Titania members?',
-      html:`<div style="text-align:left;line-height:1.75"><b>${matched.length}</b> existing members matched<br><b>${newMembers.length}</b> new members to add<br><b>${inactive.length}</b> current members to mark inactive<br><b>${reactivated.length}</b> inactive members to reactivate<br><b>${aliasCount}</b> CSV name mappings<br><b>${classCount}</b> class changes<br><b>${grCount}</b> Gear Score changes<br><b>${active.length}</b> activity/contribution updates</div>`,
+      html:`<div style="text-align:left;line-height:1.75"><b>${matched.length}</b> existing members matched<br><b>${newMembers.length}</b> new members to add<br><b>${inactive.length}</b> current members to mark inactive<br><b>${reactivated.length}</b> inactive members to reactivate<br><b>${aliasCount}</b> display names to update from the CSV<br><b>${classCount}</b> class changes<br><b>${grCount}</b> Gear Score changes<br><b>${active.length}</b> activity/contribution updates</div>`,
       showCancelButton:true,confirmButtonText:'Apply Updates',cancelButtonText:'Cancel',reverseButtons:true
     });
     if(!result.isConfirmed)return;
@@ -466,6 +490,7 @@
       if(rpc.error)throw rpc.error;
       sessionStorage.removeItem(STORAGE_KEY);
       const pieces=[`${matched.length} updated`];
+      if(aliasCount)pieces.push(`${aliasCount} renamed`);
       if(newMembers.length)pieces.push(`${newMembers.length} added`);
       if(inactive.length)pieces.push(`${inactive.length} marked inactive`);
       if(reactivated.length)pieces.push(`${reactivated.length} reactivated`);

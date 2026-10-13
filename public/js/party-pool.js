@@ -6,7 +6,9 @@
   let parties=[];
   let loaded=false;
   let loading=false;
+  let rosterReady=false;
   let activePool='members';
+  let poolEvent=null;
   let iconMap={};
   let iconMapPromise=null;
 
@@ -92,6 +94,10 @@
   function renderPartyPool(){
     const list=document.getElementById('partyPoolList');
     if(!list)return;
+    if(!rosterReady){
+      list.innerHTML='<div class="party-pool-empty">Loading members…</div>';
+      return;
+    }
     const saved=parties.filter(p=>(p.member_ids||[]).length);
     if(!saved.length){
       list.innerHTML='<div class="party-pool-empty">No saved parties yet.<br>Open <b>Manage Parties</b> to build your 30 reference parties.</div>';
@@ -177,7 +183,11 @@
     const title=head&&head.querySelector('.sidebar-title-row h2');
     const enabled=canUsePools();
 
-    if(!enabled)activePool='members';
+    const currentPoolEvent=document.body.dataset.event;
+    if(poolEvent!==currentPoolEvent){
+      activePool=enabled?'parties':'members';
+      poolEvent=currentPoolEvent;
+    }
     const partiesActive=enabled&&activePool==='parties';
     if(tabs)tabs.hidden=!enabled;
     if(memberList)memberList.hidden=partiesActive;
@@ -243,6 +253,11 @@
   },true);
 
   document.addEventListener('dragend',()=>document.querySelectorAll('.party-drop-ready').forEach(node=>node.classList.remove('party-drop-ready')));
+
+  window.addEventListener('titania:roster-updated',()=>{
+    rosterReady=true;
+    if(loaded)renderPartyPool();
+  });
 
   function refreshForEvent(){
     ensureSidebar();
