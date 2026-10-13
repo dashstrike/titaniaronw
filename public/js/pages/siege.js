@@ -186,7 +186,7 @@ function raidBlock(raid,kind,five){
   const mode=isSiegeRaid?(str(state.raidModes[raid.id]).toUpperCase()==='DEF'?'DEF':'ATK'):'';
   const modeLabel=mode==='DEF'?'RESPAWN':'CAPTURE';
   const modeIcon=mode==='DEF'?'↻':'🏰';
-  const raidTitle=`<b>${esc(commander)}</b>`;
+  const raidTitle=`TEAM <b>${esc(commander)}</b>`;
   return `<div class="raid-block card" data-kind="${kind}">
     <div class="raid-head card-header">
       <div class="raid-name">${raidTitle}</div>
@@ -203,7 +203,7 @@ function teamCard(key,kind,label){
   const s=slots(key);
   const noHealer=teamNoHealer(key);
   return `<article class="team-card ${kind} card">
-    <div class="team-head card-header d-flex align-items-center justify-content-between gap-2"><div class="team-name">${esc(label||teamLabel(key))}</div><h2 class="ms-auto mb-0 text-end"><span class="badge text-wrap ${kind==='sub'?'':'bg-primary-subtle text-primary'}"${kind==='sub'?' style="background-color:rgba(143,232,221,.15);color:#8fe8dd"':''}>TEAM ${esc(teamName)}</span></h2></div>
+    <div class="team-head card-header d-flex align-items-center justify-content-between gap-2"><div class="team-name">${esc(label||teamLabel(key))}</div><h3 class="ms-auto mb-0 text-end"><span class="badge rounded-pill text-wrap badge-outline-primary"${kind==='sub'?' style="color:#8fe8dd;border-color:currentColor"':''}>TEAM ${esc(teamName)}</span></h3></div>
     <div class="card-body p-2">${s.map((name,i)=>slotHtml(name,i,key)).join('')}</div>
     ${noHealer?'<div class="no-healer">⚠ No healer</div>':''}
   </article>`;

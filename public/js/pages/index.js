@@ -1211,7 +1211,7 @@
     let modeToggle='';
     if(SUB_RAIDS.some(item=>item.id===raid.id)){
       const position=['MID','TOP','BOTTOM'].includes(state.raidModes?.[raid.id])?state.raidModes[raid.id]:'MID';
-      modeToggle=`<button class="raid-mode-toggle" data-raid-mode-toggle="${raid.id}" type="button" title="Switch this raid between MID, TOP and BOTTOM">${position==='BOTTOM'?'BTM':position}</button>`;
+      modeToggle=`<button class="raid-mode-toggle" style="color:${position==='TOP'?'var(--bs-primary)':position==='BOTTOM'?'#ffd34d':'#3b82f6'};border-color:currentColor" data-raid-mode-toggle="${raid.id}" type="button" title="Switch this raid between MID, TOP and BOTTOM">${position==='BOTTOM'?'BTM':position}</button>`;
     }
     if(isGuildMainRaid||isSiegeRaid){
       const raidMode=state.raidModes&&state.raidModes[raid.id]==='DEF'?'DEF':'ATK';
@@ -1221,7 +1221,7 @@
       const modeTitle=isSiegeRaid?'Switch this raid between CAPTURE and RESPAWN':'Switch this raid between ATK and DEF';
       modeToggle=`<button class="raid-mode-toggle ${raidMode.toLowerCase()}" data-raid-mode-toggle="${raid.id}" type="button" title="${modeTitle}">${modeIcon} ${modeLabel}</button>`;
     }
-    const title=isPolarityRaid?`RAID TEAM — ${displayCommander}`:`${raid.label.toUpperCase()} · TEAM ${displayCommander}`;
+    const title=`TEAM ${displayCommander}`;
     const selectedLeader=!isPolarityRaid?stringValue(state.raidLeaders&&state.raidLeaders[raid.id]).trim():'';
     const leaderDropText=selectedLeader||'Drag member here';
     const raidLeaderControl=isPolarityRaid?'':`<label class="raid-leader-control"><b>Raid Leader</b><span class="raid-leader-drop ${selectedLeader?'':'empty'}" data-raid-leader-drop="${raid.id}" role="button" tabindex="0" title="Drag the member who created this raid party here">${raidLeaderIcon()}<span class="raid-leader-drop-name">${escapeHtml(leaderDropText)}</span></span></label>`;
