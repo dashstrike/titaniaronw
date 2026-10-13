@@ -141,7 +141,7 @@ function renderPolarity(){
 function raidBlock(raid,kind,five){
   const commander=str(state.raidCommanders[raid.id])||'Not assigned';
   const mode=MAIN_RAIDS.some(r=>r.id===raid.id)?(str(state.raidModes[raid.id]).toUpperCase()==='DEF'?'DEF':'ATK'):'';
-  const raidTitle=kind==='star'?`RAID TEAM — <b>${esc(commander)}</b>`:`${esc(raid.label.toUpperCase())} · TEAM <b>${esc(commander)}</b>`;
+  const raidTitle=`<b>${esc(commander)}</b>`;
   return `<div class="raid-block">
     <div class="raid-head">
       <div class="raid-name">${raidTitle}</div>

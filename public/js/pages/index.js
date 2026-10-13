@@ -642,7 +642,7 @@
 
   function createDefaultRaidModes(){
     const out={};
-    ALL_GUILD_STYLE_RAIDS.forEach(raid=>{out[raid.id]='ATK';});
+    ALL_GUILD_STYLE_RAIDS.forEach(raid=>{out[raid.id]=SUB_RAIDS.some(item=>item.id===raid.id)?'MID':'ATK';});
     return out;
   }
 
@@ -651,7 +651,7 @@
     const out=createDefaultRaidModes();
     ALL_GUILD_STYLE_RAIDS.forEach(raid=>{
       const mode=stringValue(source[raid.id]).trim().toUpperCase();
-      out[raid.id]=mode==='DEF'?'DEF':'ATK';
+      out[raid.id]=SUB_RAIDS.some(item=>item.id===raid.id)?(['MID','TOP','BOTTOM'].includes(mode)?mode:'MID'):(mode==='DEF'?'DEF':'ATK');
     });
     return out;
   }
@@ -1209,6 +1209,10 @@
     const isSiegeRaid=ALL_SIEGE_RAIDS.some(item=>item.id===raid.id);
     const isPolarityRaid=Boolean(raid.polarity);
     let modeToggle='';
+    if(SUB_RAIDS.some(item=>item.id===raid.id)){
+      const position=['MID','TOP','BOTTOM'].includes(state.raidModes?.[raid.id])?state.raidModes[raid.id]:'MID';
+      modeToggle=`<button class="raid-mode-toggle" data-raid-mode-toggle="${raid.id}" type="button" title="Switch this raid between MID, TOP and BOTTOM">${position==='BOTTOM'?'BTM':position}</button>`;
+    }
     if(isGuildMainRaid||isSiegeRaid){
       const raidMode=state.raidModes&&state.raidModes[raid.id]==='DEF'?'DEF':'ATK';
       const siegeModeLabel=raidMode==='DEF'?'RESPAWN':'CAPTURE';
@@ -1297,6 +1301,14 @@
       event.preventDefault();event.stopPropagation();
       const raidId=button.dataset.raidModeToggle;
       const siegeRaid=ALL_SIEGE_RAIDS.some(raid=>raid.id===raidId);
+      if(SUB_RAIDS.some(raid=>raid.id===raidId)){
+        if(!state.raidModes||typeof state.raidModes!=='object')state.raidModes=createDefaultRaidModes();
+        const positions=['MID','TOP','BOTTOM'];
+        const previous=positions.includes(state.raidModes[raidId])?state.raidModes[raidId]:'MID';
+        state.raidModes[raidId]=positions[(positions.indexOf(previous)+1)%positions.length];
+        commitMutation('Sub Battlefield position updated');
+        return;
+      }
       if(!MAIN_RAIDS.some(raid=>raid.id===raidId)&&!siegeRaid)return;
       if(!state.raidModes||typeof state.raidModes!=='object')state.raidModes=createDefaultRaidModes();
       const previous=state.raidModes[raidId]==='DEF'?'DEF':'ATK';
@@ -2206,7 +2218,7 @@ Their team assignments and membership history will also be removed. Use Mark Ina
       const id=raid.id;
       if(!sameJson(local.raidLeaders[id],base.raidLeaders[id]))merged.raidLeaders[id]=local.raidLeaders[id]||'';
     });
-    [...MAIN_RAIDS,...ALL_SIEGE_RAIDS].forEach(raid=>{
+    [...MAIN_RAIDS,...SUB_RAIDS,...ALL_SIEGE_RAIDS].forEach(raid=>{
       const id=raid.id;
       if(!sameJson(local.raidModes[id],base.raidModes[id]))merged.raidModes[id]=local.raidModes[id];
     });

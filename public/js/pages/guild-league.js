@@ -147,11 +147,13 @@ function renderPolarity(){
 
 function raidBlock(raid,kind,five){
   const commander=str(state.raidCommanders[raid.id])||'Not assigned';
+  const position=kind==='sub'?(['MID','TOP','BOTTOM'].includes(state.raidModes[raid.id])?state.raidModes[raid.id]:'MID'):'';
   const mode=MAIN_RAIDS.some(r=>r.id===raid.id)?(str(state.raidModes[raid.id]).toUpperCase()==='DEF'?'DEF':'ATK'):'';
-  const raidTitle=kind==='star'?`RAID TEAM — <b>${esc(commander)}</b>`:`${esc(raid.label.toUpperCase())} · TEAM <b>${esc(commander)}</b>`;
+  const raidTitle=`<b>${esc(commander)}</b>`;
   return `<div class="raid-block card" data-kind="${kind}">
     <div class="raid-head card-header">
       <div class="raid-name">${raidTitle}</div>
+      ${position?`<span class="mode">${position==='BOTTOM'?'BTM':position}</span>`:''}
       ${mode?`<span class="mode ${mode.toLowerCase()}">${mode==='DEF'?'🛡':'⚔'} ${mode}</span>`:''}
       <div class="raid-line"></div>
     </div>
@@ -165,7 +167,7 @@ function teamCard(key,kind,label){
   const s=slots(key);
   const noHealer=teamNoHealer(key);
   return `<article class="team-card ${kind} card">
-    <div class="team-head card-header d-flex align-items-center justify-content-between gap-2"><div class="team-name">${esc(label||teamLabel(key))}</div><span class="ms-auto text-end small text-info">TEAM ${esc(teamName)}</span></div>
+    <div class="team-head card-header d-flex align-items-center justify-content-between gap-2"><div class="team-name">${esc(label||teamLabel(key))}</div><h2 class="ms-auto mb-0 text-end"><span class="badge text-wrap ${kind==='sub'?'':'bg-primary-subtle text-primary'}"${kind==='sub'?' style="background-color:rgba(143,232,221,.15);color:#8fe8dd"':''}>TEAM ${esc(teamName)}</span></h2></div>
     <div class="card-body p-2">${s.map((name,i)=>slotHtml(name,i,key)).join('')}</div>
     ${noHealer?'<div class="no-healer">⚠ No healer</div>':''}
   </article>`;
