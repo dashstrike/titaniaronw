@@ -5,6 +5,10 @@
 @section('body-attributes')@endsection
 
 @push('head')
+<link rel="stylesheet" href="{{ asset('vendor/datatables/dataTables.bootstrap5.min.css') }}">
+<script src="{{ asset('vendor/datatables/jquery.min.js') }}" defer></script>
+<script src="{{ asset('vendor/datatables/dataTables.min.js') }}" defer></script>
+<script src="{{ asset('vendor/datatables/dataTables.bootstrap5.min.js') }}" defer></script>
 <link rel="stylesheet" href="{{ asset('css/member-page.css') }}?v={{ filemtime(public_path('css/member-page.css')) }}">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="{{ asset('config.js') }}?v={{ filemtime(public_path('config.js')) }}"></script>

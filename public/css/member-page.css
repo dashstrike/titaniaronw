@@ -80,7 +80,8 @@ html[data-theme="light"] #titania-content{--bg:var(--bs-body-bg);--panel:var(--b
 #titania-content .info-row:last-child{border-bottom:0;}
 #titania-content .info-key{color:var(--muted);}
 #titania-content .info-value{min-width:0;overflow-wrap:anywhere;}
-#titania-content #historyWrap,
+#titania-content #historyWrap{min-width:0;}
+#titania-content #historyWrap .dt-container > .row{margin-left:0;margin-right:0;}
 #titania-content #classHistoryWrap,
 #titania-content #nameHistoryWrap{overflow-x:auto;}
 #titania-content .history-table,
