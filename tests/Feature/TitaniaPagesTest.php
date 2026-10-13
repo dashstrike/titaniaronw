@@ -96,6 +96,14 @@ class TitaniaPagesTest extends TestCase
         }
     }
 
+    public function test_management_urls_select_their_own_page_on_refresh(): void
+    {
+        foreach (['dashboard' => 'dashboard', 'members' => 'manage_members', 'guild-league' => 'guild_league', 'siege' => 'siege', 'attendance' => 'attendance'] as $path => $event) {
+            $this->get('/'.$path)->assertOk()
+                ->assertSee('data-planner-event="'.$event.'"', false);
+        }
+    }
+
     public function test_job_map_points_to_existing_images(): void
     {
         $map = json_decode(file_get_contents(public_path('images/job/job-icons.json')), true, 512, JSON_THROW_ON_ERROR);

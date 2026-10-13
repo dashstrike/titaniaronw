@@ -21,7 +21,7 @@
     <link rel="stylesheet" href="{{ asset('css/titania.css') }}?v={{ filemtime(public_path('css/titania.css')) }}">
     <link rel="stylesheet" href="{{ asset('css/tooltips.css') }}?v={{ filemtime(public_path('css/tooltips.css')) }}">
 </head>
-<body data-titania-page="{{ $page }}" data-titania-public="{{ $publicPage ? 'true' : 'false' }}" @yield('body-attributes')>
+<body data-titania-page="{{ $page }}" data-planner-event="{{ $plannerEvent }}" data-titania-public="{{ $publicPage ? 'true' : 'false' }}" @yield('body-attributes')>
     <div class="app-wrapper">
         @unless($publicPage)
             @include('partials.sidebar')

@@ -108,7 +108,7 @@ const TITANIA_IS_MEMBER_PAGE = document.documentElement.dataset.titaniaPage==='m
   const loadScript = () => {
     if (document.querySelector('script[data-titania-attendance-page]')) return;
     const script = document.createElement('script');
-    script.src = './js/attendance-page.js?v=stats-cards-1';
+    script.src = './js/attendance-page.js?v=route-startup-1';
     script.setAttribute('data-titania-attendance-page', '1');
     document.body.appendChild(script);
   };

@@ -886,6 +886,15 @@
 
   function renderAll(){
     rebuildIndex();
+    if(currentEvent==='attendance'){
+      renderTabs();
+      renderHeaderStats();
+      document.body.dataset.event='attendance';
+      document.getElementById('eventActionRow').hidden=true;
+      document.getElementById('bodyWrap').classList.add('dashboard-mode');
+      if(window.TitaniaShowAttendance)window.TitaniaShowAttendance();
+      return;
+    }
     renderTabs();
     renderHeaderStats();
     renderActionState();
@@ -921,7 +930,7 @@
   }
 
   function setEvent(eventName){
-    if(!['dashboard','manage_members','guild_league','siege','polarity_zone'].includes(eventName)) return;
+    if(!['dashboard','manage_members','guild_league','siege','attendance','polarity_zone'].includes(eventName)) return;
     currentEvent=eventName;
     try{localStorage.setItem('roworld_sheets_event_v1',eventName);}catch(error){}
     statusFilter='All';
@@ -930,11 +939,8 @@
   }
 
   function readStoredEvent(){
-    try{
-      const value=localStorage.getItem('roworld_sheets_event_v1');
-      if(['dashboard','manage_members','guild_league','siege','polarity_zone'].includes(value)) return value;
-    }catch(error){}
-    return 'guild_league';
+    const page=document.body.dataset.plannerEvent;
+    return ['dashboard','manage_members','guild_league','siege','attendance','polarity_zone'].includes(page)?page:'dashboard';
   }
 
   function renderHeaderStats(){
@@ -2104,7 +2110,7 @@
     const selectedCount=dashboardSelected.size;const allVisible=rows.length&&rows.every(member=>dashboardSelected.has(member.name));
     const activeCount=activeRoster().length;const inactiveCount=state.roster.length-activeCount;
     return `${sectionHeader('🛠 Manage Members','',`${rows.length} shown · ${activeCount} active · ${inactiveCount} inactive`)}
-      <div class="d-flex flex-wrap align-items-center gap-2 mb-3"><input class="edit-input form-control" id="dashSearch" placeholder="Search members…" value="${escapeAttr(dashboardSearch)}" style="width:210px"><div class="btn-group">${['Active','Inactive','All'].map(status=>`<button class="pill ${dashboardGuildStatusFilter===status?'active':''} btn btn-outline-primary btn-sm" data-dashboard-status="${status}">${status}</button>`).join('')}</div><div class="d-flex flex-wrap align-items-center gap-2"><span class="dash-manage-sort-label">Sort</span><button class="pill ${dashboardSortBy==='name'?'active':''} btn btn-outline-primary btn-sm" data-dashboard-sort="name">Name${dashboardSortBy==='name'?(dashboardSortDir==='asc'?' ↑':' ↓'):''}</button><button class="pill ${dashboardSortBy==='gear'?'active':''} btn btn-outline-primary btn-sm" data-dashboard-sort="gear">Gear Rating${dashboardSortBy==='gear'?(dashboardSortDir==='asc'?' ↑':' ↓'):''}</button><button class="pill ${dashboardSortBy==='updated'?'active':''} btn btn-outline-primary btn-sm" data-dashboard-sort="updated">Last Update${dashboardSortBy==='updated'?(dashboardSortDir==='asc'?' ↑':' ↓'):''}</button><select class="form-select w-auto" id="dashClassFilter" title="Filter members by class"><option value="All" ${dashboardClassFilter==='All'?'selected':''}>All Classes</option>${dashboardAvailableClasses().map(([cls,count])=>`<option value="${escapeAttr(cls)}" ${dashboardClassFilter===cls?'selected':''}>${escapeHtml(cls)} (${count})</option>`).join('')}</select></div><label class="d-flex align-items-center gap-2 ms-lg-auto"><input type="checkbox" id="dashSelectAll" ${allVisible?'checked':''} class="form-check-input"> Select all shown</label><span class="text-muted small">${selectedCount} selected</span><button class="btn primary small btn-primary btn-sm" id="dashAddMember">+ Add member</button></div>
+      <div class="d-flex flex-wrap align-items-center gap-2 mb-3"><input class="edit-input form-control" id="dashSearch" placeholder="Search members…" value="${escapeAttr(dashboardSearch)}" style="width:210px"><div class="d-flex flex-wrap align-items-center">${['Active','Inactive','All'].map(status=>`<button class="pill ${dashboardGuildStatusFilter===status?'active':''} btn btn-outline-primary btn-sm m-2" data-dashboard-status="${status}">${status}</button>`).join('')}</div><div class="d-flex flex-wrap align-items-center gap-2"><span class="dash-manage-sort-label">Sort</span><button class="pill ${dashboardSortBy==='name'?'active':''} btn btn-outline-primary btn-sm" data-dashboard-sort="name">Name${dashboardSortBy==='name'?(dashboardSortDir==='asc'?' ↑':' ↓'):''}</button><button class="pill ${dashboardSortBy==='gear'?'active':''} btn btn-outline-primary btn-sm" data-dashboard-sort="gear">Gear Rating${dashboardSortBy==='gear'?(dashboardSortDir==='asc'?' ↑':' ↓'):''}</button><button class="pill ${dashboardSortBy==='updated'?'active':''} btn btn-outline-primary btn-sm" data-dashboard-sort="updated">Last Update${dashboardSortBy==='updated'?(dashboardSortDir==='asc'?' ↑':' ↓'):''}</button><select class="form-select w-auto" id="dashClassFilter" title="Filter members by class"><option value="All" ${dashboardClassFilter==='All'?'selected':''}>All Classes</option>${dashboardAvailableClasses().map(([cls,count])=>`<option value="${escapeAttr(cls)}" ${dashboardClassFilter===cls?'selected':''}>${escapeHtml(cls)} (${count})</option>`).join('')}</select></div><label class="d-flex align-items-center gap-2 ms-lg-auto"><input type="checkbox" id="dashSelectAll" ${allVisible?'checked':''} class="form-check-input"> Select all shown</label><span class="text-muted small">${selectedCount} selected</span><button class="btn primary small btn-primary btn-sm" id="dashAddMember">+ Add member</button></div>
       ${selectedCount?`<div class="dash-bulk-bar"><span class="dash-bulk-label">Class</span><select class="edit-input form-select" id="dashBulkClass">${CLASSES.map(cls=>`<option value="${escapeAttr(cls)}">${escapeHtml(cls)}</option>`).join('')}</select><button class="btn small btn-outline-secondary btn-sm" id="dashBulkClassBtn">Apply to ${selectedCount}</button><span class="dash-bulk-label">Set GR</span><input type="number" class="edit-input form-control" id="dashBulkSet" min="0" placeholder="25000"><button class="btn small btn-outline-secondary btn-sm" id="dashBulkSetBtn">Set for ${selectedCount}</button><span class="dash-bulk-label">Adjust GR</span><input type="number" class="edit-input form-control" id="dashBulkAdjust" placeholder="500 or -500"><button class="btn small btn-outline-secondary btn-sm" id="dashBulkAdjustBtn">Adjust ${selectedCount}</button><button class="btn small danger btn-outline-danger btn-sm" id="dashBulkDeleteBtn">Permanently delete ${selectedCount}</button></div>`:''}
       <div class="card"><div class="table-responsive" id="dashManageTable"><table class="table table-centered table-hover align-middle mb-0"><thead><tr><th aria-label="Select"></th><th>Player</th><th>Status</th><th>Class</th><th>Gear Rating</th><th>Last Updated</th><th class="text-end">Actions</th></tr></thead><tbody>${rows.length?rows.map(member=>{
         const inactive=member.status==='inactive';

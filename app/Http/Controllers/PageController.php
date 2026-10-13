@@ -13,6 +13,7 @@ class PageController extends Controller
 
         return view('pages.'.$page, [
             'page' => $page,
+            'plannerEvent' => $request->route('plannerEvent', 'dashboard'),
             'publicPage' => in_array($page, ['guild-league', 'siege', 'polarity-zone', 'titaniaruns'], true),
             // Only browser-safe settings are exposed. Supabase still governs all data access.
             'browserConfig' => [

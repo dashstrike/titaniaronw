@@ -56,18 +56,6 @@
     }
   }
 
-  document.querySelectorAll('[data-planner-event]').forEach(link => {
-    link.addEventListener('click', event => {
-      if (!isPlanner) return;
-      event.preventDefault();
-      requestedEvent = link.dataset.plannerEvent;
-      if (location.pathname.replace(/\/$/, '') !== new URL(link.href).pathname.replace(/\/$/, '')) history.pushState(null, '', link.href);
-      updateNavigation();
-      document.documentElement.classList.remove('sidebar-enable');
-      document.querySelector('.offcanvas-backdrop')?.click();
-    });
-  });
-
   // Keep existing public/member theme controls in step with Darkone.
   const themeObserver = new MutationObserver(changes => {
     const source = changes[changes.length - 1].attributeName;
