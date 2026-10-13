@@ -56,14 +56,14 @@ const TITANIA_IS_MEMBER_PAGE = document.documentElement.dataset.titaniaPage==='m
   if (document.querySelector('link[data-titania-dashboard-fixes]')) return;
   const link = document.createElement('link');
   link.rel = 'stylesheet';
-  link.href = './css/dashboard-fixes.css?v=clean-routes-1';
+  link.href = './css/dashboard-fixes.css?v=inline-refresh-1-clean-routes-1';
   link.setAttribute('data-titania-dashboard-fixes', '1');
   document.head.appendChild(link);
 
   const loadScript = () => {
     if (document.querySelector('script[data-titania-dashboard-attendance]')) return;
     const script = document.createElement('script');
-    script.src = './js/dashboard-attendance.js?v=clean-routes-1';
+    script.src = './js/dashboard-attendance.js?v=inline-refresh-1';
     script.setAttribute('data-titania-dashboard-attendance', '1');
     document.body.appendChild(script);
   };

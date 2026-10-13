@@ -212,7 +212,7 @@
     panel.setAttribute('aria-labelledby','dashAttendanceTitle');
     panel.innerHTML=`<div class="dash-att-head">
       <div><h2 id="dashAttendanceTitle"><i class="fa-solid fa-chart-column mr-2" aria-hidden="true"></i>Attendance Overview</h2><p>Latest 8 events \u00b7 Guild League &amp; Siege</p></div>
-      <div class="dash-att-controls"><select class="edit-input form-select" aria-label="Attendance chart view"><option value="actual">Actual attendance</option><option value="pre">Pre-attendance</option></select><button class="btn small btn-outline-secondary btn-sm" type="button" data-dash-att-refresh><i class="fa-solid fa-rotate mr-2" aria-hidden="true"></i>Refresh</button></div>
+      <div class="dash-att-controls"><select class="edit-input form-select" aria-label="Attendance chart view"><option value="actual">Actual attendance</option><option value="pre">Pre-attendance</option></select><button class="btn small btn-outline-secondary btn-sm" type="button" data-dash-att-refresh title="Refresh" data-titania-tooltip="Refresh" aria-label="Refresh"><i class="fa-solid fa-rotate" aria-hidden="true"></i></button></div>
     </div><div class="dash-att-content"></div>`;
     panel.querySelector('select').value=mode;
     panel.querySelector('[data-dash-att-refresh]').addEventListener('click',()=>load(panel));
