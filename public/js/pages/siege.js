@@ -198,10 +198,12 @@ function raidBlock(raid,kind,five){
 }
 
 function teamCard(key,kind,label){
+  const raid=raidForParty(key);
+  const teamName=raid?str(state.raidCommanders[raid.id])||'Not assigned':'Not assigned';
   const s=slots(key);
   const noHealer=teamNoHealer(key);
   return `<article class="team-card ${kind} card">
-    <div class="team-head card-header"><div class="team-name">${esc(label||teamLabel(key))}</div></div>
+    <div class="team-head card-header d-flex align-items-center justify-content-between gap-2"><div class="team-name">${esc(label||teamLabel(key))}</div><span class="ms-auto text-end small text-info">TEAM ${esc(teamName)}</span></div>
     <div class="card-body p-2">${s.map((name,i)=>slotHtml(name,i,key)).join('')}</div>
     ${noHealer?'<div class="no-healer">⚠ No healer</div>':''}
   </article>`;
@@ -246,7 +248,7 @@ function slotHtml(name,index,key){
   const raidLeaderSelected=Boolean(raid&&state.raidLeaders&&str(state.raidLeaders[raid.id])===name);
   return `<div class="slot ${index===0?'leader-slot':''}">
     ${titleIconHtml(m)}
-    <div class="member"><div class="member-name">${esc(name)}</div>${preBadge(name)}${raidLeaderSelected?'<span class="public-raid-leader" title="Raid Leader" aria-label="Raid Leader"><i class="fa-solid fa-crown" aria-hidden="true"></i></span>':''}</div>
+    <div class="member"><div class="member-name">${esc(name)} ${raidLeaderSelected?'<span class="public-raid-leader" title="Raid Leader" aria-label="Raid Leader"><i class="fa-solid fa-crown" aria-hidden="true"></i></span>':''}</div>${preBadge(name)}</div>
     <span class="job-class job-class-source">${esc(m.cls)}</span><span class="dot public-job-icon" title="${esc(m.cls)}" aria-label="${esc(m.cls)} class icon"></span>
   </div>`;
 }
