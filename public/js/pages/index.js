@@ -1103,7 +1103,7 @@
     const options=currentEvent==='polarity_zone'?['All','Star','Normal','Unassigned']:['All','Main','Sub','Unassigned'];
     if(!options.includes(statusFilter)) statusFilter='All';
     const row=document.getElementById('filterRow');
-    row.innerHTML=options.map(option=>`<button class="pill ${option===statusFilter?'active':''} btn btn-outline-primary btn-sm" data-filter="${option}">${option}</button>`).join('');
+    row.innerHTML=options.map(option=>`<button class="pill ${option===statusFilter?'active':''} btn btn-outline-primary btn-sm px-2 text-nowrap" data-filter="${option}">${option}</button>`).join('');
     row.querySelectorAll('[data-filter]').forEach(button=>button.addEventListener('click',()=>{statusFilter=button.dataset.filter;renderFilters();renderMemberList();}));
   }
 
@@ -1120,8 +1120,8 @@
     const options=[{key:'gr',label:'Gear Rating'},{key:'name',label:'Name'}];
     row.innerHTML='<span class="sort-label">Sort</span>'+options.map(option=>{
       const active=sortBy===option.key;
-      const arrow=active?(sortDir==='asc'?'↑':'↓'):'';
-      return `<button class="pill sort-pill ${active?'active':''} btn btn-outline-primary btn-sm" data-sort="${option.key}">${option.label}${arrow?' '+arrow:''}</button>`;
+      const arrow=sortDir==='asc'?'fa-arrow-up':'fa-arrow-down';
+      return `<button class="pill sort-pill ${active?'active':''} btn btn-outline-primary btn-sm" data-sort="${option.key}"><span${active?' class="mr-2"':''}>${option.label}</span>${active?`<i class="fa-solid ${arrow}" aria-hidden="true"></i>`:''}</button>`;
     }).join('');
     row.querySelectorAll('[data-sort]').forEach(button=>button.addEventListener('click',()=>{
       const key=button.dataset.sort;
@@ -1245,7 +1245,7 @@
     }else if(currentEvent==='siege'){
       wrap.innerHTML=`<div class="main-raids siege-raids">${currentSiegeRaids().map(mainRaidHtml).join('')}</div>`;
     }else{
-      wrap.innerHTML=sectionHeader('⚔ Main Battlefield','main-bf',`3 raids · 4 teams each`)+`<div class="main-raids">${MAIN_RAIDS.map(mainRaidHtml).join('')}</div>`+sectionHeader('◈ Sub Battlefield','sub-bf',`4 raids · Parties 1–${CONFIG.subTeams}`)+`<div class="main-raids sub-raids">${SUB_RAIDS.map(mainRaidHtml).join('')}</div>`;
+      wrap.innerHTML=sectionHeader('⚔ Main Battlefield','main-bf',`3 raids · 4 teams each`)+`<div class="main-raids">${MAIN_RAIDS.map(mainRaidHtml).join('')}</div>`+sectionHeader('<i class="fa-solid fa-shield-cat mr-2" aria-hidden="true"></i>Sub Battlefield','sub-bf',`4 raids · Parties 1–${CONFIG.subTeams}`)+`<div class="main-raids sub-raids">${SUB_RAIDS.map(mainRaidHtml).join('')}</div>`;
     }
     wireTeamInteractions();
   }
@@ -1276,7 +1276,7 @@
     const raidLeaderControl=isPolarityRaid?'':`<label class="raid-leader-control"><b>Raid Leader</b><span class="raid-leader-drop ${selectedLeader?'':'empty'}" data-raid-leader-drop="${raid.id}" role="button" tabindex="0" title="Drag the member who created this raid party here">${raidLeaderIcon()}<span class="raid-leader-drop-name">${escapeHtml(leaderDropText)}</span></span></label>`;
     let gridClass=raid.kind==='star'?'pz-star-raid-grid':raid.kind==='normal'?'pz-normal-raid-grid':'main-raid-grid';
     if(!isPolarityRaid&&raid.keys.length===5)gridClass+=' five';
-    return `<div class="main-raid-block card mb-0" data-raid="${raid.id}"><div class="main-raid-head card-header ${SUB_RAIDS.some(item=>item.id===raid.id)||SIEGE_SUB_RAIDS.some(item=>item.id===raid.id)?'': 'bg-primary-subtle'}"><div class="main-raid-title">${escapeHtml(title)}</div>${modeToggle}<div class="main-raid-line"></div><label class="raid-commander-control"><b>Raid Commander</b><span class="raid-commander-drop ${selectedCommander?'':'empty'}" data-raid-commander-drop="${raid.id}" role="button" tabindex="0" title="Drag any member from this raid here to make them Raid Commander">${raidCommanderIcon()}<span class="raid-commander-drop-name">${escapeHtml(dropText)}</span></span></label>${raidLeaderControl}</div><div class="${gridClass} card-body">${raid.keys.map(teamCardHtml).join('')}</div></div>`;
+    return `<div class="main-raid-block card mb-0" data-raid="${raid.id}"><div class="main-raid-head card-header ${currentEvent==='guild_league'&&SUB_RAIDS.some(item=>item.id===raid.id)?'': 'bg-primary-subtle'}"><div class="main-raid-title">${escapeHtml(title)}</div>${modeToggle}<div class="main-raid-line"></div><label class="raid-commander-control"><b>Raid Commander</b><span class="raid-commander-drop ${selectedCommander?'':'empty'}" data-raid-commander-drop="${raid.id}" role="button" tabindex="0" title="Drag any member from this raid here to make them Raid Commander">${raidCommanderIcon()}<span class="raid-commander-drop-name">${escapeHtml(dropText)}</span></span></label>${raidLeaderControl}</div><div class="${gridClass} card-body">${raid.keys.map(teamCardHtml).join('')}</div></div>`;
   }
 
   function raidForTeam(key){if(key.startsWith('siege_'))return currentSiegeRaids().find(raid=>raid.keys.includes(key))||null;return ALL_RAIDS.find(raid=>!raid.siege&&raid.keys.includes(key))||null;}
@@ -2542,7 +2542,7 @@ Their team assignments and membership history will also be removed. Use Mark Ina
         const modeIcon=raidMode==='DEF'?'🛡':'⚔';
         html+=`<div class="print-raid-block"><div class="print-raid-head"><span>${escapeHtml(raid.label.toUpperCase())} · TEAM ${escapeHtml(commanderName)} <span class="print-raid-mode ${raidMode.toLowerCase()}">${modeIcon} ${raidMode}</span></span></div><div class="print-team-grid print-main-raid-grid">${raid.keys.map(appendTeamCard).join('')}</div></div>`;
       });
-      html+=`<div class="print-section-title">Sub Battlefield</div>`;
+      html+=`<div class="print-section-title"><i class="fa-solid fa-shield-cat mr-2" aria-hidden="true"></i>Sub Battlefield</div>`;
       SUB_RAIDS.forEach(raid=>{
         const commanderName=stringValue(state.raidCommanders&&state.raidCommanders[raid.id]).trim()||'Not assigned';
         const printGridClass=raid.keys.length===5?'print-main-raid-grid five':'print-main-raid-grid';

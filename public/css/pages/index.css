@@ -128,7 +128,7 @@
     }
 #titania-content .search-box input:not(.form-control):not(.form-select):not(.form-check-input):focus{border-color:var(--violet);}
 #titania-content .search-box svg{position:absolute;left:10px;top:50%;transform:translateY(-50%);width:14px;height:14px;color:var(--muted-2);}
-#titania-content .filter-row{display:flex;gap:6px;flex-wrap:wrap;}
+#titania-content .filter-row{display:flex;gap:6px;flex-wrap:nowrap;}
 #titania-content .pill:not(.btn){
       font-size:12.5px;padding:5px 10px;border-radius:20px;border:1px solid var(--line-soft);
       background:var(--panel);color:var(--muted);cursor:pointer;user-select:none;transition:.15s;

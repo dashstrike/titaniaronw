@@ -117,7 +117,7 @@ function render(){
 function renderGuild(){
   return section('⚔ Main Battlefield','main')+
     MAIN_RAIDS.map(r=>raidBlock(r,'main',false)).join('')+
-    section('◈ Sub Battlefield','sub')+
+    section('<i class="fa-solid fa-shield-cat mr-2" aria-hidden="true"></i>Sub Battlefield','sub')+
     SUB_RAIDS.map(r=>raidBlock(r,'sub',false)).join('');
 }
 

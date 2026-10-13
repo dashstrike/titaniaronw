@@ -19,7 +19,7 @@
             ] as [$event, $label, $icon])
                 <li class="nav-item">
                     <a class="nav-link" href="{{ route($event === 'dashboard' ? 'dashboard' : 'planner.'.$event) }}" data-planner-event="{{ $event }}">
-                        <span class="nav-icon"><iconify-icon icon="bx:{{ substr($icon, 3) }}"></iconify-icon></span>
+                        <span class="nav-icon">@if($event === 'siege')<i class="fa-regular fa-chess-rook" aria-hidden="true"></i>@else<iconify-icon icon="bx:{{ substr($icon, 3) }}"></iconify-icon>@endif</span>
                         <span class="nav-text">{{ $label }}</span>
                     </a>
                 </li>
@@ -46,7 +46,7 @@
             @foreach([['guild-league', 'Guild League'], ['siege', 'Siege'], ['titaniaruns', 'Titania Runs']] as [$routeName, $label])
                 <li class="nav-item">
                     <a class="nav-link" href="{{ route($routeName) }}" target="_blank" rel="noopener noreferrer">
-                        <span class="nav-icon"><iconify-icon icon="bx:link-external"></iconify-icon></span>
+                        <span class="nav-icon">@if($routeName === 'siege')<i class="fa-regular fa-chess-rook" aria-hidden="true"></i>@else<iconify-icon icon="bx:link-external"></iconify-icon>@endif</span>
                         <span class="nav-text">{{ $label }}</span>
                     </a>
                 </li>

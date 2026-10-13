@@ -7,7 +7,7 @@
     dashboard:{icon:'fa-solid fa-chart-pie',label:'Dashboard'},
     manage_members:{icon:'fa-solid fa-users',label:'Members'},
     guild_league:{icon:'fa-solid fa-shield-heart',label:'Guild League'},
-    siege:{icon:'fa-brands fa-fort-awesome',label:'Siege'},
+    siege:{icon:'fa-regular fa-chess-rook',label:'Siege'},
     attendance:{icon:'fa-solid fa-list-check',label:'Attendance'},
     runs:{icon:'fa-solid fa-people-pulling',label:'Runs'}
   };

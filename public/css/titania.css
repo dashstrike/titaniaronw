@@ -315,3 +315,26 @@ body[data-view="siege"] #titania-content .slot.leader-slot {
   border-radius: 0;
   box-shadow: none;
 }
+
+/* Center Select2 clear controls at every page's input height. */
+#titania-content .select2-container--default .select2-selection--single{
+  position:relative;
+}
+#titania-content .select2-container--default .select2-selection--single .select2-selection__clear{
+  position:absolute;
+  top:50%;
+  right:26px;
+  transform:translateY(-50%);
+  float:none;
+  width:24px;
+  height:24px;
+  margin:0;
+  padding:0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  line-height:1;
+}
+#titania-content .select2-container--default .select2-selection--single.select2-selection--clearable .select2-selection__rendered{
+  padding-right:54px;
+}

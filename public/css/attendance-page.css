@@ -47,7 +47,7 @@ html[data-theme="light"] #titania-content .att-picker-card input:not(.form-contr
 #titania-content .att-event-action-btn{height:38px;min-height:38px;display:inline-flex;align-items:center;justify-content:center;padding:0 12px;}
 #titania-content .att-btn-icon{display:inline-flex;align-items:center;justify-content:center;margin-right:8px;line-height:1;}
 #titania-content .att-danger-action{margin-left:8px;}
-#titania-content .att-summary-grid{display:grid;grid-template-columns:repeat(8,minmax(90px,1fr));gap:8px;}
+#titania-content .att-summary-grid{display:grid;grid-template-columns:repeat(9,minmax(0,1fr));gap:8px;}
 #titania-content .att-summary-chip{border-radius:10px;padding:10px 9px;text-align:center;display:flex;flex-direction:column;gap:2px;}
 #titania-content .att-summary-chip b{font-family:var(--bs-body-font-family);font-size:18px;}
 #titania-content .att-summary-chip span{font-size:10.5px;text-transform:uppercase;letter-spacing:.65px;color:var(--muted);font-weight:700;}
@@ -117,7 +117,7 @@ html[data-theme="light"] #titania-content .att-picker-card input:not(.form-contr
 #titania-content .att-create-row input:not(.form-control):not(.form-select):not(.form-check-input)[type="date"],
 #titania-content .att-create-row>.btn:not([class*="btn-"]){height:42px!important;min-height:42px!important;}
 #titania-content .att-create-row>.btn:not([class*="btn-"]){display:inline-flex;align-items:center;justify-content:center;align-self:flex-end;padding-top:0;padding-bottom:0;}
-@media (max-width:1200px){#titania-content .att-summary-grid{grid-template-columns:repeat(4,minmax(90px,1fr));}
+@media (max-width:1200px){#titania-content .att-summary-grid{grid-template-columns:repeat(3,minmax(0,1fr));}
 #titania-content .att-column-head,
 #titania-content .att-member-row{grid-template-columns:minmax(180px,1.2fr) minmax(100px,.6fr) 110px minmax(300px,1.6fr) 36px;}
 }
@@ -133,7 +133,7 @@ html[data-theme="light"] #titania-content .att-picker-card input:not(.form-contr
 #titania-content .att-party{grid-area:party;flex-direction:row;gap:7px;align-items:center;}
 #titania-content .att-pre-cell{grid-area:pre;}
 #titania-content .att-actual-cell{grid-area:actual;}
-#titania-content .att-note-btn:not(.btn){grid-area:note;}
+#titania-content .att-note-btn{grid-area:note;}
 #titania-content .att-actual-buttons{grid-template-columns:repeat(4,minmax(0,1fr));}
 #titania-content .att-picker-row,
 #titania-content .att-create-row{align-items:stretch;}

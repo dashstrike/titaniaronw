@@ -31,7 +31,7 @@ window.TITANIA_FEATURES = Object.freeze({
   }
   if (!document.querySelector('script[data-titania-ui-icons]')) {
     const script = document.createElement('script');
-    script.src = './js/ui-icons.js?v=clean-routes-1';
+    script.src = './js/ui-icons.js?v=siege-rook-1';
     script.setAttribute('data-titania-ui-icons', '1');
     document.head.appendChild(script);
   }
@@ -100,7 +100,7 @@ const TITANIA_IS_MEMBER_PAGE = document.documentElement.dataset.titaniaPage==='m
   if (!document.querySelector('link[data-titania-attendance-page]')) {
     const link = document.createElement('link');
     link.rel = 'stylesheet';
-    link.href = './css/attendance-page.css?v=clean-routes-1';
+    link.href = './css/attendance-page.css?v=summary-row-1';
     link.setAttribute('data-titania-attendance-page', '1');
     document.head.appendChild(link);
   }
@@ -108,7 +108,7 @@ const TITANIA_IS_MEMBER_PAGE = document.documentElement.dataset.titaniaPage==='m
   const loadScript = () => {
     if (document.querySelector('script[data-titania-attendance-page]')) return;
     const script = document.createElement('script');
-    script.src = './js/attendance-page.js?v=route-startup-1';
+    script.src = './js/attendance-page.js?v=siege-rook-1';
     script.setAttribute('data-titania-attendance-page', '1');
     document.body.appendChild(script);
   };
