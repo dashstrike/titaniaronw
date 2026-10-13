@@ -1211,7 +1211,7 @@
     let modeToggle='';
     if(SUB_RAIDS.some(item=>item.id===raid.id)){
       const position=['MID','TOP','BOTTOM'].includes(state.raidModes?.[raid.id])?state.raidModes[raid.id]:'MID';
-      modeToggle=`<button class="raid-mode-toggle" style="color:${position==='TOP'?'var(--bs-primary)':position==='BOTTOM'?'#ffd34d':'#3b82f6'};border-color:currentColor" data-raid-mode-toggle="${raid.id}" type="button" title="Switch this raid between MID, TOP and BOTTOM">${position==='BOTTOM'?'BTM':position}</button>`;
+      modeToggle=`<button class="raid-mode-toggle gap-0" style="color:${position==='TOP'?'var(--bs-primary)':position==='BOTTOM'?'#ffd34d':'#3b82f6'};border-color:currentColor" data-raid-mode-toggle="${raid.id}" type="button" title="Switch this raid between MID, TOP and BOTTOM"><i class="fa-solid ${position==='TOP'?'fa-circle-up':position==='BOTTOM'?'fa-circle-down':'fa-circle-dot'} me-2" aria-hidden="true"></i>${position==='BOTTOM'?'BTM':position}</button>`;
     }
     if(isGuildMainRaid||isSiegeRaid){
       const raidMode=state.raidModes&&state.raidModes[raid.id]==='DEF'?'DEF':'ATK';

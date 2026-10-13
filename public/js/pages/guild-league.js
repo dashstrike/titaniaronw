@@ -153,7 +153,7 @@ function raidBlock(raid,kind,five){
   return `<div class="raid-block card" data-kind="${kind}">
     <div class="raid-head card-header">
       <div class="raid-name">${raidTitle}</div>
-      ${position?`<span class="mode" style="color:${position==='TOP'?'var(--bs-primary)':position==='BOTTOM'?'#ffd34d':'#3b82f6'}">${position==='BOTTOM'?'BTM':position}</span>`:''}
+      ${position?`<span class="mode" style="color:${position==='TOP'?'var(--bs-primary)':position==='BOTTOM'?'#ffd34d':'#3b82f6'}"><i class="fa-solid ${position==='TOP'?'fa-circle-up':position==='BOTTOM'?'fa-circle-down':'fa-circle-dot'} me-2" aria-hidden="true"></i>${position==='BOTTOM'?'BTM':position}</span>`:''}
       ${mode?`<span class="mode ${mode.toLowerCase()}">${mode==='DEF'?'🛡':'⚔'} ${mode}</span>`:''}
       <div class="raid-line"></div>
     </div>
