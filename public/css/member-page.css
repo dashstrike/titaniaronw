@@ -14,7 +14,9 @@ html[data-theme="light"] #titania-content{--bg:var(--bs-body-bg);--panel:var(--b
 #titania-content .brand b{display:block;letter-spacing:1.4px;}
 #titania-content .brand span{display:block;color:var(--muted);font-size:12px;}
 #titania-content .actions,
-#titania-content .att-controls{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+#titania-content .att-controls{display:flex;align-items:center;gap:8px;flex-wrap:nowrap;}
+#titania-content .att-controls .form-select{flex:1;min-width:0;width:auto;}
+#titania-content .att-controls .btn{flex-shrink:0;}
 #titania-content .btn:not([class*="btn-"]),
 #titania-content select:not(.form-control):not(.form-select):not(.form-check-input){border:1px solid var(--lineSoft);background:var(--panel);color:var(--text);padding:9px 12px;border-radius:9px;text-decoration:none;cursor:pointer;font-weight:600;font-size:12px;}
 #titania-content .btn:not([class*="btn-"]):hover,
@@ -139,7 +141,7 @@ html[data-theme="light"] #titania-content{--bg:var(--bs-body-bg);--panel:var(--b
 #titania-content .metrics{gap:10px;}
 #titania-content .att-legend{margin-left:0;}
 #titania-content .att-controls{width:100%;}
-#titania-content .att-controls select:not(.form-control):not(.form-select):not(.form-check-input){flex:1;min-width:0;}
+#titania-content .att-controls select{flex:1;min-width:0;}
 #titania-content .history-table th,
 #titania-content .history-table td{font-size:11px;padding:8px 4px;}
 }
