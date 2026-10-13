@@ -32,10 +32,10 @@
                 <div id="titania-content">
                     @yield('content')
                 </div>
-                <footer class="footer position-static mt-4" id="titania-footer" @if($page === 'index') hidden @endif>
-                    <div class="container-fluid text-center text-muted">Titania Guild Management · Dark Lord Server</div>
-                </footer>
             </div>
+            <footer class="footer" id="titania-footer" @if($page === 'index') hidden @endif>
+                <div class="container-fluid text-center text-muted">Titania Guild Management · Dark Lord Server</div>
+            </footer>
         </div>
     </div>
     <div class="toast-container position-fixed top-0 end-0 p-3" id="toastStack" aria-live="polite" aria-atomic="false"></div>

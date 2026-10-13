@@ -19,7 +19,8 @@ body[data-event="siege"] #classBreakdown { display: none; }
   font-family: var(--bs-body-font-family);
   min-height: 0;
 }
-#titania-content .app { min-height: 0; }
+#titania-content .app,
+#titania-content .page { min-height: 0; }
 #titania-content .topbar {
   position: static;
   border-radius: var(--bs-border-radius);
@@ -166,7 +167,7 @@ body[data-titania-public="true"] .page-content { margin-left: 0; }
 #titania-content .form-control,
 #titania-content .form-select { min-width: 0; }
 
-#titania-content main.main { padding: 0 0 2rem; }
+#titania-content main.main { padding: 0; }
 #titania-content .body-wrap:not(.dashboard-mode):not(.pool-hidden) main.main { padding-left: 1.5rem; }
 #titania-content .page-head { margin-bottom: 1.5rem; }
 #titania-content .att-actual-btn { display: inline-flex; align-items: center; justify-content: center; gap: .35rem; }
@@ -193,7 +194,7 @@ body[data-titania-public="true"] .page-content { margin-left: 0; }
   #titania-content .app,
   #titania-content .app-inner { min-width: 0; width: 100%; max-width: 100%; }
   #titania-content { overflow-x: visible; }
-  #titania-page-content { margin-left: 0; padding: 1rem .25rem 2rem; }
+  #titania-page-content { margin-left: 0; padding: 1rem .25rem var(--bs-footer-height); }
   #titania-topbar { padding: 0 .25rem; }
   #titania-topbar .container-fluid { padding: 0 .5rem; }
   #titania-topbar .navbar-header { padding: 0; gap: .5rem; min-width: 0; }
@@ -205,7 +206,7 @@ body[data-titania-public="true"] .page-content { margin-left: 0; }
   #titania-content .sidebar { width: 100%; min-width: 0; max-width: 100%; height: auto; max-height: none; margin-bottom: 1rem; }
   #titania-content .member-list { flex: auto; height: 240px; min-height: 0; max-height: 32vh; overflow-y: auto; }
   #titania-content .party-pool-list { max-height: 32vh; padding-bottom: 1rem; }
-  #titania-content main.main { width: 100%; min-width: 0; padding: 0 0 2rem; }
+  #titania-content main.main { width: 100%; min-width: 0; padding: 0; }
   #titania-content .body-wrap:not(.dashboard-mode):not(.pool-hidden) main.main { padding-left: 0; }
   #titania-content #eventActionRow { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .5rem; margin-bottom: 1rem; }
   #titania-content #eventActionRow > .btn { min-width: 0; width: 100%; padding: .5rem; white-space: normal; justify-content: center; }
