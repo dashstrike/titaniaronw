@@ -209,7 +209,10 @@ body[data-event="dashboard"] #titania-content #teamsWrap > .section-head:first-c
 #titania-content .dash-attendance .excused{background:#4d8de8;}
 #titania-content .dash-attendance .afk{background:var(--amber);}
 #titania-content .dash-attendance .no_response{background:var(--muted-2);}
-#titania-content .dash-att-note{font-size:11px;line-height:1.6;color:var(--muted);margin:12px 0 0;}
+#titania-content .dash-att-footer{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:12px;}
+#titania-content .dash-att-note{font-size:11px;line-height:1.6;color:var(--muted);margin:0;}
+#titania-content .dash-att-pagination{display:flex;align-items:center;gap:8px;flex:none;}
+#titania-content .dash-att-pagination span{font-size:11px;color:var(--muted);white-space:nowrap;}
 #titania-content .dash-att-message{font-size:13px;color:var(--muted);margin:16px 0 4px;}
 @media(max-width:600px){#titania-content .dash-gr-rank-grid .dash-bar-avg{display:none;}
 #titania-content .dash-gr-rank-grid .dash-bar-count{flex-basis:72px;}
@@ -217,17 +220,22 @@ body[data-event="dashboard"] #titania-content #teamsWrap > .section-head:first-c
 #titania-content .dash-gr-spread-panel .dash-bar-count,
 #titania-content .dash-gr-spread-panel .dash-bar-pct{width:32px;}
 #titania-content .dash-attendance{padding:12px;}
+#titania-content .dash-att-footer{align-items:flex-start;flex-direction:column;}
 
 }
 body[data-event="dashboard"] #titania-content .dash-headed-card{padding:16px;}
 #titania-content .dash-card-head{width:100%;min-width:0;flex:none;margin-bottom:14px;text-align:left;}
 #titania-content .dash-card-head h2{font-family:var(--bs-body-font-family);font-weight:700;letter-spacing:0;text-transform:none;overflow-wrap:anywhere;}
 #titania-content .dash-card-head p{line-height:1.4;}
+#titania-content .dash-template-card > .dash-card-head,
+#titania-content .dash-template-card > .dash-att-head{align-self:stretch;width:auto;margin:-16px -16px 14px;padding:16px;}
 #titania-content .dash-card > .dash-card-head{margin-bottom:8px;}
 #titania-content .dash-card > .dash-card-head h2{font-size:16px;}
 #titania-content .dash-card > .dash-card-head p{font-size:11px;}
 #titania-content .dash-class-pie-panel.dash-headed-card{justify-content:flex-start;}
 @media(max-width:600px){body[data-event="dashboard"] #titania-content .dash-headed-card{padding:12px;}
+#titania-content .dash-template-card > .dash-card-head,
+#titania-content .dash-template-card > .dash-att-head{margin:-12px -12px 14px;padding:12px;}
 }
 #titania-content .dash-class-analytics-grid,
 #titania-content .dash-gr-analytics-grid,

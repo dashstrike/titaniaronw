@@ -1903,6 +1903,25 @@
     const maxBucket=Math.max(1,...buckets.map(bucket=>bucket.count));
     const topFive=withGR.slice(0,5);
     const lowestFive=withGR.slice(-5).reverse();
+    const compositionRows=keys=>{
+      const names=new Set();
+      keys.forEach(key=>(state.assignments[key]||[]).forEach(name=>{if(name)names.add(name);}));
+      const counts={};
+      names.forEach(name=>{const member=memberByName[name];if(member&&isActiveMember(member))counts[member.cls]=(counts[member.cls]||0)+1;});
+      return Object.entries(counts).map(([cls,count])=>({cls,count})).sort((a,b)=>b.count-a.count||a.cls.localeCompare(b.cls));
+    };
+    const compositionChart=(id,title,rows,icon,titleClass)=>{
+      const count=rows.reduce((sum,row)=>sum+row.count,0);
+      return `<div class="col-xl-6"><div class="card mb-0"><div class="card-header border-bottom"><div class="d-flex align-items-center justify-content-between"><h4 class="card-title mb-0 ${titleClass}">${icon}${escapeHtml(title)}</h4><span class="text-muted">${count} members</span></div></div><div class="card-body"><div dir="ltr"><div class="chart" style="height:420px"><canvas id="${id}" class="chart-canvas"></canvas></div></div></div></div></div>`;
+    };
+    const mainComposition=compositionRows(MAIN_KEYS);
+    const subComposition=compositionRows(SUB_KEYS);
+    const mainCounts=Object.fromEntries(mainComposition.map(row=>[row.cls,row.count]));
+    const subCounts=Object.fromEntries(subComposition.map(row=>[row.cls,row.count]));
+    const compositionClasses=[...new Set([...mainComposition,...subComposition].map(row=>row.cls))].sort((a,b)=>(mainCounts[b]||0)+(subCounts[b]||0)-(mainCounts[a]||0)-(subCounts[a]||0)||a.localeCompare(b));
+    const mainRows=compositionClasses.map(cls=>({cls,count:mainCounts[cls]||0}));
+    const subRows=compositionClasses.map(cls=>({cls,count:subCounts[cls]||0}));
+    const compositionAnalytics=`<div class="row g-3">${compositionChart('mainClassCompositionChart','Main Class Composition',mainRows,'<i class="fa-solid fa-shield-heart me-2" aria-hidden="true"></i>','text-primary')}${compositionChart('subClassCompositionChart','Sub Class Composition',subRows,'<i class="fa-solid fa-shield-cat me-2" aria-hidden="true"></i>','text-info')}</div>`;
     const analytics=total?`
       ${sectionHeader('Active Members by Class','',`${classRows.length} classes`)}
       <div class="dash-class-analytics-grid"><div class="dash-panel dash-class-bars card">${classRows.map(row=>dashBarRow(row.cls,row.count,row.pct,row.avg,maxClass,classColor(row.cls))).join('')}</div>${dashClassPieHtml(classRows,total)}</div>
@@ -1912,10 +1931,11 @@
     wrap.innerHTML=`
       ${sectionHeader('📊 Guild Dashboard','',`${active.length} active · ${inactive.length} inactive · ${records} records`)}
       <div class="dash-grid">
-        ${dashCard('Active Members',formatNumber(active.length),'Available for team assignment',true)}${dashCard('Inactive Members',formatNumber(inactive.length),'Hidden from Member Pool')}${dashCard('All Member Records',formatNumber(records))}${dashCard('Active Total GR',formatNumber(totalGR))}${dashCard('Active Average GR',formatNumber(avgGR))}${dashCard('Active Healers',`${healers}<span class="dash-card-sub"> / ${total}</span>`)}
-        ${top?dashCard('Highest Active GR',escapeHtml(top.name),`${formatNumber(top.gr)} · ${escapeHtml(top.cls)}`,true):''}${bottom?dashCard('Lowest Active GR',escapeHtml(bottom.name),`${formatNumber(bottom.gr)} · ${escapeHtml(bottom.cls)}`):''}
+        ${dashCard('Active Members',formatNumber(active.length),'Available for team assignment','solar:users-group-two-rounded-broken')}${dashCard('Active Total GR',formatNumber(totalGR),'Combined active-member Gear Rating','solar:bolt-outline')}${dashCard('Active Average GR',formatNumber(avgGR),'Average across active members','solar:chart-2-outline')}${dashCard('Healers',formatNumber(healers),'Active healer count','solar:heart-pulse-outline')}
       </div>
+      ${compositionAnalytics}
       ${analytics}`;
+    renderDashboardCompositionCharts(mainRows,subRows);
     wireDashboardClassPie();
     wireDashboardClassAverageGrChart();
   }
@@ -1926,7 +1946,7 @@
     wireDashboard();
   }
 
-  function dashCard(label,value,sub='',highlight=false){return `<div class="dash-card ${highlight?'highlight':''} card"><div class="dash-card-label">${label}</div><div class="dash-card-value">${value}</div>${sub?`<div class="dash-card-sub">${sub}</div>`:''}</div>`;}
+  function dashCard(label,value,sub,icon){return `<div class="dash-card card"><div class="card-body"><div class="dash-card-main"><div class="dash-card-copy"><p class="dash-card-label text-muted mb-0 text-truncate">${label}</p><h3 class="dash-card-value text-dark mt-2 mb-0">${value}</h3>${sub?`<p class="dash-card-sub mb-0">${sub}</p>`:''}</div><div class="dash-card-icon ms-auto avatar-md bg-soft-primary rounded"><iconify-icon icon="${icon}" class="fs-32 avatar-title text-primary" aria-hidden="true"></iconify-icon></div></div></div></div>`;}
   function dashboardPiePoint(cx,cy,radius,angle){
     const radians=(angle-90)*Math.PI/180;
     return{x:cx+(radius*Math.cos(radians)),y:cy+(radius*Math.sin(radians))};
@@ -2001,6 +2021,27 @@
   }
 
   function dashBarRow(label,count,pct,avg,max,color){return `<div class="dash-bar-row"><span class="class-dot" style="background:${color};color:${color}"></span><span class="dash-bar-name">${escapeHtml(label)}</span><div class="dash-bar-track"><div class="dash-bar-fill" style="width:${count/max*100}%;background:${color}"></div></div><span class="dash-bar-count">${count}</span><span class="dash-bar-pct">${pct.toFixed(0)}%</span><span class="dash-bar-avg">avg ${formatNumber(avg)}</span></div>`;}
+  function renderDashboardCompositionCharts(mainRows,subRows){
+    const previous=renderDashboardCompositionCharts.instances||[];
+    previous.forEach(chart=>chart.destroy());
+    renderDashboardCompositionCharts.instances=[];
+    if(typeof Chart==='undefined')return;
+    const styles=getComputedStyle(document.documentElement);
+    const textColor=styles.getPropertyValue('--bs-body-color').trim()||'#adb5bd';
+    const gridColor=styles.getPropertyValue('--bs-border-color').trim()||'#303846';
+    const valueLabels={id:'compositionValueLabels',afterDatasetsDraw(chart){const{ctx}=chart;ctx.save();ctx.fillStyle=textColor;ctx.font='600 12px '+styles.getPropertyValue('--bs-body-font-family');ctx.textBaseline='middle';chart.getDatasetMeta(0).data.forEach((bar,index)=>ctx.fillText(String(chart.data.datasets[0].data[index]),bar.x+8,bar.y));ctx.restore();}};
+    [['mainClassCompositionChart',mainRows],['subClassCompositionChart',subRows]].forEach(([id,rows])=>{
+      const element=document.getElementById(id);
+      if(!element)return;
+      const chart=new Chart(element,{
+        type:'bar',
+        data:{labels:rows.map(row=>row.cls),datasets:[{label:'Members',data:rows.map(row=>row.count),backgroundColor:rows.map(row=>classColor(row.cls)),borderRadius:3,borderSkipped:false,barPercentage:.65,categoryPercentage:.8}]},
+        options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,animation:false,layout:{padding:{right:28}},plugins:{legend:{display:false},tooltip:{callbacks:{label:context=>`${context.raw} members`}}},scales:{x:{beginAtZero:true,ticks:{precision:0,color:textColor},grid:{color:gridColor}},y:{ticks:{color:textColor,font:{weight:600}},grid:{display:false}}}},
+        plugins:[valueLabels]
+      });
+      renderDashboardCompositionCharts.instances.push(chart);
+    });
+  }
 
   function dashboardClassShortLabel(cls){
     const words=stringValue(cls).trim().split(/\s+/).filter(Boolean);

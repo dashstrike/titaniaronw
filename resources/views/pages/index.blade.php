@@ -6,6 +6,7 @@
 
 @push('head')
 <link rel="preconnect" href="https://fonts.googleapis.com">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
   <link rel="stylesheet" href="{{ asset('css/pages/index.css') }}?v={{ filemtime(public_path('css/pages/index.css')) }}">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="{{ asset('config.js') }}?v={{ filemtime(public_path('config.js')) }}"></script>

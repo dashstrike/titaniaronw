@@ -8,7 +8,10 @@
     actual:[['present','Present'],['absent','Absent'],['excused','Excused'],['afk','AFK']],
     pre:[['going','Going'],['not_going','Not going'],['no_response','No response']]
   };
+  const PAGE_SIZE=5;
   let mode='actual';
+  let page=1;
+  let totalEvents=0;
   let pending=null;
 
   function esc(value){return String(value==null?'':value).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
@@ -22,7 +25,7 @@
       const group=grouped.get(String(row.event_id));
       if(group&&row.member_id)group.set(String(row.member_id),row);
     });
-    return events.slice().reverse().map(event=>{
+    return events.map(event=>{
       const snapshot=event.lineup_snapshot||{};
       const hasRoster=Array.isArray(snapshot.roster);
       const members=new Map();
@@ -48,14 +51,16 @@
     });
   }
 
-  async function fetchData(){
+  async function fetchData(requestedPage){
     const client=supabaseClient;
+    const from=(requestedPage-1)*PAGE_SIZE;
     // Include unfinished events: some already contain actual attendance marks.
     const result=await client.from('attendance_events')
-      .select('id,event_type,event_date,status,lineup_snapshot')
+      .select('id,event_type,event_date,status,lineup_snapshot',{count:'exact'})
       .in('event_type',Object.keys(EVENT_LABELS))
-      .order('event_date',{ascending:false}).order('id',{ascending:false}).limit(8);
+      .order('event_date',{ascending:false}).order('id',{ascending:false}).range(from,from+PAGE_SIZE-1);
     if(result.error)throw result.error;
+    totalEvents=typeof result.count==='number'?result.count:0;
     const events=result.data||[];
     if(!events.length)return [];
     const records=[];
@@ -103,11 +108,14 @@
         <small class="dash-att-state">${event.status==='closed'?'Closed':'Not final'}</small>
       </div>`;
     }).join('');
+    const totalPages=Math.max(1,Math.ceil(totalEvents/PAGE_SIZE));
     content.innerHTML=`<div class="dash-att-legend">${legend}</div>
       <div class="dash-att-scroll" tabindex="0" role="region" aria-label="Attendance chart; scroll horizontally on small screens">
         <div class="dash-att-chart">${bars}</div>
       </div>
-      <p class="dash-att-note">Percentages use that event's saved data, not today's roster. ${mode==='actual'?'Members with no actual status are excluded.':'No response is separate from Not going.'} Unfinished events are marked Not final.${events.some(event=>!event.hasRoster)?' Events without a saved roster use recorded members only.':''}</p>`;
+      <div class="dash-att-footer"><p class="dash-att-note">Percentages use that event's saved data, not today's roster. ${mode==='actual'?'Members with no actual status are excluded.':'No response is separate from Not going.'} Unfinished events are marked Not final.${events.some(event=>!event.hasRoster)?' Events without a saved roster use recorded members only.':''}</p><div class="dash-att-pagination"><button class="btn btn-outline-secondary btn-sm" type="button" data-att-page="prev" ${page<=1?'disabled':''}>Previous</button><span>Page ${page} of ${totalPages}</span><button class="btn btn-outline-secondary btn-sm" type="button" data-att-page="next" ${page>=totalPages?'disabled':''}>Next</button></div></div>`;
+    content.querySelector('[data-att-page="prev"]')?.addEventListener('click',()=>{if(page>1){page--;load(panel);}});
+    content.querySelector('[data-att-page="next"]')?.addEventListener('click',()=>{if(page<totalPages){page++;load(panel);}});
   }
 
   async function load(panel){
@@ -121,8 +129,8 @@
     content.setAttribute('aria-busy','true');
     content.innerHTML='<p class="dash-att-message" role="status">Loading attendance...</p>';
     try{
-      if(!pending||pending.user!==id){
-        const request={user:id,promise:fetchData()};
+      if(!pending||pending.user!==id||pending.page!==page){
+        const request={user:id,page,promise:fetchData(page)};
         pending=request;
         request.promise.finally(()=>{if(pending===request)pending=null;}).catch(()=>{});
       }
@@ -143,40 +151,18 @@
   }
 
   // Match the attendance card without rebuilding chart nodes or their listeners.
-  function addCardHeader(card,icon,title,subtitle){
+  function addCardHeader(card,icon,title,subtitle,templateHeader=false){
     if(!card||card.querySelector('.dash-card-head'))return false;
     const header=document.createElement('header');
-    header.className='dash-card-head';
+    header.className=`dash-card-head${templateHeader?' card-header border-bottom':''}`;
     header.innerHTML=`<h2><i class="fa-solid ${icon} mr-2" aria-hidden="true"></i>${esc(title)}</h2><p>${esc(subtitle)}</p>`;
     card.prepend(header);
     card.classList.add('dash-headed-card');
+    if(templateHeader)card.classList.add('dash-template-card');
     return true;
   }
 
   function styleDashboardCards(wrap){
-    const metrics={
-      'Active Members':['fa-users','Available for team assignment'],
-      'Inactive Members':['fa-user-clock','Hidden from Member Pool'],
-      'All Member Records':['fa-address-book','Active and inactive members'],
-      'Active Total GR':['fa-layer-group','Combined active-member Gear Rating'],
-      'Active Average GR':['fa-gauge-high','Average across active members'],
-      'Active Healers':['fa-heart-pulse','Healers in the active roster'],
-      'Highest Active GR':['fa-trophy','Highest rated active member'],
-      'Lowest Active GR':['fa-arrow-trend-down','Lowest rated active member']
-    };
-    wrap.querySelectorAll('.dash-card').forEach(card=>{
-      const label=card.querySelector('.dash-card-label');
-      if(!label)return;
-      const title=label.textContent.trim();
-      const meta=metrics[title];
-      if(!meta)return;
-      const sub=card.querySelector(':scope > .dash-card-sub');
-      if(addCardHeader(card,meta[0],title,sub?sub.textContent:meta[1])){
-        label.remove();
-        if(sub)sub.remove();
-      }
-    });
-
     const panels=[
       ['.dash-class-bars','fa-users','Active Members by Class',`${wrap.querySelectorAll('.dash-class-bars .dash-bar-row').length} classes - count, share and average GR`],
       ['.dash-class-pie-panel','fa-chart-pie','Class Distribution','Hover a slice for class %'],
@@ -187,7 +173,7 @@
     ];
     panels.forEach(([selector,icon,title,subtitle])=>{
       const card=wrap.querySelector(selector);
-      if(!addCardHeader(card,icon,title,subtitle))return;
+      if(!addCardHeader(card,icon,title,subtitle,true))return;
       card.querySelectorAll('.dash-class-pie-title,.dash-class-pie-note,.dash-gr-class-chart-title,.dash-gr-class-chart-note').forEach(el=>el.remove());
       // The ranking title used to sit outside its panel.
       const previous=card.previousElementSibling;
@@ -208,10 +194,10 @@
     if(!canRead()||wrap.querySelector('#dashAttendance'))return;
     const panel=document.createElement('section');
     panel.id='dashAttendance';
-    panel.className='dash-panel dash-attendance card';
+    panel.className='dash-panel dash-attendance dash-template-card card';
     panel.setAttribute('aria-labelledby','dashAttendanceTitle');
-    panel.innerHTML=`<div class="dash-att-head">
-      <div><h2 id="dashAttendanceTitle"><i class="fa-solid fa-chart-column mr-2" aria-hidden="true"></i>Attendance Overview</h2><p>Latest 8 events \u00b7 Guild League &amp; Siege</p></div>
+    panel.innerHTML=`<div class="dash-att-head card-header border-bottom">
+      <div><h2 id="dashAttendanceTitle"><i class="fa-solid fa-chart-column mr-2" aria-hidden="true"></i>Attendance Overview</h2><p>5 events per page \u00b7 newest first \u00b7 Guild League &amp; Siege</p></div>
       <div class="dash-att-controls"><select class="edit-input form-select" aria-label="Attendance chart view"><option value="actual">Actual attendance</option><option value="pre">Pre-attendance</option></select><button class="btn small btn-outline-secondary btn-sm" type="button" data-dash-att-refresh title="Refresh" data-titania-tooltip="Refresh" aria-label="Refresh"><i class="fa-solid fa-rotate" aria-hidden="true"></i></button></div>
     </div><div class="dash-att-content"></div>`;
     panel.querySelector('select').value=mode;
