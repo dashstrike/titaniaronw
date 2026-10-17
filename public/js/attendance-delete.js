@@ -80,6 +80,8 @@
 
   function addButton(){
     if(!isAdmin||document.body.dataset.event!=='attendance')return;
+    const panel=document.getElementById('attendanceEventPanel');
+    if(panel&&panel.dataset.attendanceStatus==='closed')return;
     const actions=document.querySelector('#attendanceEventPanel .att-event-actions');
     if(!actions||actions.querySelector('#attDeleteEventBtn')||!selectedEvent())return;
     const button=document.createElement('button');

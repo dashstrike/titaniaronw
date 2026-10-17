@@ -49,7 +49,7 @@
     if(!head||head.querySelector('[data-member-csv-import]'))return;
     const action=document.createElement('div');
     action.className='member-csv-import-action';
-    action.innerHTML='<button type="button" class="btn small btn-outline-secondary btn-sm" data-member-csv-import><i class="fa-solid fa-file-csv mr-2" aria-hidden="true"></i>Upload Member CSV</button>';
+    action.innerHTML='<button type="button" class="btn small btn-info btn-sm" data-member-csv-import><i class="fa-solid fa-file-csv mr-2" aria-hidden="true"></i>Upload Member CSV</button>';
     action.querySelector('button').addEventListener('click',()=>{
       const input=ensureFileInput();
       input.value='';

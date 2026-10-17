@@ -94,6 +94,7 @@
         dropdownParent:jQuery('#titania-content'),
         placeholder:'Empty slot',
         allowClear:true,
+        language:{removeAllItems:()=> 'Remove player'},
         width:'100%',
         templateResult:select2Template,
         templateSelection:select2Template,

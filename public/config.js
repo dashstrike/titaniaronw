@@ -6,12 +6,12 @@ document.write('<link rel="stylesheet" href="./css/crowns.css?v=clean-routes-1">
 document.write('<link rel="stylesheet" href="./css/party-stars.css?v=gold-star-1">');
 document.write('<link rel="stylesheet" href="./css/ui-polish.css?v=sub-teal-border-1">');
 document.write('<script src="./js/member-profile-enhancements.js?v=clean-routes-1"><\/script>');
-document.write('<script src="./js/member-csv-import-link.js?v=clean-routes-1"><\/script>');
+document.write('<script src="./js/member-csv-import-link.js?v=info-button-1"><\/script>');
 document.write('<script src="./js/user-management-link.js?v=clean-routes-1"><\/script>');
 document.write('<script src="./js/guild-runs-link.js?v=siege-rook-1"><\/script>');
 document.write('<script src="./js/organizer-role.js?v=clean-routes-1"><\/script>');
-document.write('<link rel="stylesheet" href="./css/attendance-page.css?v=clean-routes-1">');
-document.write('<script src="./js/attendance-delete.js?v=clean-routes-1"><\/script>');
+document.write('<link rel="stylesheet" href="./css/attendance-page.css?v=attendance-alignment-4">');
+document.write('<script src="./js/attendance-delete.js?v=closed-readonly-1"><\/script>');
 document.write('<script src="./js/attendance-layout.js?v=clean-routes-1"><\/script>');
 document.write('<script src="./js/party-pool.js?v=party-roster-ready-1"><\/script>');
 document.write('<script src="./js/siege-polarity-label.js?v=clean-routes-1"><\/script>');
