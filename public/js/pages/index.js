@@ -951,9 +951,8 @@
     if(currentEvent==='dashboard'){
       const guildAssigned=assignedNamesSet(GUILD_KEYS).size;
       const siegeAssigned=assignedNamesSet(SIEGE_KEYS).size;
-      const polarityAssigned=assignedNamesSet(POLARITY_KEYS).size;
       const healers=active.filter(member=>isHealer(member.cls)).length;
-      row.innerHTML=statChip(active.length,'Active')+statChip(inactiveCount,'Inactive',inactiveCount>0)+statChip(`${guildAssigned}/150`,'Guild Slotted')+statChip(`${siegeAssigned}/150`,'Siege Slotted')+statChip(`${polarityAssigned}/250`,'PZ Slotted')+statChip(healers,'Healers');
+      row.innerHTML=statChip(active.length,'Active')+statChip(inactiveCount,'Inactive',inactiveCount>0)+statChip(`${guildAssigned}/150`,'Guild Slotted')+statChip(`${siegeAssigned}/150`,'Siege Slotted')+statChip(healers,'Healers');
       return;
     }
     if(currentEvent==='manage_members'){
