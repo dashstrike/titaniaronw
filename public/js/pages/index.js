@@ -2631,7 +2631,11 @@ Their team assignments and membership history will also be removed. Use Mark Ina
     return index>=0?`Party ${index+1}`:teamLabel(key);
   }
   function displayTeamLabel(key){
-    if(key.startsWith('sub_')||key.startsWith('siege_sub_'))return subDisplayTeamLabel(key);
+    if(key.startsWith('siege_')){
+      const index=currentSiegeRaids().flatMap(raid=>raid.keys).indexOf(key);
+      return index>=0?`Party ${index+1}`:teamLabel(key);
+    }
+    if(key.startsWith('sub_'))return subDisplayTeamLabel(key);
     if(currentEvent==='polarity_zone'&&key.startsWith('dungeon')){
       const index=DUNGEON_KEYS.indexOf(key);
       if(index>=0)return`Party ${index+1}`;
