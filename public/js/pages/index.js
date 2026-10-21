@@ -24,6 +24,12 @@
   const HEALERS = Object.freeze(['Acolyte','Priest','High Priest']);
   const INACTIVE_REASONS = Object.freeze(['Left Guild','Removed from Guild','Temporary Break','Transferred','Inactive Player','Other']);
   const REACTIVATE_REASONS = Object.freeze(['Returned to Guild','Rejoined Guild','Temporary Break Ended','Other']);
+  const NATIONALITIES = Object.freeze({
+    malaysia:{label:'Malaysia',flag:'images/flags/malaysia.svg'},
+    indonesia:{label:'Indonesia',flag:'images/flags/indonesia.svg'},
+    thailand:{label:'Thailand',flag:'images/flags/thailand.svg'},
+    philippines:{label:'Philippines',flag:'images/flags/philippines.svg'}
+  });
   /*
    * Job-family colors follow the supplied in-game class icon palette.
    * Every promoted job keeps the color of its originating job family.
@@ -796,13 +802,15 @@
       const cls=CLASSES.includes(stringValue(raw.cls||raw.class))?stringValue(raw.cls||raw.class):'Unknown';
       const gr=toInt(raw.gr!==undefined?raw.gr:raw.gearRating,0,999999999);
       const notes=stringValue(raw.notes).trim().slice(0,500);
+      const nationalityValue=stringValue(raw.nationality).trim().toLowerCase();
+      const nationality=Object.prototype.hasOwnProperty.call(NATIONALITIES,nationalityValue)?nationalityValue:'';
       const status=stringValue(raw.status||raw.guildStatus).trim().toLowerCase()==='inactive'?'inactive':'active';
       const inactiveSince=status==='inactive'?normalizeDateValue(raw.inactiveSince||raw.leftDate||raw.departureDate):'';
       const lastReturned=normalizeDateValue(raw.lastReturned||raw.returnedDate||raw.reactivatedOn);
       const inactiveReason=status==='inactive'?stringValue(raw.inactiveReason||raw.reason).trim().slice(0,300):'';
       const updatedAt=normalizeTimestampValue(raw.updatedAt||raw.lastUpdatedAt||raw.modifiedAt);
       const updatedBy=stringValue(raw.updatedBy||raw.lastUpdatedBy).trim().slice(0,120);
-      const member={id,name,cls,gr,status,inactiveSince,lastReturned,inactiveReason,notes,updatedAt,updatedBy};
+      const member={id,name,cls,gr,nationality,status,inactiveSince,lastReturned,inactiveReason,notes,updatedAt,updatedBy};
       roster.push(member);
       memberByLower.set(name.toLowerCase(),member);
       memberByIdMap.set(id,member);
@@ -1178,7 +1186,7 @@
     const tags=status.labels.map(label=>`<span class="status-tag ${statusTagClass(label)}">${escapeHtml(label)}</span>`).join('');
     return `<div class="member-card ${status.assigned?'assigned':''} ${selected?'selected':''}" draggable="${status.assigned?'false':'true'}" data-name="${escapeAttr(member.name)}">
       ${memberBoardIconHtml(member)}
-      <div class="m-info"><div class="m-name">${escapeHtml(member.name)}</div><div class="m-sub"><span>${escapeHtml(member.cls)}</span>${tags}${status.assignmentText?`<span class="assigned-flag">${escapeHtml(status.assignmentText)}</span>`:''}</div></div>
+      <div class="m-info"><div class="m-name">${escapeHtml(member.name)}${nationalityFlagHtml(member)}</div><div class="m-sub"><span>${escapeHtml(member.cls)}</span>${tags}${status.assignmentText?`<span class="assigned-flag">${escapeHtml(status.assignmentText)}</span>`:''}</div></div>
       <span class="m-gr">${formatNumber(member.gr)}</span>
       <div class="card-tools"><button class="icon-btn btn btn-outline-secondary btn-sm" data-edit-member="${escapeAttr(member.name)}" title="Edit member">✎</button><button class="icon-btn btn btn-outline-secondary btn-sm" data-inactivate-member="${escapeAttr(member.name)}" title="Mark inactive">⏸</button></div>
     </div>`;
@@ -1306,7 +1314,13 @@
     const raid=raidForTeam(key);
     const raidCommanderSelected=Boolean(raid&&state.raidCommanders&&state.raidCommanders[raid.id]===name);
     const raidLeaderSelected=Boolean(raid&&state.raidLeaders&&state.raidLeaders[raid.id]===name);
-    return `<div class="slot filled ${leader?'leader':''} ${selected?'slot-selected':''}" draggable="true" data-team="${key}" data-slot="${index}" role="button" tabindex="0" aria-label="${escapeAttr(name)} in ${escapeAttr(teamLongLabel(key))}"><div class="slot-member-main">${memberBoardIconHtml(member,true)}<div class="slot-info"><span class="slot-name">${escapeHtml(name)}</span><span class="slot-class" style="color:${color}">${escapeHtml(member.cls)}</span></div>${raidCommanderSelected?`<span class="slot-raid-commander-mark" title="Raid Commander" aria-label="Raid Commander">${raidCommanderSlotIcon()}</span>`:''}${raidLeaderSelected?`<span class="slot-raid-leader-mark" title="Raid Leader" aria-label="Raid Leader">${raidLeaderSlotIcon()}</span>`:''}</div><span class="slot-gr">${formatNumber(member.gr)}</span><button class="slot-remove" data-remove-team="${key}" data-remove-slot="${index}" title="Remove from slot" aria-label="Remove ${escapeAttr(name)}">✕</button></div>`;
+    return `<div class="slot filled ${leader?'leader':''} ${selected?'slot-selected':''}" draggable="true" data-team="${key}" data-slot="${index}" role="button" tabindex="0" aria-label="${escapeAttr(name)} in ${escapeAttr(teamLongLabel(key))}"><div class="slot-member-main">${memberBoardIconHtml(member,true)}<div class="slot-info"><span class="slot-name">${escapeHtml(name)}${nationalityFlagHtml(member)}</span><span class="slot-class" style="color:${color}">${escapeHtml(member.cls)}</span></div>${raidCommanderSelected?`<span class="slot-raid-commander-mark" title="Raid Commander" aria-label="Raid Commander">${raidCommanderSlotIcon()}</span>`:''}${raidLeaderSelected?`<span class="slot-raid-leader-mark" title="Raid Leader" aria-label="Raid Leader">${raidLeaderSlotIcon()}</span>`:''}</div><span class="slot-gr">${formatNumber(member.gr)}</span><button class="slot-remove" data-remove-team="${key}" data-remove-slot="${index}" title="Remove from slot" aria-label="Remove ${escapeAttr(name)}">✕</button></div>`;
+  }
+
+  function nationalityFlagHtml(member){
+    if(currentEvent!=='guild_league'&&currentEvent!=='siege')return '';
+    const nationality=NATIONALITIES[stringValue(member&&member.nationality).toLowerCase()];
+    return nationality?`<img class="nationality-flag ms-2" src="${escapeAttr(nationality.flag)}" alt="${escapeAttr(nationality.label)}" title="${escapeAttr(nationality.label)}">`:'';
   }
 
   function raidCommanderIcon(){return '<i class="fa-solid fa-person-military-rifle raid-commander-icon" aria-hidden="true"></i>';}
@@ -1719,6 +1733,9 @@
     document.getElementById('memberNameInput').value=member?member.name:'';
     populateClassOptions(document.getElementById('memberClassInput'),member?member.cls:'Hunter');
     document.getElementById('memberGrInput').value=member?member.gr:'';
+    document.getElementById('memberNationalityInput').value=member?member.nationality||'':'';
+    initNationalitySelect();
+    if(window.jQuery)jQuery('#memberNationalityInput').trigger('change.select2');
     document.getElementById('memberNotesInput').value=member?member.notes||'':'';
     const notice=document.getElementById('memberStatusNotice');
     if(member&&member.status==='inactive'){
@@ -1731,6 +1748,27 @@
 
   function closeMemberModal(){document.getElementById('memberModal').hidden=true;document.getElementById('memberStatusNotice').hidden=true;editingMemberName=null;}
 
+  function nationalitySelectTemplate(option){
+    if(!option.id)return 'Not set';
+    const item=NATIONALITIES[String(option.id).toLowerCase()];
+    if(!item)return option.text;
+    const row=document.createElement('span');
+    row.className='select2-nationality';
+    const flag=document.createElement('img');
+    flag.src=item.flag;
+    flag.alt='';
+    const label=document.createElement('span');
+    label.textContent=item.label;
+    row.append(flag,label);
+    return row;
+  }
+
+  function initNationalitySelect(){
+    const select=document.getElementById('memberNationalityInput');
+    if(!select||!(window.jQuery&&jQuery.fn&&jQuery.fn.select2)||jQuery(select).hasClass('select2-hidden-accessible'))return;
+    jQuery(select).select2({dropdownParent:jQuery('#memberModal'),placeholder:'Select nationality',allowClear:true,width:'100%',templateResult:nationalitySelectTemplate,templateSelection:nationalitySelectTemplate});
+  }
+
   function touchMember(member){
     if(!member)return;
     member.updatedAt=new Date().toISOString();
@@ -1742,13 +1780,15 @@
     const name=document.getElementById('memberNameInput').value.trim();
     const cls=document.getElementById('memberClassInput').value;
     const gr=toInt(document.getElementById('memberGrInput').value,0,999999999);
+    const nationalityValue=stringValue(document.getElementById('memberNationalityInput').value).toLowerCase();
+    const nationality=Object.prototype.hasOwnProperty.call(NATIONALITIES,nationalityValue)?nationalityValue:'';
     const notes=document.getElementById('memberNotesInput').value.trim().slice(0,500);
     if(!name){showToast('Name required','Enter a member name.','warn');return;}
     const duplicate=state.roster.find(member=>member.name.toLowerCase()===name.toLowerCase()&&member.name!==editingMemberName);
     if(duplicate){
       if(!wasEditing&&duplicate.status==='inactive'){
         if(!confirm(`${duplicate.name} already exists as an inactive member. Reactivate this record instead of creating a duplicate?`))return;
-        duplicate.cls=CLASSES.includes(cls)?cls:'Unknown';duplicate.gr=gr;if(notes)duplicate.notes=notes;
+        duplicate.cls=CLASSES.includes(cls)?cls:'Unknown';duplicate.gr=gr;duplicate.nationality=nationality;if(notes)duplicate.notes=notes;
         closeMemberModal();
         reactivateMemberRecord(duplicate,todayIso(),'Returned to Guild');
         return;
@@ -1757,7 +1797,7 @@
     }
     if(editingMemberName){
       const member=memberByName[editingMemberName];if(!member)return;
-      const oldName=member.name;member.name=name.slice(0,120);member.cls=CLASSES.includes(cls)?cls:'Unknown';member.gr=gr;member.notes=notes;touchMember(member);
+      const oldName=member.name;member.name=name.slice(0,120);member.cls=CLASSES.includes(cls)?cls:'Unknown';member.gr=gr;member.nationality=nationality;member.notes=notes;touchMember(member);
       if(oldName!==member.name){
         ALL_KEYS.forEach(key=>state.assignments[key]=state.assignments[key].map(value=>value===oldName?member.name:value));
         ALL_RAIDS.forEach(raid=>{if(state.raidCommanders[raid.id]===oldName)state.raidCommanders[raid.id]=member.name;});
@@ -1767,7 +1807,7 @@
       }
     }else{
       if(state.roster.length>=CONFIG.maxMembers){showToast('Roster full',`The roster limit is ${CONFIG.maxMembers} members.`,'err');return;}
-      const member={id:makeId('member'),name:name.slice(0,120),cls:CLASSES.includes(cls)?cls:'Unknown',gr,status:'active',inactiveSince:'',lastReturned:'',inactiveReason:'',notes,updatedAt:'',updatedBy:''};touchMember(member);state.roster.push(member);
+      const member={id:makeId('member'),name:name.slice(0,120),cls:CLASSES.includes(cls)?cls:'Unknown',gr,nationality,status:'active',inactiveSince:'',lastReturned:'',inactiveReason:'',notes,updatedAt:'',updatedBy:''};touchMember(member);state.roster.push(member);
     }
     closeMemberModal();
     commitMutation(wasEditing?'Member updated':'Member added');
@@ -2232,7 +2272,7 @@ Their team assignments and membership history will also be removed. Use Mark Ina
     const deletedLocally=new Set();
     baseById.forEach((_base,id)=>{if(id&&!localById.has(id))deletedLocally.add(id);});
     deletedLocally.forEach(id=>remoteById.delete(id));
-    const fields=['name','cls','gr','status','inactiveSince','lastReturned','inactiveReason','notes','updatedAt','updatedBy'];
+    const fields=['name','cls','gr','nationality','status','inactiveSince','lastReturned','inactiveReason','notes','updatedAt','updatedBy'];
     baseById.forEach((baseMember,id)=>{
       if(!id)return;
       const localMember=localById.get(id);

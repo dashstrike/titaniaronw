@@ -28,6 +28,8 @@ class TitaniaPagesTest extends TestCase
             ['/guild-runs', 'createRunForm'],
             ['/guild-runs-history', 'loading'],
             ['/titaniaruns', 'loading'],
+            ['/maps-gl', 'mapEditor'],
+            ['/maps-siege', 'mapEditor'],
         ];
     }
 
@@ -116,7 +118,7 @@ class TitaniaPagesTest extends TestCase
     public function test_legacy_urls_redirect_to_clean_routes_with_query_parameters(): void
     {
         foreach (['index', 'guild-league', 'siege', 'polarity-zone', 'member', 'parties', 'users',
-            'member-import-preview', 'guild-runs', 'guild-runs-history', 'titaniaruns'] as $page) {
+            'member-import-preview', 'guild-runs', 'guild-runs-history', 'titaniaruns', 'maps-gl', 'maps-siege'] as $page) {
             $this->get('/'.$page.'.html?id=existing-member&code=example-code')
                 ->assertStatus(301)
                 ->assertRedirect(route($page === 'index' ? 'dashboard' : $page, ['id' => 'existing-member', 'code' => 'example-code']));

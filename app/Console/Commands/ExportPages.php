@@ -62,7 +62,7 @@ class ExportPages extends Command
         }
 
         $redirects = ['index.html' => 'dashboard', 'index/index.html' => 'dashboard', 'home/index.html' => 'dashboard'];
-        foreach (['index', 'guild-league', 'siege', 'polarity-zone', 'member', 'parties', 'users', 'member-import-preview', 'guild-runs', 'guild-runs-history', 'titaniaruns'] as $page) {
+        foreach (['index', 'guild-league', 'siege', 'polarity-zone', 'member', 'parties', 'users', 'member-import-preview', 'guild-runs', 'guild-runs-history', 'titaniaruns', 'maps-gl', 'maps-siege'] as $page) {
             if ($page === 'index') {
                 continue;
             }

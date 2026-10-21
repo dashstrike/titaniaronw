@@ -36,6 +36,18 @@
                     </a>
                 </li>
             @endforeach
+            <li class="nav-item">
+                <a class="nav-link menu-arrow {{ in_array($page, ['maps-gl', 'maps-siege'], true) ? 'active' : '' }}" href="#sidebarMaps" data-bs-toggle="collapse" role="button" aria-expanded="{{ in_array($page, ['maps-gl', 'maps-siege'], true) ? 'true' : 'false' }}" aria-controls="sidebarMaps">
+                    <span class="nav-icon"><iconify-icon icon="bx:map-alt"></iconify-icon></span>
+                    <span class="nav-text">Map (TESTING)</span>
+                </a>
+                <div class="collapse {{ in_array($page, ['maps-gl', 'maps-siege'], true) ? 'show' : '' }}" id="sidebarMaps">
+                    <ul class="nav sub-navbar-nav">
+                        <li class="sub-nav-item"><a class="sub-nav-link {{ $page === 'maps-gl' ? 'active' : '' }}" href="{{ route('maps-gl') }}">Guild League</a></li>
+                        <li class="sub-nav-item"><a class="sub-nav-link {{ $page === 'maps-siege' ? 'active' : '' }}" href="{{ route('maps-siege') }}">Siege</a></li>
+                    </ul>
+                </div>
+            </li>
             <li class="nav-item" id="titania-users-link" hidden>
                 <a class="nav-link {{ $page === 'users' ? 'active' : '' }}" href="{{ route('users') }}">
                     <span class="nav-icon"><iconify-icon icon="bx:user-check"></iconify-icon></span>
@@ -46,7 +58,7 @@
             @foreach([['guild-league', 'Guild League'], ['siege', 'Siege'], ['titaniaruns', 'Titania Runs']] as [$routeName, $label])
                 <li class="nav-item">
                     <a class="nav-link" href="{{ route($routeName) }}" target="_blank" rel="noopener noreferrer">
-                        <span class="nav-icon">@if($routeName === 'siege')<i class="fa-regular fa-chess-rook" aria-hidden="true"></i>@else<iconify-icon icon="bx:link-external"></iconify-icon>@endif</span>
+                        <span class="nav-icon"><iconify-icon icon="bx:link-external"></iconify-icon></span>
                         <span class="nav-text">{{ $label }}</span>
                     </a>
                 </li>

@@ -19,7 +19,7 @@ foreach (['members' => 'manage_members', 'guild-league' => 'guild_league', 'sieg
 }
 
 foreach (['guild-league', 'siege', 'polarity-zone', 'member', 'parties', 'users',
-    'member-import-preview', 'guild-runs', 'guild-runs-history', 'titaniaruns', 'help'] as $page) {
+    'member-import-preview', 'guild-runs', 'guild-runs-history', 'titaniaruns', 'help', 'maps-gl', 'maps-siege'] as $page) {
     $path = in_array($page, ['guild-league', 'siege', 'polarity-zone'], true) ? 'public/'.$page : $page;
     Route::get('/'.$path, [PageController::class, 'show'])
         ->defaults('page', $page)
@@ -28,6 +28,6 @@ foreach (['guild-league', 'siege', 'polarity-zone', 'member', 'parties', 'users'
 
 // Old bookmarks retain their query parameters; browsers retain URL fragments.
 foreach (['index', 'guild-league', 'siege', 'polarity-zone', 'member', 'parties', 'users',
-    'member-import-preview', 'guild-runs', 'guild-runs-history', 'titaniaruns'] as $page) {
+    'member-import-preview', 'guild-runs', 'guild-runs-history', 'titaniaruns', 'maps-gl', 'maps-siege'] as $page) {
     Route::get('/'.$page.'.html', fn (Request $request) => redirect()->route($page === 'index' ? 'dashboard' : $page, $request->query(), 301));
 }
