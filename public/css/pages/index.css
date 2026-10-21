@@ -355,6 +355,21 @@ body[data-event="siege"] #titania-content .print-team-card.siege-party{border-le
 #titania-content .dash-class-pie-wrap{width:min(300px,75vw);}
 #titania-content .dash-class-pie-panel{min-height:300px;}
 }
+#titania-content .dash-nationality-panel{min-width:0;padding:18px;display:flex;flex-direction:column;justify-content:center;}
+#titania-content .dash-nationality-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:18px;}
+#titania-content .dash-nationality-head>span{color:var(--muted);font-size:12px;white-space:nowrap;}
+#titania-content .dash-nationality-title{font-size:13px;font-weight:700;color:var(--text);}
+#titania-content .dash-nationality-sub{font-size:11px;color:var(--muted);margin-top:2px;}
+#titania-content .dash-nationality-chart{display:grid;gap:14px;}
+#titania-content .dash-nationality-row{display:grid;grid-template-columns:minmax(90px,118px) minmax(45px,1fr) 28px 36px;align-items:center;gap:8px;min-width:0;}
+#titania-content .dash-nationality-label{display:flex;align-items:center;gap:8px;min-width:0;font-size:12px;font-weight:600;}
+#titania-content .dash-nationality-label img{width:20px;height:14px;object-fit:cover;border-radius:1px;flex:none;}
+#titania-content .dash-nationality-label i{width:20px;text-align:center;color:var(--muted);flex:none;}
+#titania-content .dash-nationality-label span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+#titania-content .dash-nationality-track{height:9px;background:var(--panel-2);border-radius:999px;overflow:hidden;}
+#titania-content .dash-nationality-fill{height:100%;min-width:0;background:var(--bs-primary);border-radius:inherit;}
+#titania-content .dash-nationality-row strong{text-align:right;font-size:12px;color:var(--text);}
+#titania-content .dash-nationality-pct{text-align:right;font-size:11px;color:var(--muted);}
 #titania-content .dash-gr-analytics-grid{display:grid;grid-template-columns:minmax(0,3fr) minmax(260px,1fr);gap:14px;align-items:stretch;margin-bottom:8px;}
 #titania-content .dash-gr-analytics-grid .dash-panel{margin-bottom:0;}
 #titania-content .dash-gr-spread-panel{min-width:0;}

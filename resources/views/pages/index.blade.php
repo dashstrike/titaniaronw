@@ -173,7 +173,6 @@
           <div class="class-breakdown" id="classBreakdown"></div>
         </aside>
         <main class="main">
-          <div class="hint-bar" id="hintBar"></div>
           <div id="teamsWrap"></div>
         </main>
       </div>

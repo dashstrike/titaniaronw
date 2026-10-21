@@ -907,7 +907,6 @@
     renderTabs();
     renderHeaderStats();
     renderActionState();
-    renderHint();
     const body=document.getElementById('bodyWrap');
     const fullWidthMode=currentEvent==='dashboard'||currentEvent==='manage_members';
     body.classList.toggle('dashboard-mode',fullWidthMode);
@@ -1934,6 +1933,12 @@
     const top=withGR[0]||null;const bottom=withGR.length?withGR[withGR.length-1]:null;
     const classMap={};active.forEach(member=>{if(!classMap[member.cls])classMap[member.cls]={cls:member.cls,count:0,total:0};classMap[member.cls].count++;classMap[member.cls].total+=member.gr;});
     const classRows=Object.values(classMap).map(row=>({...row,pct:total?row.count/total*100:0,avg:Math.round(row.total/row.count)})).sort((a,b)=>b.count-a.count||a.cls.localeCompare(b.cls));
+    const nationalityCounts=Object.fromEntries(Object.keys(NATIONALITIES).map(key=>[key,0]));
+    let nationalityUnset=0;
+    active.forEach(member=>{if(NATIONALITIES[member.nationality])nationalityCounts[member.nationality]++;else nationalityUnset++;});
+    const nationalityRows=Object.entries(NATIONALITIES).map(([key,item])=>({key,label:item.label,flag:item.flag,count:nationalityCounts[key]}));
+    nationalityRows.push({key:'',label:'Not set',flag:'',count:nationalityUnset});
+    nationalityRows.sort((a,b)=>b.count-a.count||a.label.localeCompare(b.label));
     const maxClass=Math.max(1,...classRows.map(row=>row.count));
     const maxGR=Math.max(0,...active.map(member=>member.gr));
     const bucketSize=Math.max(500,Math.ceil(Math.max(1,maxGR)/4/500)*500);
@@ -1963,9 +1968,9 @@
     const compositionAnalytics=`<div class="row g-3">${compositionChart('mainClassCompositionChart','Main Class Composition',mainRows,'<i class="fa-solid fa-shield-heart me-2" aria-hidden="true"></i>','text-primary')}${compositionChart('subClassCompositionChart','Sub Class Composition',subRows,'<i class="fa-solid fa-shield-cat me-2" aria-hidden="true"></i>','text-info')}</div>`;
     const analytics=total?`
       ${sectionHeader('Active Members by Class','',`${classRows.length} classes`)}
-      <div class="dash-class-analytics-grid"><div class="dash-panel dash-class-bars card">${classRows.map(row=>dashBarRow(row.cls,row.count,row.pct,row.avg,maxClass,classColor(row.cls))).join('')}</div>${dashClassPieHtml(classRows,total)}</div>
+      <div class="dash-class-analytics-grid"><div class="dash-panel dash-class-bars card">${classRows.map(row=>dashBarRow(row.cls,row.count,row.pct,row.avg,maxClass,classColor(row.cls))).join('')}</div>${dashClassAverageGrChartHtml(classRows)}</div>
       ${sectionHeader('Active Gear Rating Spread','','')}
-      <div class="dash-gr-analytics-grid">${dashClassAverageGrChartHtml(classRows)}<div class="dash-panel dash-gr-spread-panel card">${buckets.map((bucket,index)=>{const label=index===3?`${formatNumber(bucket.min)}+`:`${formatNumber(bucket.min)}–${formatNumber(bucket.max)}`;return `<div class="dash-bar-row"><span class="dash-bar-name">${label}</span><div class="dash-bar-track"><div class="dash-bar-fill" style="width:${bucket.count/maxBucket*100}%;background:var(--teal)"></div></div><span class="dash-bar-count">${bucket.count}</span><span class="dash-bar-pct">${Math.round(bucket.count/total*100)}%</span></div>`;}).join('')}</div></div>
+      <div class="dash-gr-analytics-grid">${dashNationalityChartHtml(nationalityRows,total)}<div class="dash-panel dash-gr-spread-panel card">${buckets.map((bucket,index)=>{const label=index===3?`${formatNumber(bucket.min)}+`:`${formatNumber(bucket.min)}–${formatNumber(bucket.max)}`;return `<div class="dash-bar-row"><span class="dash-bar-name">${label}</span><div class="dash-bar-track"><div class="dash-bar-fill" style="width:${bucket.count/maxBucket*100}%;background:var(--teal)"></div></div><span class="dash-bar-count">${bucket.count}</span><span class="dash-bar-pct">${Math.round(bucket.count/total*100)}%</span></div>`;}).join('')}</div></div>
       ${topFive.length?`<div class="dash-gr-rank-grid"><div class="dash-gr-rank-col">${sectionHeader('Top 5 Active Members by Gear Rating','','')}<div class="dash-panel card">${topFive.map((member,index)=>`<div class="dash-bar-row"><span class="dash-rank">#${index+1}</span><span class="class-dot" style="background:${classColor(member.cls)};color:${classColor(member.cls)}"></span><span class="dash-bar-name" style="flex:1">${escapeHtml(member.name)}</span><span class="dash-bar-avg">${escapeHtml(member.cls)}</span><span class="dash-bar-count" style="width:80px">${formatNumber(member.gr)}</span></div>`).join('')}</div></div><div class="dash-gr-rank-col">${sectionHeader('Lowest 5 Active Members by Gear Rating','','')}<div class="dash-panel card">${lowestFive.map((member,index)=>`<div class="dash-bar-row"><span class="dash-rank">#${index+1}</span><span class="class-dot" style="background:${classColor(member.cls)};color:${classColor(member.cls)}"></span><span class="dash-bar-name" style="flex:1">${escapeHtml(member.name)}</span><span class="dash-bar-avg">${escapeHtml(member.cls)}</span><span class="dash-bar-count" style="width:80px">${formatNumber(member.gr)}</span></div>`).join('')}</div></div></div>`:''}`:`<div class="empty-note" style="padding:30px 10px">There are no active members. Open the Members tab to reactivate members.</div>`;
     wrap.innerHTML=`
       ${sectionHeader('📊 Guild Dashboard','',`${active.length} active · ${inactive.length} inactive · ${records} records`)}
@@ -1975,7 +1980,6 @@
       ${compositionAnalytics}
       ${analytics}`;
     renderDashboardCompositionCharts(mainRows,subRows);
-    wireDashboardClassPie();
     wireDashboardClassAverageGrChart();
   }
 
@@ -2057,6 +2061,12 @@
       slice.addEventListener('blur',hide);
       slice.setAttribute('tabindex','0');
     });
+  }
+
+  function dashNationalityChartHtml(rows,total){
+    const max=Math.max(1,...rows.map(row=>row.count));
+    const assigned=rows.reduce((sum,row)=>sum+(row.key?row.count:0),0);
+    return `<div class="dash-panel dash-nationality-panel card"><div class="dash-nationality-head"><div><div class="dash-nationality-title">Nationality Distribution</div><div class="dash-nationality-sub">Active members</div></div><span>${assigned}/${total} set</span></div><div class="dash-nationality-chart">${rows.map(row=>{const pct=total?row.count/total*100:0;const icon=row.flag?`<img src="${escapeAttr(row.flag)}" alt="">`:'<i class="fa-solid fa-earth-asia" aria-hidden="true"></i>';return `<div class="dash-nationality-row"><div class="dash-nationality-label">${icon}<span>${escapeHtml(row.label)}</span></div><div class="dash-nationality-track"><div class="dash-nationality-fill" style="width:${row.count/max*100}%"></div></div><strong>${row.count}</strong><span class="dash-nationality-pct">${pct.toFixed(0)}%</span></div>`;}).join('')}</div></div>`;
   }
 
   function dashBarRow(label,count,pct,avg,max,color){return `<div class="dash-bar-row"><span class="class-dot" style="background:${color};color:${color}"></span><span class="dash-bar-name">${escapeHtml(label)}</span><div class="dash-bar-track"><div class="dash-bar-fill" style="width:${count/max*100}%;background:${color}"></div></div><span class="dash-bar-count">${count}</span><span class="dash-bar-pct">${pct.toFixed(0)}%</span><span class="dash-bar-avg">avg ${formatNumber(avg)}</span></div>`;}
