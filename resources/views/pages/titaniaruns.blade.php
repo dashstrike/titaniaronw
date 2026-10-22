@@ -11,7 +11,7 @@
   <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="./js/config.js?v=icon-font-fix-1"></script>
-  <script src="./js/titania-runs-public.js?v=select2-theme-1" defer></script>
+  <script src="{{ asset('js/titania-runs-public.js') }}?v={{ filemtime(public_path('js/titania-runs-public.js')) }}" defer></script>
 @endpush
 
 @section('content')

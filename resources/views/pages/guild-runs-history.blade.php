@@ -16,7 +16,7 @@
 
   <main class="wrap col-12 w-100">
     <section class="page-head">
-      <div><h1>Previous Runs</h1><p>Ended Time Echo and Mirage runs with their final registrations and carry status.</p></div>
+      <div><h1>Previous Runs</h1><p>Ended Time Echo, Mirage, and Calamity Zone runs with their final registrations and carry status.</p></div>
     </section>
 
     <div id="pageError" class="error" hidden></div>

@@ -144,6 +144,9 @@
 #titania-content .public-run-card .public-register-form{margin-top:22px}
 #titania-content .public-run-card .register-grid{grid-template-columns:minmax(0,1fr) minmax(180px,220px) auto;gap:12px;align-items:end}
 #titania-content .public-run-card .registration-columns{margin-top:18px}
+body[data-guild-runs-page="public"] #titania-content .runs-list{gap:18px}
+body[data-guild-runs-page="public"] #titania-content .public-run-card{position:relative;overflow:hidden;border-color:rgba(var(--bs-primary-rgb),.38);border-left:4px solid var(--bs-primary);background:var(--bs-tertiary-bg);box-shadow:0 8px 22px rgba(0,0,0,.18)}
+body[data-guild-runs-page="public"] #titania-content .public-run-top{margin:-18px -20px 0;padding:15px 20px;background:rgba(var(--bs-primary-rgb),.07);border-bottom:1px solid rgba(var(--bs-primary-rgb),.24)}
 #titania-content,
 #titania-content{max-width:100%;overflow-x:hidden}
 #titania-content .topbar,
@@ -222,6 +225,7 @@ body[data-guild-runs-page="organizer"] #titania-content .run-edit-row .autosave-
 #titania-content .summary-counts{flex-wrap:wrap;gap:8px 16px}
 body[data-guild-runs-page="organizer"] #titania-content table{min-width:650px}
 body[data-guild-runs-page="public"] #titania-content .public-run-card{padding:15px}
+body[data-guild-runs-page="public"] #titania-content .public-run-top{margin:-15px -15px 0;padding:14px 15px}
 body[data-guild-runs-page="public"] #titania-content .public-run-top{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;flex-wrap:wrap}
 body[data-guild-runs-page="public"] #titania-content .public-run-heading{align-items:center!important;gap:10px}
 body[data-guild-runs-page="public"] #titania-content .public-run-type{font-size:25px}
@@ -247,6 +251,7 @@ body[data-guild-runs-page="organizer"] #titania-content .run-edit-row{grid-templ
 body[data-guild-runs-page="organizer"] #titania-content .run-edit-row .run-title-input:not(.form-control),
 body[data-guild-runs-page="organizer"] #titania-content .run-edit-row .autosave-state{grid-column:auto}
 body[data-guild-runs-page="public"] #titania-content .public-run-card{padding:13px}
+body[data-guild-runs-page="public"] #titania-content .public-run-top{margin:-13px -13px 0;padding:13px}
 body[data-guild-runs-page="public"] #titania-content .public-run-type{font-size:24px}
 #titania-content .registration-columns>div{padding:10px}
 #titania-content .player-row{padding:8px 9px}

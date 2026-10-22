@@ -13,7 +13,7 @@
 
   function esc(v){return String(v==null?'':v).replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));}
   function isOrganizer(){return Boolean(profile&&profile.approved&&['party_organizer','admin'].includes(profile.role));}
-  function runLabel(type){return type==='mirage'?'Mirage':'Time Echo';}
+  function runLabel(type){return type==='mirage'?'Mirage':type==='calamity_zone'?'Calamity Zone':'Time Echo';}
   function typeLabel(type){return type==='carrier'?'Can Carry':'Need Carry';}
   function iconFor(member){const file=iconMap[member&&member.cls];return file?`./images/job/${encodeURIComponent(file)}`:'';}
   function memberById(id){return roster.find(m=>String(m.id)===String(id));}

@@ -11,7 +11,7 @@
   let iconMap={};
 
   function esc(v){return String(v==null?'':v).replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));}
-  function runLabel(type){return type==='mirage'?'Mirage':'Time Echo';}
+  function runLabel(type){return type==='mirage'?'Mirage':type==='calamity_zone'?'Calamity Zone':'Time Echo';}
   function formatDate(date){if(!date)return '';const d=new Date(`${date}T00:00:00`);return d.toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'});}
   function formatTime(time){if(!time)return '';return String(time).slice(0,5);}
   function memberById(id){return roster.find(m=>String(m.id)===String(id));}

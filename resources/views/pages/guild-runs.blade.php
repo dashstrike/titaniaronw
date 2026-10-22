@@ -17,7 +17,7 @@
 
   <main class="wrap col-12 w-100">
     <section class="page-head d-flex flex-nowrap align-items-start justify-content-between gap-3">
-      <div><h1>Guild Runs</h1><p>Create Time Echo or Mirage runs and view registrations.</p></div>
+      <div><h1>Guild Runs</h1><p>Create Time Echo, Mirage, or Calamity Zone runs and view registrations.</p></div>
       <a class="btn btn-outline-secondary flex-shrink-0" href="{{ route('guild-runs-history') }}">Previous Runs</a>
     </section>
 
@@ -32,6 +32,7 @@
           <select id="runType" required class="form-select">
             <option value="time_echo">Time Echo</option>
             <option value="mirage">Mirage</option>
+            <option value="calamity_zone">Calamity Zone</option>
           </select>
         </label>
         <label>Date<input id="runDate" type="date" required class="form-control"></label>
