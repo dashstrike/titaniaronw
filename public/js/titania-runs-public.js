@@ -64,7 +64,7 @@
         <div class="public-run-top">
           <div class="public-run-heading">
             <img class="run-raid-image" src="${esc(runImage(run.run_type))}" alt="">
-            <h2 class="public-run-type">${esc(runLabel(run.run_type))}</h2>
+            <h2 class="public-run-type">${esc(runLabel(run.run_type).toUpperCase())}</h2>
             <span class="badge bg-${isOpen?'success':'warning'}-subtle text-${isOpen?'success':'warning'}">${isOpen?'Open':'Closed'}</span>
           </div>
           <div class="public-run-datetime">${esc(formatDate(run.run_date))}${time?` · ${esc(time)}`:''}</div>

@@ -102,7 +102,7 @@
         <div class="run-card-top">
           <div class="run-identity">
             <img class="run-raid-image" src="${esc(runImage(run.run_type))}" alt="">
-            <h3 class="run-type-heading ${run.run_type==='mirage'?'mirage':'time-echo'}">${esc(runLabel(run.run_type))}</h3>
+            <h3 class="run-type-heading ${run.run_type==='mirage'?'mirage':'time-echo'}">${esc(runLabel(run.run_type).toUpperCase())}</h3>
             <span class="badge bg-${statusClass==='open'?'success':statusClass==='closed'?'warning':'secondary'}-subtle text-${statusClass==='open'?'success':statusClass==='closed'?'warning':'secondary'}">${esc(statusText)}</span>
             ${locked?'':'<a class="run-public-link" href="./titaniaruns" target="_blank" rel="noopener">Open Public Registration</a>'}
           </div>
@@ -158,7 +158,7 @@
         <div class="run-card-top">
           <div class="run-identity">
             <img class="run-raid-image" src="${esc(runImage(run.run_type))}" alt="">
-            <h3 class="run-type-heading ${run.run_type==='mirage'?'mirage':'time-echo'}">${esc(runLabel(run.run_type))}</h3>
+            <h3 class="run-type-heading ${run.run_type==='mirage'?'mirage':'time-echo'}">${esc(runLabel(run.run_type).toUpperCase())}</h3>
             <span class="status ended">Ended</span>
           </div>
         </div>
