@@ -228,10 +228,10 @@ body[data-guild-runs-page="organizer"] #titania-content table{min-width:650px}
 body[data-guild-runs-page="public"] #titania-content .public-run-card{padding:15px}
 body[data-guild-runs-page="public"] #titania-content .public-run-top{margin:-15px -15px 0;padding:14px 15px}
 body[data-guild-runs-page="public"] #titania-content .public-run-top{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;flex-wrap:wrap}
-body[data-guild-runs-page="public"] #titania-content .public-run-heading{align-items:center!important;gap:10px}
+body[data-guild-runs-page="public"] #titania-content .public-run-heading{align-items:center!important;gap:10px;width:100%}
 body[data-guild-runs-page="public"] #titania-content .run-raid-image{width:36px;height:36px}
 body[data-guild-runs-page="public"] #titania-content .public-run-type{font-size:25px}
-body[data-guild-runs-page="public"] #titania-content .public-run-datetime{width:100%;text-align:left;white-space:normal;font-size:13px}
+body[data-guild-runs-page="public"] #titania-content .public-run-datetime{flex:0 0 100%;width:100%;margin-top:2px;text-align:left;white-space:normal;font-size:13px}
 body[data-guild-runs-page="public"] #titania-content .public-run-title{margin-top:12px;font-size:16px}
 body[data-guild-runs-page="public"] #titania-content .public-run-card .register-grid{grid-template-columns:1fr}
 body[data-guild-runs-page="public"] #titania-content .public-register-form .btn:not([class*="btn-"]){width:100%}
