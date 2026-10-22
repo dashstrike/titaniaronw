@@ -14,6 +14,7 @@
   function esc(v){return String(v==null?'':v).replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));}
   function isOrganizer(){return Boolean(profile&&profile.approved&&['party_organizer','admin'].includes(profile.role));}
   function runLabel(type){return type==='mirage'?'Mirage':type==='calamity_zone'?'Calamity Zone':'Time Echo';}
+  function runImage(type){return type==='mirage'?'./images/raid/final-mirage.png':type==='calamity_zone'?'./images/raid/calamity-zone.png':'./images/raid/time-echoes.png';}
   function typeLabel(type){return type==='carrier'?'Can Carry':'Need Carry';}
   function iconFor(member){const file=iconMap[member&&member.cls];return file?`./images/job/${encodeURIComponent(file)}`:'';}
   function memberById(id){return roster.find(m=>String(m.id)===String(id));}
@@ -100,6 +101,7 @@
       return `<article class="run-card card">
         <div class="run-card-top">
           <div class="run-identity">
+            <img class="run-raid-image" src="${esc(runImage(run.run_type))}" alt="">
             <h3 class="run-type-heading ${run.run_type==='mirage'?'mirage':'time-echo'}">${esc(runLabel(run.run_type))}</h3>
             <span class="badge bg-${statusClass==='open'?'success':statusClass==='closed'?'warning':'secondary'}-subtle text-${statusClass==='open'?'success':statusClass==='closed'?'warning':'secondary'}">${esc(statusText)}</span>
             ${locked?'':'<a class="run-public-link" href="./titaniaruns" target="_blank" rel="noopener">Open Public Registration</a>'}
@@ -155,6 +157,7 @@
       return `<article class="run-card previous-run-card card">
         <div class="run-card-top">
           <div class="run-identity">
+            <img class="run-raid-image" src="${esc(runImage(run.run_type))}" alt="">
             <h3 class="run-type-heading ${run.run_type==='mirage'?'mirage':'time-echo'}">${esc(runLabel(run.run_type))}</h3>
             <span class="status ended">Ended</span>
           </div>

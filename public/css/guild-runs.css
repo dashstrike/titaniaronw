@@ -117,6 +117,7 @@
 #titania-content .create-grid input:not(.form-control):not(.form-select):not(.form-check-input)[type="time"]::-webkit-calendar-picker-indicator{opacity:0!important;width:18px!important;height:18px!important;cursor:pointer!important}
 #titania-content .run-card-top{display:flex;align-items:center;justify-content:space-between;gap:18px;flex-wrap:wrap}
 #titania-content .run-identity{display:flex;align-items:center;gap:12px;min-width:0;flex-wrap:wrap}
+#titania-content .run-raid-image{width:42px;height:42px;object-fit:contain;flex:none}
 #titania-content .run-type-heading{margin:0;font-size:29px;line-height:1;font-weight:900;letter-spacing:.5px;color:var(--text);text-transform:uppercase}
 #titania-content .run-type-heading.mirage,
 #titania-content .run-type-heading.time-echo{color:var(--text)}
@@ -228,6 +229,7 @@ body[data-guild-runs-page="public"] #titania-content .public-run-card{padding:15
 body[data-guild-runs-page="public"] #titania-content .public-run-top{margin:-15px -15px 0;padding:14px 15px}
 body[data-guild-runs-page="public"] #titania-content .public-run-top{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;flex-wrap:wrap}
 body[data-guild-runs-page="public"] #titania-content .public-run-heading{align-items:center!important;gap:10px}
+body[data-guild-runs-page="public"] #titania-content .run-raid-image{width:36px;height:36px}
 body[data-guild-runs-page="public"] #titania-content .public-run-type{font-size:25px}
 body[data-guild-runs-page="public"] #titania-content .public-run-datetime{width:100%;text-align:left;white-space:normal;font-size:13px}
 body[data-guild-runs-page="public"] #titania-content .public-run-title{margin-top:12px;font-size:16px}

@@ -41,7 +41,7 @@
       .party-star-toggle.on{background:#3a2b09;border-color:var(--bs-warning);color:#ffd34d;box-shadow:0 0 10px rgba(var(--bs-warning-rgb),0.267)}
       .party-star-toggle:disabled{cursor:default;opacity:.75;transform:none}
       .party-star-public{display:inline-flex;align-items:center;justify-content:center;color:#ffd34d;font-size:18px;line-height:1;filter:drop-shadow(0 0 5px rgba(var(--bs-warning-rgb),0.533));margin-left:6px;vertical-align:middle}
-      .party-star-counter{font:700 11px/1 var(--bs-body-font-family);color:#d9ad33;border:1px solid #6d5720;background:#241d0d;border-radius:999px;padding:5px 8px;white-space:nowrap}
+      .party-star-counter{display:inline-flex;align-items:center;align-self:center;min-height:34px;font:700 11px/1 var(--bs-body-font-family);color:#d9ad33;border:1px solid #6d5720;background:#241d0d;border-radius:999px;padding:5px 10px;white-space:nowrap}
       .team-card.party-starred{border-color:#9a7625!important;box-shadow:0 0 0 1px rgba(var(--bs-warning-rgb),0.267),0 0 18px rgba(var(--bs-warning-rgb),0.071)}
       .team-name.party-star-name{gap:7px!important}
     `;
@@ -72,16 +72,15 @@
 
   function updateCounter(){
     if(!isSiegeManagement())return;
-    const main=document.querySelector('.main');
-    if(!main)return;
+    const statsRow=document.getElementById('statsRow');
+    if(!statsRow)return;
     let counter=document.getElementById('partyStarCounter');
     if(!counter){
       counter=document.createElement('span');
       counter.id='partyStarCounter';
       counter.className='party-star-counter';
-      const hint=document.querySelector('.hint-bar');
-      if(hint)hint.appendChild(counter);else main.prepend(counter);
     }
+    if(counter.parentElement!==statsRow||statsRow.lastElementChild!==counter)statsRow.appendChild(counter);
     counter.textContent=`${selected.size}/${MAX_STARS} Star parties`;
     counter.title=`Maximum ${MAX_STARS} Siege parties can be marked for Star`;
   }

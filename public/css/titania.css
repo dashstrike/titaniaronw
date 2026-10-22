@@ -362,6 +362,10 @@ body[data-view="siege"] #titania-content .team-card.party-starred{
   border:2px solid var(--bs-warning)!important;
 }
 
+body:not([data-titania-page="siege"]):not([data-titania-page="guild-league"]) .badge{
+  text-transform:uppercase;
+}
+
 @media (max-width: 767.98px) {
   #titania-content .main-raid-grid,
   #titania-content .main-raid-grid.five {

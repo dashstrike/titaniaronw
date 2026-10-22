@@ -12,6 +12,7 @@
 
   function esc(v){return String(v==null?'':v).replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));}
   function runLabel(type){return type==='mirage'?'Mirage':type==='calamity_zone'?'Calamity Zone':'Time Echo';}
+  function runImage(type){return type==='mirage'?'./images/raid/final-mirage.png':type==='calamity_zone'?'./images/raid/calamity-zone.png':'./images/raid/time-echoes.png';}
   function formatDate(date){if(!date)return '';const d=new Date(`${date}T00:00:00`);return d.toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'});}
   function formatTime(time){if(!time)return '';return String(time).slice(0,5);}
   function memberById(id){return roster.find(m=>String(m.id)===String(id));}
@@ -61,7 +62,8 @@
       const title=String(run.note||'').trim()||'Untitled Run';
       return `<article class="run-card public-run-card card" data-run-id="${esc(run.id)}">
         <div class="public-run-top">
-          <div class="public-run-heading" style="align-items:flex-start">
+          <div class="public-run-heading">
+            <img class="run-raid-image" src="${esc(runImage(run.run_type))}" alt="">
             <h2 class="public-run-type">${esc(runLabel(run.run_type))}</h2>
             <span class="badge bg-${isOpen?'success':'warning'}-subtle text-${isOpen?'success':'warning'}">${isOpen?'Open':'Closed'}</span>
           </div>
