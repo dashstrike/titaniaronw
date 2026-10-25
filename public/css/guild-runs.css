@@ -105,8 +105,22 @@
 #titania-content .select2-results__option{color:var(--text)}
 #titania-content .select2-container--default .select2-results__option--highlighted.select2-results__option--selectable{background:var(--bs-primary)}
 #titania-content .select2-search__field{background:var(--bs-body-bg)!important;color:var(--text)!important;border:1px solid var(--line)!important}
+body[data-titania-page="auction"] #titania-content .select2-search__field:focus,
+body[data-titania-page="titaniaauction"] #titania-content .select2-search__field:focus{outline:none!important;box-shadow:none!important}
 #titania-content .select2-player{display:flex;align-items:center;gap:8px}
 #titania-content .select2-player img{width:24px;height:24px;object-fit:contain}
+/* Auction text is 1.25 times the standard size on both public and management pages. */
+#titania-content #auctionRegistrations{font-size:1.1em}
+#titania-content #auctionRegistrations .card-header{background-color:#302742;font-size:inherit}
+body:is([data-titania-page="auction"],[data-titania-page="titaniaauction"]) #titania-content{font-size:calc(var(--bs-body-font-size) * 1.25)}
+body:is([data-titania-page="auction"],[data-titania-page="titaniaauction"]) #titania-content .h3{font-size:1.875rem}
+body:is([data-titania-page="auction"],[data-titania-page="titaniaauction"]) #titania-content .h5{font-size:1.171875rem}
+body:is([data-titania-page="auction"],[data-titania-page="titaniaauction"]) #titania-content :is(.form-label,.form-select,.btn){font-size:1.09375rem}
+body:is([data-titania-page="auction"],[data-titania-page="titaniaauction"]) #titania-content .btn-sm{font-size:0.9375rem}
+body:is([data-titania-page="auction"],[data-titania-page="titaniaauction"]) #titania-content .select2-search__field{font-size:inherit}
+body:is([data-titania-page="auction"],[data-titania-page="titaniaauction"]) #titania-content .select2-container--default .select2-selection--single{height:auto;min-height:44px}
+body:is([data-titania-page="auction"],[data-titania-page="titaniaauction"]) #titania-content .select2-container--default .select2-selection--single .select2-selection__rendered{line-height:1.5;padding-top:8px;padding-bottom:8px}
+body:is([data-titania-page="auction"],[data-titania-page="titaniaauction"]) #titania-content .select2-container--default .select2-selection--single .select2-selection__arrow{height:100%}
 #titania-content .public-closed-note{margin:14px 0 0}
 #titania-content .public-empty{text-align:center;padding:24px}
 #titania-content .create-grid input:not(.form-control):not(.form-select):not(.form-check-input)[type="date"],

@@ -14,7 +14,7 @@ class PageController extends Controller
         return view('pages.'.$page, [
             'page' => $page,
             'plannerEvent' => $request->route('plannerEvent', 'dashboard'),
-            'publicPage' => in_array($page, ['guild-league', 'siege', 'polarity-zone', 'titaniaruns'], true),
+            'publicPage' => in_array($page, ['guild-league', 'siege', 'polarity-zone', 'titaniaruns', 'titaniaauction'], true),
             // Only browser-safe settings are exposed. Supabase still governs all data access.
             'browserConfig' => [
                 'supabaseUrl' => config('titania.supabase_url'),

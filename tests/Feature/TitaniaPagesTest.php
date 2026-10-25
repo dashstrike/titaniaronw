@@ -28,6 +28,8 @@ class TitaniaPagesTest extends TestCase
             ['/guild-runs', 'createRunForm'],
             ['/guild-runs-history', 'loading'],
             ['/titaniaruns', 'loading'],
+            ['/auction', 'auctionRegisterForm'],
+            ['/titaniaauction', 'auctionRegisterForm'],
             ['/maps-gl', 'mapEditor'],
             ['/maps-siege', 'mapEditor'],
         ];

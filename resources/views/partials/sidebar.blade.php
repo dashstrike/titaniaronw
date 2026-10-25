@@ -28,6 +28,7 @@
                 ['parties', 'Manage Parties', 'bx-grid-alt'],
                 ['guild-runs', 'Guild Runs', 'bx-run'],
                 ['guild-runs-history', 'Run History', 'bx-history'],
+                ['auction', 'Auction', 'bx-purchase-tag'],
             ] as [$routeName, $label, $icon])
                 <li class="nav-item">
                     <a class="nav-link {{ $page === $routeName ? 'active' : '' }}" href="{{ route($routeName) }}">
@@ -55,7 +56,7 @@
                 </a>
             </li>
             <li class="menu-title">Public Pages</li>
-            @foreach([['guild-league', 'Guild League'], ['siege', 'Siege'], ['titaniaruns', 'Titania Runs']] as [$routeName, $label])
+            @foreach([['guild-league', 'Guild League'], ['siege', 'Siege'], ['titaniaruns', 'Titania Runs'], ['titaniaauction', 'Card Auction']] as [$routeName, $label])
                 <li class="nav-item">
                     <a class="nav-link" href="{{ route($routeName) }}" target="_blank" rel="noopener noreferrer">
                         <span class="nav-icon"><iconify-icon icon="bx:link-external"></iconify-icon></span>

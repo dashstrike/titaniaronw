@@ -19,7 +19,7 @@ foreach (['members' => 'manage_members', 'guild-league' => 'guild_league', 'sieg
 }
 
 foreach (['guild-league', 'siege', 'polarity-zone', 'member', 'parties', 'users',
-    'member-import-preview', 'guild-runs', 'guild-runs-history', 'titaniaruns', 'help', 'maps-gl', 'maps-siege'] as $page) {
+    'member-import-preview', 'guild-runs', 'guild-runs-history', 'titaniaruns', 'auction', 'titaniaauction', 'help', 'maps-gl', 'maps-siege'] as $page) {
     $path = in_array($page, ['guild-league', 'siege', 'polarity-zone'], true) ? 'public/'.$page : $page;
     Route::get('/'.$path, [PageController::class, 'show'])
         ->defaults('page', $page)
