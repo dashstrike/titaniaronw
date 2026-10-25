@@ -350,3 +350,13 @@ body[data-guild-runs-page="public"] #titania-content .public-run-type{font-size:
 }
 
 #titania-content #accessoryRegistrations .card-header{background-color:var(--bs-danger-bg-subtle);font-size:inherit}
+
+#auctionDuckWiggle{
+  transform-origin:50% 80%;
+  animation:auction-duck-wiggle 1.2s ease-in-out infinite;
+}
+@keyframes auction-duck-wiggle{
+  0%,50%,100%{transform:rotate(0deg)}
+  25%{transform:rotate(-14deg)}
+  75%{transform:rotate(14deg)}
+}

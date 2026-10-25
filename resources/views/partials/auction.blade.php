@@ -1,9 +1,15 @@
 <main id="auctionPage" data-organizer="{{ $organizer ? 'true' : 'false' }}">
-    <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
-        <div><h1 class="h3 mb-1">Auction</h1><p class="text-muted mb-0">Select your IGN and an item to register. You can register again for a different item.</p></div>
+    <div class="row g-2 align-items-center mb-3">
+        <div class="col"><h1 class="h3 mb-0">Auction</h1></div>
         @if($organizer)
-        <a href="{{ route('titaniaauction') }}" target="_blank" rel="noopener" class="btn btn-outline-primary d-inline-flex align-items-center"><i class="fa-solid fa-arrow-up-right-from-square mr-2" aria-hidden="true"></i>Public Registration</a>
+        <div class="col-12 col-md-auto order-3 order-md-1">
+            <a href="{{ route('titaniaauction') }}" target="_blank" rel="noopener" class="btn btn-outline-primary d-inline-flex align-items-center"><i class="fa-solid fa-arrow-up-right-from-square mr-2" aria-hidden="true"></i>Public Registration</a>
+        </div>
         @endif
+        <div class="col-auto order-1 order-md-2">
+            <button type="button" class="btn btn-outline-warning p-2 lh-1 d-inline-flex align-items-center justify-content-center" data-bs-toggle="modal" data-bs-target="#auctionDuckInfo" aria-label="How do the ducks work?" title="How do the ducks work?"><span id="auctionDuckWiggle" class="d-inline-flex" aria-hidden="true"><iconify-icon icon="mdi:duck" class="fs-28"></iconify-icon></span></button>
+        </div>
+        <div class="col-12 order-2 order-md-3"><p class="text-muted mb-0">Select your IGN and an item to register. You can register again for a different item.</p></div>
     </div>
     <ul class="nav nav-underline nav-justified border-bottom mb-3" role="tablist" aria-label="Auction categories">
         <li class="nav-item" role="presentation"><button class="nav-link active text-primary w-100 d-flex align-items-center justify-content-center" id="auctionCardTab" data-bs-toggle="tab" data-bs-target="#auctionCardPane" type="button" role="tab" aria-controls="auctionCardPane" aria-selected="true"><i class="fa-regular fa-id-badge me-2" aria-hidden="true"></i>CARD</button></li>
@@ -56,3 +62,6 @@
     </div>
     </div>
 </main>
+@push('modals')
+@include('partials.auction-duck-info')
+@endpush

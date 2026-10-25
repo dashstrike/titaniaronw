@@ -38,6 +38,7 @@
             </footer>
         </div>
     </div>
+    @stack('modals')
     <div class="toast-container position-fixed top-0 end-0 p-3" id="toastStack" aria-live="polite" aria-atomic="false"></div>
     <script src="{{ asset('vendor/darkone/js/vendor.min.js') }}"></script>
     <script src="{{ asset('vendor/darkone/js/app.js') }}"></script>
