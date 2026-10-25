@@ -31,7 +31,7 @@
                     <select id="auctionCard" class="form-select" required>
                         <option value="">Select card</option>
                         @foreach(config('auction.cards') as $card)
-                        <option value="{{ $card['id'] }}" data-name="{{ $card['name'] }}" data-effect="{{ $card['effect'] }}" data-image="{{ asset('images/cards/icon_item_card_'.$card['id'].'_01.webp') }}">{{ $card['name'] }}</option>
+                        <option value="{{ $card['id'] }}" data-name="{{ $card['name'] }}" data-slot="{{ $card['slot'] }}" data-effect="{{ $card['effect'] }}" data-image="{{ asset('images/cards/icon_item_card_'.$card['id'].'_01.webp') }}">{{ $card['name'] }}</option>
                         @endforeach
                     </select>
                 </div>
