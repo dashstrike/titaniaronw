@@ -56,7 +56,7 @@
                 </a>
             </li>
             <li class="menu-title">Public Pages</li>
-            @foreach([['guild-league', 'Guild League'], ['siege', 'Siege'], ['titaniaruns', 'Titania Runs'], ['titaniaauction', 'Card Auction']] as [$routeName, $label])
+            @foreach([['guild-league', 'Guild League'], ['siege', 'Siege'], ['titaniaruns', 'Titania Runs'], ['titaniaauction', 'Auction']] as [$routeName, $label])
                 <li class="nav-item">
                     <a class="nav-link" href="{{ route($routeName) }}" target="_blank" rel="noopener noreferrer">
                         <span class="nav-icon"><iconify-icon icon="bx:link-external"></iconify-icon></span>

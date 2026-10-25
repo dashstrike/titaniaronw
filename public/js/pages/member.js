@@ -4,6 +4,25 @@ const CLASS_COLORS={Swordman:'#e2776b',Knight:'#e2776b','Lord Knight':'#e2776b',
 
 let client=null;
 
+async function loadCardHistory(memberId,accessory=false){
+  const label=accessory?'Accessory':'Card';
+  const wrap=document.getElementById(accessory?'memberAccessoryHistoryContent':'memberCardHistoryContent');
+  try{
+    const {data,error}=await client.rpc(accessory?'get_member_accessory_history':'get_member_card_history',{p_member_id:memberId});
+    if(error)throw error;
+    if(!data?.length){wrap.innerHTML=`<div class="muted">No ${label.toLowerCase()} registrations or received items yet.</div>`;return;}
+    const cards=(accessory?window.TITANIA_AUCTION_ACCESSORIES:window.TITANIA_AUCTION_CARDS)||[];
+    wrap.innerHTML=`<table class="history-table table table-centered table-hover align-middle mb-0"><thead><tr><th>${label}</th><th>Status</th><th>Registered</th><th>Received</th><th>Ducks</th></tr></thead><tbody>${data.map(row=>{
+      const id=accessory?row.accessory_id:row.card_id;
+      const card=cards.find(item=>item.id===id);
+      const name=card?.name||id;
+      const image=card?`<img src="${esc(accessory?card.image:`images/cards/icon_item_card_${card.id}_01.webp`)}" width="32" height="32" class="mr-2 flex-shrink-0" alt="">`:'';
+      return `<tr><td><span class="d-inline-flex align-items-center">${image}<span>${esc(name)}</span></span></td><td><span class="badge bg-${row.status==='received'?'success':'primary'}-subtle text-${row.status==='received'?'success':'primary'}">${row.status==='received'?'RECEIVED':'REGISTERED'}</span></td><td data-order="${new Date(row.registered_at).getTime()||0}">${esc(fmtDateTime(row.registered_at))}</td><td data-order="${new Date(row.received_at).getTime()||0}">${row.received_at?esc(fmtDateTime(row.received_at)):'—'}</td><td><span class="d-inline-flex align-items-center text-nowrap"><iconify-icon icon="mdi:duck" class="text-warning mr-2 fs-28" aria-hidden="true"></iconify-icon>×${esc(row.ducks)}</span></td></tr>`;
+    }).join('')}</tbody></table>`;
+    new DataTable(wrap.querySelector('table'),{pageLength:5,lengthChange:false,order:[],autoWidth:false,searching:false});
+  }catch(error){wrap.textContent=error.message||`Could not load ${label.toLowerCase()} history. Please refresh and try again.`;}
+}
+
 function esc(v){return String(v==null?'':v).replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));}
 function num(v){const n=Number(v);return Number.isFinite(n)?n:0;}
 function fmtGr(v){return Math.round(num(v)).toLocaleString();}
@@ -36,7 +55,7 @@ function renderProfile(member,history){document.title=`Titania · ${member.name}
 
 function fail(message){document.getElementById('loading').hidden=true;document.getElementById('errorText').textContent=message;document.getElementById('error').hidden=false;}
 
-async function boot(){setupTheme();const cfg=window.TITANIA_CONFIG||{};if(!cfg.supabaseUrl||!cfg.supabasePublishableKey){fail('Supabase configuration is missing.');return;}if(!window.supabase){fail('Supabase library did not load.');return;}const memberId=new URLSearchParams(location.search).get('id')||'';if(!memberId){fail('No member ID was provided.');return;}client=window.supabase.createClient(cfg.supabaseUrl,cfg.supabasePublishableKey,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:false}});const userResult=await client.auth.getUser();if(userResult.error||!userResult.data||!userResult.data.user){fail('Sign in to Titania first, then open the member profile again.');return;}const profileResult=await client.from('profiles').select('approved,role').eq('id',userResult.data.user.id).single();if(profileResult.error||!profileResult.data||!profileResult.data.approved){fail('Your Titania account is not approved to view member profiles.');return;}const plannerResult=await client.from('planner_state').select('state').eq('id',1).single();if(plannerResult.error){fail(plannerResult.error.message||'Could not load planner data.');return;}const roster=Array.isArray(plannerResult.data&&plannerResult.data.state&&plannerResult.data.state.roster)?plannerResult.data.state.roster:[];const member=roster.find(m=>String(m&&m.id||'')===memberId);if(!member){fail('This member is no longer in the current roster.');return;}const historyResult=await client.from('gear_rating_history').select('gear_rating,recorded_at').eq('member_id',memberId).order('recorded_at',{ascending:true});if(historyResult.error){fail(historyResult.error.message||'Could not load GR history.');return;}renderProfile(member,historyResult.data||[]);if(window.TitaniaMemberAttendance)window.TitaniaMemberAttendance(client,memberId,userResult.data.user.id);}
+async function boot(){setupTheme();const cfg=window.TITANIA_CONFIG||{};if(!cfg.supabaseUrl||!cfg.supabasePublishableKey){fail('Supabase configuration is missing.');return;}if(!window.supabase){fail('Supabase library did not load.');return;}const memberId=new URLSearchParams(location.search).get('id')||'';if(!memberId){fail('No member ID was provided.');return;}client=window.supabase.createClient(cfg.supabaseUrl,cfg.supabasePublishableKey,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:false}});const userResult=await client.auth.getUser();if(userResult.error||!userResult.data||!userResult.data.user){fail('Sign in to Titania first, then open the member profile again.');return;}const profileResult=await client.from('profiles').select('approved,role').eq('id',userResult.data.user.id).single();if(profileResult.error||!profileResult.data||!profileResult.data.approved){fail('Your Titania account is not approved to view member profiles.');return;}const plannerResult=await client.from('planner_state').select('state').eq('id',1).single();if(plannerResult.error){fail(plannerResult.error.message||'Could not load planner data.');return;}const roster=Array.isArray(plannerResult.data&&plannerResult.data.state&&plannerResult.data.state.roster)?plannerResult.data.state.roster:[];const member=roster.find(m=>String(m&&m.id||'')===memberId);if(!member){fail('This member is no longer in the current roster.');return;}const historyResult=await client.from('gear_rating_history').select('gear_rating,recorded_at').eq('member_id',memberId).order('recorded_at',{ascending:true});if(historyResult.error){fail(historyResult.error.message||'Could not load GR history.');return;}renderProfile(member,historyResult.data||[]);loadCardHistory(memberId);loadCardHistory(memberId,true);if(window.TitaniaMemberAttendance)window.TitaniaMemberAttendance(client,memberId,userResult.data.user.id);}
 
 const startProfile=()=>boot().catch(error=>{console.warn('Member profile load failed',error);fail('Could not load the member profile. Please refresh and try again.');});
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',startProfile,{once:true});else startProfile();

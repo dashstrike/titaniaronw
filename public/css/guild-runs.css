@@ -110,7 +110,7 @@ body[data-titania-page="titaniaauction"] #titania-content .select2-search__field
 #titania-content .select2-player{display:flex;align-items:center;gap:8px}
 #titania-content .select2-player img{width:24px;height:24px;object-fit:contain}
 /* Auction text is 1.25 times the standard size on both public and management pages. */
-#titania-content #auctionRegistrations{font-size:1.1em}
+#titania-content :is(#auctionRegistrations,#accessoryRegistrations){font-size:1.1em}
 #titania-content #auctionRegistrations .card-header{background-color:#302742;font-size:inherit}
 body:is([data-titania-page="auction"],[data-titania-page="titaniaauction"]) #titania-content{font-size:calc(var(--bs-body-font-size) * 1.25)}
 body:is([data-titania-page="auction"],[data-titania-page="titaniaauction"]) #titania-content .h3{font-size:1.875rem}
@@ -348,3 +348,5 @@ body[data-guild-runs-page="public"] #titania-content .public-run-type{font-size:
 #titania-content .public-run-card .select2-container--default .select2-selection--single .select2-selection__arrow{
   height:38px!important;
 }
+
+#titania-content #accessoryRegistrations .card-header{background-color:var(--bs-danger-bg-subtle);font-size:inherit}

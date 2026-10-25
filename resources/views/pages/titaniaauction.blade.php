@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Titania · Card Auction')
+@section('title', 'Titania · Auction')
 
 @push('head')
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -17,7 +17,7 @@
 <header class="card d-flex flex-row align-items-center justify-content-between gap-3 p-3 mb-4">
     <div class="d-flex align-items-center">
         <img src="{{ asset('images/titania-logo.webp') }}" width="46" height="46" class="mr-2" alt="Titania">
-        <div><strong>TITANIA CARD AUCTION</strong><div class="small text-muted">Register for Mirage cards</div></div>
+        <div><strong>TITANIA AUCTION</strong><div class="small text-muted">Register for cards and accessories</div></div>
     </div>
     @include('partials.theme-toggle')
 </header>

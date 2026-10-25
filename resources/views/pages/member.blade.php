@@ -5,6 +5,8 @@
 @section('body-attributes')@endsection
 
 @push('head')
+<script>window.TITANIA_AUCTION_CARDS = {{ Illuminate\Support\Js::from(config('auction.cards')) }};</script>
+<script>window.TITANIA_AUCTION_ACCESSORIES = {{ Illuminate\Support\Js::from(config('accessory')) }};</script>
 <link rel="stylesheet" href="{{ asset('vendor/datatables/dataTables.bootstrap5.min.css') }}">
 <script src="{{ asset('vendor/datatables/jquery.min.js') }}" defer></script>
 <script src="{{ asset('vendor/datatables/dataTables.min.js') }}" defer></script>
@@ -34,6 +36,8 @@
         <div class="metric card"><header class="card-head"><h2><i class="fa-solid fa-clock-rotate-left mr-2" aria-hidden="true"></i>Tracking Since</h2><p>First recorded Gear Rating</p></header><strong id="trackingSince">&#8212;</strong></div>
       </section>
       <div class="member-card-grid" id="memberCardGrid">
+        <section class="panel history card" id="memberCardHistory"><header class="card-head"><h2><i class="fa-solid fa-address-card mr-2" aria-hidden="true"></i>Card Auction History</h2><p>Cards registered for and received</p></header><div id="memberCardHistoryContent" class="table-responsive">Loading card history...</div></section>
+        <section class="panel history card" id="memberAccessoryHistory"><header class="card-head"><h2><i class="fa-solid fa-ring me-2" aria-hidden="true"></i>Accessory Auction History</h2><p>Accessories registered for and received</p></header><div id="memberAccessoryHistoryContent" class="table-responsive">Loading accessory history...</div></section>
         <section class="panel member-progress card"><header class="card-head"><h2><i class="fa-solid fa-chart-line mr-2" aria-hidden="true"></i>Gear Rating Progress</h2><p>Recorded growth over time</p></header><div class="chart-wrap" id="chartWrap"></div></section>
         <section class="panel member-info card"><header class="card-head"><h2><i class="fa-solid fa-id-card mr-2" aria-hidden="true"></i>Member Info</h2><p>Current assignments and roster details</p></header><div class="info-list" id="memberInfo"></div></section>
         <section class="panel member-attendance card" id="memberAttendance" aria-labelledby="memberAttendanceTitle">

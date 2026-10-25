@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Titania · Card Auction')
+@section('title', 'Titania · Auction')
 
 @push('head')
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
