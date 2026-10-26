@@ -336,6 +336,10 @@
   async function sendPasswordReset(){
     const email=document.getElementById('authLoginEmail').value.trim();
     if(!email){setAuthMessage('authLoginMessage','Enter your email first, then choose Forgot password.','warn');return;}
+    if(window.TITANIA_CONFIG?.localDevelopment){
+      setAuthMessage('authLoginMessage','Local development: open Mailpit for your Titania Development Login password. Supabase reset emails do not go to local Mailpit.','warn');
+      return;
+    }
     const redirectTo=new URL('.',document.baseURI).href;
     const {error}=await supabaseClient.auth.resetPasswordForEmail(email,{redirectTo});
     if(error){setAuthMessage('authLoginMessage',error.message,'err');return;}

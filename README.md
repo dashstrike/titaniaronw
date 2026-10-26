@@ -4,13 +4,18 @@
 
 `main` builds and publishes the static site through `.github/workflows/pages.yml`.
 Laravel renders the HTML during the build; GitHub Pages serves the generated files.
-Supabase still handles authentication and data at runtime. No database changes are required.
+Supabase handles authentication and data at runtime. SQL changes are applied to
+the live Supabase project separately from GitHub Pages deployment.
 
 - Site: https://dashstrike.github.io/titaniaronw/
 - Laravel backup: `backup/v2-laravel` (the `v2` branch is also retained).
 - Original static version: `v1`.
 - Repository Actions variables: `SUPABASE_URL` and `SUPABASE_PUBLISHABLE_KEY`.
   Use only a publishable or legacy anon key. The exporter rejects privileged keys.
+- Auction workflow: enabled by the Pages workflow after installing
+  `sql/auction_last_received.sql` and `sql/auction_workflow.sql` in that order.
+  Set the optional Actions variable `TITANIA_AUCTION_WORKFLOW=false` to disable
+  its page controls. Local development uses its own Supabase project and `.env`.
 - Pages publishing source: **GitHub Actions**.
 
 To build locally with the public settings from `.env`:

@@ -8,6 +8,15 @@ use Tests\TestCase;
 
 class TitaniaPagesTest extends TestCase
 {
+    public function test_missing_page_uses_titania_error_template(): void
+    {
+        $this->get('/page-that-does-not-exist')->assertNotFound()
+            ->assertSee('Page not found')
+            ->assertSee('images/titania-logo.webp', false)
+            ->assertSee('vendor/darkone/css/style.min.css', false)
+            ->assertSee('Return to Titania');
+    }
+
     public static function pages(): array
     {
         return [

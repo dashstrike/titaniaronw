@@ -21,6 +21,7 @@
         </div>
     </fieldset>
 </form>
+@include('partials.auction-ban-form', ['prefix' => 'accessory'])
 <section class="card mb-3">
     <div class="card-header d-flex align-items-center justify-content-between gap-2">
         <div>

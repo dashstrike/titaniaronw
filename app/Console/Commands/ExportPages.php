@@ -20,6 +20,11 @@ class ExportPages extends Command
         $base = rtrim($this->option('url') ?: config('app.url'), '/');
         $key = config('titania.supabase_publishable_key');
         $parts = explode('.', $key);
+        if (config('titania.development_project') && parse_url(config('titania.supabase_url'), PHP_URL_HOST) === config('titania.development_project').'.supabase.co') {
+            $this->error('Refusing to export the development database connection. Use the production environment for deployment.');
+
+            return self::FAILURE;
+        }
         $claims = count($parts) === 3 ? json_decode(base64_decode(strtr($parts[1], '-_', '+/')), true) : [];
         if (! filter_var($base, FILTER_VALIDATE_URL) || ! filter_var(config('titania.supabase_url'), FILTER_VALIDATE_URL)) {
             $this->error('Set a valid site URL and SUPABASE_URL before exporting.');
@@ -76,7 +81,7 @@ class ExportPages extends Command
             $encoded = json_encode($url, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT);
             File::put($output.'/'.$file, '<!doctype html><html lang="en"><meta charset="utf-8"><title>Titania</title><script>location.replace('.$encoded.'+location.search+location.hash);</script><a href="'.e($url).'">Continue to Titania</a></html>');
         }
-        File::put($output.'/404.html', '<!doctype html><html lang="en"><meta charset="utf-8"><title>Page not found</title><h1>Page not found</h1><a href="'.e($base.'/').'">Return to Titania</a></html>');
+        File::put($output.'/404.html', view('errors.404')->render());
         $this->info("Exported {$count} pages to storage/app/pages.");
 
         return self::SUCCESS;

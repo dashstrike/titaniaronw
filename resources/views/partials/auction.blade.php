@@ -6,7 +6,10 @@
             <a href="{{ route('titaniaauction') }}" target="_blank" rel="noopener" class="btn btn-outline-primary d-inline-flex align-items-center"><i class="fa-solid fa-arrow-up-right-from-square mr-2" aria-hidden="true"></i>Public Registration</a>
         </div>
         @endif
-        <div class="col-auto order-1 order-md-2">
+        <div class="col-auto order-1 order-md-2 d-flex align-items-center gap-2">
+            @if(config('titania.auction_workflow'))
+            <button type="button" id="auctionBanList" class="btn btn-outline-danger d-inline-flex align-items-center justify-content-center"><i class="fa-solid fa-ban me-2" aria-hidden="true"></i>Ban List</button>
+            @endif
             <button type="button" class="btn btn-outline-warning p-2 lh-1 d-inline-flex align-items-center justify-content-center" data-bs-toggle="modal" data-bs-target="#auctionDuckInfo" aria-label="How do the ducks work?" title="How do the ducks work?"><span id="auctionDuckWiggle" class="d-inline-flex" aria-hidden="true"><iconify-icon icon="mdi:duck" class="fs-28"></iconify-icon></span></button>
         </div>
         <div class="col-12 order-2 order-md-3"><p class="text-muted mb-0">Select your IGN and an item to register. You can register again for a different item.</p></div>
@@ -41,6 +44,7 @@
             </div>
         </fieldset>
     </form>
+    @include('partials.auction-ban-form', ['prefix' => 'auction'])
     <section class="card mb-3">
         <div class="card-header d-flex align-items-center justify-content-between gap-2">
             <div>

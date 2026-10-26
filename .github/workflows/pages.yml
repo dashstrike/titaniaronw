@@ -39,6 +39,7 @@ jobs:
         env:
           SUPABASE_URL: ${{ vars.SUPABASE_URL }}
           SUPABASE_PUBLISHABLE_KEY: ${{ vars.SUPABASE_PUBLISHABLE_KEY }}
+          TITANIA_AUCTION_WORKFLOW: ${{ vars.TITANIA_AUCTION_WORKFLOW || 'true' }}
           APP_ENV: production
           APP_DEBUG: 'false'
           SITE_URL: ${{ steps.pages.outputs.base_url }}

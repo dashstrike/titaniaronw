@@ -1,0 +1,65 @@
+Auction development setup
+
+Local site: http://titaniaronw.test/auction
+Public registration: http://titaniaronw.test/titaniaauction
+Supabase project: Titania Development (vgrsehzavllbohqxsxqf)
+The project was created at the confirmed quoted price of $0/month.
+
+Login: dev-admin@titania.test
+Password: see the ignored .env.development-login file in the project root.
+Additional approved developer accounts have separate development passwords
+in that file. Development passwords are independent of production passwords.
+The four TEST players are synthetic. Live users, registrations and receipts
+were not copied. Development data is never included in production deployment.
+
+The local .env selects the development database and enables
+TITANIA_AUCTION_WORKFLOW=true. TITANIA_DEVELOPMENT_PROJECT pins the local
+connection. Pages export refuses to publish this development connection.
+The workflow defaults to disabled in application config. The GitHub Pages
+workflow enables it for production after the live SQL is installed. The optional
+Actions variable TITANIA_AUCTION_WORKFLOW=false overrides that build setting.
+
+Testing the workflow
+1. Register TEST players for the same card and an accessory.
+2. Use Carry Forward to mark one player NEXT BIDDER and give the others on
+   that item +1 duck. Their saved ducks remain hidden while next bidder.
+3. Use Outbid Again for a later auction round to give the others another +1.
+4. Use the green check to mark the item received. This records the receipt,
+   removes the registration and gives the remaining players +1 duck.
+5. Use Clear Next Bidder or Withdraw when needed; neither awards ducks.
+6. Ban a player until a GMT+8 date/time. All their active registrations and
+   ducks are removed across categories. Receipt history is preserved.
+   After expiry, new registration is allowed and starts at one duck.
+7. Ban List shows the global list. Action History includes the admin/time.
+8. Remove 1 Duck is available for a registered player who is not NEXT BIDDER.
+   It can reduce one duck to zero without removing the registration. At zero,
+   the player has no race entries until they gain another duck. The adjustment
+   appears in Action History and can be undone while it is the latest action.
+
+No auction date needs to be entered. Carry Forward keeps the player as NEXT
+BIDDER for that item until the item returns. Outbid Again is used only when
+that player is outbid at a later appearance of the same item. Action times
+are recorded automatically. Request retries and stale page actions are
+rejected to prevent accidental duplicate duck awards. A separately confirmed
+Outbid Again action awards the other players another duck.
+Undo is available only for the latest action before any newer registration
+or admin action. It restores the affected state without overwriting later work.
+
+Verification completed: 33 Laravel tests (3448 assertions), JavaScript syntax,
+and rollback-only SQL workflow tests on development. The SQL tests cover both
+categories, permissions, repeated outcomes, duplicates, bans, expiry and undo.
+No connected browser was available for visual verification.
+
+Laravel development mail uses Laragon Mailpit at 127.0.0.1:1025. Open
+http://127.0.0.1:8025 to inspect messages; a test message was delivered.
+Hosted Supabase Auth sends login/registration/reset emails separately and
+cannot connect to Mailpit on this computer's localhost address. Its reset
+email delivery requires a reachable SMTP server configured in Supabase.
+
+Development security review: Auction tables intentionally use RPC-only access
+with RLS and no direct public policies. Admin RPCs validate approved admin status.
+The cloned schema also retains an existing touch_updated_at search-path warning;
+Supabase leaked-password protection is disabled. These were not changed as part
+of this Auction feature. References:
+https://supabase.com/docs/guides/database/database-linter?lint=0011_function_search_path_mutable
+https://supabase.com/docs/guides/auth/password-security#password-strength-and-leaked-password-protection
