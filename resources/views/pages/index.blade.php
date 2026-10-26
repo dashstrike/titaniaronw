@@ -55,6 +55,7 @@
           <div class="auth-field"><label for="authResetPassword">New password</label><input id="authResetPassword" type="password" minlength="8" autocomplete="new-password" class="form-control"></div>
           <div class="auth-field"><label for="authResetPassword2">Confirm password</label><input id="authResetPassword2" type="password" minlength="8" autocomplete="new-password" class="form-control"></div>
           <button class="btn primary btn-primary" id="authResetBtn" type="button">Update Password</button>
+          <div class="auth-row"><button class="auth-link" id="authResetCancelBtn" type="button">Back to Sign In</button></div>
           <div class="auth-message" id="authResetMessage"></div>
         </div>
         <div class="auth-panel" id="authConfigPanel" hidden>

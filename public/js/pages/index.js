@@ -214,6 +214,9 @@
   let currentAuthUser = null;
   let currentProfile = null;
   let passwordRecoveryMode = false;
+  let passwordResetRequestInFlight = false;
+  let passwordResetRequestedAt = 0;
+  let passwordResetUpdateInFlight = false;
   const TITLE_ICON_BASE='./images/title/';
   const TITLE_ICON_SERIES=Object.freeze({traveler:'traveler_green',explorer:'explorer_blue',pathfinder:'pathfinder_purple',trailblazer:'trailblazer_orange',pioneer:'pioneer_red',dawnbringer:'dawnbringer_rainbow'});
   const TITLE_ICON_LEVELS=Object.freeze({i:1,ii:2,iii:3,iv:4,v:5,'1':1,'2':2,'3':3,'4':4,'5':5});
@@ -274,15 +277,33 @@
   async function bootstrapWebsite(){
     wireAuthControls();
     if(!configReady()){showAuthView('config');return;}
+    const callbackUrl=new URL(location.href);
+    const callbackHash=new URLSearchParams(callbackUrl.hash.slice(1));
+    passwordRecoveryMode=callbackUrl.searchParams.get('password_reset')==='1'||callbackHash.get('type')==='recovery';
+    const recoveryError=callbackHash.get('error_description')||callbackUrl.searchParams.get('error_description');
+    if(passwordRecoveryMode){
+      callbackUrl.searchParams.set('password_reset','1');
+      history.replaceState(null,'',callbackUrl.pathname+callbackUrl.search+callbackUrl.hash);
+      showAuthView('reset');
+      document.getElementById('authResetBtn').disabled=true;
+    }
     const cfg=window.TITANIA_CONFIG;
     supabaseClient=window.supabase.createClient(cfg.supabaseUrl,cfg.supabasePublishableKey,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
     supabaseClient.auth.onAuthStateChange((event)=>{
       if(event==='PASSWORD_RECOVERY'){
         passwordRecoveryMode=true;
         showAuthView('reset');
+        document.getElementById('authResetBtn').disabled=false;
       }
     });
     const {data,error}=await supabaseClient.auth.getSession();
+    if(passwordRecoveryMode){
+      showAuthView('reset');
+      const ready=!!data.session&&!error&&!recoveryError;
+      document.getElementById('authResetBtn').disabled=!ready;
+      if(!ready)setAuthMessage('authResetMessage','This reset link is invalid or expired. Return to Sign In and request a new link.','err');
+      return;
+    }
     if(error){showAuthView('login');setAuthMessage('authLoginMessage',error.message,'err');return;}
     if(!data.session){showAuthView('login');return;}
     if(passwordRecoveryMode){showAuthView('reset');return;}
@@ -298,6 +319,7 @@
     document.getElementById('authCheckApprovalBtn').addEventListener('click',checkApproval);
     document.getElementById('authPendingLogoutBtn').addEventListener('click',logoutAccount);
     document.getElementById('authResetBtn').addEventListener('click',finishPasswordReset);
+    document.getElementById('authResetCancelBtn').addEventListener('click',cancelPasswordReset);
     document.getElementById('logoutBtn').addEventListener('click',logoutAccount);
     document.getElementById('adminUsersClose').addEventListener('click',closeAdminUsers);
     document.getElementById('adminUsersDone').addEventListener('click',closeAdminUsers);
@@ -334,28 +356,67 @@
   }
 
   async function sendPasswordReset(){
+    if(passwordResetRequestInFlight)return;
     const email=document.getElementById('authLoginEmail').value.trim();
     if(!email){setAuthMessage('authLoginMessage','Enter your email first, then choose Forgot password.','warn');return;}
     if(window.TITANIA_CONFIG?.localDevelopment){
       setAuthMessage('authLoginMessage','Local development: open Mailpit for your Titania Development Login password. Supabase reset emails do not go to local Mailpit.','warn');
       return;
     }
-    const redirectTo=new URL('.',document.baseURI).href;
-    const {error}=await supabaseClient.auth.resetPasswordForEmail(email,{redirectTo});
-    if(error){setAuthMessage('authLoginMessage',error.message,'err');return;}
-    setAuthMessage('authLoginMessage','Password reset email sent.','ok');
+    const wait=60000-(Date.now()-passwordResetRequestedAt);
+    if(wait>0){setAuthMessage('authLoginMessage',`Please wait ${Math.ceil(wait/1000)} seconds before requesting another reset email.`,'warn');return;}
+    passwordResetRequestInFlight=true;
+    const button=document.getElementById('authForgotBtn');
+    button.disabled=true;
+    setAuthMessage('authLoginMessage','Sending password reset link…');
+    const redirectTo=new URL('.',document.baseURI);
+    redirectTo.searchParams.set('password_reset','1');
+    try{
+      const {error}=await supabaseClient.auth.resetPasswordForEmail(email,{redirectTo:redirectTo.href});
+      if(error){setAuthMessage('authLoginMessage',error.message,'err');return;}
+      passwordResetRequestedAt=Date.now();
+      setAuthMessage('authLoginMessage','If this email has a Titania account, a reset link has been sent. Use the latest email.','ok');
+    }catch(error){setAuthMessage('authLoginMessage',error.message,'err');}
+    finally{passwordResetRequestInFlight=false;button.disabled=false;}
   }
 
   async function finishPasswordReset(){
+    if(passwordResetUpdateInFlight)return;
+    if(!passwordRecoveryMode){setAuthMessage('authResetMessage','Open the reset link from your email first.','err');return;}
     const p1=document.getElementById('authResetPassword').value;
     const p2=document.getElementById('authResetPassword2').value;
     if(p1.length<8){setAuthMessage('authResetMessage','Use at least 8 characters.','warn');return;}
     if(p1!==p2){setAuthMessage('authResetMessage','Passwords do not match.','warn');return;}
-    const {error}=await supabaseClient.auth.updateUser({password:p1});
-    if(error){setAuthMessage('authResetMessage',error.message,'err');return;}
+    passwordResetUpdateInFlight=true;
+    const button=document.getElementById('authResetBtn');
+    button.disabled=true;
+    try{
+      const {error}=await supabaseClient.auth.updateUser({password:p1});
+      if(error){setAuthMessage('authResetMessage',error.message,'err');return;}
+      const signedOut=await supabaseClient.auth.signOut({scope:'local'});
+      if(signedOut.error){setAuthMessage('authResetMessage','Password updated, but signing out failed. Please try returning to Sign In.','warn');return;}
+      leavePasswordReset();
+      setAuthMessage('authLoginMessage','Password updated. Sign in with your new password.','ok');
+    }catch(error){setAuthMessage('authResetMessage',error.message,'err');}
+    finally{passwordResetUpdateInFlight=false;button.disabled=false;}
+  }
+
+  function leavePasswordReset(){
     passwordRecoveryMode=false;
-    setAuthMessage('authResetMessage','Password updated. Reloading…','ok');
-    setTimeout(()=>location.reload(),700);
+    const loginUrl=new URL('login',document.baseURI);
+    history.replaceState(null,'',loginUrl.pathname);
+    document.getElementById('authResetPassword').value='';
+    document.getElementById('authResetPassword2').value='';
+    document.getElementById('authLoginPassword').value='';
+    setAuthMessage('authResetMessage','');
+    showAuthView('login');
+  }
+
+  async function cancelPasswordReset(){
+    if(passwordResetUpdateInFlight)return;
+    const {error}=await supabaseClient.auth.signOut({scope:'local'});
+    if(error){setAuthMessage('authResetMessage',error.message,'err');return;}
+    leavePasswordReset();
   }
 
   async function fetchCurrentProfile(userId){
@@ -365,12 +426,14 @@
   }
 
   async function enterAuthenticatedApp(session){
+    if(passwordRecoveryMode){showAuthView('reset');return;}
     currentAuthUser=session.user;
     let profile=await fetchCurrentProfile(currentAuthUser.id);
     if(!profile){
       await new Promise(resolve=>setTimeout(resolve,500));
       profile=await fetchCurrentProfile(currentAuthUser.id);
     }
+    if(passwordRecoveryMode){showAuthView('reset');return;}
     currentProfile=profile;
     if(!profile||!profile.approved||profile.role==='pending'){
       await showPendingForUser();
