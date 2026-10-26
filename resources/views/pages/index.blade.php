@@ -28,7 +28,7 @@
           <h2 class="auth-title">Welcome back</h2>
           <p class="auth-copy">Sign in with your Titania account.</p>
           <div class="auth-field"><label for="authLoginEmail">Email</label><input id="authLoginEmail" type="email" autocomplete="email" class="form-control"></div>
-          <div class="auth-field"><label for="authLoginPassword">Password</label><input id="authLoginPassword" type="password" autocomplete="current-password" class="form-control"></div>
+          <div class="auth-field"><label for="authLoginPassword">Password</label><div class="input-group"><input id="authLoginPassword" type="password" autocomplete="current-password" class="form-control"><button type="button" class="btn btn-outline-secondary d-inline-flex align-items-center justify-content-center" data-password-toggle="authLoginPassword" aria-controls="authLoginPassword" aria-label="Show password" aria-pressed="false"><i class="fa-solid fa-eye" aria-hidden="true"></i></button></div></div>
           <button class="btn primary btn-primary" id="authLoginBtn" type="button">Sign In</button>
           <div class="auth-row"><button class="auth-link" id="authForgotBtn" type="button">Forgot password?</button></div>
           <div class="auth-message" id="authLoginMessage"></div>
@@ -52,8 +52,8 @@
         <div class="auth-panel" id="authResetPanel" hidden>
           <h2 class="auth-title">Set new password</h2>
           <p class="auth-copy">Enter a new password for your Titania account.</p>
-          <div class="auth-field"><label for="authResetPassword">New password</label><input id="authResetPassword" type="password" minlength="8" autocomplete="new-password" class="form-control"></div>
-          <div class="auth-field"><label for="authResetPassword2">Confirm password</label><input id="authResetPassword2" type="password" minlength="8" autocomplete="new-password" class="form-control"></div>
+          <div class="auth-field"><label for="authResetPassword">New password</label><div class="input-group"><input id="authResetPassword" type="password" minlength="8" autocomplete="new-password" class="form-control"><button type="button" class="btn btn-outline-secondary d-inline-flex align-items-center justify-content-center" data-password-toggle="authResetPassword" aria-controls="authResetPassword" aria-label="Show password" aria-pressed="false"><i class="fa-solid fa-eye" aria-hidden="true"></i></button></div></div>
+          <div class="auth-field"><label for="authResetPassword2">Confirm password</label><div class="input-group"><input id="authResetPassword2" type="password" minlength="8" autocomplete="new-password" class="form-control"><button type="button" class="btn btn-outline-secondary d-inline-flex align-items-center justify-content-center" data-password-toggle="authResetPassword2" aria-controls="authResetPassword2" aria-label="Show password" aria-pressed="false"><i class="fa-solid fa-eye" aria-hidden="true"></i></button></div></div>
           <button class="btn primary btn-primary" id="authResetBtn" type="button">Update Password</button>
           <div class="auth-row"><button class="auth-link" id="authResetCancelBtn" type="button">Back to Sign In</button></div>
           <div class="auth-message" id="authResetMessage"></div>
