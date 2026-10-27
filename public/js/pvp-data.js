@@ -55,8 +55,8 @@
     if(!/^\d{4}-\d{2}-\d{2}$/.test(date))return [];
     const day=new Date(date+'T12:00:00Z');
     if(Number.isNaN(day.getTime())||day.toISOString().slice(0,10)!==date)return [];
-    if(day.getUTCDay()===2)return [{time:'21:30',label:'Tuesday GL 1 — 21:30'},{time:'22:00',label:'Tuesday GL 2 — 22:00'}];
-    if(day.getUTCDay()===4)return [{time:'22:00',label:'Thursday GL — 22:00'}];
+    if(day.getUTCDay()===2)return [{time:'22:30',label:'Tuesday GL 1 — 22:30'},{time:'23:00',label:'Tuesday GL 2 — 23:00'}];
+    if(day.getUTCDay()===4)return [{time:'23:00',label:'Thursday GL — 23:00'}];
     return [];
   }
   function sessionLabel(date,time){
@@ -80,7 +80,7 @@
     row.appendChild(document.createTextNode(option.text));return row;
   }
   const battleDate=el('pvpImportDate');
-  const datepicker=window.flatpickr?window.flatpickr(battleDate,{dateFormat:'Y-m-d',altInput:true,altFormat:'F j, Y',disableMobile:true,onChange:updateSessions}):null;
+  const datepicker=window.flatpickr?window.flatpickr(battleDate,{dateFormat:'Y-m-d',altInput:true,altFormat:'F j, Y',disableMobile:true,enable:[date=>[2,4].includes(date.getDay())],onChange:updateSessions}):null;
   if(datepicker){
     datepicker.altInput.id='pvpImportDateDisplay';
     document.querySelector('label[for="pvpImportDate"]').htmlFor='pvpImportDateDisplay';
@@ -92,7 +92,10 @@
     if(sessions.some(session=>session.time===previous))battleTime.value=previous;
     else if(sessions.length===1)battleTime.value=sessions[0].time;
   }
-  battleDate.addEventListener('change',updateSessions);
+  battleDate.addEventListener('change',()=>{
+    if(battleDate.value&&!glSessions(battleDate.value).length)battleDate.value='';
+    updateSessions();
+  });
   let availableDates=new Set();
   const viewDate=el('pvpViewDate');
   const viewDatepicker=window.flatpickr?window.flatpickr(viewDate,{

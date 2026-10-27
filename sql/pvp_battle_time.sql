@@ -1,8 +1,8 @@
 -- Upgrade the existing PVP table. All battle times are local GMT+8.
 begin;
 alter table public.pvp_battles add column if not exists battle_time time(0) without time zone;
--- These two files were confirmed as Tuesday's 22:00 match.
-update public.pvp_battles set battle_time = time '22:00'
+-- These files are Tuesday GL 2: 22:00 server UTC+7 = 23:00 GMT+8.
+update public.pvp_battles set battle_time = time '23:00'
 where category = 'guild_league' and battle_date = date '2026-10-27'
   and ((battlefield = 'main' and source_file = 'main27-10-2026.csv')
     or (battlefield = 'sub' and source_file = 'sub27-10-2026.csv'))
