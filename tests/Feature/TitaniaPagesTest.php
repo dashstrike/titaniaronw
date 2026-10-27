@@ -41,6 +41,8 @@ class TitaniaPagesTest extends TestCase
             ['/titaniaauction', 'auctionRegisterForm'],
             ['/maps-gl', 'mapEditor'],
             ['/maps-siege', 'mapEditor'],
+            ['/pvp-guild-league', 'pvpData'],
+            ['/pvp-siege', 'titania-content'],
         ];
     }
 

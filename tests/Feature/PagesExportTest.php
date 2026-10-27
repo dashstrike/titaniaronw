@@ -16,7 +16,7 @@ class PagesExportTest extends TestCase
         $output = storage_path('app/pages');
         $pages = File::glob($output.'/*/index.html');
         $pages = array_merge($pages, File::glob($output.'/public/*/index.html'));
-        $this->assertCount(23, $pages);
+        $this->assertCount(25, $pages);
         foreach ($pages as $file) {
             $html = File::get($file);
             $this->assertStringNotContainsString('127.0.0.1', $html);

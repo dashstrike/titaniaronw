@@ -398,3 +398,12 @@ body:not([data-titania-page="siege"]):not([data-titania-page="guild-league"]) .b
     width: auto;
   }
 }
+#pvpData .select2-container .select2-selection--single{height:40px;background:var(--bs-body-bg);border-color:var(--bs-border-color)}
+#pvpData .select2-selection__rendered{color:var(--bs-body-color);line-height:38px}
+#pvpData .select2-selection__arrow{height:38px}
+#pvpData .select2-dropdown,#pvpData .select2-search__field{background:var(--bs-body-bg);color:var(--bs-body-color);border-color:var(--bs-border-color)}
+#pvpData .select2-search__field:focus{outline:none;box-shadow:none}
+#pvpData .select2-results__option--selected{background:var(--bs-tertiary-bg);color:var(--bs-body-color)}
+.flatpickr-day[data-pvp-battle-date]::after{content:"";position:absolute;width:4px;height:4px;border-radius:50%;background:var(--bs-primary);bottom:3px;left:calc(50% - 2px)}
+.flatpickr-day[data-pvp-battle-date].selected::after{background:#fff}
+#pvpData .select2-results__option--highlighted.select2-results__option--selectable{background:var(--bs-primary);color:#fff}

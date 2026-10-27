@@ -42,12 +42,7 @@
   }
 
   function renderUsers(rows){
-    const sorted=[...rows].sort((a,b)=>{
-      const ap=a.role==='pending'?0:1;
-      const bp=b.role==='pending'?0:1;
-      if(ap!==bp)return ap-bp;
-      return String(a.display_name||a.email||'').localeCompare(String(b.display_name||b.email||''),undefined,{sensitivity:'base'});
-    });
+    const sorted=[...rows].sort((a,b)=>new Date(a.created_at)-new Date(b.created_at));
 
     list.innerHTML='<table class="table table-centered table-hover align-middle mb-0"><thead><tr><th>User</th><th>Role</th><th>Approval</th><th class="text-end">Actions</th></tr></thead><tbody>'+sorted.map(profile=>{
       const self=profile.id===currentUserId;

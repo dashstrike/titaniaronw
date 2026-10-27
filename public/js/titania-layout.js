@@ -27,6 +27,16 @@
       if (active) link.setAttribute('aria-current', 'page');
       else link.removeAttribute('aria-current');
     });
+    const roster = document.getElementById('sidebarGuildRoster');
+    if (isPlanner && roster) {
+      const toggle = document.querySelector('[aria-controls="sidebarGuildRoster"]');
+      const active = Boolean(roster.querySelector('a[data-planner-event].active'));
+      const wasActive = toggle.classList.contains('active');
+      toggle.classList.toggle('active', active);
+      if (active && !wasActive && window.bootstrap?.Collapse) {
+        bootstrap.Collapse.getOrCreateInstance(roster, {toggle:false}).show();
+      }
+    }
     if (typeof currentProfile !== 'undefined') setAccount(currentProfile);
   }
 
