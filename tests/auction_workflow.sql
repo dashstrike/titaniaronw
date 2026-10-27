@@ -26,6 +26,17 @@ begin
   exception when insufficient_privilege then null; end;
   perform set_config('request.jwt.claim.sub','10000000-0000-4000-8000-000000000001',true);
   outcome:=gen_random_uuid();
+  perform public.auction_admin_action('add_duck','card',one_id,rev,outcome);
+  assert (select ducks=2 and not next_bidder from public.card_auction_registrations where id=one_id),'Adding a duck changed registration status';
+  assert (select ducks=1 from public.card_auction_registrations where id=two_id),'Adding a duck affected another player';
+  assert (select kind='add_duck' and actor='10000000-0000-4000-8000-000000000001' from public.auction_actions where id=outcome),'Added duck was not audited';
+  perform public.auction_admin_action('add_duck','card',one_id,rev,outcome);
+  assert (select ducks=2 from public.card_auction_registrations where id=one_id),'Retry added a second duck';
+  select revision into rev from public.auction_control where id=1;
+  perform public.undo_auction_action(outcome,rev);
+  assert (select ducks=1 from public.card_auction_registrations where id=one_id),'Undo did not reverse added duck';
+  select revision into rev from public.auction_control where id=1;
+  outcome:=gen_random_uuid();
   perform public.auction_admin_action('remove_duck','card',one_id,rev,outcome);
   assert (select ducks=0 and not next_bidder from public.card_auction_registrations where id=one_id),'Removing the first duck did not leave the player registered at zero';
   assert (select kind='remove_duck' and actor='10000000-0000-4000-8000-000000000001' and before_state is not null from public.auction_actions where id=outcome),'Duck adjustment was not audited';
@@ -153,6 +164,15 @@ begin
   select revision into rev from public.auction_control where id=1;
   perform public.undo_auction_action(receipt,rev);
   assert exists(select 1 from public.accessory_auction_registrations where id=accessory_registration),'Legacy receipt could not be undone';
+  -- Adding from zero must work for accessories without affecting other registrations.
+  update public.accessory_auction_registrations set next_bidder=false,ducks=0 where id=accessory_registration;
+  select revision into rev from public.auction_control where id=1;
+  outcome:=gen_random_uuid();
+  perform public.auction_admin_action('add_duck','accessory',accessory_registration,rev,outcome);
+  assert (select ducks=1 and not next_bidder from public.accessory_auction_registrations where id=accessory_registration),'Accessory duck was not added from zero';
+  select revision into rev from public.auction_control where id=1;
+  perform public.undo_auction_action(outcome,rev);
+  assert (select ducks=0 from public.accessory_auction_registrations where id=accessory_registration),'Accessory undo did not restore zero';
   assert jsonb_array_length(public.get_auction_action_history())>0;
   assert not has_function_privilege('anon','public.auction_admin_action(text,text,uuid,bigint,uuid)','EXECUTE');
   assert not has_function_privilege('anon','public.remove_accessory_auction_registration(uuid)','EXECUTE');

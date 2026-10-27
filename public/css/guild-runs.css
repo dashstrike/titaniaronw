@@ -351,6 +351,23 @@ body[data-guild-runs-page="public"] #titania-content .public-run-type{font-size:
 
 #titania-content #accessoryRegistrations .card-header{background-color:var(--bs-danger-bg-subtle);font-size:inherit}
 
+@media(max-width:575.98px){
+  #titania-content #auctionRegistrations .card-header > .d-flex > .d-inline-flex{
+    flex:1 1 auto;
+    min-width:0;
+    flex-wrap:wrap;
+    row-gap:4px;
+  }
+  #titania-content #auctionRegistrations .card-header > .d-flex > .d-inline-flex > strong{
+    max-width:100%;
+  }
+  #titania-content #auctionRegistrations .card-header .badge-outline-dark{
+    font-size:10px;
+    line-height:1.2;
+    padding:2px 5px;
+  }
+}
+
 #auctionDuckWiggle{
   transform-origin:50% 80%;
   animation:auction-duck-wiggle 1.2s ease-in-out infinite;

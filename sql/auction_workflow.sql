@@ -117,7 +117,7 @@ begin
   if exists(select 1 from public.auction_actions where id=p_request) then return p_request; end if;
   select revision into rev from public.auction_control where id=1;
   if p_revision is distinct from rev then raise exception 'The auction list changed. Refresh and review it before trying again.'; end if;
-  if p_kind is null or p_kind not in ('carry_forward','outbid_again','received','clear_next','withdraw','remove_duck') then raise exception 'Invalid auction action.'; end if;
+  if p_kind is null or p_kind not in ('carry_forward','outbid_again','received','clear_next','withdraw','add_duck','remove_duck') then raise exception 'Invalid auction action.'; end if;
   if p_category='card' then
     select to_jsonb(x) into r from public.card_auction_registrations x where id=p_registration;
     item_key:=r->>'card_id';
@@ -132,7 +132,7 @@ begin
   if p_kind='carry_forward' and next_id is not null then raise exception 'This item already has a next bidder.'; end if;
   if p_kind in ('outbid_again','clear_next') and next_id is distinct from p_registration then raise exception 'Select the current next bidder.'; end if;
   if p_kind='received' and next_id is not null and next_id<>p_registration then raise exception 'The next bidder has priority for this item. Clear that status first if necessary.'; end if;
-  if p_kind='remove_duck' and next_id=p_registration then raise exception 'Clear NEXT BIDDER before changing this player''s ducks.'; end if;
+  if p_kind in ('add_duck','remove_duck') and next_id=p_registration then raise exception 'Clear NEXT BIDDER before changing this player''s ducks.'; end if;
   if p_kind='remove_duck' and (r->>'ducks')::integer<1 then raise exception 'This player has no ducks left to remove.'; end if;
   if p_kind='carry_forward' and (r->>'ducks')::integer<1 then raise exception 'A player with no ducks cannot be carried forward.'; end if;
   if p_kind in ('carry_forward','outbid_again','received') then
@@ -145,6 +145,7 @@ begin
       values(p_registration,r->>'member_id',item_key,(r->>'ducks')::integer,(r->>'created_at')::timestamptz,auth.uid());
     end if;
     if p_kind in ('received','withdraw') then delete from public.card_auction_registrations where id=p_registration;
+    elsif p_kind='add_duck' then update public.card_auction_registrations set ducks=ducks+1 where id=p_registration;
     elsif p_kind='remove_duck' then update public.card_auction_registrations set ducks=ducks-1 where id=p_registration;
     else update public.card_auction_registrations set next_bidder=(p_kind<>'clear_next') where id=p_registration; end if;
     if p_kind in ('carry_forward','outbid_again','received') then update public.card_auction_registrations set ducks=ducks+1 where card_id=item_key and id<>p_registration; end if;
@@ -154,6 +155,7 @@ begin
       values(p_registration,r->>'member_id',item_key,(r->>'ducks')::integer,(r->>'created_at')::timestamptz,auth.uid());
     end if;
     if p_kind in ('received','withdraw') then delete from public.accessory_auction_registrations where id=p_registration;
+    elsif p_kind='add_duck' then update public.accessory_auction_registrations set ducks=ducks+1 where id=p_registration;
     elsif p_kind='remove_duck' then update public.accessory_auction_registrations set ducks=ducks-1 where id=p_registration;
     else update public.accessory_auction_registrations set next_bidder=(p_kind<>'clear_next') where id=p_registration; end if;
     if p_kind in ('carry_forward','outbid_again','received') then update public.accessory_auction_registrations set ducks=ducks+1 where accessory_id=item_key and id<>p_registration; end if;

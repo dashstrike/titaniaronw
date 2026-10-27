@@ -122,8 +122,8 @@
     if(!canManage)return '';
     const received=`<button type="button" class="btn btn-sm btn-outline-success" ${workflow?'data-workflow="received" data-registration':'data-remove'}="${esc(row.id)}" aria-label="Mark ${itemLabel} received by ${esc(row.member_name)}" title="Mark ${itemLabel} received"><i class="fa-solid fa-check" aria-hidden="true"></i></button>`;
     if(!workflow)return received;
-    const choices=row.next_bidder?[['outbid_again','Outbid Again'],['clear_next','Clear Next Bidder'],['withdraw','Withdraw']]:[...(Number(row.ducks??1)>0?[['carry_forward','Carry Forward'],['remove_duck','Remove 1 Duck']]:[]),['withdraw','Withdraw']];
-    return received+`<span class="dropdown ms-2"><button class="btn btn-sm btn-outline-secondary" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="More actions for ${esc(row.member_name)}"><i class="fa-solid fa-ellipsis-vertical" aria-hidden="true"></i></button><span class="dropdown-menu dropdown-menu-end">${choices.map(([kind,label])=>`<button type="button" class="dropdown-item" data-workflow="${kind}" data-registration="${esc(row.id)}">${label}</button>`).join('')}</span></span>`;
+    const choices=row.next_bidder?[['outbid_again','Outbid Again'],['clear_next','Clear Next Bidder'],['withdraw','Withdraw']]:[...(Number(row.ducks??1)>0?[['carry_forward','Carry Forward']]:[]),['add_duck','Add 1 Duck','text-info'],...(Number(row.ducks??1)>0?[['remove_duck','Remove 1 Duck','text-danger']]:[]),['withdraw','Withdraw']];
+    return received+`<span class="dropdown ms-2"><button class="btn btn-sm btn-outline-secondary" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="More actions for ${esc(row.member_name)}"><i class="fa-solid fa-ellipsis-vertical" aria-hidden="true"></i></button><span class="dropdown-menu dropdown-menu-end">${choices.map(([kind,label,color])=>`<button type="button" class="dropdown-item${color?' '+color:''}" data-workflow="${kind}" data-registration="${esc(row.id)}">${label}</button>`).join('')}</span></span>`;
   }
   function render(){
     el('auctionFields').disabled=!loaded||busy;
@@ -193,17 +193,19 @@
     const kind=button.dataset.workflow;
     const row=registrations.find(r=>r.id===button.dataset.registration);
     if(!row||busy||!canManage||!window.Swal)return;
-    const titles={received:'Mark item received',carry_forward:'Carry Forward',outbid_again:'Outbid Again',clear_next:'Clear Next Bidder',withdraw:'Withdraw registration',remove_duck:'Remove 1 Duck'};
+    const titles={received:'Mark item received',carry_forward:'Carry Forward',outbid_again:'Outbid Again',clear_next:'Clear Next Bidder',withdraw:'Withdraw registration',add_duck:'Add 1 Duck',remove_duck:'Remove 1 Duck'};
     const explanations={
       received:'Save this item as received, remove this registration, and give everyone remaining on this item +1 duck.',
       carry_forward:'This player becomes NEXT BIDDER whenever this same item appears again. Their duck count is preserved and hidden. Everyone else on this item receives +1 duck.',
       outbid_again:'Use this only if this item appeared again and this player was outbid again. They stay NEXT BIDDER. Everyone else on this item receives another +1 duck.',
       clear_next:'Remove NEXT BIDDER status and show the saved duck count again. Nobody receives extra ducks.',
       withdraw:'Remove this registration and any NEXT BIDDER status. No ducks are awarded and no item is marked received.',
+      add_duck:'Add one duck to this player for this item. This adjustment is recorded in Action History.',
       remove_duck:'Remove one duck from this player for this item. At ×0, the player stays registered but has no duck entries. This adjustment is recorded in Action History.'
     };
     const expectedRevision=revision;
-    const confirmation=await Swal.fire({...dialogTheme,title:titles[kind],icon:'warning',
+    const confirmation=await Swal.fire({...dialogTheme,title:titles[kind],icon:kind==='add_duck'?'info':'warning',
+      confirmButtonColor:kind==='add_duck'?'var(--bs-info)':kind==='remove_duck'?'var(--bs-danger)':dialogTheme.confirmButtonColor,
       html:`<p>${esc(row.member_name)}</p><p>${explanations[kind]}</p>`,
       showCancelButton:true,confirmButtonText:'Confirm',focusCancel:true
     });
@@ -225,7 +227,7 @@
       await load();
       const history=await rpc('get_auction_action_history');
       const expectedRevision=revision;
-      const label={received:'Item received',carry_forward:'Carry Forward',outbid_again:'Outbid Again',clear_next:'Clear Next Bidder',withdraw:'Withdraw',remove_duck:'Removed 1 Duck',ban:'Ban'};
+      const label={received:'Item received',carry_forward:'Carry Forward',outbid_again:'Outbid Again',clear_next:'Clear Next Bidder',withdraw:'Withdraw',add_duck:'Added 1 Duck',remove_duck:'Removed 1 Duck',ban:'Ban'};
       Swal.fire({...dialogTheme,title:'Auction Action History',width:1100,confirmButtonText:'Close',
         html:'<p class="small text-muted">Undo is available only for the latest action, before any newer registration or admin action. It restores the affected registrations, ducks, status and receipt history.</p>'+ (history.length?`<div class="table-responsive"><table class="table align-middle text-start"><thead><tr><th>Action / Player</th><th>Item</th><th>Recorded / Admin</th><th>Status</th></tr></thead><tbody>${history.map(a=>{
           const catalog=a.category==='card'?document.getElementById('auctionCard'):document.getElementById('accessoryCard');

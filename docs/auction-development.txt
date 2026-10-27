@@ -31,7 +31,8 @@ Testing the workflow
    ducks are removed across categories. Receipt history is preserved.
    After expiry, new registration is allowed and starts at one duck.
 7. Ban List shows the global list. Action History includes the admin/time.
-8. Remove 1 Duck is available for a registered player who is not NEXT BIDDER.
+8. Add 1 Duck and Remove 1 Duck are available for a player who is not NEXT BIDDER.
+   Adding affects only that player's registration for the selected item.
    It can reduce one duck to zero without removing the registration. At zero,
    the player has no race entries until they gain another duck. The adjustment
    appears in Action History and can be undone while it is the latest action.
