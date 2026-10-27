@@ -123,16 +123,33 @@
     if(!organizerPage||!canManage||button.disabled)return;
     const row=registrations.find(item=>item.id===button.dataset.copyIgn);
     if(!row)return;
+    await copyText(button,row.member_name,'Copy IGN');
+  }
+  async function copyAllNames(button){
+    if(!organizerPage||!canManage||button.disabled||busy)return;
+    const entries=registrations.filter(row=>row.card_id===button.dataset.copyAllNames).sort((a,b)=>a.member_name.localeCompare(b.member_name));
+    const next=entries.find(row=>row.next_bidder);
+    if(next){message(`${next.member_name} is NEXT BIDDER for this item. A new duck race is not needed until that status is cleared or the item is received.`);return;}
+    const names=entries.flatMap(row=>Array.from({length:Math.max(0,Number(row.ducks??1))},()=>row.member_name));
+    if(!names.length){message('There are no duck entries to copy for this item.');return;}
+    await copyText(button,names.join('\n'),'Copy All Names');
+  }
+  async function copyText(button,text,label){
     button.disabled=true;
+    const icon=button.querySelector('i');
+    const originalIcon=icon.className;
+    const caption=button.querySelector('[data-copy-caption]');
+    const originalCaption=caption?.textContent;
+    const originalLabel=button.getAttribute('aria-label')||label;
     try{
       let copied=false;
       if(navigator.clipboard?.writeText){
-        try{await navigator.clipboard.writeText(row.member_name);copied=true;}catch(_error){}
+        try{await navigator.clipboard.writeText(text);copied=true;}catch(_error){}
       }
       if(!copied){
         const previousFocus=document.activeElement;
         const input=document.createElement('textarea');
-        input.value=row.member_name;
+        input.value=text;
         input.readOnly=true;
         input.className='position-fixed top-0 start-0 opacity-0 pe-none';
         input.setAttribute('aria-hidden','true');
@@ -141,14 +158,16 @@
         try{input.select();copied=document.execCommand('copy');}
         finally{input.remove();previousFocus?.focus({preventScroll:true});}
       }
-      if(!copied)throw new Error('Could not copy the IGN. Please select and copy the player name manually.');
-      button.querySelector('i').className='fa-solid fa-check text-success';
+      if(!copied)throw new Error('Could not copy the names. Please select and copy the player names manually.');
+      icon.className='fa-solid fa-check text-success'+(caption?' me-2':'');
+      if(caption)caption.textContent='Copied';
       button.dataset.titaniaTooltip='Copied';
-      button.setAttribute('aria-label','IGN copied');
+      button.setAttribute('aria-label','Names copied');
       setTimeout(()=>{
-        button.querySelector('i').className='fa-regular fa-copy';
-        button.dataset.titaniaTooltip='Copy IGN';
-        button.setAttribute('aria-label','Copy IGN '+row.member_name);
+        icon.className=originalIcon;
+        if(caption)caption.textContent=originalCaption;
+        button.dataset.titaniaTooltip=label;
+        button.setAttribute('aria-label',originalLabel);
         button.disabled=false;
       },1500);
     }catch(error){button.disabled=false;message(error.message,true);}
@@ -174,12 +193,23 @@
     dropdowns();
     el('auctionTotals').textContent=loaded?`${new Set(rows.map(row=>row.member_id)).size} players · ${rows.length} ${itemLabel} registrations`:'Loading registrations...';
     el('auctionRegistrations').querySelectorAll('[data-auction-details]').forEach(node=>window.bootstrap?.Popover.getInstance(node)?.dispose());
+    el('auctionRegistrations').querySelectorAll('[data-bs-toggle="dropdown"]').forEach(node=>window.bootstrap?.Dropdown.getInstance(node)?.dispose());
     el('auctionRegistrations').innerHTML=loaded?cards.map(input=>{
       const name=input.dataset.name;
       const image=input.dataset.image;
       const entries=rows.filter(row=>row.card_id===input.value).sort((a,b)=>a.member_name.localeCompare(b.member_name));
-      return `<div class="col-12 col-md-6"><div class="card mb-0"><button type="button" id="auctionHeading-${esc(input.value)}" class="card-header border-top-0 border-start-0 border-end-0 border-bottom text-start text-body w-100" data-bs-toggle="collapse" data-bs-target="#auctionList-${esc(input.value)}" aria-expanded="${expanded.get(input.value)!==false}" aria-controls="auctionList-${esc(input.value)}"><span class="d-flex align-items-center mb-2"><img ${accessory?`data-auction-details="${esc(input.value)}"`:""} src="${esc(image)}" width="44" height="44" class="mr-2 flex-shrink-0" alt=""><span class="d-inline-flex align-items-center me-2"><strong class="me-2">${esc(name)}</strong>${!accessory&&input.dataset.slot?`<span class="badge badge-outline-dark rounded-pill text-uppercase flex-shrink-0">${esc(input.dataset.slot)}</span>`:""}</span><span class="badge bg-${theme} text-white ms-auto mr-2 flex-shrink-0">${String(entries.length).padStart(2,'0')}</span><i class="fa-solid ${expanded.get(input.value)!==false?'fa-chevron-up':'fa-chevron-down'} flex-shrink-0" aria-hidden="true"></i></span><span class="d-block small text-muted mb-0">${accessory?"Level 90 · ":""}${esc(input.dataset.effect)}${accessory?"":"<br>Includes up to 2 random affixes."}</span><span class="d-block small text-muted fst-italic mt-1">Last received: ${esc(receiptTime(input.value))}</span></button><div id="auctionList-${esc(input.value)}" class="collapse ${expanded.get(input.value)!==false?'show':''}" data-auction-card="${esc(input.value)}" role="region" aria-labelledby="auctionHeading-${esc(input.value)}"><div class="card-body">${entries.length?'<ul class="list-unstyled mb-0">'+entries.map((row,index)=>`<li class="d-flex align-items-center justify-content-between ${index?"border-top ":""}py-2">${registeredPlayer(row)}<span class="d-inline-flex align-items-center flex-shrink-0 ms-auto">${workflow&&row.next_bidder?'':`<span class="d-inline-flex align-items-center text-nowrap mx-2" aria-label="${esc(row.ducks??1)} ducks"><iconify-icon icon="mdi:duck" class="text-warning mr-2 fs-28" aria-hidden="true"></iconify-icon>×${esc(row.ducks??1)}</span>`}${rowActions(row)}</span></li>`).join('')+'</ul>':'<p class="text-muted small mb-0">No registrations yet.</p>'}</div></div></div></div>`;
+      const headerTag=organizerPage?'div':'button';
+      const headerAttributes=organizerPage?'':`type="button" data-bs-toggle="collapse" data-bs-target="#auctionList-${esc(input.value)}" aria-expanded="${expanded.get(input.value)!==false}" aria-controls="auctionList-${esc(input.value)}"`;
+      const arrow=organizerPage?'':`<i class="fa-solid ${expanded.get(input.value)!==false?'fa-chevron-up':'fa-chevron-down'} flex-shrink-0" aria-hidden="true"></i>`;
+      const listClass=organizerPage?'':`collapse ${expanded.get(input.value)!==false?'show':''}`;
+      const copyAll=organizerPage&&canManage?`<div class="d-flex w-100 justify-content-start mt-2"><button type="button" class="btn btn-sm btn-light text-dark d-inline-flex align-items-center justify-content-center" data-copy-all-names="${esc(input.value)}" aria-label="Copy all names for ${esc(name)}" data-titania-tooltip="Copy All Names"><i class="fa-regular fa-copy me-2" aria-hidden="true"></i><span data-copy-caption>Copy All Names</span></button></div>`:'';
+      return `<div class="col-12 col-md-6"><div class="card mb-0"><${headerTag} ${headerAttributes} id="auctionHeading-${esc(input.value)}" class="card-header border-top-0 border-start-0 border-end-0 border-bottom text-start text-body w-100"><span class="d-flex align-items-center mb-2"><img ${accessory?`data-auction-details="${esc(input.value)}"`:""} src="${esc(image)}" width="44" height="44" class="mr-2 flex-shrink-0" alt=""><span class="d-inline-flex align-items-center me-2"><strong class="me-2">${esc(name)}</strong>${!accessory&&input.dataset.slot?`<span class="badge badge-outline-dark rounded-pill text-uppercase flex-shrink-0">${esc(input.dataset.slot)}</span>`:""}</span><span class="badge bg-${theme} text-white ms-auto mr-2 flex-shrink-0">${String(entries.length).padStart(2,'0')}</span>${arrow}</span><span class="d-block small text-muted mb-0">${accessory?"Level 90 · ":""}${esc(input.dataset.effect)}${accessory?"":"<br>Includes up to 2 random affixes."}</span><span class="d-block small text-muted fst-italic mt-1">Last received: ${esc(receiptTime(input.value))}</span>${copyAll}</${headerTag}><div id="auctionList-${esc(input.value)}" class="${listClass}" data-auction-card="${esc(input.value)}" role="region" aria-labelledby="auctionHeading-${esc(input.value)}"><div class="card-body">${entries.length?'<ul class="list-unstyled mb-0">'+entries.map((row,index)=>`<li class="d-flex align-items-center justify-content-between ${index?"border-top ":""}py-2">${registeredPlayer(row)}<span class="d-inline-flex align-items-center flex-shrink-0 ms-auto">${workflow&&row.next_bidder?'':`<span class="d-inline-flex align-items-center text-nowrap mx-2" aria-label="${esc(row.ducks??1)} ducks"><iconify-icon icon="mdi:duck" class="text-warning mr-2 fs-28" aria-hidden="true"></iconify-icon>×${esc(row.ducks??1)}</span>`}${rowActions(row)}</span></li>`).join('')+'</ul>':'<p class="text-muted small mb-0">No registrations yet.</p>'}</div></div></div></div>`;
     }).join('').replaceAll('auctionHeading-',prefix+'Heading-').replaceAll('auctionList-',prefix+'List-'):'';
+    if(organizerPage&&window.bootstrap?.Dropdown){
+      el('auctionRegistrations').querySelectorAll('[data-bs-toggle="dropdown"]').forEach(node=>{
+        new window.bootstrap.Dropdown(node,{popperConfig:config=>({...config,strategy:'fixed'})});
+      });
+    }
     if(accessory&&window.bootstrap?.Popover){
       el('auctionRegistrations').querySelectorAll('[data-auction-details]').forEach(node=>{
         const item=cards.find(option=>option.value===node.dataset.auctionDetails);
@@ -307,7 +337,7 @@
     document.addEventListener('visibilitychange',()=>{if(!document.hidden)refreshWorkflow();});
     window.setInterval(refreshWorkflow,30000);
   }
-  ['show.bs.collapse','hide.bs.collapse'].forEach(type=>{
+  if(!organizerPage)['show.bs.collapse','hide.bs.collapse'].forEach(type=>{
     el('auctionRegistrations').addEventListener(type,event=>{
       const card=event.target.dataset.auctionCard;
       if(!card)return;
@@ -321,6 +351,8 @@
     });
   });
   el('auctionRegistrations').addEventListener('click',async event=>{
+    const copyAllButton=event.target.closest('[data-copy-all-names]');
+    if(copyAllButton){event.preventDefault();await copyAllNames(copyAllButton);return;}
     const copyButton=event.target.closest('[data-copy-ign]');
     if(copyButton){event.preventDefault();await copyIgn(copyButton);return;}
     const workflowButton=event.target.closest('[data-workflow]');

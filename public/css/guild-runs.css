@@ -353,6 +353,19 @@ body[data-guild-runs-page="public"] #titania-content .public-run-type{font-size:
 
 #titania-content #accessoryRegistrations .card-header{background-color:var(--bs-danger-bg-subtle);font-size:inherit}
 
+#auctionPage[data-organizer="true"] :is(#auctionRegistrations,#accessoryRegistrations) [data-auction-card] > .card-body{
+  overflow-x:auto;
+}
+#auctionPage[data-organizer="true"] :is(#auctionRegistrations,#accessoryRegistrations) [data-auction-card] ul{
+  min-width:max(100%,480px);
+  width:max-content;
+  max-width:none;
+}
+#auctionPage[data-organizer="true"] :is(#auctionRegistrations,#accessoryRegistrations) [data-auction-card] li{
+  min-width:100%;
+  white-space:nowrap;
+}
+
 #titania-content #auctionPage > .row:first-child .btn{
   height:44px;
 }
