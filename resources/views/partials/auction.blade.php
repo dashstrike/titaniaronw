@@ -6,7 +6,7 @@
             <a href="{{ route('titaniaauction') }}" target="_blank" rel="noopener" class="btn btn-outline-primary d-inline-flex align-items-center"><i class="fa-solid fa-arrow-up-right-from-square mr-2" aria-hidden="true"></i>Public Registration</a>
         </div>
         @endif
-        <div class="col-auto order-1 order-md-2 d-flex align-items-center gap-2">
+        <div class="col-auto order-1 order-md-2 d-flex align-items-stretch gap-2">
             @if(config('titania.auction_workflow'))
             <button type="button" id="auctionBanList" class="btn btn-outline-danger d-inline-flex align-items-center justify-content-center"><i class="fa-solid fa-ban me-2" aria-hidden="true"></i>Ban List</button>
             @endif
