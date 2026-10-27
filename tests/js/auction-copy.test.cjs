@@ -77,13 +77,13 @@ test('public page cannot invoke management copy action', async () => {
 
 test('bulk copy repeats each IGN by its duck count, one per line, for only this item', async () => {
   const f = fixture(undefined, true, true, [
-    {card_id: 'fh', member_name: 'George', ducks: 1},
-    {card_id: 'fh', member_name: 'Alex', ducks: 3},
+    {card_id: 'fh', member_name: 'George', ducks: 1, created_at: '2026-10-25T01:00:00Z'},
+    {card_id: 'fh', member_name: 'Alex', ducks: 3, created_at: '2026-10-26T01:00:00Z'},
     {card_id: 'fh', member_name: 'Zero', ducks: 0},
     {card_id: 'other', member_name: 'Other Item', ducks: 9},
   ]);
   await f.copyAll();
-  assert.deepEqual(f.calls.copied, ['Alex\nAlex\nAlex\nGeorge']);
+  assert.deepEqual(f.calls.copied, ['George\nAlex\nAlex\nAlex']);
 });
 
 test('bulk copy supports exact Unicode names through Clipboard API', async () => {

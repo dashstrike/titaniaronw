@@ -127,7 +127,7 @@
   }
   async function copyAllNames(button){
     if(!organizerPage||!canManage||button.disabled||busy)return;
-    const entries=registrations.filter(row=>row.card_id===button.dataset.copyAllNames).sort((a,b)=>a.member_name.localeCompare(b.member_name));
+    const entries=registrations.filter(row=>row.card_id===button.dataset.copyAllNames).sort((a,b)=>new Date(a.created_at)-new Date(b.created_at));
     const next=entries.find(row=>row.next_bidder);
     if(next){message(`${next.member_name} is NEXT BIDDER for this item. A new duck race is not needed until that status is cleared or the item is received.`);return;}
     const names=entries.flatMap(row=>Array.from({length:Math.max(0,Number(row.ducks??1))},()=>row.member_name));
@@ -197,7 +197,7 @@
     el('auctionRegistrations').innerHTML=loaded?cards.map(input=>{
       const name=input.dataset.name;
       const image=input.dataset.image;
-      const entries=rows.filter(row=>row.card_id===input.value).sort((a,b)=>a.member_name.localeCompare(b.member_name));
+      const entries=rows.filter(row=>row.card_id===input.value).sort((a,b)=>new Date(a.created_at)-new Date(b.created_at));
       const headerTag=organizerPage?'div':'button';
       const headerAttributes=organizerPage?'':`type="button" data-bs-toggle="collapse" data-bs-target="#auctionList-${esc(input.value)}" aria-expanded="${expanded.get(input.value)!==false}" aria-controls="auctionList-${esc(input.value)}"`;
       const arrow=organizerPage?'':`<i class="fa-solid ${expanded.get(input.value)!==false?'fa-chevron-up':'fa-chevron-down'} flex-shrink-0" aria-hidden="true"></i>`;
