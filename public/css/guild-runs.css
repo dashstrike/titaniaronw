@@ -351,6 +351,10 @@ body[data-guild-runs-page="public"] #titania-content .public-run-type{font-size:
 
 #titania-content #accessoryRegistrations .card-header{background-color:var(--bs-danger-bg-subtle);font-size:inherit}
 
+#titania-content #auctionPage > .row:first-child .btn{
+  height:44px;
+}
+
 @media(max-width:575.98px){
   #titania-content #auctionRegistrations .card-header > .d-flex > .d-inline-flex{
     flex:1 1 auto;
