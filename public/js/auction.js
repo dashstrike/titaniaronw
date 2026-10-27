@@ -52,7 +52,8 @@
     const file=member&&iconMap[member.cls];
     const image=file?`<img src="./images/job/${esc(encodeURIComponent(file))}" width="24" height="24" class="mr-2 flex-shrink-0" alt="${esc(member.cls)}">`:'';
     const name=organizerPage?`<a href="member?id=${encodeURIComponent(row.member_id)}" target="_blank" rel="noopener noreferrer">${esc(row.member_name)}</a>`:`<span>${esc(row.member_name)}</span>`;
-    return `<span class="d-inline-flex align-items-center">${image}<span class="d-flex flex-column"><span class="d-inline-flex align-items-center flex-wrap gap-2">${name}${workflow&&row.next_bidder?'<span class="badge bg-warning text-dark" title="Will bid in the next auction for this item.">NEXT BIDDER</span>':''}</span><small class="text-muted fst-italic">${esc(formatTime(row.created_at))}</small></span></span>`;
+    const copy=organizerPage&&canManage?`<button type="button" class="btn btn-sm btn-outline-secondary border-0 p-1 ms-2 d-inline-flex align-items-center justify-content-center" data-copy-ign="${esc(row.id)}" aria-label="Copy IGN ${esc(row.member_name)}" data-titania-tooltip="Copy IGN"><i class="fa-regular fa-copy" aria-hidden="true"></i></button>`:'';
+    return `<span class="d-inline-flex align-items-center">${image}<span class="d-flex flex-column"><span class="d-inline-flex align-items-center flex-wrap gap-2"><span class="d-inline-flex align-items-center">${name}${copy}</span>${workflow&&row.next_bidder?'<span class="badge bg-warning text-dark" title="Will bid in the next auction for this item.">NEXT BIDDER</span>':''}</span><small class="text-muted fst-italic">${esc(formatTime(row.created_at))}</small></span></span>`;
   }
   function optionTemplate(option){
     if(!option.id)return option.text;
@@ -117,6 +118,40 @@
       el('auctionBanPlayer').innerHTML=options;
       el('auctionBanPlayer').value=banned.has(selectedBan)?'':selectedBan;
     }
+  }
+  async function copyIgn(button){
+    if(!organizerPage||!canManage||button.disabled)return;
+    const row=registrations.find(item=>item.id===button.dataset.copyIgn);
+    if(!row)return;
+    button.disabled=true;
+    try{
+      let copied=false;
+      if(navigator.clipboard?.writeText){
+        try{await navigator.clipboard.writeText(row.member_name);copied=true;}catch(_error){}
+      }
+      if(!copied){
+        const previousFocus=document.activeElement;
+        const input=document.createElement('textarea');
+        input.value=row.member_name;
+        input.readOnly=true;
+        input.className='position-fixed top-0 start-0 opacity-0 pe-none';
+        input.setAttribute('aria-hidden','true');
+        input.tabIndex=-1;
+        document.body.appendChild(input);
+        try{input.select();copied=document.execCommand('copy');}
+        finally{input.remove();previousFocus?.focus({preventScroll:true});}
+      }
+      if(!copied)throw new Error('Could not copy the IGN. Please select and copy the player name manually.');
+      button.querySelector('i').className='fa-solid fa-check text-success';
+      button.dataset.titaniaTooltip='Copied';
+      button.setAttribute('aria-label','IGN copied');
+      setTimeout(()=>{
+        button.querySelector('i').className='fa-regular fa-copy';
+        button.dataset.titaniaTooltip='Copy IGN';
+        button.setAttribute('aria-label','Copy IGN '+row.member_name);
+        button.disabled=false;
+      },1500);
+    }catch(error){button.disabled=false;message(error.message,true);}
   }
   function rowActions(row){
     if(!canManage)return '';
@@ -286,6 +321,8 @@
     });
   });
   el('auctionRegistrations').addEventListener('click',async event=>{
+    const copyButton=event.target.closest('[data-copy-ign]');
+    if(copyButton){event.preventDefault();await copyIgn(copyButton);return;}
     const workflowButton=event.target.closest('[data-workflow]');
     if(workflowButton&&workflow){await workflowAction(workflowButton);return;}
     const button=event.target.closest('[data-remove]');

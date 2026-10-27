@@ -11,7 +11,10 @@
 @section('content')
 <div class="page">
   <header class="viewerbar card flex-row align-items-center justify-content-between flex-wrap gap-3 p-3 mb-3">
-    <div class="mini-brand"><img class="logo" src="images/titania-logo.webp" alt="Titania guild logo"><div><b>TITANIA</b><span>Dark Lord Server</span></div></div>
+    <div class="d-flex align-items-center gap-3 flex-wrap">
+      <div class="mini-brand"><img class="logo" src="images/titania-logo.webp" alt="Titania guild logo"><div><b>TITANIA</b><span>Dark Lord Server</span></div></div>
+      @include('partials.discord-button', ['mobile' => false])
+    </div>
     <nav class="nav gap-2">
       <a class="btn btn-primary active" href="public/guild-league"><i class="fa-solid fa-shield-halved mr-2" aria-hidden="true"></i>Guild League</a>
       <a class="btn btn-outline-danger" href="public/siege"><i class="fa-regular fa-chess-rook mr-2" aria-hidden="true"></i>Siege/Polarity</a>
@@ -21,6 +24,7 @@
     <nav class="mobile-event-nav" aria-label="Public lineup pages">
       <a class="btn btn-primary active" href="public/guild-league"><i class="fa-solid fa-shield-halved mr-2" aria-hidden="true"></i>Guild League</a>
       <a class="btn btn-outline-danger" href="public/siege"><i class="fa-regular fa-chess-rook mr-2" aria-hidden="true"></i>Siege/Polarity</a>
+      @include('partials.discord-button', ['mobile' => true])
     </nav>
   </header>
   <main class="content w-100 mw-100" id="content"><div class="loading"><div class="spinner"></div>Loading lineup…</div></main>

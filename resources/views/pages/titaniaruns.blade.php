@@ -15,12 +15,16 @@
 @endpush
 
 @section('content')
-<header class="card d-flex flex-row align-items-center justify-content-between gap-3 p-3 mb-4">
+<header class="card d-flex flex-row align-items-center justify-content-between flex-wrap gap-3 p-3 mb-4">
+    <div class="d-flex align-items-center gap-3 flex-wrap">
     <div class="brand">
       <img src="images/titania-logo.webp" alt="Titania">
       <div><b>TITANIA GUILD RUNS</b><span>Register for an available carry run</span></div>
     </div>
+    @include('partials.discord-button', ['mobile' => false])
+    </div>
     @include('partials.theme-toggle')
+    @include('partials.discord-button', ['mobile' => true])
   </header>
 
   <main class="wrap w-100 mw-100">

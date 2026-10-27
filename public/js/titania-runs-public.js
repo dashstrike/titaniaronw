@@ -60,7 +60,7 @@
       const time=formatTime(run.run_time);
       const isOpen=run.status==='open';
       const title=String(run.note||'').trim()||'Untitled Run';
-      return `<article class="run-card public-run-card card" data-run-id="${esc(run.id)}">
+      return `<article class="run-card public-run-card card" data-run-id="${esc(run.id)}" data-run-type="${esc(run.run_type)}">
         <div class="public-run-top">
           <div class="public-run-heading">
             <img class="run-raid-image" src="${esc(runImage(run.run_type))}" alt="">

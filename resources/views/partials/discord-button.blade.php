@@ -1,0 +1,1 @@
+<a class="btn btn-primary rounded-pill {{ $mobile ? 'w-100' : 'd-inline-flex align-items-center justify-content-center' }}" @if($mobile) data-discord-mobile @else data-discord-desktop @endif href="https://discord.gg/DgYSRuWSvK" target="_blank" rel="noopener noreferrer"><i class="fa-brands fa-discord me-2" aria-hidden="true"></i>Titania Discord</a>

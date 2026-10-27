@@ -156,6 +156,20 @@ body[data-titania-public="true"] .page-content { margin-left: 0; }
 #titania-content .role-select { min-width: 180px; }
 #titania-content .viewerbar { position: static; backdrop-filter: none; }
 #titania-content .viewerbar .nav a { border-radius: var(--bs-border-radius); }
+#titania-content [data-discord-desktop],
+#titania-content [data-discord-mobile] {
+  --bs-btn-color: #fff;
+  --bs-btn-bg: #5865f2;
+  --bs-btn-border-color: #5865f2;
+  --bs-btn-hover-color: #fff;
+  --bs-btn-hover-bg: #5865f2;
+  --bs-btn-hover-border-color: #5865f2;
+  --bs-btn-active-color: #fff;
+  --bs-btn-active-bg: #5865f2;
+  --bs-btn-active-border-color: #5865f2;
+  --bs-btn-focus-shadow-rgb: 88, 101, 242;
+}
+#titania-content [data-discord-mobile] { display: none; }
 #titania-content .sheet-brand { font-size: 1.75rem; letter-spacing: normal; text-transform: none; }
 #titania-content .sheet-head { border-bottom: 1px solid var(--bs-border-color); }
 #titania-content .run-type-heading { font-size: 1.125rem; color: var(--bs-heading-color); }
@@ -181,6 +195,9 @@ body[data-titania-public="true"] .page-content { margin-left: 0; }
 #titania-content .auth-tabs { background: transparent; padding: 0; }
 #titania-content .auth-tab { flex: 1; }
 @media (max-width: 720px) {
+  #titania-content [data-discord-desktop] { display: none !important; }
+  #titania-content [data-discord-mobile] { display: flex; align-items: center; justify-content: center; flex: 1 0 100%; }
+  #titania-content .mobile-event-nav [data-discord-mobile] { grid-column: 1 / -1; }
   #titania-content .body-wrap:not(.dashboard-mode):not(.pool-hidden) main.main { padding-left: 0; }
   #titania-content .page-head { flex-wrap: wrap; gap: 1rem; }
 }
