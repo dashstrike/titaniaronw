@@ -35,5 +35,13 @@ reset role;
 do $$ begin
   if exists(select 1 from public.user_login_history where session_id=current_setting('test.old_sid')::uuid and logged_out_at is not null) then raise exception 'Another user forged the logout'; end if;
 end $$;
-select 'Latest-per-user history, confirmed logout and owner-only permissions passed' as result;
+-- Signing back in must not hide the previously recorded logout.
+insert into public.user_login_history(session_id,user_id,display_name,signed_in_at)
+  values(gen_random_uuid(),current_setting('test.owner_uid')::uuid,'Test owner',now()+interval '1 minute');
+select set_config('request.jwt.claims',jsonb_build_object('sub',current_setting('test.owner_uid'),'role','authenticated')::text,true);
+set local role authenticated;
+do $$ begin
+  if not exists(select 1 from public.get_latest_user_logins() where user_id=current_setting('test.owner_uid')::uuid and signed_in_at=now()+interval '1 minute' and logged_out_at=now()) then raise exception 'A new login hid the previous logout'; end if;
+end $$;
+select 'Latest-per-user history, retained latest logout and owner-only permissions passed' as result;
 rollback;

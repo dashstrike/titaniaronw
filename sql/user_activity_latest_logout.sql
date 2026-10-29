@@ -33,7 +33,8 @@ begin
   return query
     select latest.user_id,latest.display_name,latest.signed_in_at,latest.logged_out_at
     from (
-      select distinct on (h.user_id) h.user_id,coalesce(p.display_name,h.display_name) as display_name,h.signed_in_at,h.logged_out_at
+      select distinct on (h.user_id) h.user_id,coalesce(p.display_name,h.display_name) as display_name,h.signed_in_at,
+        max(h.logged_out_at) over (partition by h.user_id) as logged_out_at
       from public.user_login_history h left join public.profiles p on p.id=h.user_id
       where h.user_id is not null
       order by h.user_id,h.signed_in_at desc,h.session_id

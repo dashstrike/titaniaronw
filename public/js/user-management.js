@@ -22,7 +22,7 @@
       const {data,error}=await client.rpc('get_latest_user_logins');
       if(error)throw error;
       const rows=data||[];
-      target.innerHTML=rows.length?'<table class="table table-centered align-middle mb-0"><thead><tr><th>User</th><th>Latest login (GMT+8)</th><th>Logout (GMT+8)</th></tr></thead><tbody>'+rows.map(row=>`<tr><td>${esc(row.display_name)}</td><td>${esc(activityTime(row.signed_in_at))}</td><td>${row.logged_out_at?esc(activityTime(row.logged_out_at)):'—'}</td></tr>`).join('')+'</tbody></table>':'<p class="text-muted mb-0">No login sessions recorded yet.</p>';
+      target.innerHTML=rows.length?'<table class="table table-centered align-middle mb-0"><thead><tr><th>User</th><th>Latest login (GMT+8)</th><th>Latest logout (GMT+8)</th></tr></thead><tbody>'+rows.map(row=>`<tr><td>${esc(row.display_name)}</td><td>${esc(activityTime(row.signed_in_at))}</td><td>${row.logged_out_at?esc(activityTime(row.logged_out_at)):'—'}</td></tr>`).join('')+'</tbody></table>':'<p class="text-muted mb-0">No login sessions recorded yet.</p>';
     }catch(error){target.textContent='Could not load login history: '+error.message;}
     finally{historyBusy=false;refresh.disabled=false;}
   }
