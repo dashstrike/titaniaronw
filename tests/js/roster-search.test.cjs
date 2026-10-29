@@ -5,7 +5,7 @@ const path=require('node:path');
 const vm=require('node:vm');
 const source=fs.readFileSync(path.join(__dirname,'../../public/js/roster-search.js'),'utf8');
 
-function fixture(event='guild_league'){
+function fixture(event='guild_league',publicMode=false){
   const nodes=new Map(),timers=new Map(),observers=[];
   let timerId=0;
   function node(id){
@@ -20,15 +20,17 @@ function fixture(event='guild_league'){
   function player(name,index){
     const row=node('player-'+index);
     row.dataset={team:'main_1',slot:String(index)};
-    row.querySelector=()=>({childNodes:[{nodeType:3,textContent:name},{nodeType:1,textContent:'FLAG'}]});
+    row.querySelector=selector=>selector===(publicMode?'.member-name':'.slot-name')?{childNodes:[{nodeType:3,textContent:name},{nodeType:1,textContent:'FLAG'}]}:null;
     return row;
   }
   let rows=[player('Alex',0),player('Alexander',1),player('Love棉花糖',2)];
   node('glRosterSearchPanel').hidden=true;
-  const roster=node('teamsWrap');
-  roster.querySelectorAll=selector=>selector==='.slot.filled'?rows:rows.filter(row=>row.dataset.rosterSearchMatch);
+  node('glRosterSearch').dataset.publicSearch=publicMode?'true':'false';
+  const roster=node(publicMode?'content':'teamsWrap');
+  roster.querySelector=()=>rows.length?{}:null;
+  roster.querySelectorAll=selector=>['.slot.filled','.slot'].includes(selector)?rows:rows.filter(row=>row.dataset.rosterSearchMatch);
   const body={dataset:{event}};
-  const context={document:{body,getElementById:node},window:{matchMedia:()=>({matches:false})},
+  const context={document:{body,getElementById:id=>publicMode&&id==='app'?null:node(id)},window:{matchMedia:()=>({matches:false})},
     setTimeout(callback){timers.set(++timerId,callback);return timerId;},clearTimeout(id){timers.delete(id);},
     MutationObserver:class{constructor(callback){this.callback=callback;}observe(target){observers.push({target,callback:this.callback});}},
   };
@@ -49,6 +51,18 @@ test('search is limited to GL and Siege rosters and closes on other pages',()=>{
   f.updateEvent('dashboard');assert.equal(f.node('glRosterSearch').hidden,true);
   assert.equal(f.node('glRosterSearchPanel').hidden,true);
   assert.ok(f.rows.every(row=>!row.dataset.rosterSearchMatch));
+});
+test('public GL and Siege search published names without a management app or login',()=>{
+  for(const event of ['guild','siege']){
+    const f=fixture(event,true);assert.equal(f.node('glRosterSearch').hidden,false);
+    f.fire('glRosterSearchToggle','click');f.search('alex');
+    assert.equal(f.node('glRosterSearchCount').textContent,'1 of 2 matches');
+    f.fire('glRosterSearchNext','click');assert.equal(f.rows[1].dataset.rosterSearchMatch,'active');
+    assert.equal(f.rows[1].scrolled,1);
+    f.search('FLAG');assert.equal(f.node('glRosterSearchCount').textContent,'No roster matches.');
+    f.search('棉花');assert.equal(f.rows[2].dataset.rosterSearchMatch,'active');
+    f.fire('glRosterSearchClose','click');assert.ok(f.rows.every(row=>!row.dataset.rosterSearchMatch));
+  }
 });
 test('Siege supports player search and scrolls to the matching row',()=>{
   const f=fixture('siege');assert.equal(f.node('glRosterSearch').hidden,false);

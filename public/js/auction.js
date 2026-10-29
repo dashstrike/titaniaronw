@@ -98,7 +98,7 @@
     el('auctionMessage').className='alert '+(error?'alert-danger':'alert-info');
     el('auctionMessage').hidden=!text;
   }
-  async function rpc(name,args){
+  async function rpc(name,args){ca
     if(accessory){
       name=name.replace('card_auction','accessory_auction');
       if(args?.p_card_ids){args={p_member_id:args.p_member_id,p_accessory_ids:args.p_card_ids};}

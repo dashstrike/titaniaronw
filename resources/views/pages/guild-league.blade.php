@@ -8,6 +8,14 @@
 <link rel="stylesheet" href="{{ asset('css/pages/guild-league.css') }}?v={{ filemtime(public_path('css/pages/guild-league.css')) }}">
 @endpush
 
+@push('head')
+<script src="{{ asset('js/roster-search.js') }}?v={{ filemtime(public_path('js/roster-search.js')) }}" defer></script>
+@endpush
+
+@push('modals')
+@include('partials.roster-search', ['publicSearch' => true, 'searchLabel' => 'Find My Name'])
+@endpush
+
 @section('content')
 <div class="page">
   <header class="viewerbar card flex-row align-items-center justify-content-between flex-wrap gap-3 p-3 mb-3">

@@ -12,8 +12,17 @@
   75%{border-color:#67ef9e;box-shadow:0 0 12px #67ef9e80,0 0 24px #67ef9e30}
 }
 @media(prefers-reduced-motion:reduce){#glRosterSearchToggle{animation:none;box-shadow:0 0 12px rgba(var(--bs-primary-rgb),.4)!important}}
-body:is([data-event="guild_league"],[data-event="siege"]) #teamsWrap .slot[data-roster-search-match]{background:rgba(var(--bs-warning-rgb),.15);outline:1px solid var(--bs-warning);scroll-margin-top:100px;scroll-margin-bottom:140px}
-body:is([data-event="guild_league"],[data-event="siege"]) #teamsWrap .slot[data-roster-search-match="active"]{background:rgba(var(--bs-warning-rgb),.3);outline:3px solid var(--bs-warning)}
+body:is([data-event="guild_league"],[data-event="siege"]) #teamsWrap .slot[data-roster-search-match],
+body:is([data-view="guild"],[data-view="siege"]) #content .slot[data-roster-search-match]{background:rgba(var(--bs-warning-rgb),.15);outline:1px solid var(--bs-warning);scroll-margin-top:100px;scroll-margin-bottom:140px}
+body:is([data-event="guild_league"],[data-event="siege"]) #teamsWrap .slot[data-roster-search-match="active"],
+body:is([data-view="guild"],[data-view="siege"]) #content .slot[data-roster-search-match="active"]{background:rgba(var(--bs-warning-rgb),.15);outline:3px solid var(--bs-primary);animation:roster-match-rgb 5s linear infinite}
+@keyframes roster-match-rgb{
+  0%,100%{outline-color:#a970ff;background-color:#a970ff30;box-shadow:0 0 12px #a970ff80}
+  25%{outline-color:#ff528e;background-color:#ff528e30;box-shadow:0 0 12px #ff528e80}
+  50%{outline-color:#4de5ff;background-color:#4de5ff30;box-shadow:0 0 12px #4de5ff80}
+  75%{outline-color:#67ef9e;background-color:#67ef9e30;box-shadow:0 0 12px #67ef9e80}
+}
+@media(prefers-reduced-motion:reduce){:is(#teamsWrap,#content) .slot[data-roster-search-match="active"]{animation:none!important}}
 @media print{#glRosterSearch{display:none!important}}
 body[data-event="guild_league"] #classBreakdown,
 body[data-event="siege"] #classBreakdown { display: none; }
