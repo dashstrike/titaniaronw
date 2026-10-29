@@ -5,21 +5,22 @@
   const roster=document.getElementById(publicSearch?'content':'teamsWrap');
   const app=document.getElementById('app');
   if(!root||!roster||(!publicSearch&&!app))return;
-  const panel=document.getElementById('glRosterSearchPanel');
-  const toggle=document.getElementById('glRosterSearchToggle');
+  const controls=document.getElementById('glRosterSearchControls');
   const input=document.getElementById('glRosterSearchInput');
   const count=document.getElementById('glRosterSearchCount');
   const previous=document.getElementById('glRosterSearchPrevious');
   const next=document.getElementById('glRosterSearchNext');
   const normalize=value=>String(value).normalize('NFKC').trim().toLocaleLowerCase();
-  let matches=[],active=-1,lastQuery='',timer;
+  let matches=[],active=-1,lastQuery='',focused=false,timer;
   const rowKey=row=>publicSearch?String([...roster.querySelectorAll('.slot')].indexOf(row)):`${row.dataset.team}:${row.dataset.slot}`;
   function clearHighlights(){
     roster.querySelectorAll('[data-roster-search-match]').forEach(row=>row.removeAttribute('data-roster-search-match'));
   }
   function showActive(scroll){
     matches.forEach((row,index)=>row.dataset.rosterSearchMatch=index===active?'active':'match');
-    count.textContent=lastQuery?(matches.length?`${active+1} of ${matches.length} matches`:'No roster matches.'): 'Enter a player name.';
+    count.textContent=lastQuery?(matches.length?`${active+1}/${matches.length}`:'0 matches'):'';
+    controls.hidden=!lastQuery;
+    root.dataset.expanded=String(focused||Boolean(lastQuery));
     previous.disabled=next.disabled=matches.length<2;
     if(scroll&&matches[active])matches[active].scrollIntoView({block:'center',inline:'nearest',behavior:window.matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth'});
   }
@@ -28,7 +29,7 @@
     const query=normalize(input.value);
     const oldKey=query===lastQuery&&matches[active]?rowKey(matches[active]):null;
     clearHighlights();lastQuery=query;
-    matches=query&&!root.hidden&&!panel.hidden?[...roster.querySelectorAll(publicSearch?'.slot':'.slot.filled')].filter(row=>{
+    matches=query&&!root.hidden?[...roster.querySelectorAll(publicSearch?'.slot':'.slot.filled')].filter(row=>{
       const name=row.querySelector(publicSearch?'.member-name':'.slot-name');
       // Read the IGN's text nodes only; nationality flags and other decorations
       // are not part of the searchable player name.
@@ -43,31 +44,29 @@
     if(!matches.length)return;
     active=(active+direction+matches.length)%matches.length;showActive(true);
   }
-  function close(focus){
-    clearTimeout(timer);panel.hidden=true;toggle.setAttribute('aria-expanded','false');
-    input.value='';lastQuery='';matches=[];active=-1;clearHighlights();showActive(false);
-    if(focus)toggle.focus();
-  }
   function syncVisibility(){
     root.hidden=publicSearch?!roster.querySelector('.slot .member-name'):app.hidden||!['guild_league','siege'].includes(document.body.dataset.event);
-    if(root.hidden)close(false);
+    if(root.hidden){clearTimeout(timer);input.value='';lastQuery='';matches=[];active=-1;clearHighlights();showActive(false);}
   }
-  toggle.addEventListener('click',()=>{
-    if(!panel.hidden){close(true);return;}
-    panel.hidden=false;toggle.setAttribute('aria-expanded','true');input.focus();
+  input.addEventListener('input',()=>{
+    root.dataset.expanded=String(focused||Boolean(normalize(input.value)));
+    clearTimeout(timer);timer=setTimeout(()=>search(true),180);
   });
-  document.getElementById('glRosterSearchClose').addEventListener('click',()=>close(true));
-  input.addEventListener('input',()=>{clearTimeout(timer);timer=setTimeout(()=>search(true),180);});
+  input.addEventListener('focus',()=>{focused=true;root.dataset.expanded='true';});
+  input.addEventListener('blur',()=>{focused=false;root.dataset.expanded=String(Boolean(normalize(input.value)));});
+  document.getElementById('glRosterSearchPanel').addEventListener('click',event=>{
+    if(!event.target.closest('button'))input.focus();
+  });
   previous.addEventListener('click',()=>move(-1));next.addEventListener('click',()=>move(1));
   root.addEventListener('keydown',event=>{
-    if(event.key==='Escape'){event.preventDefault();close(true);}
+    if(event.key==='Escape'){event.preventDefault();search(false);input.blur();}
     if(event.target===input&&event.key==='Enter'){event.preventDefault();move(event.shiftKey?-1:1);}
   });
   new MutationObserver(syncVisibility).observe(document.body,{attributes:true,attributeFilter:['data-event']});
   if(!publicSearch)new MutationObserver(syncVisibility).observe(app,{attributes:true,attributeFilter:['hidden']});
   new MutationObserver(()=>{
     if(publicSearch)syncVisibility();
-    if(root.hidden||panel.hidden||!input.value)return;
+    if(root.hidden||!input.value)return;
     clearTimeout(timer);timer=setTimeout(()=>search(false),80);
   }).observe(roster,{childList:true,subtree:true,characterData:true});
   syncVisibility();

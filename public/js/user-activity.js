@@ -70,13 +70,12 @@
   if(popup){
     popupToggle.addEventListener('click',()=>{
       if(!popupPanel.hidden){closePopup(true);return;}
-      document.getElementById('glRosterSearchClose')?.click();
       popupPanel.hidden=false;popupToggle.setAttribute('aria-expanded','true');
       document.getElementById('onlineUsersPopupClose').focus();loadOnline();
     });
     document.getElementById('onlineUsersPopupClose').addEventListener('click',()=>closePopup(true));
     popup.addEventListener('keydown',event=>{if(event.key==='Escape'){event.preventDefault();closePopup(true);}});
-    document.getElementById('glRosterSearchToggle')?.addEventListener('click',()=>closePopup());
+    document.getElementById('glRosterSearchInput')?.addEventListener('focus',()=>closePopup());
     const app=document.getElementById('app');
     if(app)new MutationObserver(popupVisibility).observe(app,{attributes:true,attributeFilter:['hidden']});
     setInterval(loadOnline,30000);
