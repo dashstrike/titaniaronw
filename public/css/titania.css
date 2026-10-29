@@ -2,6 +2,10 @@
 [hidden] { display: none !important; }
 #toastStack { z-index: 1200; }
 #glRosterSearch{z-index:1040}
+#onlineUsersPopup{z-index:1040}
+#onlineUsersPopupPanel{width:min(380px,calc(100vw - 32px));max-height:70vh;overflow-y:auto;border:2px solid var(--bs-info);box-shadow:0 0 12px rgba(var(--bs-info-rgb),.5),0 0 24px rgba(var(--bs-info-rgb),.2)}
+#onlineUsersPopupToggle{min-height:44px;background:#0b0b0d;color:#fff;border:2px solid var(--bs-info);box-shadow:0 0 12px rgba(var(--bs-info-rgb),.5),0 0 24px rgba(var(--bs-info-rgb),.2)}
+#onlineUsersPopupToggle:hover,#onlineUsersPopupToggle:focus-visible{background:var(--bs-info-bg-subtle);border-color:var(--bs-info);color:#fff}
 #glRosterSearchPanel{width:min(360px,calc(100vw - 32px));border:2px solid var(--bs-primary);animation:roster-search-rgb 5s linear infinite}
 #glRosterSearchToggle{min-height:44px;background:#0b0b0d;color:#fff;border:2px solid var(--bs-primary);animation:roster-search-rgb 5s linear infinite}
 #glRosterSearchToggle:hover,#glRosterSearchToggle:focus-visible,#glRosterSearchToggle[aria-expanded="true"]{background:#181222;color:#fff}
@@ -23,7 +27,7 @@ body:is([data-view="guild"],[data-view="siege"]) #content .slot[data-roster-sear
   75%{outline-color:#67ef9e;background-color:#67ef9e30;box-shadow:0 0 12px #67ef9e80}
 }
 @media(prefers-reduced-motion:reduce){:is(#teamsWrap,#content) .slot[data-roster-search-match="active"]{animation:none!important}}
-@media print{#glRosterSearch{display:none!important}}
+@media print{#glRosterSearch,#onlineUsersPopup{display:none!important}}
 body[data-event="guild_league"] #classBreakdown,
 body[data-event="siege"] #classBreakdown { display: none; }
 #titania-content {

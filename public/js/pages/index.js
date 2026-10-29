@@ -481,7 +481,10 @@
   }
 
   async function logoutAccount(){
-    if(supabaseClient)await supabaseClient.auth.signOut();
+    if(supabaseClient){
+      const result=await window.TitaniaSignOut(supabaseClient);
+      if(result.error){window.TitaniaToast('Sign out failed',result.error.message,'err');return;}
+    }
     location.reload();
   }
 

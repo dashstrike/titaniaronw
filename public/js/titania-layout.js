@@ -94,7 +94,7 @@
     if (logout) logout.addEventListener('click', async () => {
       logout.disabled = true;
       try {
-        const result = await client.auth.signOut();
+        const result = await window.TitaniaSignOut(client);
         if (result.error) throw result.error;
         location.href = new URL('dashboard', document.baseURI).href;
       } catch (error) {

@@ -39,10 +39,16 @@
         </div>
     </div>
     @stack('modals')
+    @unless($publicPage)
+    @include('partials.online-users-popup')
+    @endunless
     <div class="toast-container position-fixed top-0 end-0 p-3" id="toastStack" aria-live="polite" aria-atomic="false"></div>
     <script src="{{ asset('vendor/darkone/js/vendor.min.js') }}"></script>
     <script src="{{ asset('vendor/darkone/js/app.js') }}"></script>
     <script src="{{ asset('js/titania-layout.js') }}?v={{ filemtime(public_path('js/titania-layout.js')) }}"></script>
     <script src="{{ asset('js/tooltips-global.js') }}?v={{ filemtime(public_path('js/tooltips-global.js')) }}"></script>
+    @unless($publicPage)
+    <script src="{{ asset('js/user-activity.js') }}?v={{ filemtime(public_path('js/user-activity.js')) }}"></script>
+    @endunless
 </body>
 </html>

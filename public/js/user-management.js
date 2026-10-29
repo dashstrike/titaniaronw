@@ -9,6 +9,23 @@
   const refreshBtn=document.getElementById('refreshBtn');
   let client=null;
   let currentUserId='';
+  let canViewHistory=false,historyBusy=false;
+  const activityTime=value=>new Date(value).toLocaleString('en-GB',{timeZone:'Asia/Kuala_Lumpur',day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:true})+' GMT+8';
+
+  async function loadLoginHistory(){
+    if(!canViewHistory||historyBusy)return;
+    historyBusy=true;
+    const target=document.getElementById('loginHistoryList');
+    const refresh=document.getElementById('loginHistoryRefresh');
+    refresh.disabled=true;
+    try{
+      const {data,error}=await client.rpc('get_latest_user_logins');
+      if(error)throw error;
+      const rows=data||[];
+      target.innerHTML=rows.length?'<table class="table table-centered align-middle mb-0"><thead><tr><th>User</th><th>Latest login (GMT+8)</th><th>Logout (GMT+8)</th></tr></thead><tbody>'+rows.map(row=>`<tr><td>${esc(row.display_name)}</td><td>${esc(activityTime(row.signed_in_at))}</td><td>${row.logged_out_at?esc(activityTime(row.logged_out_at)):'—'}</td></tr>`).join('')+'</tbody></table>':'<p class="text-muted mb-0">No login sessions recorded yet.</p>';
+    }catch(error){target.textContent='Could not load login history: '+error.message;}
+    finally{historyBusy=false;refresh.disabled=false;}
+  }
 
   const ROLE_OPTIONS=[
     ['pending','Pending'],
@@ -166,9 +183,14 @@
     }
 
     await loadUsers();
+    const permission=await client.rpc('can_view_login_history');
+    canViewHistory=!permission.error&&permission.data===true;
+    document.getElementById('loginHistoryPanel').hidden=!canViewHistory;
+    if(canViewHistory)await loadLoginHistory();
   }
 
-  refreshBtn.addEventListener('click',loadUsers);
+  refreshBtn.addEventListener('click',()=>{loadUsers();loadLoginHistory();});
+  document.getElementById('loginHistoryRefresh').addEventListener('click',loadLoginHistory);
   list.addEventListener('click',event=>{
     const saveButton=event.target.closest('[data-save]');
     const deleteButton=event.target.closest('[data-delete]');
