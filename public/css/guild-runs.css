@@ -356,6 +356,13 @@ body[data-guild-runs-page="public"] #titania-content .public-run-type{font-size:
 #auctionPage[data-organizer="true"] :is(#auctionRegistrations,#accessoryRegistrations) [data-auction-card] > .card-body{
   overflow-x:auto;
 }
+#auctionPage[data-organizer="true"] .dropdown-menu{
+  /* Darkone's top:100% and slide animation override Popper's fixed position. */
+  inset:0 auto auto 0!important;
+  margin:0!important;
+  animation:none!important;
+  overflow:visible;
+}
 #auctionPage[data-organizer="true"] :is(#auctionRegistrations,#accessoryRegistrations) [data-auction-card] ul{
   min-width:max(100%,480px);
   width:max-content;

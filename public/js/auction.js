@@ -179,6 +179,23 @@
     const choices=row.next_bidder?[['outbid_again','Outbid Again'],['clear_next','Clear Next Bidder'],['withdraw','Withdraw']]:[...(Number(row.ducks??1)>0?[['carry_forward','Carry Forward']]:[]),['add_duck','Add 1 Duck','text-info'],...(Number(row.ducks??1)>0?[['remove_duck','Remove 1 Duck','text-danger']]:[]),['withdraw','Withdraw']];
     return received+`<span class="dropdown ms-2"><button class="btn btn-sm btn-outline-secondary" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="More actions for ${esc(row.member_name)}"><i class="fa-solid fa-ellipsis-vertical" aria-hidden="true"></i></button><span class="dropdown-menu dropdown-menu-end">${choices.map(([kind,label,color])=>`<button type="button" class="dropdown-item${color?' '+color:''}" data-workflow="${kind}" data-registration="${esc(row.id)}">${label}</button>`).join('')}</span></span>`;
   }
+  function setupActionDropdown(button){
+    const menu=button.nextElementSibling;
+    // A native top-layer popover avoids clipping by the scrollable player list.
+    // Keep the menu in its original DOM position so Bootstrap keyboard handling
+    // and the existing delegated auction action clicks continue to work.
+    if(menu&&typeof menu.showPopover==='function'){
+      menu.setAttribute('popover','manual');
+      button.addEventListener('show.bs.dropdown',()=>menu.showPopover());
+      button.addEventListener('hidden.bs.dropdown',()=>{
+        if(menu.matches(':popover-open'))menu.hidePopover();
+      });
+    }
+    window.bootstrap.Dropdown.getOrCreateInstance(button,{popperConfig:config=>({
+      ...config,strategy:'fixed',
+      modifiers:[...(config.modifiers||[]),{name:'computeStyles',options:{adaptive:false}}],
+    })});
+  }
   function render(){
     el('auctionFields').disabled=!loaded||busy;
     if(workflow&&canManage){el('auctionBanForm').hidden=false;el('auctionBanFields').disabled=!loaded||busy;el('auctionActionHistory').hidden=false;}
@@ -193,7 +210,10 @@
     dropdowns();
     el('auctionTotals').textContent=loaded?`${new Set(rows.map(row=>row.member_id)).size} players · ${rows.length} ${itemLabel} registrations`:'Loading registrations...';
     el('auctionRegistrations').querySelectorAll('[data-auction-details]').forEach(node=>window.bootstrap?.Popover.getInstance(node)?.dispose());
-    el('auctionRegistrations').querySelectorAll('[data-bs-toggle="dropdown"]').forEach(node=>window.bootstrap?.Dropdown.getInstance(node)?.dispose());
+    el('auctionRegistrations').querySelectorAll('[data-bs-toggle="dropdown"]').forEach(node=>{
+      const dropdown=window.bootstrap?.Dropdown.getInstance(node);
+      dropdown?.hide();dropdown?.dispose();
+    });
     el('auctionRegistrations').innerHTML=loaded?cards.map(input=>{
       const name=input.dataset.name;
       const image=input.dataset.image;
@@ -207,7 +227,7 @@
     }).join('').replaceAll('auctionHeading-',prefix+'Heading-').replaceAll('auctionList-',prefix+'List-'):'';
     if(organizerPage&&window.bootstrap?.Dropdown){
       el('auctionRegistrations').querySelectorAll('[data-bs-toggle="dropdown"]').forEach(node=>{
-        new window.bootstrap.Dropdown(node,{popperConfig:config=>({...config,strategy:'fixed'})});
+        setupActionDropdown(node);
       });
     }
     if(accessory&&window.bootstrap?.Popover){
