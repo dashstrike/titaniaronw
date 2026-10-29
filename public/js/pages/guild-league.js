@@ -83,6 +83,7 @@ function normalize(raw){
     roster,
     assignments,
     raidCommanders:raw.raidCommanders||{},
+    raidTeamNames:raw.raidTeamNames||{},
     raidLeaders:raw.raidLeaders||{},
     raidModes:raw.raidModes||{},
     finishedDungeons:Array.isArray(raw.finishedDungeons)?raw.finishedDungeons.map(Number):[],
@@ -146,24 +147,31 @@ function renderPolarity(){
 }
 
 function raidBlock(raid,kind,five){
-  const commander=str(state.raidCommanders[raid.id])||'Not assigned';
+  const commander=raidTeamName(raid);
   const position=kind==='sub'?(['MID','TOP','BOTTOM'].includes(state.raidModes[raid.id])?state.raidModes[raid.id]:'MID'):'';
-  const mode=MAIN_RAIDS.some(r=>r.id===raid.id)?(str(state.raidModes[raid.id]).toUpperCase()==='DEF'?'DEF':'ATK'):'';
+  const savedMode=str(state.raidModes[raid.id]).toUpperCase();
+  const mode=MAIN_RAIDS.some(r=>r.id===raid.id)?(['ATK','DEF','MVP'].includes(savedMode)?savedMode:'ATK'):'';
   const raidTitle=`TEAM <b>${esc(commander)}</b>`;
   return `<div class="raid-block card" data-kind="${kind}">
     <div class="raid-head card-header">
       <div class="raid-name">${raidTitle}</div>
       ${position?`<span class="mode" style="color:${position==='TOP'?'var(--bs-primary)':position==='BOTTOM'?'#ffd34d':'#3b82f6'}"><i class="fa-solid ${position==='TOP'?'fa-circle-up':position==='BOTTOM'?'fa-circle-down':'fa-circle-dot'} me-2" aria-hidden="true"></i>${position==='BOTTOM'?'BTM':position}</span>`:''}
-      ${mode?`<span class="mode ${mode.toLowerCase()}">${mode==='DEF'?'🛡':'⚔'} ${mode}</span>`:''}
+      ${mode?`<span class="mode ${mode==='MVP'?'text-danger bg-danger-subtle d-inline-flex align-items-center':mode.toLowerCase()}">${mode==='MVP'?'<i class="fa-solid fa-dragon me-2" aria-hidden="true"></i>':mode==='DEF'?'🛡 ':'⚔ '}${mode}</span>`:''}
       <div class="raid-line"></div>
     </div>
     <div class="team-grid card-body ${five?'five':''}">${raid.keys.map(k=>teamCard(k,kind)).join('')}</div>
   </div>`;
 }
 
+function raidTeamName(raid){
+  if(!raid)return 'Not assigned';
+  const names=state.raidTeamNames||{};
+  return str(Object.hasOwn(names,raid.id)?names[raid.id]:state.raidCommanders[raid.id]).trim()||'Not assigned';
+}
+
 function teamCard(key,kind,label){
   const raid=raidForParty(key);
-  const teamName=raid?str(state.raidCommanders[raid.id])||'Not assigned':'Not assigned';
+  const teamName=raidTeamName(raid);
   const s=slots(key);
   const noHealer=teamNoHealer(key);
   return `<article class="team-card ${kind} card">

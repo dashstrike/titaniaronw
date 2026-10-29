@@ -258,7 +258,7 @@ begin
     raise exception 'INVALID_RAID_ID';
   end if;
 
-  v_mode := case when upper(coalesce(p_mode,'')) = 'DEF' then 'DEF' else 'ATK' end;
+  v_mode := case when p_raid_id in ('raid_1','raid_2','raid_3') and upper(coalesce(p_mode,'')) = 'MVP' then 'MVP' when upper(coalesce(p_mode,'')) = 'DEF' then 'DEF' else 'ATK' end;
 
   select state into v_state
   from public.planner_state

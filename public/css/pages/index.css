@@ -225,6 +225,11 @@
 #titania-content .raid-mode-toggle:hover{border-color:#59658c;background:#151c31;}
 #titania-content .raid-mode-toggle.atk{color:var(--bs-warning);border-color:#8a6a20;background:#1b180f;}
 #titania-content .raid-mode-toggle.def{color:#73b7ff;border-color:#315b85;background:#0e1724;}
+#titania-content .raid-mode-toggle[data-raid-mode-toggle^="raid_"],
+#titania-content .raid-mode-toggle[data-raid-mode-toggle^="sub_raid_"]{gap:0;min-width:0;padding:4px 9px;font-family:inherit;font-size:12.5px;line-height:1.5;letter-spacing:normal;border-color:currentColor;}
+#titania-content .raid-mode-toggle[data-raid-mode-toggle^="sub_raid_"]{background:transparent;}
+#titania-content .raid-mode-toggle.atk[data-raid-mode-toggle^="raid_"]{background:rgba(var(--bs-warning-rgb),.09);}
+#titania-content .raid-mode-toggle.def[data-raid-mode-toggle^="raid_"]{color:var(--bs-info);background:rgba(71,145,220,.08);}
 #titania-content .main-raid-line{height:1px;flex:1;background:var(--line-soft);min-width:20px;}
 #titania-content .raid-commander-control,
 #titania-content .raid-leader-control{display:flex;align-items:center;gap:7px;color:var(--muted);font-size:12px;white-space:nowrap;}

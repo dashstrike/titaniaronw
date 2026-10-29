@@ -261,7 +261,7 @@ begin
     raise exception 'INVALID_RAID_ID';
   end if;
 
-  v_mode := case when upper(coalesce(p_mode,'')) = 'DEF' then 'DEF' else 'ATK' end;
+  v_mode := case when p_raid_id in ('raid_1','raid_2','raid_3') and upper(coalesce(p_mode,'')) = 'MVP' then 'MVP' when upper(coalesce(p_mode,'')) = 'DEF' then 'DEF' else 'ATK' end;
 
   select state into v_state
   from public.planner_state
@@ -531,6 +531,7 @@ declare
   v_published boolean := false;
   v_assignments jsonb := '{}'::jsonb;
   v_raid_commanders jsonb := '{}'::jsonb;
+  v_raid_team_names jsonb := '{}'::jsonb;
   v_raid_leaders jsonb := '{}'::jsonb;
   v_raid_modes jsonb := '{}'::jsonb;
   v_roster jsonb := '[]'::jsonb;
@@ -653,6 +654,11 @@ begin
   where (m.item->>'name') = any(v_used_names);
 
   select coalesce(jsonb_object_agg(e.key, e.value), '{}'::jsonb)
+    into v_raid_team_names
+  from jsonb_each(coalesce(v_state->'raidTeamNames', '{}'::jsonb)) e
+  where e.key ~ v_raid_pattern;
+
+  select coalesce(jsonb_object_agg(e.key, e.value), '{}'::jsonb)
     into v_raid_commanders
   from jsonb_each(coalesce(v_state->'raidCommanders', '{}'::jsonb)) e
   where e.key ~ v_raid_pattern;
@@ -710,6 +716,7 @@ begin
     'roster', v_roster,
     'assignments', v_assignments,
     'raidCommanders', v_raid_commanders,
+    'raidTeamNames', v_raid_team_names,
     'raidLeaders', v_raid_leaders,
     'raidModes', v_raid_modes,
     'siegeRaidGroups', v_siege_raid_groups,

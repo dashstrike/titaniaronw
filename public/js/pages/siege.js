@@ -120,6 +120,7 @@ function normalize(raw){
     roster,
     assignments,
     raidCommanders:raw.raidCommanders||{},
+    raidTeamNames:raw.raidTeamNames||{},
     raidLeaders:raw.raidLeaders||{},
     raidModes:raw.raidModes||{},
     siegeRaidGroups:normalizeSiegeRaidGroups(raw.siegeRaidGroups),
@@ -181,7 +182,7 @@ function renderPolarity(){
 }
 
 function raidBlock(raid,kind,five){
-  const commander=str(state.raidCommanders[raid.id])||'Not assigned';
+  const commander=raidTeamName(raid);
   const isSiegeRaid=DEFAULT_SIEGE_RAIDS.some(r=>r.id===raid.id);
   const mode=isSiegeRaid?(str(state.raidModes[raid.id]).toUpperCase()==='DEF'?'DEF':'ATK'):'';
   const modeLabel=mode==='DEF'?'RESPAWN':'CAPTURE';
@@ -197,9 +198,15 @@ function raidBlock(raid,kind,five){
   </div>`;
 }
 
+function raidTeamName(raid){
+  if(!raid)return 'Not assigned';
+  const names=state.raidTeamNames||{};
+  return str(Object.hasOwn(names,raid.id)?names[raid.id]:state.raidCommanders[raid.id]).trim()||'Not assigned';
+}
+
 function teamCard(key,kind,label){
   const raid=raidForParty(key);
-  const teamName=raid?str(state.raidCommanders[raid.id])||'Not assigned':'Not assigned';
+  const teamName=raidTeamName(raid);
   const s=slots(key);
   const noHealer=teamNoHealer(key);
   return `<article class="team-card ${kind} card">

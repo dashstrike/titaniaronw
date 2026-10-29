@@ -158,6 +158,7 @@
     assignments:createEmptyAssignments(),
     finishedDungeons:[],
     raidCommanders:createDefaultRaidCommanders(),
+    raidTeamNames:{},
     raidLeaders:createDefaultRaidLeaders(),
     raidModes:createDefaultRaidModes(),
     siegeRaidGroups:createDefaultSiegeRaidGroups(),
@@ -798,7 +799,7 @@
     const out=createDefaultRaidModes();
     ALL_GUILD_STYLE_RAIDS.forEach(raid=>{
       const mode=stringValue(source[raid.id]).trim().toUpperCase();
-      out[raid.id]=SUB_RAIDS.some(item=>item.id===raid.id)?(['MID','TOP','BOTTOM'].includes(mode)?mode:'MID'):(mode==='DEF'?'DEF':'ATK');
+      out[raid.id]=SUB_RAIDS.some(item=>item.id===raid.id)?(['MID','TOP','BOTTOM'].includes(mode)?mode:'MID'):(MAIN_RAIDS.some(item=>item.id===raid.id)&&mode==='MVP'?'MVP':mode==='DEF'?'DEF':'ATK');
     });
     return out;
   }
@@ -912,6 +913,9 @@
     const finishedDungeons=[...new Set(rawFinished.map(v=>toInt(v,0,999)).filter(v=>v>=1&&v<=CONFIG.dungeonCount))].sort((a,b)=>a-b);
     const siegeRaidGroups=normalizeSiegeRaidGroups(input.siegeRaidGroups||(input.srg&&typeof input.srg==='object'?input.srg:{}));
     const raidCommanders=normalizeRaidCommanders(input.raidCommanders||(input.rc&&typeof input.rc==='object'?input.rc:(input.rl&&typeof input.rl==='object'?input.rl:{})),assignments,siegeRaidGroups);
+    const raidTeamNames={};
+    const rawTeamNames=input.raidTeamNames&&typeof input.raidTeamNames==='object'?input.raidTeamNames:{};
+    ALL_GUILD_STYLE_RAIDS.forEach(raid=>{raidTeamNames[raid.id]=stringValue(Object.hasOwn(rawTeamNames,raid.id)?rawTeamNames[raid.id]:raidCommanders[raid.id]).trim().slice(0,60);});
     const raidLeaders=normalizeRaidLeaders(input.raidLeaders||(input.rlead&&typeof input.rlead==='object'?input.rlead:{}),assignments,siegeRaidGroups);
     const raidModes=normalizeRaidModes(input.raidModes||(input.rm&&typeof input.rm==='object'?input.rm:{}));
     const rawHistory=Array.isArray(input.membershipHistory)?input.membershipHistory:(Array.isArray(input.mh)?input.mh:[]);
@@ -951,7 +955,7 @@
       siege:normalizeEventUpdate(rawEventUpdates.siege,false),
       polarityZone:normalizeEventUpdate(rawEventUpdates.polarityZone)
     };
-    return {roster,assignments,finishedDungeons,raidCommanders,raidLeaders,raidModes,siegeRaidGroups,membershipHistory:membershipHistory.slice(-CONFIG.maxHistory),publicVisibility,eventUpdates,revision:0,updatedAt:'',spreadsheetName:''};
+    return {roster,assignments,finishedDungeons,raidCommanders,raidTeamNames,raidLeaders,raidModes,siegeRaidGroups,membershipHistory:membershipHistory.slice(-CONFIG.maxHistory),publicVisibility,eventUpdates,revision:0,updatedAt:'',spreadsheetName:''};
   }
 
   function enforceUnique(assignments,keys){
@@ -1348,20 +1352,27 @@
       modeToggle=`<button class="raid-mode-toggle gap-0" style="color:${position==='TOP'?'var(--bs-primary)':position==='BOTTOM'?'#ffd34d':'#3b82f6'};border-color:currentColor" data-raid-mode-toggle="${raid.id}" type="button" title="Switch this raid between MID, TOP and BOTTOM"><i class="fa-solid ${position==='TOP'?'fa-circle-up':position==='BOTTOM'?'fa-circle-down':'fa-circle-dot'} me-2" aria-hidden="true"></i>${position==='BOTTOM'?'BTM':position}</button>`;
     }
     if(isGuildMainRaid||isSiegeRaid){
-      const raidMode=state.raidModes&&state.raidModes[raid.id]==='DEF'?'DEF':'ATK';
+      const raidMode=isGuildMainRaid&&state.raidModes?.[raid.id]==='MVP'?'MVP':state.raidModes&&state.raidModes[raid.id]==='DEF'?'DEF':'ATK';
       const siegeModeLabel=raidMode==='DEF'?'RESPAWN':'CAPTURE';
-      const modeIcon=isSiegeRaid?(raidMode==='DEF'?'↻':'🏰'):(raidMode==='DEF'?'🛡':'⚔');
+      const modeIcon=isSiegeRaid?(raidMode==='DEF'?'↻':'🏰'):(raidMode==='MVP'?'<i class="fa-solid fa-dragon me-2" aria-hidden="true"></i>':raidMode==='DEF'?'🛡':'⚔');
       const modeLabel=isSiegeRaid?siegeModeLabel:raidMode;
-      const modeTitle=isSiegeRaid?'Switch this raid between CAPTURE and RESPAWN':'Switch this raid between ATK and DEF';
-      modeToggle=`<button class="raid-mode-toggle ${raidMode.toLowerCase()}" data-raid-mode-toggle="${raid.id}" type="button" title="${modeTitle}">${modeIcon} ${modeLabel}</button>`;
+      const modeTitle=isSiegeRaid?'Switch this raid between CAPTURE and RESPAWN':'Switch this raid between ATK, DEF and MVP';
+      modeToggle=`<button class="raid-mode-toggle ${raidMode==='MVP'?'text-danger border-danger bg-danger-subtle gap-0':raidMode.toLowerCase()}" data-raid-mode-toggle="${raid.id}" type="button" title="${modeTitle}">${modeIcon}${raidMode==='MVP'?'':' '}${modeLabel}</button>`;
     }
-    const title=`TEAM ${displayCommander}`;
+    const customTeam=isGuildMainRaid||isSiegeRaid||SUB_RAIDS.some(item=>item.id===raid.id);
+    const title=customTeam?`<label class="d-inline-flex align-items-center mb-0"><span class="me-2">TEAM</span><input class="form-control form-control-sm w-auto" type="text" maxlength="60" aria-label="Team name" placeholder="Team name" data-raid-team-name="${raid.id}" value="${escapeHtml(stringValue(state.raidTeamNames?.[raid.id]))}" ${userCanEdit()?'':'disabled'}></label>`:`TEAM ${escapeHtml(displayCommander)}`;
     const selectedLeader=!isPolarityRaid?stringValue(state.raidLeaders&&state.raidLeaders[raid.id]).trim():'';
     const leaderDropText=selectedLeader||'Drag member here';
     const raidLeaderControl=isPolarityRaid?'':`<label class="raid-leader-control"><b>Raid Leader</b><span class="raid-leader-drop ${selectedLeader?'':'empty'}" data-raid-leader-drop="${raid.id}" role="button" tabindex="0" title="Drag the member who created this raid party here">${raidLeaderIcon()}<span class="raid-leader-drop-name">${escapeHtml(leaderDropText)}</span></span></label>`;
     let gridClass=raid.kind==='star'?'pz-star-raid-grid':raid.kind==='normal'?'pz-normal-raid-grid':'main-raid-grid';
     if(!isPolarityRaid&&raid.keys.length===5)gridClass+=' five';
-    return `<div class="main-raid-block card mb-0" data-raid="${raid.id}"><div class="main-raid-head card-header ${currentEvent==='guild_league'&&SUB_RAIDS.some(item=>item.id===raid.id)?'': 'bg-primary-subtle'}"><div class="main-raid-title">${escapeHtml(title)}</div>${modeToggle}<div class="main-raid-line"></div><label class="raid-commander-control"><b>Raid Commander</b><span class="raid-commander-drop ${selectedCommander?'':'empty'}" data-raid-commander-drop="${raid.id}" role="button" tabindex="0" title="Drag any member from this raid here to make them Raid Commander">${raidCommanderIcon()}<span class="raid-commander-drop-name">${escapeHtml(dropText)}</span></span></label>${raidLeaderControl}</div><div class="${gridClass} card-body">${raid.keys.map(teamCardHtml).join('')}</div></div>`;
+    return `<div class="main-raid-block card mb-0" data-raid="${raid.id}"><div class="main-raid-head card-header ${currentEvent==='guild_league'&&SUB_RAIDS.some(item=>item.id===raid.id)?'': 'bg-primary-subtle'}"><div class="main-raid-title">${title}</div>${modeToggle}<div class="main-raid-line"></div><label class="raid-commander-control"><b>Raid Commander</b><span class="raid-commander-drop ${selectedCommander?'':'empty'}" data-raid-commander-drop="${raid.id}" role="button" tabindex="0" title="Drag any member from this raid here to make them Raid Commander">${raidCommanderIcon()}<span class="raid-commander-drop-name">${escapeHtml(dropText)}</span></span></label>${raidLeaderControl}</div><div class="${gridClass} card-body">${raid.keys.map(teamCardHtml).join('')}</div></div>`;
+  }
+
+  function raidTeamName(raid){
+    if(!raid)return 'Not assigned';
+    if(ALL_GUILD_STYLE_RAIDS.some(item=>item.id===raid.id)&&Object.hasOwn(state.raidTeamNames||{},raid.id))return stringValue(state.raidTeamNames[raid.id]).trim()||'Not assigned';
+    return stringValue(state.raidCommanders?.[raid.id]).trim()||'Not assigned';
   }
 
   function raidForTeam(key){if(key.startsWith('siege_'))return currentSiegeRaids().find(raid=>raid.keys.includes(key))||null;return ALL_RAIDS.find(raid=>!raid.siege&&raid.keys.includes(key))||null;}
@@ -1437,6 +1448,21 @@
     wrap.querySelectorAll('[data-remove-team]').forEach(button=>button.addEventListener('click',event=>{
       event.stopPropagation();removeFromSlot(button.dataset.removeTeam,toInt(button.dataset.removeSlot,0,CONFIG.teamSize-1));
     }));
+    wrap.querySelectorAll('[data-raid-team-name]').forEach(input=>{
+      input.addEventListener('keydown',event=>{event.stopPropagation();if(event.key==='Enter'){event.preventDefault();input.blur();}});
+      input.addEventListener('change',()=>{
+        if(!userCanEdit())return;
+        const raidId=input.dataset.raidTeamName;
+        if(!ALL_GUILD_STYLE_RAIDS.some(raid=>raid.id===raidId))return;
+        const name=input.value.trim().slice(0,60);
+        if(name===stringValue(state.raidTeamNames?.[raidId]))return;
+        state.raidTeamNames={...state.raidTeamNames,[raidId]:name};
+        input.value=name;
+        touchEventUpdate(currentEvent);
+        renderEventLastUpdated();
+        queueSave();
+      });
+    });
     wrap.querySelectorAll('[data-raid-mode-toggle]').forEach(button=>button.addEventListener('click',async event=>{
       event.preventDefault();event.stopPropagation();
       const raidId=button.dataset.raidModeToggle;
@@ -1451,8 +1477,9 @@
       }
       if(!MAIN_RAIDS.some(raid=>raid.id===raidId)&&!siegeRaid)return;
       if(!state.raidModes||typeof state.raidModes!=='object')state.raidModes=createDefaultRaidModes();
-      const previous=state.raidModes[raidId]==='DEF'?'DEF':'ATK';
-      const next=previous==='DEF'?'ATK':'DEF';
+      const modes=siegeRaid?['ATK','DEF']:['ATK','DEF','MVP'];
+      const previous=modes.includes(state.raidModes[raidId])?state.raidModes[raidId]:'ATK';
+      const next=modes[(modes.indexOf(previous)+1)%modes.length];
       state.raidModes[raidId]=next;
       if(siegeRaid){
         commitMutation('Siege raid objective updated');
@@ -1462,7 +1489,8 @@
       setSaveFlag('busy','Saving');quickSaveInFlight+=1;
       try{
         const result=await callServer('saveRaidModeSetting',raidId,next);
-        state.raidModes[raidId]=stringValue(result&&result.mode).toUpperCase()==='DEF'?'DEF':'ATK';
+        const savedMode=stringValue(result&&result.mode).toUpperCase();
+        state.raidModes[raidId]=modes.includes(savedMode)?savedMode:'ATK';
         state.revision=toInt(result&&result.revision,state.revision,Number.MAX_SAFE_INTEGER);
         state.updatedAt=stringValue(result&&result.updatedAt);
         state.updatedBy=currentEditorName();
@@ -1470,7 +1498,7 @@
         renderEventLastUpdated();
         queueSave();
       }catch(error){
-        state.raidModes[raidId]=previous;renderAll();setSaveFlag('err','Save failed');showToast('ATK/DEF save failed',errorMessage(error),'err');
+        state.raidModes[raidId]=previous;renderAll();setSaveFlag('err','Save failed');showToast('Raid mode save failed',errorMessage(error),'err');
       }finally{quickSaveInFlight=Math.max(0,quickSaveInFlight-1);}
     }));
 
@@ -2344,6 +2372,7 @@ Their team assignments and membership history will also be removed. Use Mark Ina
       assignments:value.assignments&&typeof value.assignments==='object'?value.assignments:createEmptyAssignments(),
       finishedDungeons:Array.isArray(value.finishedDungeons)?value.finishedDungeons:[],
       raidCommanders:value.raidCommanders&&typeof value.raidCommanders==='object'?value.raidCommanders:createDefaultRaidCommanders(),
+      raidTeamNames:value.raidTeamNames&&typeof value.raidTeamNames==='object'?value.raidTeamNames:{},
       raidLeaders:value.raidLeaders&&typeof value.raidLeaders==='object'?value.raidLeaders:createDefaultRaidLeaders(),
       raidModes:value.raidModes&&typeof value.raidModes==='object'?value.raidModes:createDefaultRaidModes(),
       siegeRaidGroups:value.siegeRaidGroups&&typeof value.siegeRaidGroups==='object'?value.siegeRaidGroups:createDefaultSiegeRaidGroups(),
@@ -2434,6 +2463,7 @@ Their team assignments and membership history will also be removed. Use Mark Ina
     });
     ALL_GUILD_STYLE_RAIDS.forEach(raid=>{
       const id=raid.id;
+      if(!sameJson(local.raidTeamNames[id],base.raidTeamNames[id]))merged.raidTeamNames[id]=local.raidTeamNames[id]||'';
       if(!sameJson(local.raidLeaders[id],base.raidLeaders[id]))merged.raidLeaders[id]=local.raidLeaders[id]||'';
     });
     [...MAIN_RAIDS,...SUB_RAIDS,...ALL_SIEGE_RAIDS].forEach(raid=>{
@@ -2627,7 +2657,7 @@ Their team assignments and membership history will also be removed. Use Mark Ina
   }
 
   function exportLineup(){
-    const payload={type:'tempest-lineup-export',version:10,exportedAt:new Date().toISOString(),source:'Titania Supabase website',m:state.roster,a:state.assignments,fd:state.finishedDungeons,rc:state.raidCommanders,rlead:state.raidLeaders,rm:state.raidModes,mh:state.membershipHistory,eu:state.eventUpdates};
+    const payload={type:'tempest-lineup-export',version:10,exportedAt:new Date().toISOString(),source:'Titania Supabase website',m:state.roster,a:state.assignments,fd:state.finishedDungeons,rc:state.raidCommanders,raidTeamNames:state.raidTeamNames,rlead:state.raidLeaders,rm:state.raidModes,mh:state.membershipHistory,eu:state.eventUpdates};
     const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});const url=URL.createObjectURL(blob);const link=document.createElement('a');link.href=url;link.download=`guild-lineup-${new Date().toISOString().slice(0,10)}.json`;document.body.appendChild(link);link.click();link.remove();URL.revokeObjectURL(url);showToast('Lineup exported','Roster status, membership history, Guild League, Siege, Polarity Zone, and finished-dungeon marks were included.');
   }
 
@@ -2639,7 +2669,7 @@ Their team assignments and membership history will also be removed. Use Mark Ina
       const imported=normalizeClientState(data);
       const when=data.exportedAt?new Date(data.exportedAt).toLocaleString():'an unknown time';
       if(!userCanEdit()||!await confirmPlannerAction(`Import the lineup exported on ${when}?`,'This will replace the current roster, Guild Status records, membership history, and all event lineups in the Titania database.','Replace data',true)||!userCanEdit())return;
-      state.roster=imported.roster;state.assignments=imported.assignments;state.finishedDungeons=imported.finishedDungeons;state.raidCommanders=imported.raidCommanders;state.raidLeaders=imported.raidLeaders;state.raidModes=imported.raidModes;state.siegeRaidGroups=imported.siegeRaidGroups;state.membershipHistory=imported.membershipHistory;dashboardSelected.clear();clearSelections(false);commitMutation('Lineup imported','all');showToast('Lineup imported','The roster, raid commanders, status history, and event data are being saved to Supabase.');
+      state.roster=imported.roster;state.assignments=imported.assignments;state.finishedDungeons=imported.finishedDungeons;state.raidCommanders=imported.raidCommanders;state.raidTeamNames=imported.raidTeamNames;state.raidLeaders=imported.raidLeaders;state.raidModes=imported.raidModes;state.siegeRaidGroups=imported.siegeRaidGroups;state.membershipHistory=imported.membershipHistory;dashboardSelected.clear();clearSelections(false);commitMutation('Lineup imported','all');showToast('Lineup imported','The roster, raid commanders, status history, and event data are being saved to Supabase.');
     };
     reader.onerror=()=>showToast('Import failed','The file could not be read.','err');reader.readAsText(file);
   }
@@ -2670,7 +2700,7 @@ Their team assignments and membership history will also be removed. Use Mark Ina
     const appendTeamCard=key=>{
       const slots=state.assignments[key];const noHealer=teamHasNoHealer(key);
       const raid=raidForTeam(key);
-      const raidCommanderName=raid?(stringValue(state.raidCommanders&&state.raidCommanders[raid.id]).trim()||'Not assigned'):'Not assigned';
+      const raidCommanderName=raidTeamName(raid);
       let card=`<div class="print-team-card ${currentEvent==='siege'?'siege-party ':''}${noHealer?'no-healer':''}"><div class="print-team-head"><b>${escapeHtml(displayTeamLabel(key))}</b><span title="Team ${escapeAttr(raidCommanderName)}">TEAM ${escapeHtml(raidCommanderName)}</span></div>`;
       slots.forEach((name,index)=>{
         if(!name){card+=`<div class="print-slot-row p-empty ${index===0?'p-party-leader':''}"><span>${index===0?'':'·'}</span><span>${index===0?'Empty leader':'Empty slot'}</span></div>`;return;}
@@ -2696,7 +2726,7 @@ Their team assignments and membership history will also be removed. Use Mark Ina
       }
     }else if(currentEvent==='siege'){
       currentSiegeRaids().forEach(raid=>{
-        const commanderName=stringValue(state.raidCommanders&&state.raidCommanders[raid.id]).trim()||'Not assigned';
+        const commanderName=raidTeamName(raid);
         const raidMode=state.raidModes&&state.raidModes[raid.id]==='DEF'?'DEF':'ATK';
         const modeLabel=raidMode==='DEF'?'RESPAWN':'CAPTURE';
         const modeIcon=raidMode==='DEF'?'↻':'🏰';
@@ -2706,14 +2736,15 @@ Their team assignments and membership history will also be removed. Use Mark Ina
     }else{
       html+=`<div class="print-section-title">Main Battlefield</div>`;
       MAIN_RAIDS.forEach(raid=>{
-        const commanderName=stringValue(state.raidCommanders&&state.raidCommanders[raid.id]).trim()||'Not assigned';
+        const commanderName=raidTeamName(raid);
         const raidMode=state.raidModes&&state.raidModes[raid.id]==='DEF'?'DEF':'ATK';
-        const modeIcon=raidMode==='DEF'?'🛡':'⚔';
-        html+=`<div class="print-raid-block"><div class="print-raid-head"><span>${escapeHtml(raid.label.toUpperCase())} · TEAM ${escapeHtml(commanderName)} <span class="print-raid-mode ${raidMode.toLowerCase()}">${modeIcon} ${raidMode}</span></span></div><div class="print-team-grid print-main-raid-grid">${raid.keys.map(appendTeamCard).join('')}</div></div>`;
+        const guildMode=state.raidModes?.[raid.id]==='MVP'?'MVP':raidMode;
+        const modeIcon=guildMode==='MVP'?'<i class="fa-solid fa-dragon me-2" aria-hidden="true"></i>':guildMode==='DEF'?'🛡':'⚔';
+        html+=`<div class="print-raid-block"><div class="print-raid-head"><span>${escapeHtml(raid.label.toUpperCase())} · TEAM ${escapeHtml(commanderName)} <span class="print-raid-mode ${guildMode==='MVP'?'text-danger bg-danger-subtle border border-danger gap-0':guildMode.toLowerCase()}">${modeIcon}${guildMode==='MVP'?'':' '}${guildMode}</span></span></div><div class="print-team-grid print-main-raid-grid">${raid.keys.map(appendTeamCard).join('')}</div></div>`;
       });
       html+=`<div class="print-section-title"><i class="fa-solid fa-shield-cat mr-2" aria-hidden="true"></i>Sub Battlefield</div>`;
       SUB_RAIDS.forEach(raid=>{
-        const commanderName=stringValue(state.raidCommanders&&state.raidCommanders[raid.id]).trim()||'Not assigned';
+        const commanderName=raidTeamName(raid);
         const printGridClass=raid.keys.length===5?'print-main-raid-grid five':'print-main-raid-grid';
         html+=`<div class="print-raid-block"><div class="print-raid-head"><span>${escapeHtml(raid.label.toUpperCase())} · TEAM ${escapeHtml(commanderName)}</span></div><div class="print-team-grid ${printGridClass}">${raid.keys.map(appendTeamCard).join('')}</div></div>`;
       });
