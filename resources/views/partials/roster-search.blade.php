@@ -1,5 +1,5 @@
 <div id="glRosterSearch" class="position-fixed bottom-0 end-0 p-3" data-public-search="{{ ($publicSearch ?? false) ? 'true' : 'false' }}" hidden>
-    <section id="glRosterSearchPanel" class="card shadow mb-2" aria-labelledby="glRosterSearchTitle" hidden>
+    <section id="glRosterSearchPanel" class="card mb-2" aria-labelledby="glRosterSearchTitle" hidden>
         <div class="card-header d-flex align-items-center justify-content-between gap-2 py-2">
             <h2 id="glRosterSearchTitle" class="h6 mb-0">{{ $searchLabel ?? 'Find Player' }}</h2>
             <button id="glRosterSearchClose" type="button" class="btn btn-sm btn-outline-secondary d-inline-flex align-items-center justify-content-center" aria-label="Close player search"><iconify-icon icon="bx:x" aria-hidden="true"></iconify-icon></button>
