@@ -1,6 +1,20 @@
 /* Darkone theme integration using the planner's existing component selectors. */
 [hidden] { display: none !important; }
 #toastStack { z-index: 1200; }
+#glRosterSearch{z-index:1040}
+#glRosterSearchPanel{width:min(360px,calc(100vw - 32px))}
+#glRosterSearchToggle{min-height:44px;background:#0b0b0d;color:#fff;border:2px solid var(--bs-primary);animation:roster-search-rgb 5s linear infinite}
+#glRosterSearchToggle:hover,#glRosterSearchToggle:focus-visible,#glRosterSearchToggle[aria-expanded="true"]{background:#181222;color:#fff}
+@keyframes roster-search-rgb{
+  0%,100%{border-color:#a970ff;box-shadow:0 0 12px #a970ff80,0 0 24px #a970ff30}
+  25%{border-color:#ff528e;box-shadow:0 0 12px #ff528e80,0 0 24px #ff528e30}
+  50%{border-color:#4de5ff;box-shadow:0 0 12px #4de5ff80,0 0 24px #4de5ff30}
+  75%{border-color:#67ef9e;box-shadow:0 0 12px #67ef9e80,0 0 24px #67ef9e30}
+}
+@media(prefers-reduced-motion:reduce){#glRosterSearchToggle{animation:none;box-shadow:0 0 12px rgba(var(--bs-primary-rgb),.4)!important}}
+body:is([data-event="guild_league"],[data-event="siege"]) #teamsWrap .slot[data-roster-search-match]{background:rgba(var(--bs-warning-rgb),.15);outline:1px solid var(--bs-warning);scroll-margin-top:100px;scroll-margin-bottom:140px}
+body:is([data-event="guild_league"],[data-event="siege"]) #teamsWrap .slot[data-roster-search-match="active"]{background:rgba(var(--bs-warning-rgb),.3);outline:3px solid var(--bs-warning)}
+@media print{#glRosterSearch{display:none!important}}
 body[data-event="guild_league"] #classBreakdown,
 body[data-event="siege"] #classBreakdown { display: none; }
 #titania-content {
