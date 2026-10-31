@@ -11,6 +11,19 @@
   let parties=[];
   let canEdit=false;
   let iconMap={};
+  let rosterRefresh=null;
+  let inactiveIds=new Set();
+
+  function readRoster(state){
+    return (Array.isArray(state?.roster)?state.roster:[]).filter(active)
+      .map(member=>({id:member.id,name:member.name,cls:member.cls}))
+      .sort((a,b)=>String(a.name||'').localeCompare(String(b.name||''),undefined,{sensitivity:'base'}));
+  }
+
+  function readInactiveIds(state){
+    return new Set((Array.isArray(state?.roster)?state.roster:[])
+      .filter(member=>member?.status==='inactive').map(member=>String(member.id)));
+  }
 
   function esc(value){return String(value==null?'':value).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
   function active(member){return member&&member.status!=='inactive';}
@@ -33,15 +46,64 @@
     const [plannerResult,partyResult,iconsResult]=await Promise.all([
       client.from('planner_state').select('state').eq('id',1).single(),
       client.from('party_templates').select('party_no,member_ids,updated_at').order('party_no',{ascending:true}),
-      fetch('./images/job/job-icons.json').then(response=>response.ok?response.json():{}).catch(()=>({}))
+      fetch('./images/job/job-icons.json?v=sea-jobs-20261101').then(response=>response.ok?response.json():{}).catch(()=>({}))
     ]);
     if(plannerResult.error){fail(plannerResult.error.message||'Could not load roster.');return;}
     if(partyResult.error){fail(partyResult.error.message||'Could not load parties.');return;}
 
-    roster=((plannerResult.data&&plannerResult.data.state&&plannerResult.data.state.roster)||[]).filter(active).sort((a,b)=>String(a.name||'').localeCompare(String(b.name||''),undefined,{sensitivity:'base'}));
+    roster=readRoster(plannerResult.data?.state);
+    inactiveIds=readInactiveIds(plannerResult.data?.state);
     parties=partyResult.data||[];
     iconMap=iconsResult||{};
     render();
+    startRosterSync();
+  }
+
+  function refreshRoster(){
+    if(rosterRefresh)return rosterRefresh;
+    rosterRefresh=(async()=>{
+      try{
+        const {data,error}=await client.from('planner_state').select('state').eq('id',1).single();
+        if(error)throw error;
+        const next=readRoster(data?.state);
+        const nextInactive=readInactiveIds(data?.state);
+        if(JSON.stringify(next)!==JSON.stringify(roster)||JSON.stringify([...nextInactive])!==JSON.stringify([...inactiveIds])){
+          roster=next;
+          inactiveIds=nextInactive;
+          // Replace labels/options only: keep every draft slot and save button intact.
+          grid.querySelectorAll('.party-member-select').forEach(select=>{
+            const selectedId=inactiveIds.has(select.value)?'':select.value;
+            if(window.jQuery&&jQuery.fn?.select2&&jQuery(select).data('select2'))jQuery(select).select2('destroy');
+            select.innerHTML=memberOptions(selectedId);
+            select.value=selectedId;
+          });
+          initSelect2();
+          grid.querySelectorAll('.party-card').forEach(card=>updateCount(Number(card.dataset.partyCard)));
+          validateDuplicates();
+          updateSummary();
+        }
+        stateBox.hidden=true;
+      }catch(_error){
+        stateBox.hidden=false;
+        stateBox.className='state error';
+        stateBox.textContent='Member updates could not be refreshed. Retrying automatically; your party selections are preserved.';
+      }
+    })().finally(()=>{rosterRefresh=null;});
+    return rosterRefresh;
+  }
+
+  function startRosterSync(){
+    const refreshVisible=()=>{if(!document.hidden)refreshRoster();};
+    const timer=setInterval(refreshVisible,15000);
+    window.addEventListener('focus',refreshVisible);
+    document.addEventListener('visibilitychange',refreshVisible);
+    window.addEventListener('pagehide',event=>{
+      // Cached pages resume their existing timer when navigating back.
+      if(event.persisted)return;
+      clearInterval(timer);
+      window.removeEventListener('focus',refreshVisible);
+      document.removeEventListener('visibilitychange',refreshVisible);
+    },{once:true});
   }
 
   function fail(message){
@@ -52,13 +114,19 @@
     summary.textContent='Unavailable';
   }
 
-  function options(selectedId,partyNo,slotNo){
+  function memberOptions(selectedId){
     let html='<option value=""></option>';
     for(const member of roster){
       const id=String(member.id||'');
       html+=`<option value="${esc(id)}"${id===selectedId?' selected':''}>${esc(member.name||'Unnamed')} · ${esc(member.cls||'Unknown')}</option>`;
     }
-    return `<select class="party-member-select form-select" data-party="${partyNo}" data-slot="${slotNo}" ${canEdit?'':'disabled'}>${html}</select>`;
+    // Retain unknown/deleted IDs for review; explicitly inactive members are cleared.
+    if(selectedId&&!inactiveIds.has(selectedId)&&!memberById(selectedId))html+=`<option value="${esc(selectedId)}" selected disabled>Unavailable member (removed)</option>`;
+    return html;
+  }
+
+  function options(selectedId,partyNo,slotNo){
+    return `<select class="party-member-select form-select" data-party="${partyNo}" data-slot="${slotNo}" ${canEdit?'':'disabled'}>${memberOptions(selectedId)}</select>`;
   }
 
   function select2Template(option){
@@ -113,7 +181,7 @@
     const cards=[];
     for(let n=1;n<=30;n++){
       const party=byNo.get(n)||{party_no:n,member_ids:[]};
-      const ids=Array.isArray(party.member_ids)?party.member_ids.slice(0,5):[];
+      const ids=Array.isArray(party.member_ids)?party.member_ids.slice(0,5).map(id=>inactiveIds.has(String(id))?'':id):[];
       while(ids.length<5)ids.push('');
       const count=ids.filter(Boolean).length;
       cards.push(`<article class="party-card card" data-party-card="${n}">

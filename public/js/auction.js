@@ -12,7 +12,7 @@
       if(profile.error||!profile.data?.approved)throw new Error('Approved Titania access is required.');
       canManage=profile.data.role==='admin';
     }
-    const iconMap=await fetch('./images/job/job-icons.json').then(response=>response.ok?response.json():{}).catch(()=>({}));
+    const iconMap=await fetch('./images/job/job-icons.json?v=sea-jobs-20261101').then(response=>response.ok?response.json():{}).catch(()=>({}));
     return {client,canManage,iconMap};
   }
   function TitaniaAuction(category){

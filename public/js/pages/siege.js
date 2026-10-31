@@ -63,11 +63,16 @@ const DUNGEONS = Array.from({length:4},(_,i)=>({
 }));
 const HEALERS = new Set(['Acolyte','Priest','High Priest']);
 const CLASS_COLORS = {
-  Swordman:'#e2776b',Knight:'#e2776b','Lord Knight':'#e2776b',Crusader:'#e2776b',Paladin:'#e2776b',
-  Mage:'#579ed3',Wizard:'#579ed3','High Wizard':'#579ed3',Archer:'#e2aa50',Hunter:'#e2aa50',Sniper:'#e2aa50',
-  Bard:'#e2aa50',Clown:'#e2aa50',Dancer:'#e2aa50',Gypsy:'#e2aa50',Acolyte:'#78bd5b',Priest:'#78bd5b','High Priest':'#78bd5b',Monk:'#78bd5b',Champion:'#78bd5b',
-  Thief:'#a579f2',Assassin:'#a579f2','Assassin Cross':'#a579f2',Merchant:'#df9056',Blacksmith:'#df9056',Whitesmith:'#df9056',Alchemist:'#df9056',Creator:'#df9056',
-  Gunslinger:'#b27d69',Rebel:'#b27d69','Night Watch':'#b27d69',Druid:'#32947e',Kanos:'#32947e',Alithea:'#32947e',Unknown:'#8b93b0'
+  'Novice':'#737bd3',
+  'Swordman':'#e2776b','Knight':'#e2776b','Lord Knight':'#e2776b','Crusader':'#e2776b','Paladin':'#e2776b',
+  'Mage':'#579ed3','Wizard':'#579ed3','High Wizard':'#579ed3','Sage':'#579ed3','Scholar':'#579ed3',
+  'Archer':'#e2aa50','Hunter':'#e2aa50','Sniper':'#e2aa50','Bard':'#e2aa50','Clown':'#e2aa50','Dancer':'#e2aa50','Gypsy':'#e2aa50',
+  'Acolyte':'#78bd5b','Priest':'#78bd5b','High Priest':'#78bd5b','Monk':'#78bd5b','Champion':'#78bd5b',
+  'Thief':'#a579f2','Assassin':'#a579f2','Assassin Cross':'#a579f2','Rogue':'#a579f2','Stalker':'#a579f2',
+  'Merchant':'#df9056','Blacksmith':'#df9056','Whitesmith':'#df9056','Alchemist':'#df9056','Creator':'#df9056',
+  'Gunslinger':'#b27d69','Rebel':'#b27d69','Night Watch':'#b27d69',
+  'Druid':'#32947e','Kanos':'#32947e','Alithea':'#32947e',
+  Unknown:'#8b93b0'
 };
 const TITLE_ICON_BASE='./images/title/';
 const TITLE_ICON_SERIES=Object.freeze({traveler:'traveler_green',explorer:'explorer_blue',pathfinder:'pathfinder_purple',trailblazer:'trailblazer_orange',pioneer:'pioneer_red',dawnbringer:'dawnbringer_rainbow'});

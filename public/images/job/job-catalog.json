@@ -1,0 +1,359 @@
+{
+  "source": "https://www.roworlddb.com/sea/skill_planner/",
+  "additionalSource": "https://www.roworlddb.com/sea/jobs/",
+  "catalogSource": "https://www.roworlddb.com/sea/skill-simulator/data/skills_index_en-US.json",
+  "verifiedOn": "2026-11-01",
+  "jobs": [
+    {
+      "id": 101,
+      "name": "Novice",
+      "parent": 0,
+      "icon": "novice.webp",
+      "source": "https://www.roworlddb.com/media/images/job/icon_jsxq_101.webp",
+      "sha256": "e866c84303831650d749da3032a418998719a5fc1139c6e977921a68f8fba3ed",
+      "color": "#737bd3"
+    },
+    {
+      "id": 201,
+      "name": "Swordman",
+      "parent": 101,
+      "icon": "swordman.webp",
+      "source": "https://www.roworlddb.com/media/images/job/icon_jsxq_201.webp",
+      "sha256": "114589a7f178d49480502cc7a1f82df6e5e4ee8d062541310c0979f3cf922666",
+      "color": "#e2776b"
+    },
+    {
+      "id": 212,
+      "name": "Knight",
+      "parent": 201,
+      "icon": "knight.webp",
+      "source": "https://www.roworlddb.com/media/images/job/icon_jsxq_212.webp",
+      "sha256": "1dedee09f2b39421acc4b759c7ffce1cc47b8bb30e4c996d693c088e0bad8677",
+      "color": "#e2776b"
+    },
+    {
+      "id": 213,
+      "name": "Lord Knight",
+      "parent": 212,
+      "icon": "lord-knight.webp",
+      "source": "https://www.roworlddb.com/media/images/job/icon_jsxq_213.webp",
+      "sha256": "d02eaa388dd2d56ed8332fb4b450c0184a4599c77cb3ca3a5e3f33df42f2bf22",
+      "color": "#e2776b"
+    },
+    {
+      "id": 222,
+      "name": "Crusader",
+      "parent": 201,
+      "icon": "crusader.webp",
+      "source": "https://www.roworlddb.com/media/images/job/icon_jsxq_222.webp",
+      "sha256": "7af4067c30be0f8df5296c6be1c3e5914761e58b7affef7491003b25919f0d67",
+      "color": "#e2776b"
+    },
+    {
+      "id": 223,
+      "name": "Paladin",
+      "parent": 222,
+      "icon": "paladin.webp",
+      "source": "https://www.roworlddb.com/media/images/job/icon_jsxq_223.webp",
+      "sha256": "6b86dc55f16d2f1f86544f44b662579e8baf2d4fe6f349d711b72e261e264deb",
+      "color": "#e2776b"
+    },
+    {
+      "id": 301,
+      "name": "Mage",
+      "parent": 101,
+      "icon": "mage.webp",
+      "source": "https://www.roworlddb.com/media/images/job/icon_jsxq_301.webp",
+      "sha256": "9c4e4a075e3dec13fe4d92bbf1187bc7d00b698d33cf49ed288b428c9a0edf19",
+      "color": "#579ed3"
+    },
+    {
+      "id": 312,
+      "name": "Wizard",
+      "parent": 301,
+      "icon": "wizard.webp",
+      "source": "https://www.roworlddb.com/media/images/job/icon_jsxq_312.webp",
+      "sha256": "19f1078c8d1b01ca8364a9f7fe24a46e623f6f7fdb294a155e3e3ac9b47ae6f6",
+      "color": "#579ed3"
+    },
+    {
+      "id": 313,
+      "name": "High Wizard",
+      "parent": 312,
+      "icon": "high-wizard.webp",
+      "source": "https://www.roworlddb.com/media/images/job/icon_jsxq_313.webp",
+      "sha256": "ba35611711da21fa30b457251feeef1341e060041ed4fd0862af5c7706e9f8a8",
+      "color": "#579ed3"
+    },
+    {
+      "id": 322,
+      "name": "Sage",
+      "parent": 301,
+      "icon": "sage.webp",
+      "source": "https://www.roworlddb.com/media/images/job/icon_jsxq_322.webp",
+      "sha256": "9898aaa98b5ea74f3539ae5541e72f6b722b1c6e86bf53403f2d7a975e04b1a2",
+      "color": "#579ed3"
+    },
+    {
+      "id": 323,
+      "name": "Scholar",
+      "parent": 322,
+      "icon": "scholar.webp",
+      "source": "https://www.roworlddb.com/media/images/job/icon_jsxq_323.webp",
+      "sha256": "b746dbd86df61255081f9f79ecdf7bd14819d25a5cbc4b18539fd9cf6799d937",
+      "color": "#579ed3"
+    },
+    {
+      "id": 401,
+      "name": "Archer",
+      "parent": 101,
+      "icon": "archer.webp",
+      "source": "https://www.roworlddb.com/media/images/job/icon_jsxq_401.webp",
+      "sha256": "431b0ebf0bf67d1c85926846772769d19e050343e839b2658f1cc1ded7d50556",
+      "color": "#e2aa50"
+    },
+    {
+      "id": 412,
+      "name": "Hunter",
+      "parent": 401,
+      "icon": "hunter.webp",
+      "source": "https://www.roworlddb.com/media/images/job/icon_jsxq_412.webp",
+      "sha256": "3dd8c7fbfcff1c55626eba0ca0a388f228a84de4ef2c0b3dfdb5190eb782bec9",
+      "color": "#e2aa50"
+    },
+    {
+      "id": 413,
+      "name": "Sniper",
+      "parent": 412,
+      "icon": "sniper.webp",
+      "source": "https://www.roworlddb.com/media/images/job/icon_jsxq_413.webp",
+      "sha256": "cfedeac7efec43e767a346035a33af7e85dea6d5fe1dcba79e840851e41de308",
+      "color": "#e2aa50"
+    },
+    {
+      "id": 422,
+      "name": "Bard",
+      "parent": 401,
+      "icon": "bard.webp",
+      "source": "https://www.roworlddb.com/media/images/job/icon_jsxq_422.webp",
+      "sha256": "d9dc593c6485e28eb56e5ae140ab8ae626f61a18d56ccf91473776810feeb948",
+      "color": "#e2aa50"
+    },
+    {
+      "id": 423,
+      "name": "Clown",
+      "parent": 422,
+      "icon": "clown.webp",
+      "source": "https://www.roworlddb.com/media/images/job/icon_jsxq_423.webp",
+      "sha256": "4df8bee4ebc67eb9c4005bf741ee35599a5d14fd363e3f5e106afec4f13c9094",
+      "color": "#e2aa50"
+    },
+    {
+      "id": 432,
+      "name": "Dancer",
+      "parent": 401,
+      "icon": "dancer.webp",
+      "source": "https://www.roworlddb.com/media/images/job/icon_jsxq_432.webp",
+      "sha256": "2a13ea66b539fc555b52b8792819d85742fc018e8b74ff5ce75bcdf5bbbf57dc",
+      "color": "#e2aa50"
+    },
+    {
+      "id": 433,
+      "name": "Gypsy",
+      "parent": 432,
+      "icon": "gypsy.webp",
+      "source": "https://www.roworlddb.com/media/images/job/icon_jsxq_433.webp",
+      "sha256": "5edbc48f998bc43a7b7cb6e509f93cbd6ade6fc545a5df63326944d5cc770b5f",
+      "color": "#e2aa50"
+    },
+    {
+      "id": 501,
+      "name": "Acolyte",
+      "parent": 101,
+      "icon": "acolyte.webp",
+      "source": "https://www.roworlddb.com/media/images/job/icon_jsxq_501.webp",
+      "sha256": "30ac4583bb7e0ef3129958e9ed9cd37a85ea7fb7897faa0d8c6dbda25bb70ab1",
+      "color": "#78bd5b"
+    },
+    {
+      "id": 512,
+      "name": "Priest",
+      "parent": 501,
+      "icon": "priest.webp",
+      "source": "https://www.roworlddb.com/media/images/job/icon_jsxq_512.webp",
+      "sha256": "cf2fcab372aa75c27f3ba4f1fd398688961d761dc4225175f408691859098ae7",
+      "color": "#78bd5b"
+    },
+    {
+      "id": 513,
+      "name": "High Priest",
+      "parent": 512,
+      "icon": "high-priest.webp",
+      "source": "https://www.roworlddb.com/media/images/job/icon_jsxq_513.webp",
+      "sha256": "ffcfffef14834f36f21d8a23e84ed89eabd0eb44d8b69e88ada678efa94ef6ce",
+      "color": "#78bd5b"
+    },
+    {
+      "id": 522,
+      "name": "Monk",
+      "parent": 501,
+      "icon": "monk.webp",
+      "source": "https://www.roworlddb.com/media/images/job/icon_jsxq_522.webp",
+      "sha256": "2d546c1df6a92a047213e9dce38f5b03582e65cb8e54c962694af503391fd4ed",
+      "color": "#78bd5b"
+    },
+    {
+      "id": 523,
+      "name": "Champion",
+      "parent": 522,
+      "icon": "champion.webp",
+      "source": "https://www.roworlddb.com/media/images/job/icon_jsxq_523.webp",
+      "sha256": "fcc2ae63c054a0552015725b98fca2cc10241a35d9e16091952f03393790c6f5",
+      "color": "#78bd5b"
+    },
+    {
+      "id": 601,
+      "name": "Thief",
+      "parent": 101,
+      "icon": "thief.webp",
+      "source": "https://www.roworlddb.com/media/images/job/icon_jsxq_601.webp",
+      "sha256": "fcb94f1a3758dca2fdb1bd67e22f395653749e638908560ce6777e650aeef659",
+      "color": "#a579f2"
+    },
+    {
+      "id": 612,
+      "name": "Assassin",
+      "parent": 601,
+      "icon": "assassin.webp",
+      "source": "https://www.roworlddb.com/media/images/job/icon_jsxq_612.webp",
+      "sha256": "d9adf9138c8c640cada8382525c42e0e62ac9cdaff683f914a94e68a36a420f8",
+      "color": "#a579f2"
+    },
+    {
+      "id": 613,
+      "name": "Assassin Cross",
+      "parent": 612,
+      "icon": "assassin-cross.webp",
+      "source": "https://www.roworlddb.com/media/images/job/icon_jsxq_613.webp",
+      "sha256": "68b0a3e94257f5a031ec5897c18c3708d70d27f91875c6ed670f394cec55f458",
+      "color": "#a579f2"
+    },
+    {
+      "id": 622,
+      "name": "Rogue",
+      "parent": 601,
+      "icon": "rogue.webp",
+      "source": "https://www.roworlddb.com/media/images/job/icon_jsxq_622.webp",
+      "sha256": "d1475615d813d38a7ff0e6523b2771685c976d16e5dd0f1c4a6eb2080290ee37",
+      "color": "#a579f2"
+    },
+    {
+      "id": 623,
+      "name": "Stalker",
+      "parent": 622,
+      "icon": "stalker.webp",
+      "source": "https://www.roworlddb.com/media/images/job/icon_jsxq_623.webp",
+      "sha256": "3ca6f907a0f1d92f51793199a0129df29703acceceb7936a8faac2a24f2b3f61",
+      "color": "#a579f2"
+    },
+    {
+      "id": 701,
+      "name": "Merchant",
+      "parent": 101,
+      "icon": "merchant.webp",
+      "source": "https://www.roworlddb.com/media/images/job/icon_jsxq_701.webp",
+      "sha256": "5160a87ba706adde1a7abd00d92ac9d024c8b58739aafefa76f51b75d5cb34fe",
+      "color": "#df9056"
+    },
+    {
+      "id": 712,
+      "name": "Blacksmith",
+      "parent": 701,
+      "icon": "blacksmith.webp",
+      "source": "https://www.roworlddb.com/media/images/job/icon_jsxq_712.webp",
+      "sha256": "cb264827c85ef6a7063d75c286d73f9c6d3637b6115e8c33253144eda133b727",
+      "color": "#df9056"
+    },
+    {
+      "id": 713,
+      "name": "Whitesmith",
+      "parent": 712,
+      "icon": "whitesmith.webp",
+      "source": "https://www.roworlddb.com/media/images/job/icon_jsxq_713.webp",
+      "sha256": "9d782e43590f844fef55fad5ed1068378be70d6475a25c368ad132cbe7657e2c",
+      "color": "#df9056"
+    },
+    {
+      "id": 722,
+      "name": "Alchemist",
+      "parent": 701,
+      "icon": "alchemist.webp",
+      "source": "https://www.roworlddb.com/media/images/job/icon_jsxq_722.webp",
+      "sha256": "9a1da4856e9758d44f3801ac1f1cb758dcaba4708e6ee18e32e22012f7dd42fb",
+      "color": "#df9056"
+    },
+    {
+      "id": 723,
+      "name": "Creator",
+      "parent": 722,
+      "icon": "creator.webp",
+      "source": "https://www.roworlddb.com/media/images/job/icon_jsxq_723.webp",
+      "sha256": "657ad4ca9e49648451a6cd6e272a51b75a0f6dff1ca02ececbfb204c9623287e",
+      "color": "#df9056"
+    },
+    {
+      "id": 801,
+      "name": "Gunslinger",
+      "parent": 101,
+      "icon": "gunslinger.webp",
+      "source": "https://www.roworlddb.com/media/images/job/icon_jsxq_801.webp",
+      "sha256": "93c3ae386f3b1530be715e03185c592586df6e45f2504eeb73e95ecc02fa0dd1",
+      "color": "#b27d69"
+    },
+    {
+      "id": 812,
+      "name": "Rebel",
+      "parent": 801,
+      "icon": "rebel.webp",
+      "source": "https://www.roworlddb.com/media/images/job/icon_jsxq_812.webp",
+      "sha256": "913ac83f15c250f9e543c675befd9f0f9cd0170e08b06881b1d6c532766f847c",
+      "color": "#b27d69"
+    },
+    {
+      "id": 813,
+      "name": "Night Watch",
+      "parent": 812,
+      "icon": "night-watch.webp",
+      "source": "https://www.roworlddb.com/media/images/job/icon_jsxq_813.webp",
+      "sha256": "928e2164cc510def0f1b82e41461bd6e0a6298af79e422f5918dea4f5937563b",
+      "color": "#b27d69"
+    },
+    {
+      "id": 901,
+      "name": "Druid",
+      "parent": 101,
+      "icon": "druid.webp",
+      "source": "https://www.roworlddb.com/media/images/job/icon_jsxq_901.webp",
+      "sha256": "46f90b6676100e9130e397b64501cab2831347aad0202a2ad2166a32779671b6",
+      "color": "#32947e"
+    },
+    {
+      "id": 912,
+      "name": "Kanos",
+      "parent": 901,
+      "icon": "kanos.webp",
+      "source": "https://www.roworlddb.com/media/images/job/icon_jsxq_912.webp",
+      "sha256": "cb9d6632cbdee8b1d0372529e6f2dcbe2020753c761f52d83e87441ad7ce63d1",
+      "color": "#32947e"
+    },
+    {
+      "id": 913,
+      "name": "Alithea",
+      "parent": 912,
+      "icon": "alithea.webp",
+      "source": "https://www.roworlddb.com/media/images/job/icon_jsxq_913.webp",
+      "sha256": "b0906f0c9e5fc4a8ba8de28dc6e62b0257f7028a1deb9d1f9df27744d985d931",
+      "color": "#32947e"
+    }
+  ]
+}

@@ -31,6 +31,14 @@
 #titania-content select:not(.form-control):not(.form-select):not(.form-check-input),
 #titania-content textarea:not(.form-control):not(.form-select):not(.form-check-input){font:inherit;}
 #titania-content button:not(.btn){color:inherit;}
+#titania-content .member-class-cell{min-width:170px;}
+#titania-content .member-class-cell .select2-container{max-width:240px;}
+#titania-content .member-class-selection{height:32px;background:var(--bs-body-bg);border-color:var(--bs-border-color);border-radius:var(--bs-border-radius-sm);font-size:.875rem;}
+#titania-content .member-class-selection .select2-selection__rendered{line-height:30px;color:var(--bs-body-color);}
+#titania-content .member-class-selection .select2-selection__arrow{height:30px;}
+#titania-content .member-class-dropdown,#titania-content .member-class-dropdown .select2-search__field{background:var(--bs-body-bg);color:var(--bs-body-color);border-color:var(--bs-border-color);}
+#titania-content .member-class-dropdown .select2-results__option--selected{background:var(--bs-secondary-bg);}
+#titania-content .member-class-dropdown .select2-results__option--highlighted.select2-results__option--selectable{background:var(--bs-primary);color:#fff;}
 #titania-content ::selection{background:var(--violet-glow);}
 #titania-content [hidden]{display:none!important;}
 #titania-content .app{display:flex;min-height:100vh;}

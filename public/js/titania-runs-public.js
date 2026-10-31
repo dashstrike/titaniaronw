@@ -124,7 +124,7 @@
     clearError();
     const [payloadResult,iconsResult]=await Promise.all([
       client.rpc('get_public_guild_runs'),
-      fetch('./images/job/job-icons.json').then(r=>r.ok?r.json():{}).catch(()=>({}))
+      fetch('./images/job/job-icons.json?v=sea-jobs-20261101').then(r=>r.ok?r.json():{}).catch(()=>({}))
     ]);
     if(payloadResult.error)throw payloadResult.error;
     const payload=payloadResult.data||{};

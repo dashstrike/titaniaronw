@@ -14,7 +14,7 @@
         <div class="card-body">
             <ol class="mb-4">
                 <li class="mb-3"><b>Dashboard</b> — review guild statistics, class balance, Gear Rating distribution, top members, and recent membership history. Use the <b>Members</b> tab for roster changes.</li>
-                <li class="mb-3"><b>Members</b> — add or edit members, change class and Gear Rating, mark members inactive when they leave, and reactivate them when they return. Changes autosave to Supabase.</li>
+                <li class="mb-3"><b>Members</b> — class and Gear Rating edits stay as drafts. Click <b>Save</b> in Actions or <b>Save all changes</b> and confirm the review to apply them. Member forms, inactive/reactivate actions, and deletions also require confirmation.</li>
                 <li class="mb-3"><b>Guild League & Siege</b> — drag a member onto a slot. Drag one filled slot onto another to swap. On any device, tap/click a member or filled slot, then tap another slot to place or swap. Use the slot Remove button to remove a member.</li>
                 <li class="mb-3"><b>Siege Parties</b> — drag the ⠿ handle on a Party into another Raid. Each Raid must keep at least 1 Party and can hold up to 5.</li>
                 <li class="mb-3"><b>Attendance</b> — open or create an event, mark actual attendance, use <b>Refresh Members</b> to reload the latest active roster and party list, then finish attendance when complete.</li>

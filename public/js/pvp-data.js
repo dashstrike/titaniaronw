@@ -254,7 +254,7 @@
       const profile=await client.from('profiles').select('role,approved').eq('id',user.id).single();
       if(profile.error||!profile.data?.approved)throw new Error('Approved Titania access is required.');
       canManage=profile.data.role==='admin';
-      iconMap=await fetch('./images/job/job-icons.json').then(response=>response.ok?response.json():{}).catch(()=>({}));
+      iconMap=await fetch('./images/job/job-icons.json?v=sea-jobs-20261101').then(response=>response.ok?response.json():{}).catch(()=>({}));
       el('pvpImportPanel').hidden=!canManage;el('pvpImportFields').disabled=!canManage;
       await load();
     }catch(error){notice(error.message,true);}

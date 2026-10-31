@@ -43,7 +43,7 @@
 
     const [plannerResult,iconsResult]=await Promise.all([
       client.from('planner_state').select('state').eq('id',1).single(),
-      fetch('./images/job/job-icons.json').then(r=>r.ok?r.json():{}).catch(()=>({}))
+      fetch('./images/job/job-icons.json?v=sea-jobs-20261101').then(r=>r.ok?r.json():{}).catch(()=>({}))
     ]);
     if(plannerResult.error)throw plannerResult.error;
     roster=Array.isArray(plannerResult.data&&plannerResult.data.state&&plannerResult.data.state.roster)?plannerResult.data.state.roster:[];

@@ -4,7 +4,7 @@
   if(document.documentElement.dataset.titaniaPage!=='member')return;
 
   const ICON_BASE='./images/job/';
-  const ICON_MAP_URL=`${ICON_BASE}job-icons.json?v=clean-routes-1`;
+  const ICON_MAP_URL=`${ICON_BASE}job-icons.json?v=sea-jobs-20261101`;
   const TITLE_BASE='./images/title/';
   const TITLE_SERIES={
     traveler:'traveler_green',

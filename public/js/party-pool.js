@@ -67,7 +67,7 @@
 
   function loadIcons(){
     if(iconMapPromise)return iconMapPromise;
-    iconMapPromise=fetch('./images/job/job-icons.json?v=clean-routes-1',{cache:'force-cache'})
+    iconMapPromise=fetch('./images/job/job-icons.json?v=sea-jobs-20261101',{cache:'force-cache'})
       .then(response=>response.ok?response.json():{})
       .then(data=>{iconMap=data||{};})
       .catch(error=>console.warn('[Titania] Could not load Party Pool job icons:',error));
@@ -80,15 +80,22 @@
     try{client=supabaseClient;}catch(_e){return;}
     if(!client)return;
     loading=true;
-    const [result]=await Promise.all([
-      client.from('party_templates').select('party_no,member_ids,updated_at').order('party_no',{ascending:true}),
-      loadIcons()
-    ]);
-    loading=false;
-    if(result.error){console.warn('Party Pool load failed',result.error);return;}
-    parties=result.data||[];
-    loaded=true;
-    renderPartyPool();
+    try{
+      const [result]=await Promise.all([
+        client.from('party_templates').select('party_no,member_ids,updated_at').order('party_no',{ascending:true}),
+        loadIcons()
+      ]);
+      if(result.error)throw result.error;
+      const next=result.data||[];
+      const changed=!loaded||JSON.stringify(next)!==JSON.stringify(parties);
+      parties=next;
+      loaded=true;
+      if(changed)renderPartyPool();
+    }catch(error){
+      console.warn('Party Pool load failed',error);
+    }finally{
+      loading=false;
+    }
   }
 
   function renderPartyPool(){
@@ -105,10 +112,11 @@
     }
 
     list.innerHTML=saved.map(party=>{
-      const members=(party.member_ids||[]).map(memberFromId).filter(Boolean);
+      const members=(party.member_ids||[]).map(memberFromId).filter(activeMember);
       const full=party.member_ids.length===5&&members.length===5&&members.every(activeMember)&&new Set(party.member_ids).size===5;
       const rows=(party.member_ids||[]).map(id=>{
         const member=memberFromId(id);
+        if(member&&!activeMember(member))return '';
         const src=iconFor(member);
         return `<div class="party-pool-member">${src?`<img class="party-pool-job-icon" src="${esc(src)}" alt="" title="${esc(member.cls||'')}">`:''}<span class="party-pool-member-name">${esc(member?member.name:'Member unavailable')}</span></div>`;
       }).join('');

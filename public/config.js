@@ -13,7 +13,7 @@ document.write('<script src="./js/organizer-role.js?v=clean-routes-1"><\/script>
 document.write('<link rel="stylesheet" href="./css/attendance-page.css?v=attendance-alignment-4">');
 document.write('<script src="./js/attendance-delete.js?v=closed-readonly-1"><\/script>');
 document.write('<script src="./js/attendance-layout.js?v=clean-routes-1"><\/script>');
-document.write('<script src="./js/party-pool.js?v=party-roster-ready-1"><\/script>');
+document.write('<script src="./js/party-pool.js?v=independent-party-templates-1"><\/script>');
 document.write('<script src="./js/siege-polarity-label.js?v=clean-routes-1"><\/script>');
 document.write('<script src="./js/dashboard-weekly-ranking.js?v=stable-ranking-1"><\/script>');
 

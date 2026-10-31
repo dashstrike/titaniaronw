@@ -2,7 +2,7 @@
   'use strict';
 
   const ICON_BASE='./images/job/';
-  const MAP_URL=`${ICON_BASE}job-icons.json?v=clean-routes-1`;
+  const MAP_URL=`${ICON_BASE}job-icons.json?v=sea-jobs-20261101`;
   let iconMap={};
   let ready=false;
   let queued=false;

@@ -11,15 +11,16 @@
   });
 
   const CLASSES = Object.freeze([
+    'Novice',
     'Swordman','Knight','Lord Knight','Crusader','Paladin',
-    'Mage','Wizard','High Wizard',
-    'Archer','Hunter','Sniper',
-    'Bard','Clown','Dancer','Gypsy',
+    'Mage','Wizard','High Wizard','Sage','Scholar',
+    'Archer','Hunter','Sniper','Bard','Clown','Dancer','Gypsy',
     'Acolyte','Priest','High Priest','Monk','Champion',
-    'Thief','Assassin','Assassin Cross',
+    'Thief','Assassin','Assassin Cross','Rogue','Stalker',
     'Merchant','Blacksmith','Whitesmith','Alchemist','Creator',
     'Gunslinger','Rebel','Night Watch',
-    'Druid','Kanos','Alithea','Unknown'
+    'Druid','Kanos','Alithea',
+    'Unknown'
   ]);
   const HEALERS = Object.freeze(['Acolyte','Priest','High Priest']);
   const INACTIVE_REASONS = Object.freeze(['Left Guild','Removed from Guild','Temporary Break','Transferred','Inactive Player','Other']);
@@ -35,15 +36,16 @@
    * Every promoted job keeps the color of its originating job family.
    */
   const CLASS_COLORS = Object.freeze({
-    Swordman:'#e2776b',Knight:'#e2776b','Lord Knight':'#e2776b',Crusader:'#e2776b',Paladin:'#e2776b',
-    Mage:'#579ed3',Wizard:'#579ed3','High Wizard':'#579ed3',
-    Archer:'#e2aa50',Hunter:'#e2aa50',Sniper:'#e2aa50',
-    Bard:'#e2aa50',Clown:'#e2aa50',Dancer:'#e2aa50',Gypsy:'#e2aa50',
-    Acolyte:'#78bd5b',Priest:'#78bd5b','High Priest':'#78bd5b',Monk:'#78bd5b',Champion:'#78bd5b',
-    Thief:'#a579f2',Assassin:'#a579f2','Assassin Cross':'#a579f2',
-    Merchant:'#df9056',Blacksmith:'#df9056',Whitesmith:'#df9056',Alchemist:'#df9056',Creator:'#df9056',
-    Gunslinger:'#b27d69',Rebel:'#b27d69','Night Watch':'#b27d69',
-    Druid:'#32947e',Kanos:'#32947e',Alithea:'#32947e',Unknown:'#8b93b0'
+    'Novice':'#737bd3',
+    'Swordman':'#e2776b','Knight':'#e2776b','Lord Knight':'#e2776b','Crusader':'#e2776b','Paladin':'#e2776b',
+    'Mage':'#579ed3','Wizard':'#579ed3','High Wizard':'#579ed3','Sage':'#579ed3','Scholar':'#579ed3',
+    'Archer':'#e2aa50','Hunter':'#e2aa50','Sniper':'#e2aa50','Bard':'#e2aa50','Clown':'#e2aa50','Dancer':'#e2aa50','Gypsy':'#e2aa50',
+    'Acolyte':'#78bd5b','Priest':'#78bd5b','High Priest':'#78bd5b','Monk':'#78bd5b','Champion':'#78bd5b',
+    'Thief':'#a579f2','Assassin':'#a579f2','Assassin Cross':'#a579f2','Rogue':'#a579f2','Stalker':'#a579f2',
+    'Merchant':'#df9056','Blacksmith':'#df9056','Whitesmith':'#df9056','Alchemist':'#df9056','Creator':'#df9056',
+    'Gunslinger':'#b27d69','Rebel':'#b27d69','Night Watch':'#b27d69',
+    'Druid':'#32947e','Kanos':'#32947e','Alithea':'#32947e',
+    Unknown:'#8b93b0'
   });
 
   const MAIN_KEYS = Object.freeze(Array.from({length:CONFIG.mainTeams},(_,i)=>`main_${i+1}`));
@@ -195,6 +197,7 @@
   let dashboardSortDir = 'asc';
   let dashboardClassFilter = 'All';
   let dashboardSelected = new Set();
+  const memberDrafts = new Map();
   let statusModalMemberName = null;
   let statusModalMode = 'inactive';
   let saveTimer = null;
@@ -482,6 +485,7 @@
   }
 
   async function logoutAccount(){
+    if(!await resolveMemberDraftNavigation())return;
     if(supabaseClient){
       const result=await window.TitaniaSignOut(supabaseClient);
       if(result.error){window.TitaniaToast('Sign out failed',result.error.message,'err');return;}
@@ -645,6 +649,17 @@
 
   function wireStaticControls(){
     wirePlannerScrolling();
+    document.addEventListener('click',async event=>{
+      if(!memberDrafts.size||event.defaultPrevented||event.button!==0||event.ctrlKey||event.metaKey||event.shiftKey||event.altKey)return;
+      const link=event.target.closest('a[href]');
+      if(!link||link.hasAttribute('download')||(link.target&&link.target!=='_self'))return;
+      const raw=link.getAttribute('href');
+      if(!raw||raw.startsWith('#'))return;
+      const target=new URL(link.href,document.baseURI);
+      if(!['http:','https:'].includes(target.protocol))return;
+      event.preventDefault();event.stopImmediatePropagation();
+      if(await resolveMemberDraftNavigation())location.assign(target.href);
+    },true);
     document.getElementById('eventTabs').addEventListener('click',event=>{
       const button = event.target.closest('[data-event]');
       if(!button) return;
@@ -703,7 +718,7 @@
       else clearSelections();
     });
     window.addEventListener('beforeunload',event=>{
-      if(!dirty && !saveInFlight && quickSaveInFlight===0) return;
+      if(!dirty && !saveInFlight && quickSaveInFlight===0 && memberDrafts.size===0) return;
       event.preventDefault();
       event.returnValue='';
     });
@@ -1019,8 +1034,10 @@
     });
   }
 
-  function setEvent(eventName){
+  async function setEvent(eventName){
     if(!['dashboard','manage_members','guild_league','siege','attendance','polarity_zone'].includes(eventName)) return;
+    if(eventName!==currentEvent&&!await resolveMemberDraftNavigation())return;
+    if(currentEvent==='manage_members'&&eventName!=='manage_members')destroyMemberClassSelects(document.getElementById('teamsWrap'));
     currentEvent=eventName;
     try{localStorage.setItem('roworld_sheets_event_v1',eventName);}catch(error){}
     statusFilter='All';
@@ -1171,7 +1188,7 @@
       return;
     }
     if(currentEvent==='manage_members'){
-      bar.innerHTML=hintIcon()+`<div><b>Members:</b> add or edit members, change class and Gear Rating, mark members inactive when they leave, and reactivate them when they return. Every change autosaves to Supabase.</div>`;
+      bar.innerHTML=hintIcon()+`<div><b>Members:</b> class and Gear Rating edits stay as drafts. Use <b>Save</b> in Actions or <b>Save all changes</b>, then confirm the review. Member and status forms also ask for confirmation before saving.</div>`;
       return;
     }
     const extra=currentEvent==='polarity_zone'?` · <b>Bringing teams down:</b> drag a team's handle (or tap it, then tap a target card) from Star onto an empty Normal Dungeon team. Star is copied; Normal Dungeon teams are moved.`:currentEvent==='siege'?` · <b>Siege Parties:</b> drag the ⠿ handle on a Party into another Raid. Each Raid must keep at least 1 Party and can hold up to 5.`:'';
@@ -1833,7 +1850,8 @@
 
   function openMemberModal(name){
     editingMemberName=name;
-    const member=name?memberByName[name]:null;
+    const saved=name?memberByName[name]:null;
+    const member=saved?{...saved,...memberDrafts.get(saved.id)}:null;
     document.getElementById('memberModalTitle').textContent=member?'Edit member':'Add member';
     document.getElementById('memberNameInput').value=member?member.name:'';
     populateClassOptions(document.getElementById('memberClassInput'),member?member.cls:'Hunter');
@@ -1880,7 +1898,8 @@
     member.updatedBy=stringValue(currentProfile&&currentProfile.display_name).trim()||stringValue(currentProfile&&currentProfile.email).trim()||'Unknown user';
   }
 
-  function saveMemberFromModal(){
+  async function saveMemberFromModal(){
+    if(!userCanEdit())return;
     const wasEditing=Boolean(editingMemberName);
     const name=document.getElementById('memberNameInput').value.trim();
     const cls=document.getElementById('memberClassInput').value;
@@ -1889,11 +1908,22 @@
     const nationality=Object.prototype.hasOwnProperty.call(NATIONALITIES,nationalityValue)?nationalityValue:'';
     const notes=document.getElementById('memberNotesInput').value.trim().slice(0,500);
     if(!name){showToast('Name required','Enter a member name.','warn');return;}
-    const duplicate=state.roster.find(member=>member.name.toLowerCase()===name.toLowerCase()&&member.name!==editingMemberName);
+    let duplicate=state.roster.find(member=>member.name.toLowerCase()===name.toLowerCase()&&member.name!==editingMemberName);
+    if(duplicate&&(wasEditing||duplicate.status!=='inactive')){showToast('Duplicate member',`A member named ${duplicate.name} already exists.`,'warn');return;}
+    if(!wasEditing&&!duplicate&&state.roster.length>=CONFIG.maxMembers){showToast('Roster full',`The roster limit is ${CONFIG.maxMembers} members.`,'err');return;}
+    const original=wasEditing?memberByName[editingMemberName]:duplicate;
+    const originalSnapshot=original?JSON.stringify(original):null;
+    const modalName=editingMemberName;
+    const summary=[['Name',original?.name,name],['Class',original?.cls,cls],['Gear Rating',original?.gr,gr],['Nationality',original?.nationality||'Not set',nationality||'Not set'],['Notes',original?.notes||'None',duplicate&&!notes?(duplicate.notes||'None'):(notes||'None')]]
+      .filter(([_label,before,after])=>!original||before!==after).map(([label,before,after])=>`${label}: ${original?`${before} → `:''}${after}`).join('\n');
+    if(!await confirmPlannerAction(duplicate?'Save and reactivate existing member?':wasEditing?'Save member changes?':'Add this member?',`${summary||'No member fields have changed.'}${duplicate?'\nThe existing inactive member will be reactivated.':''}`,duplicate?'Save and reactivate':'Save member')||!userCanEdit())return;
+    if(modalName!==editingMemberName||(original&&JSON.stringify(memberById[original.id])!==originalSnapshot)){showToast('Member changed','This member changed during review. Reopen the form and review the latest details.','warn');return;}
+    if(state.roster.some(member=>member.name.toLowerCase()===name.toLowerCase()&&member.id!==original?.id)){showToast('Duplicate member','That name is now used by another member. Review the form again.','warn');return;}
+    if(duplicate)duplicate=memberById[duplicate.id];
     if(duplicate){
       if(!wasEditing&&duplicate.status==='inactive'){
-        if(!confirm(`${duplicate.name} already exists as an inactive member. Reactivate this record instead of creating a duplicate?`))return;
         duplicate.cls=CLASSES.includes(cls)?cls:'Unknown';duplicate.gr=gr;duplicate.nationality=nationality;if(notes)duplicate.notes=notes;
+        memberDrafts.delete(duplicate.id);
         closeMemberModal();
         reactivateMemberRecord(duplicate,todayIso(),'Returned to Guild');
         return;
@@ -1902,6 +1932,7 @@
     }
     if(editingMemberName){
       const member=memberByName[editingMemberName];if(!member)return;
+      memberDrafts.delete(member.id);
       const oldName=member.name;member.name=name.slice(0,120);member.cls=CLASSES.includes(cls)?cls:'Unknown';member.gr=gr;member.nationality=nationality;member.notes=notes;touchMember(member);
       if(oldName!==member.name){
         ALL_KEYS.forEach(key=>state.assignments[key]=state.assignments[key].map(value=>value===oldName?member.name:value));
@@ -1918,10 +1949,12 @@
     commitMutation(wasEditing?'Member updated':'Member added');
   }
 
-  function deleteMember(name){
+  async function deleteMember(name){
     const member=memberByName[name];
-    if(!member)return;
-    if(!confirm(`Permanently delete ${name}?\n\nThis clears the member from every team and removes their membership history. For a normal guild departure, use Mark Inactive instead.`)) return;
+    if(!member||!userCanEdit())return;
+    if(!await confirmPlannerAction(`Permanently delete ${name}?`,'This clears the member from every team and removes their membership history. For a normal guild departure, use Mark Inactive instead.','Delete member',true)||!userCanEdit())return;
+    if(memberById[member.id]!==member){showToast('Member changed','Review the latest member record before deleting.','warn');return;}
+    memberDrafts.delete(member.id);
     ALL_KEYS.forEach(key=>state.assignments[key]=state.assignments[key].map(value=>value===name?null:value));
     const lowerName=member.name.toLowerCase();
     state.membershipHistory=state.membershipHistory.filter(entry=>entry.memberId!==member.id&&stringValue(entry.memberName).toLowerCase()!==lowerName);
@@ -1977,7 +2010,8 @@
     if(other)setTimeout(()=>document.getElementById('statusOtherReasonInput').focus(),0);
   }
 
-  function saveStatusModal(){
+  async function saveStatusModal(){
+    if(!userCanEdit())return;
     const member=memberByName[statusModalMemberName];
     if(!member){closeStatusModal();return;}
     const date=normalizeDateValue(document.getElementById('statusDateInput').value);
@@ -1986,6 +2020,8 @@
     if(reason==='Other')reason=document.getElementById('statusOtherReasonInput').value.trim();
     if(!reason){showToast('Reason required','Enter the reason for this status change.','warn');return;}
     const mode=statusModalMode;
+    if(!await confirmPlannerAction(mode==='reactivate'?`Reactivate ${member.name}?`:`Mark ${member.name} inactive?`,mode==='reactivate'?'The member will become available for assignment again. Previous parties and team positions will not be restored.':'The member will be removed from saved parties and all event teams.',mode==='reactivate'?'Save and reactivate':'Save inactive status',mode!=='reactivate')||!userCanEdit())return;
+    if(memberById[member.id]!==member||statusModalMemberName!==member.name||statusModalMode!==mode){showToast('Member changed','Review the latest member status before saving.','warn');return;}
     closeStatusModal();
     if(mode==='reactivate')reactivateMemberRecord(member,date,reason);
     else markMemberInactiveRecord(member,date,reason);
@@ -2091,6 +2127,7 @@
 
   function renderManageMembersTab(){
     const wrap=document.getElementById('teamsWrap');
+    destroyMemberClassSelects(wrap);
     wrap.innerHTML=renderManageMembersHtml()+renderMembershipHistoryHtml();
     wireDashboard();
   }
@@ -2301,7 +2338,109 @@
     return dashboardSortDir==='desc'?-result:result;
   }
 
+  function stageMemberDraft(id,changes){
+    if(!userCanEdit())return;
+    const member=memberById[id];
+    if(!member)return;
+    const draft={...memberDrafts.get(id)};
+    for(const field of ['cls','gr']){
+      if(!Object.hasOwn(changes,field))continue;
+      const value=field==='cls'?changes.cls:toInt(changes.gr,0,999999999);
+      if(field==='cls'&&!CLASSES.includes(value))continue;
+      if(value===member[field])delete draft[field];else draft[field]=value;
+    }
+    if(Object.keys(draft).length)memberDrafts.set(id,draft);else memberDrafts.delete(id);
+  }
+
+  function memberDraftDescription(member,changes){
+    return Object.entries(changes).map(([field,value])=>`${field==='cls'?'Class':'Gear Rating'}: ${member[field]} → ${value}`).join('\n');
+  }
+
+  async function reviewMemberDrafts(ids,allowDiscard=false){
+    if(!userCanEdit()||plannerConfirmationPending)return false;
+    const entries=ids.map(id=>{
+      const member=memberById[id],draft=memberDrafts.get(id);
+      if(!member||!draft){memberDrafts.delete(id);return null;}
+      const changes=Object.fromEntries(Object.entries(draft).filter(([field,value])=>value!==member[field]));
+      if(!Object.keys(changes).length){memberDrafts.delete(id);return null;}
+      return {id,name:member.name,changes,before:Object.fromEntries(Object.keys(changes).map(field=>[field,member[field]]))};
+    }).filter(Boolean);
+    if(!entries.length){rerenderManageMembers();return true;}
+    if(!window.Swal){showToast('Confirmation unavailable','Refresh the page and try again. Your drafts have not been saved.','warn');return false;}
+    const event=currentEvent;
+    plannerConfirmationPending=true;
+    let result;
+    try{
+      result=await Swal.fire({
+        title:entries.length===1?`Save changes for ${entries[0].name}?`:`Save changes for ${entries.length} members?`,
+        text:entries.map(entry=>`${entry.name}\n${memberDraftDescription(entry.before,entry.changes)}`).join('\n\n'),
+        icon:'question',showCancelButton:true,showDenyButton:allowDiscard,
+        didOpen:()=>{const content=Swal.getHtmlContainer();if(content)content.style.whiteSpace='pre-line';},
+        confirmButtonText:'Save changes',denyButtonText:'Discard changes',cancelButtonText:allowDiscard?'Keep editing':'Cancel',
+        focusCancel:true,reverseButtons:true,background:'var(--bs-secondary-bg)',color:'var(--bs-body-color)',
+        confirmButtonColor:'var(--bs-primary)',cancelButtonColor:'var(--bs-secondary)'
+      });
+    }finally{plannerConfirmationPending=false;}
+    if(event!==currentEvent)return false;
+    if(allowDiscard&&result.isDenied){entries.forEach(entry=>memberDrafts.delete(entry.id));rerenderManageMembers();return true;}
+    if(!result.isConfirmed||!userCanEdit())return false;
+    if(entries.some(entry=>!memberById[entry.id]||Object.entries(entry.before).some(([field,value])=>memberById[entry.id][field]!==value)||Object.entries(entry.changes).some(([field,value])=>memberDrafts.get(entry.id)?.[field]!==value))){
+      showToast('Member changed','The data changed during review. Review your drafts again before saving.','warn');return false;
+    }
+    entries.forEach(entry=>{
+      const member=memberById[entry.id];
+      Object.assign(member,entry.changes);touchMember(member);memberDrafts.delete(entry.id);
+    });
+    commitMutation('Member changes saved');
+    return true;
+  }
+
+  async function discardMemberDrafts(ids){
+    if(!await confirmPlannerAction('Discard unsaved member changes?','The saved member records will be kept.','Discard changes'))return;
+    ids.forEach(id=>memberDrafts.delete(id));rerenderManageMembers();
+  }
+
+  async function resolveMemberDraftNavigation(){
+    if(!memberDrafts.size)return true;
+    if(!await reviewMemberDrafts([...memberDrafts.keys()],true))return false;
+    if(dirty||saveQueued||saveInFlight){
+      await flushSave();
+      if(dirty||saveQueued||saveInFlight){showToast('Save pending','Please wait for the save to finish before leaving Members.','warn');return false;}
+    }
+    return true;
+  }
+
+  function updateMemberDraftActions(row,id){
+    const pending=memberDrafts.has(id);
+    row.querySelectorAll('.dash-row-save,.dash-row-discard').forEach(button=>{button.hidden=!pending;});
+    const notice=document.getElementById('dashDraftNotice');
+    if(notice){notice.hidden=!memberDrafts.size;notice.querySelector('[data-draft-count]').textContent=memberDrafts.size;}
+  }
+
+  function destroyMemberClassSelects(root){
+    if(!root||!(window.jQuery&&jQuery.fn&&jQuery.fn.select2))return;
+    root.querySelectorAll('.dash-row-class').forEach(select=>{
+      if(jQuery(select).hasClass('select2-hidden-accessible'))jQuery(select).select2('destroy');
+    });
+  }
+
+  function initMemberClassSelects(root){
+    root.querySelectorAll('.dash-row-class').forEach(select=>{
+      const changed=()=>{
+        stageMemberDraft(select.dataset.memberId,{cls:select.value});
+        updateMemberDraftActions(select.closest('[data-member-row]'),select.dataset.memberId);
+      };
+      if(window.jQuery&&jQuery.fn&&jQuery.fn.select2){
+        jQuery(select).select2({
+          dropdownParent:jQuery('#titania-content'),width:'100%',minimumResultsForSearch:0,
+          dropdownCssClass:'member-class-dropdown',selectionCssClass:'member-class-selection'
+        }).on('change.memberClassDraft',changed);
+      }else select.addEventListener('change',changed);
+    });
+  }
+
   function renderManageMembersHtml(){
+    for(const id of memberDrafts.keys()){if(!memberById[id])memberDrafts.delete(id);}
     const rows=dashboardVisibleMembers();
     const valid=new Set(state.roster.map(member=>member.name));[...dashboardSelected].forEach(name=>{if(!valid.has(name))dashboardSelected.delete(name);});
     const selectedCount=dashboardSelected.size;const allVisible=rows.length&&rows.every(member=>dashboardSelected.has(member.name));
@@ -2309,11 +2448,13 @@
     return `${sectionHeader('🛠 Manage Members','',`${rows.length} shown · ${activeCount} active · ${inactiveCount} inactive`)}
       <div class="d-flex flex-wrap align-items-center gap-2 mb-3"><input class="edit-input form-control" id="dashSearch" placeholder="Search members…" value="${escapeAttr(dashboardSearch)}" style="width:210px"><div class="d-flex flex-wrap align-items-center gap-2">${['Active','Inactive','All'].map(status=>`<button class="pill ${dashboardGuildStatusFilter===status?'active':''} btn btn-outline-primary btn-sm" data-dashboard-status="${status}">${status}</button>`).join('')}</div><div class="d-flex flex-wrap align-items-center gap-2"><span class="dash-manage-sort-label">Sort</span><button class="pill ${dashboardSortBy==='name'?'active':''} btn btn-outline-primary btn-sm" data-dashboard-sort="name">Name${dashboardSortBy==='name'?(dashboardSortDir==='asc'?' ↑':' ↓'):''}</button><button class="pill ${dashboardSortBy==='gear'?'active':''} btn btn-outline-primary btn-sm" data-dashboard-sort="gear">Gear Rating${dashboardSortBy==='gear'?(dashboardSortDir==='asc'?' ↑':' ↓'):''}</button><button class="pill ${dashboardSortBy==='updated'?'active':''} btn btn-outline-primary btn-sm" data-dashboard-sort="updated">Last Update${dashboardSortBy==='updated'?(dashboardSortDir==='asc'?' ↑':' ↓'):''}</button><select class="form-select w-auto" id="dashClassFilter" title="Filter members by class"><option value="All" ${dashboardClassFilter==='All'?'selected':''}>All Classes</option>${dashboardAvailableClasses().map(([cls,count])=>`<option value="${escapeAttr(cls)}" ${dashboardClassFilter===cls?'selected':''}>${escapeHtml(cls)} (${count})</option>`).join('')}</select></div><label class="d-flex align-items-center gap-2 ms-lg-auto"><input type="checkbox" id="dashSelectAll" ${allVisible?'checked':''} class="form-check-input"> Select all shown</label><span class="text-muted small">${selectedCount} selected</span><button class="btn primary small btn-primary btn-sm" id="dashAddMember">+ Add member</button></div>
       ${selectedCount?`<div class="dash-bulk-bar"><span class="dash-bulk-label">Class</span><select class="edit-input form-select" id="dashBulkClass">${CLASSES.map(cls=>`<option value="${escapeAttr(cls)}">${escapeHtml(cls)}</option>`).join('')}</select><button class="btn small btn-outline-secondary btn-sm" id="dashBulkClassBtn">Apply to ${selectedCount}</button><span class="dash-bulk-label">Set GR</span><input type="number" class="edit-input form-control" id="dashBulkSet" min="0" placeholder="25000"><button class="btn small btn-outline-secondary btn-sm" id="dashBulkSetBtn">Set for ${selectedCount}</button><span class="dash-bulk-label">Adjust GR</span><input type="number" class="edit-input form-control" id="dashBulkAdjust" placeholder="500 or -500"><button class="btn small btn-outline-secondary btn-sm" id="dashBulkAdjustBtn">Adjust ${selectedCount}</button><button class="btn small danger btn-outline-danger btn-sm" id="dashBulkDeleteBtn">Permanently delete ${selectedCount}</button></div>`:''}
+      <div class="alert alert-warning d-flex align-items-center flex-wrap gap-2" id="dashDraftNotice" ${memberDrafts.size?'':'hidden'}><span><b data-draft-count>${memberDrafts.size}</b> member(s) have unsaved changes. Review and save to apply them.</span><button type="button" class="btn btn-primary btn-sm ms-auto" id="dashSaveDrafts">Save all changes</button><button type="button" class="btn btn-danger btn-sm" id="dashDiscardDrafts">Discard all</button></div>
       <div class="card"><div class="table-responsive" id="dashManageTable"><table class="table table-centered table-hover align-middle mb-0"><thead><tr><th aria-label="Select"></th><th>Player</th><th>Status</th><th>Class</th><th>Gear Rating</th><th>Last Updated</th><th class="text-end">Actions</th></tr></thead><tbody>${rows.length?rows.map(member=>{
+        const draft=memberDrafts.get(member.id)||{},shown={...member,...draft},pending=Object.keys(draft).length>0;
         const inactive=member.status==='inactive';
         const detail=inactive?`Since ${formatDate(member.inactiveSince)||'date not recorded'}${member.inactiveReason?` · ${member.inactiveReason}`:''}`:(member.lastReturned?`Returned ${formatDate(member.lastReturned)}`:'Available for teams');
         const updateValue=member.updatedAt?formatMemberUpdate(member.updatedAt):'No edit recorded';
-        return `<tr class="dash-manage-row ${dashboardSelected.has(member.name)?'table-active':''}"><td><input type="checkbox" class="form-check-input dash-row-check" aria-label="Select ${escapeAttr(member.name)}" data-name="${escapeAttr(member.name)}" ${dashboardSelected.has(member.name)?'checked':''}></td><td><div class="d-flex align-items-center gap-2"><span class="class-dot" style="background:${classColor(member.cls)};color:${classColor(member.cls)}"></span><span class="dash-manage-name fw-semibold" title="${escapeAttr(member.name)}">${escapeHtml(member.name)}</span></div></td><td><span class="badge bg-${inactive?'danger':'success'}-subtle text-${inactive?'danger':'success'}">${inactive?'Inactive':'Active'}</span><div class="text-muted small mt-1">${escapeHtml(detail)}</div></td><td><select class="form-select form-select-sm dash-row-class" aria-label="Class for ${escapeAttr(member.name)}" data-name="${escapeAttr(member.name)}">${CLASSES.map(cls=>`<option value="${escapeAttr(cls)}" ${cls===member.cls?'selected':''}>${escapeHtml(cls)}</option>`).join('')}</select></td><td><input type="number" class="form-control form-control-sm dash-row-gr" aria-label="Gear rating for ${escapeAttr(member.name)}" data-name="${escapeAttr(member.name)}" value="${member.gr}" min="0"></td><td class="text-nowrap"><div>${escapeHtml(updateValue)}</div>${member.updatedBy?`<div class="text-muted small">${escapeHtml(member.updatedBy)}</div>`:''}</td><td><div class="d-flex justify-content-end align-items-center gap-2"><button class="btn btn-soft-secondary btn-sm dash-row-edit" data-name="${escapeAttr(member.name)}" title="Edit member details" aria-label="Edit ${escapeAttr(member.name)}"><i class="bx bx-pencil"></i></button>${inactive?`<button class="btn btn-soft-success btn-sm text-nowrap" data-reactivate-member="${escapeAttr(member.name)}">Reactivate</button>`:`<button class="btn btn-soft-warning btn-sm text-nowrap" data-inactivate-member="${escapeAttr(member.name)}">Mark Inactive</button>`}<button class="btn btn-soft-danger btn-sm dash-row-del" data-name="${escapeAttr(member.name)}" title="Permanently delete member" aria-label="Delete ${escapeAttr(member.name)}"><i class="bx bx-trash"></i></button></div></td></tr>`;
+        return `<tr data-member-row="${escapeAttr(member.id)}" class="dash-manage-row ${dashboardSelected.has(member.name)?'table-active':''}"><td><input type="checkbox" class="form-check-input dash-row-check" aria-label="Select ${escapeAttr(member.name)}" data-name="${escapeAttr(member.name)}" ${dashboardSelected.has(member.name)?'checked':''}></td><td><div class="d-flex align-items-center gap-2"><span class="class-dot" style="background:${classColor(shown.cls)};color:${classColor(shown.cls)}"></span><span class="dash-manage-name fw-semibold" title="${escapeAttr(member.name)}">${escapeHtml(member.name)}</span></div></td><td><span class="badge bg-${inactive?'danger':'success'}-subtle text-${inactive?'danger':'success'}">${inactive?'Inactive':'Active'}</span><div class="text-muted small mt-1">${escapeHtml(detail)}</div></td><td class="member-class-cell"><select class="form-select form-select-sm dash-row-class" aria-label="Class for ${escapeAttr(member.name)}" data-member-id="${escapeAttr(member.id)}" ${userCanEdit()?'':'disabled'}>${CLASSES.map(cls=>`<option value="${escapeAttr(cls)}" ${cls===shown.cls?'selected':''}>${escapeHtml(cls)}</option>`).join('')}</select></td><td><input type="number" class="form-control form-control-sm dash-row-gr" aria-label="Gear rating for ${escapeAttr(member.name)}" data-name="${escapeAttr(member.name)}" value="${shown.gr}" min="0" data-member-id="${escapeAttr(member.id)}" ${userCanEdit()?'':'disabled'}></td><td class="text-nowrap"><div>${escapeHtml(updateValue)}</div>${member.updatedBy?`<div class="text-muted small">${escapeHtml(member.updatedBy)}</div>`:''}</td><td><div class="d-flex justify-content-end align-items-center gap-2"><button type="button" class="btn btn-primary btn-sm dash-row-save" data-member-id="${escapeAttr(member.id)}" ${pending?'':'hidden'}><i class="bx bx-save me-1" aria-hidden="true"></i>Save</button><button type="button" class="btn btn-outline-secondary btn-sm dash-row-discard" data-member-id="${escapeAttr(member.id)}" ${pending?'':'hidden'}>Discard</button><button type="button" class="btn btn-primary btn-sm dash-row-edit d-inline-flex align-items-center gap-1" data-name="${escapeAttr(member.name)}" title="Edit member details" aria-label="Edit ${escapeAttr(member.name)}"><i class="bx bx-pencil fs-16" aria-hidden="true"></i><span>Edit</span></button>${inactive?`<button class="btn btn-soft-success btn-sm text-nowrap" data-reactivate-member="${escapeAttr(member.name)}">Reactivate</button>`:`<button class="btn btn-soft-warning btn-sm text-nowrap" data-inactivate-member="${escapeAttr(member.name)}">Mark Inactive</button>`}<button class="btn btn-soft-danger btn-sm dash-row-del" data-name="${escapeAttr(member.name)}" title="Permanently delete member" aria-label="Delete ${escapeAttr(member.name)}"><i class="bx bx-trash"></i></button></div></td></tr>`;
       }).join(''):'<tr><td colspan="7" class="text-center text-muted py-4">No members match this search and status filter.</td></tr>'}</tbody></table></div></div>`;
   }
 
@@ -2341,17 +2482,20 @@
     root.querySelectorAll('.dash-row-edit').forEach(button=>button.addEventListener('click',()=>openMemberModal(button.dataset.name)));
     root.querySelectorAll('[data-inactivate-member]').forEach(button=>button.addEventListener('click',()=>openStatusModal(button.dataset.inactivateMember,'inactive')));
     root.querySelectorAll('[data-reactivate-member]').forEach(button=>button.addEventListener('click',()=>openStatusModal(button.dataset.reactivateMember,'reactivate')));
-    root.querySelectorAll('.dash-row-class').forEach(select=>select.addEventListener('change',()=>{const member=memberByName[select.dataset.name];if(member){member.cls=select.value;touchMember(member);commitMutation('Member class updated');}}));
-    root.querySelectorAll('.dash-row-gr').forEach(input=>input.addEventListener('change',()=>{const member=memberByName[input.dataset.name];if(member){member.gr=toInt(input.value,0,999999999);touchMember(member);commitMutation('Member Gear Rating updated');}}));
+    initMemberClassSelects(root);
+    root.querySelectorAll('.dash-row-gr').forEach(input=>input.addEventListener('input',()=>{stageMemberDraft(input.dataset.memberId,{gr:input.value});updateMemberDraftActions(input.closest('[data-member-row]'),input.dataset.memberId);}));
+    root.querySelectorAll('.dash-row-save').forEach(button=>button.addEventListener('click',()=>reviewMemberDrafts([button.dataset.memberId])));
+    root.querySelectorAll('.dash-row-discard').forEach(button=>button.addEventListener('click',()=>discardMemberDrafts([button.dataset.memberId])));
+    root.querySelector('#dashSaveDrafts')?.addEventListener('click',()=>reviewMemberDrafts([...memberDrafts.keys()]));
+    root.querySelector('#dashDiscardDrafts')?.addEventListener('click',()=>discardMemberDrafts([...memberDrafts.keys()]));
     root.querySelectorAll('.dash-row-del').forEach(button=>button.addEventListener('click',()=>deleteMember(button.dataset.name)));
-    const classButton=root.querySelector('#dashBulkClassBtn');if(classButton)classButton.addEventListener('click',()=>{const cls=document.getElementById('dashBulkClass').value;state.roster.forEach(member=>{if(dashboardSelected.has(member.name)){member.cls=cls;touchMember(member);}});commitMutation('Bulk class update complete');});
-    const setButton=root.querySelector('#dashBulkSetBtn');if(setButton)setButton.addEventListener('click',()=>{const value=toInt(document.getElementById('dashBulkSet').value,0,999999999);state.roster.forEach(member=>{if(dashboardSelected.has(member.name)){member.gr=value;touchMember(member);}});commitMutation('Bulk Gear Rating set');});
-    const adjustButton=root.querySelector('#dashBulkAdjustBtn');if(adjustButton)adjustButton.addEventListener('click',()=>{const delta=Number.parseInt(document.getElementById('dashBulkAdjust').value,10)||0;state.roster.forEach(member=>{if(dashboardSelected.has(member.name)){member.gr=Math.max(0,Math.min(999999999,member.gr+delta));touchMember(member);}});commitMutation('Bulk Gear Rating adjusted');});
-    const deleteButton=root.querySelector('#dashBulkDeleteBtn');if(deleteButton)deleteButton.addEventListener('click',()=>{
-      if(!confirm(`Permanently delete ${dashboardSelected.size} selected members?
-
-Their team assignments and membership history will also be removed. Use Mark Inactive for normal guild departures.`))return;
-      const names=new Set(dashboardSelected);const lowerNames=new Set([...names].map(name=>name.toLowerCase()));const ids=new Set(state.roster.filter(member=>names.has(member.name)).map(member=>member.id));ALL_KEYS.forEach(key=>state.assignments[key]=state.assignments[key].map(value=>names.has(value)?null:value));state.membershipHistory=state.membershipHistory.filter(entry=>!ids.has(entry.memberId)&&!lowerNames.has(stringValue(entry.memberName).toLowerCase()));state.roster=state.roster.filter(member=>!names.has(member.name));dashboardSelected.clear();commitMutation('Selected members permanently deleted');
+    const classButton=root.querySelector('#dashBulkClassBtn');if(classButton)classButton.addEventListener('click',()=>{const cls=document.getElementById('dashBulkClass').value;state.roster.forEach(member=>{if(dashboardSelected.has(member.name))stageMemberDraft(member.id,{cls});});rerenderManageMembers();});
+    const setButton=root.querySelector('#dashBulkSetBtn');if(setButton)setButton.addEventListener('click',()=>{const gr=toInt(document.getElementById('dashBulkSet').value,0,999999999);state.roster.forEach(member=>{if(dashboardSelected.has(member.name))stageMemberDraft(member.id,{gr});});rerenderManageMembers();});
+    const adjustButton=root.querySelector('#dashBulkAdjustBtn');if(adjustButton)adjustButton.addEventListener('click',()=>{const delta=Number.parseInt(document.getElementById('dashBulkAdjust').value,10)||0;state.roster.forEach(member=>{if(dashboardSelected.has(member.name))stageMemberDraft(member.id,{gr:(memberDrafts.get(member.id)?.gr??member.gr)+delta});});rerenderManageMembers();});
+    const deleteButton=root.querySelector('#dashBulkDeleteBtn');if(deleteButton)deleteButton.addEventListener('click',async()=>{
+      const names=new Set(dashboardSelected);
+      if(!userCanEdit()||!await confirmPlannerAction(`Permanently delete ${names.size} selected members?`,'Their team assignments and membership history will also be removed. Use Mark Inactive for normal guild departures.','Delete members',true)||!userCanEdit())return;
+      const lowerNames=new Set([...names].map(name=>name.toLowerCase()));const ids=new Set(state.roster.filter(member=>names.has(member.name)).map(member=>member.id));ids.forEach(id=>memberDrafts.delete(id));ALL_KEYS.forEach(key=>state.assignments[key]=state.assignments[key].map(value=>names.has(value)?null:value));state.membershipHistory=state.membershipHistory.filter(entry=>!ids.has(entry.memberId)&&!lowerNames.has(stringValue(entry.memberName).toLowerCase()));state.roster=state.roster.filter(member=>!names.has(member.name));dashboardSelected.clear();commitMutation('Selected members permanently deleted');
     });
   }
 
@@ -2531,7 +2675,7 @@ Their team assignments and membership history will also be removed. Use Mark Ina
 
   async function syncRemoteIfIdle(){
     if(syncCheckInFlight||!supabaseClient||!currentAuthUser||!currentProfile||!currentProfile.approved)return;
-    if(document.hidden||dirty||saveQueued||saveInFlight||quickSaveInFlight>0||userIsEditingInline())return;
+    if(document.hidden||dirty||saveQueued||saveInFlight||quickSaveInFlight>0||plannerConfirmationPending||userIsEditingInline())return;
     syncCheckInFlight=true;
     try{
       const loaded=await callServer('getPlannerState');

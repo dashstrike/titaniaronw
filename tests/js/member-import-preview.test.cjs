@@ -15,6 +15,15 @@ function apply(roster,rows,extra={}){
 const member=(id,name)=>({id,name,cls:'Night Watch',gr:55884,status:'active'});
 const row=(memberId,csvName,extra={})=>({memberId,csvName,cls:'Night Watch',gr:55884,needsReview:false,...extra});
 
+test('CSV updates every SEA class without replacing member IDs',()=>{
+  const catalog=JSON.parse(fs.readFileSync('public/images/job/job-catalog.json','utf8'));
+  for(const cls of catalog.jobs.map(job=>job.name)){
+    const {next}=apply([member('1','Player')],[row('1','Player',{cls})]);
+    assert.equal(next.roster[0].id,'1');
+    assert.equal(next.roster[0].cls,cls);
+  }
+});
+
 test('confirmed mapping renames same ID and lineup references while retaining history',()=>{
   const {next,original}=apply([member('1','Xaraki')],[row('1','福Le-Xhiaツ')]);
   assert.equal(next.roster[0].id,'1');

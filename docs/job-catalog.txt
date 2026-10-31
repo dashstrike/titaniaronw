@@ -1,0 +1,29 @@
+SEA job catalog and icons
+
+Reference: https://www.roworlddb.com/sea/skill_planner/
+Additional reference: https://www.roworlddb.com/sea/jobs/
+Catalog: https://www.roworlddb.com/sea/skill-simulator/data/skills_index_en-US.json
+Verified: 2026-11-01
+
+The reference catalog contains 39 jobs. All 39 are selectable in Members.
+Novice, Sage, and Rogue complete the previously missing selectable jobs.
+Scholar uses scholar.webp, not the Sage icon. Stalker uses stalker.webp.
+
+public/images/job/job-icons.json is the shared runtime name-to-file mapping.
+public/images/job/job-catalog.json records each reference job's ID, parent,
+local icon filename, source URL, SHA-256 checksum, and family color.
+All 39 files were downloaded from the exact icon paths used by the reference
+planner and compared byte-for-byte. The existing 38 matched; Scholar was added.
+Older icon mappings outside the current SEA catalog are retained for compatibility.
+
+For future jobs, verify the SEA reference, obtain its exact icon, and update
+the selectable CLASSES list, shared icon map, source catalog, and CLASS_COLORS
+in the planner, profile, public-lineup, and public event scripts. Bump the icon
+map cache version in its consumers so browsers fetch the updated mapping.
+
+Run node --test tests/js/*.test.cjs. The class tests check catalog coverage,
+dropdown selection, CSV updates, normalized save/reload behavior, icon checksums,
+and consistent colors across views. Unknown stays an explicit fallback.
+
+Adding class support does not rewrite saved member records. Correct any records
+already stored as Unknown through Members or a reviewed member CSV import.

@@ -4,7 +4,7 @@
   if (document.documentElement.dataset.titaniaPage !== 'member') return;
 
   const ICON_BASE = './images/job/';
-  const MAP_URL = `${ICON_BASE}job-icons.json?v=clean-routes-1`;
+  const MAP_URL = `${ICON_BASE}job-icons.json?v=sea-jobs-20261101`;
   let iconMapPromise = null;
 
   function loadIconMap(){
