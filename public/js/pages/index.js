@@ -2657,7 +2657,7 @@ Their team assignments and membership history will also be removed. Use Mark Ina
   }
 
   function exportLineup(){
-    const payload={type:'tempest-lineup-export',version:10,exportedAt:new Date().toISOString(),source:'Titania Supabase website',m:state.roster,a:state.assignments,fd:state.finishedDungeons,rc:state.raidCommanders,raidTeamNames:state.raidTeamNames,rlead:state.raidLeaders,rm:state.raidModes,mh:state.membershipHistory,eu:state.eventUpdates};
+    const payload={type:'tempest-lineup-export',version:10,exportedAt:new Date().toISOString(),source:'Titania Supabase website',m:state.roster,a:state.assignments,fd:state.finishedDungeons,rc:state.raidCommanders,raidTeamNames:state.raidTeamNames,rlead:state.raidLeaders,rm:state.raidModes,siegeRaidGroups:state.siegeRaidGroups,mh:state.membershipHistory,eu:state.eventUpdates};
     const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});const url=URL.createObjectURL(blob);const link=document.createElement('a');link.href=url;link.download=`guild-lineup-${new Date().toISOString().slice(0,10)}.json`;document.body.appendChild(link);link.click();link.remove();URL.revokeObjectURL(url);showToast('Lineup exported','Roster status, membership history, Guild League, Siege, Polarity Zone, and finished-dungeon marks were included.');
   }
 
