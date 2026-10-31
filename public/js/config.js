@@ -46,7 +46,7 @@ const TITANIA_IS_MEMBER_PAGE = document.documentElement.dataset.titaniaPage==='m
   if (document.querySelector('link[data-titania-mobile-nav]')) return;
   const link = document.createElement('link');
   link.rel = 'stylesheet';
-  link.href = './css/mobile-nav.css?v=mobile-layout-1';
+  link.href = './css/mobile-nav.css?v=raid-card-layout-1';
   link.setAttribute('data-titania-mobile-nav', '1');
   document.head.appendChild(link);
 })();
@@ -56,7 +56,7 @@ const TITANIA_IS_MEMBER_PAGE = document.documentElement.dataset.titaniaPage==='m
   if (document.querySelector('link[data-titania-dashboard-fixes]')) return;
   const link = document.createElement('link');
   link.rel = 'stylesheet';
-  link.href = './css/dashboard-fixes.css?v=inline-refresh-7-clean-routes-1';
+  link.href = './css/dashboard-fixes.css?v=raid-card-layout-1';
   link.setAttribute('data-titania-dashboard-fixes', '1');
   document.head.appendChild(link);
 

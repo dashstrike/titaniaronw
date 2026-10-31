@@ -143,8 +143,7 @@
     max-width: 100%;
     min-width: 0;
   }
-#titania-content .main-raid-grid,
-#titania-content .main-raid-grid.five,
+/* GL/Siege raid rows retain horizontal scrolling from titania.css. */
 #titania-content .pz-star-raid-grid,
 #titania-content .pz-normal-raid-grid,
 #titania-content .pz-dungeon-team-grid,
