@@ -16,10 +16,10 @@ window.TITANIA_FEATURES = Object.freeze({
 
 /* One Font Awesome stylesheet and shared icons for every Titania page. */
 (function loadTitaniaUiIcons(){
-  if (!document.querySelector('link[href*="font-awesome/"]')) {
+  if (!document.querySelector('link[data-titania-font-awesome],link[href*="font-awesome/"],link[href*="vendor/fontawesome/"]')) {
     const link = document.createElement('link');
     link.rel = 'stylesheet';
-    link.href = 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css';
+    link.href = './vendor/fontawesome/css/all.min.css';
     document.head.appendChild(link);
   }
   if (!document.querySelector('link[data-titania-ui-icons]')) {

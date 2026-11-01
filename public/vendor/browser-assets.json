@@ -1,0 +1,142 @@
+{
+  "verifiedOn": "2026-11-01",
+  "packages": [
+    {
+      "name": "sweetalert2",
+      "version": "11.26.25"
+    },
+    {
+      "name": "@supabase/supabase-js",
+      "version": "2.118.0"
+    },
+    {
+      "name": "select2",
+      "version": "4.1.0-rc.0"
+    },
+    {
+      "name": "chart.js",
+      "version": "4.4.7"
+    },
+    {
+      "name": "@fortawesome/fontawesome-free",
+      "version": "6.7.2"
+    }
+  ],
+  "assets": [
+    {
+      "file": "vendor/sweetalert2/LICENSE",
+      "source": "https://cdn.jsdelivr.net/npm/sweetalert2@11.26.25/LICENSE",
+      "sha256": "879aa33feba35b3428c6485fc17cddd8c820d7a8780281aa945e60582a28c4b4"
+    },
+    {
+      "file": "vendor/select2/select2.min.js",
+      "source": "https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js",
+      "sha256": "f7244fff610595b944f76bf3080d74e3af42b5dd234f8f079e698cc39ac966b0"
+    },
+    {
+      "file": "vendor/supabase/LICENSE",
+      "source": "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.118.0/LICENSE",
+      "sha256": "334dd6820e2eaeab2064e7c59001b810566728a28a41a7c1dbf69bbee17d0936"
+    },
+    {
+      "file": "vendor/sweetalert2/sweetalert2.all.min.js",
+      "source": "https://cdn.jsdelivr.net/npm/sweetalert2@11.26.25/dist/sweetalert2.all.min.js",
+      "sha256": "4e86f0e22e4771b5b8aac24c613c661806a678b1afa284d03cf6ad03d3e21a0a"
+    },
+    {
+      "file": "vendor/supabase/supabase.js",
+      "source": "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.118.0/dist/umd/supabase.js",
+      "sha256": "ee3be8de192b97cb1d73d1e95d6b82bb1f6b658c0f97c4ef757fc331996ed3d3"
+    },
+    {
+      "file": "vendor/select2/select2.min.css",
+      "source": "https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css",
+      "sha256": "cda4a81c187015d95ed2c71f1841540b08203cdec5fa2a7d5d1825a3c2166f8c"
+    },
+    {
+      "file": "vendor/select2/LICENSE.md",
+      "source": "https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/LICENSE.md",
+      "sha256": "4ee0cbc51370afde358652a0f977972053729ed578b6a42f5e2a037d114f0b39"
+    },
+    {
+      "file": "vendor/chartjs/LICENSE.md",
+      "source": "https://cdn.jsdelivr.net/npm/chart.js@4.4.7/LICENSE.md",
+      "sha256": "41a84aa2caba645f966a18d9c2056b73e6d3a81d80bc0046bc0011a2634d4cce"
+    },
+    {
+      "file": "vendor/fontawesome/css/all.min.css",
+      "source": "https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.7.2/css/all.min.css",
+      "sha256": "74005d7c17d4a02f2f25404ec0655d9bc2fdaa53166874c87d7b7eec69d9088a"
+    },
+    {
+      "file": "vendor/fontawesome/LICENSE.txt",
+      "source": "https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.7.2/LICENSE.txt",
+      "sha256": "9b914eae88817d63b576eab5aafde7068c7a1abae125d7cdfb034f1da43a9afc"
+    },
+    {
+      "file": "vendor/chartjs/chart.umd.js",
+      "source": "https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.js",
+      "sha256": "2812cb8825fdc57469eb2f7bb055e9429244e599920511ee477e828499b632cb"
+    },
+    {
+      "file": "vendor/fontawesome/webfonts/fa-regular-400.woff2",
+      "source": "https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.7.2/webfonts/fa-regular-400.woff2",
+      "sha256": "e3456d1283b9d75337a773dfd147bf908fd02c01b4bf48576d8603a69b13cbe5"
+    },
+    {
+      "file": "vendor/fontawesome/webfonts/fa-regular-400.ttf",
+      "source": "https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.7.2/webfonts/fa-regular-400.ttf",
+      "sha256": "54cf6086f7bb21f9d072ad494a19b4681fa516dd0a14cee52da01d3651a913a3"
+    },
+    {
+      "file": "vendor/fontawesome/webfonts/fa-brands-400.woff2",
+      "source": "https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.7.2/webfonts/fa-brands-400.woff2",
+      "sha256": "d7236a19bf23cbb2027280e8f51dc99d6c45976a2ed60de73382b034b18a2b68"
+    },
+    {
+      "file": "vendor/fontawesome/webfonts/fa-solid-900.woff2",
+      "source": "https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.7.2/webfonts/fa-solid-900.woff2",
+      "sha256": "aa75998623a391e61c6901794ace832e3ecdd288b56d608f21bea0411acc0b8e"
+    },
+    {
+      "file": "vendor/fontawesome/webfonts/fa-brands-400.ttf",
+      "source": "https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.7.2/webfonts/fa-brands-400.ttf",
+      "sha256": "808443ae6c8204395add8543da8a90a60b9376fb0f87ed8e8ea37d109596d805"
+    },
+    {
+      "file": "vendor/fontawesome/webfonts/fa-v4compatibility.ttf",
+      "source": "https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.7.2/webfonts/fa-v4compatibility.ttf",
+      "sha256": "30f6abf6baa425825828793d6dfad1fb63765d0e5abaa7af6feafb9bfcece5a0"
+    },
+    {
+      "file": "vendor/fontawesome/webfonts/fa-v4compatibility.woff2",
+      "source": "https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.7.2/webfonts/fa-v4compatibility.woff2",
+      "sha256": "0ce9033c69dc714f5f45ef9bf17d55e4c46bcdfad6799a4e92b38e7781bf86bd"
+    },
+    {
+      "file": "vendor/fontawesome/webfonts/fa-solid-900.ttf",
+      "source": "https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.7.2/webfonts/fa-solid-900.ttf",
+      "sha256": "d2f0593540b0e33ba6de255a54f272d466e31144806956bea8cfdbf7edffc9bd"
+    },
+    {
+      "file": "vendor/fonts/play.css",
+      "source": "https://fonts.googleapis.com/css2?family=Play:wght@400;700&display=swap",
+      "sha256": "8b2309963335bf661821e3e83ac0e785f1747925d3fbc985a45a7b916784bc4e"
+    },
+    {
+      "file": "vendor/fonts/6aez4K2oVqwIjtI.ttf",
+      "source": "https://fonts.gstatic.com/s/play/v21/6aez4K2oVqwIjtI.ttf",
+      "sha256": "e1e9c9a87d56ac9897b41de72db27e5b5c7f97e1583690e338be7d4dd6c68deb"
+    },
+    {
+      "file": "vendor/fonts/6ae84K2oVqwItm4TOpc.ttf",
+      "source": "https://fonts.gstatic.com/s/play/v21/6ae84K2oVqwItm4TOpc.ttf",
+      "sha256": "b0270d79073f111f528ee9c25503ab9ec92dc19517198dcf7528b00f89fbd4b7"
+    },
+    {
+      "file": "vendor/fonts/Play-OFL.txt",
+      "source": "https://raw.githubusercontent.com/google/fonts/main/ofl/play/OFL.txt",
+      "sha256": "6d216cec166b6e139adaa599053dd49720c053e1f2adb4845de3cc9c3704344d"
+    }
+  ]
+}

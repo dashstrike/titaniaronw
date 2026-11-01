@@ -6,8 +6,8 @@
 
 @push('head')
 <link rel="stylesheet" href="./css/guild-runs.css?v=clean-routes-1">
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+
   <script src="./js/config.js?v=icon-font-fix-1"></script>
   <script src="{{ asset('js/guild-runs.js') }}?v={{ filemtime(public_path('js/guild-runs.js')) }}" defer></script>
 @endpush

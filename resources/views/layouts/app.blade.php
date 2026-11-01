@@ -8,12 +8,17 @@
     <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('images/favicon-32.png') }}">
     <link rel="icon" type="image/png" sizes="192x192" href="{{ asset('images/favicon-192.png') }}">
     <link rel="apple-touch-icon" sizes="180x180" href="{{ asset('images/apple-touch-icon.png') }}">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Play:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ asset('vendor/fonts/play.css') }}">
+    <script src="{{ asset('vendor/datatables/jquery.min.js') }}"></script>
+    <script src="{{ asset('vendor/select2/select2.min.js') }}"></script>
+    <script src="{{ asset('vendor/sweetalert2/sweetalert2.all.min.js') }}"></script>
+    <script src="{{ asset('vendor/supabase/supabase.js') }}"></script>
+    <script src="{{ asset('vendor/iconify/icons.js') }}"></script>
     <link rel="stylesheet" href="{{ asset('vendor/darkone/css/vendor.min.css') }}">
     <link rel="stylesheet" href="{{ asset('vendor/darkone/css/icons.min.css') }}">
     <link rel="stylesheet" href="{{ asset('vendor/darkone/css/style.min.css') }}">
+    <link rel="stylesheet" href="{{ asset('vendor/fontawesome/css/all.min.css') }}" data-titania-font-awesome>
+    <link rel="stylesheet" href="{{ asset('vendor/select2/select2.min.css') }}">
     <script src="{{ asset('vendor/darkone/js/config.js') }}"></script>
     <script>window.TITANIA_CONFIG = Object.freeze({{ Illuminate\Support\Js::from($browserConfig) }});</script>
     <script src="{{ asset('js/titania-toasts.js') }}?v={{ filemtime(public_path('js/titania-toasts.js')) }}"></script>

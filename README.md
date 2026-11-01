@@ -15,6 +15,8 @@ The same views support two deployment modes:
 
 No local application database or Laravel migration step is required. Defaults use file sessions/cache and synchronous queues. Page rendering alone does not grant access to guild data; Supabase policies and database functions enforce access.
 
+Browser libraries, fonts, and UI icons are served locally from `public/vendor/`; pages do not require a CDN. This includes SweetAlert2, Select2, Supabase JS, Chart.js, Font Awesome, Play fonts, and the Iconify icons used by the interface. Pinned versions, download sources, and checksums are recorded in `public/vendor/browser-assets.json`; licenses and icon attribution are alongside the assets. When updating a library, replace its local files and update the manifest. Additional Iconify icons must also be added to the bundled collections and preload. Supabase authentication and guild data still require an internet connection.
+
 ## Features
 
 | Area | Functionality |
@@ -219,6 +221,7 @@ Optional browser regressions use local assets and synthetic data:
 ```sh
 node tests/browser/roster-search.cjs
 node tests/browser/auction-dropdown.cjs
+node tests/browser/local-libraries.cjs
 ```
 
 They expect Google Chrome at its standard Windows path. Set `CHROME_PATH` to use another compatible executable.

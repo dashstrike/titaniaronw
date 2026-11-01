@@ -1,0 +1,79 @@
+﻿[
+    {
+        "prefix":  "mdi",
+        "icons":  [
+                      "duck"
+                  ],
+        "source":  "https://github.com/Templarian/MaterialDesign",
+        "license":  {
+                        "title":  "Apache 2.0",
+                        "spdx":  "Apache-2.0",
+                        "url":  "https://github.com/Templarian/MaterialDesign/blob/master/LICENSE"
+                    },
+        "author":  {
+                       "name":  "Pictogrammers",
+                       "url":  "https://github.com/Templarian/MaterialDesign"
+                   }
+    },
+    {
+        "prefix":  "bx",
+        "icons":  [
+                      "bar-chart-alt-2",
+                      "chevron-down",
+                      "chevron-up",
+                      "copy",
+                      "download",
+                      "extension",
+                      "group",
+                      "image-add",
+                      "link-external",
+                      "map-alt",
+                      "pie-chart-alt-2",
+                      "purchase-tag",
+                      "run",
+                      "save",
+                      "search",
+                      "slider-alt",
+                      "text",
+                      "trash",
+                      "upload",
+                      "user-check",
+                      "x"
+                  ],
+        "source":  "https://github.com/box-icons/boxicons",
+        "license":  {
+                        "title":  "MIT",
+                        "spdx":  "MIT",
+                        "url":  "https://github.com/box-icons/boxicons/blob/main/LICENSE"
+                    },
+        "author":  {
+                       "name":  "Boxicons",
+                       "url":  "https://github.com/box-icons/boxicons"
+                   }
+    },
+    {
+        "prefix":  "solar",
+        "icons":  [
+                      "bolt-outline",
+                      "chart-2-outline",
+                      "hamburger-menu-outline",
+                      "heart-pulse-outline",
+                      "help-outline",
+                      "logout-3-outline",
+                      "moon-outline",
+                      "sun-2-outline",
+                      "user-circle-outline",
+                      "users-group-two-rounded-broken"
+                  ],
+        "source":  "https://www.figma.com/community/file/1166831539721848736",
+        "license":  {
+                        "title":  "CC BY 4.0",
+                        "spdx":  "CC-BY-4.0",
+                        "url":  "https://creativecommons.org/licenses/by/4.0/"
+                    },
+        "author":  {
+                       "name":  "480 Design",
+                       "url":  "https://www.figma.com/community/file/1166831539721848736"
+                   }
+    }
+]

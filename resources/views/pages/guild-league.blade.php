@@ -37,5 +37,5 @@
   </header>
   <main class="content w-100 mw-100" id="content"><div class="loading"><div class="spinner"></div>Loading lineup…</div></main>
 </div>
-<script src="config.js?v=icon-font-fix-1"></script><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="{{ asset('js/pages/guild-league.js') }}?v={{ filemtime(public_path('js/pages/guild-league.js')) }}"></script>
+<script src="config.js?v=icon-font-fix-1"></script><script src="{{ asset('js/pages/guild-league.js') }}?v={{ filemtime(public_path('js/pages/guild-league.js')) }}"></script>
 @endsection

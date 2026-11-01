@@ -4,13 +4,13 @@
 
 @push('head')
 <link rel="stylesheet" href="{{ asset('vendor/datatables/dataTables.bootstrap5.min.css') }}">
-<script src="{{ asset('vendor/datatables/jquery.min.js') }}" defer></script>
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css">
-<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js" defer></script>
+
+
+
 <script src="{{ asset('vendor/datatables/dataTables.min.js') }}" defer></script>
 <script src="{{ asset('vendor/datatables/dataTables.bootstrap5.min.js') }}" defer></script>
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+
 <script src="{{ asset('js/config.js') }}"></script>
 <script src="{{ asset('js/pvp-data.js') }}?v={{ filemtime(public_path('js/pvp-data.js')) }}" defer></script>
 @endpush

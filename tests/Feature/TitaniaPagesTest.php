@@ -82,12 +82,21 @@ class TitaniaPagesTest extends TestCase
                     continue;
                 }
                 $host = parse_url($asset, PHP_URL_HOST);
-                if ($host && ! in_array($host, ['localhost', 'titaniaronw.test'], true)) {
-                    continue;
+                if ($host && $host !== parse_url(asset('/'), PHP_URL_HOST)) {
+                    $this->fail('Browser assets must be served locally: '.$asset);
                 }
                 $assetPath = ltrim(parse_url($asset, PHP_URL_PATH), './');
                 $this->assertFileExists(public_path($assetPath), 'Missing asset: '.$asset);
             }
+        }
+        foreach (['vendor/datatables/jquery.min.js', 'vendor/select2/select2.min.js', 'vendor/sweetalert2/sweetalert2.all.min.js', 'vendor/supabase/supabase.js', 'vendor/iconify/icons.js'] as $library) {
+            $matches = 0;
+            foreach ($document->getElementsByTagName('script') as $script) {
+                if (str_ends_with(parse_url($script->getAttribute('src'), PHP_URL_PATH) ?? '', '/'.$library)) {
+                    $matches++;
+                }
+            }
+            $this->assertSame(1, $matches, 'Shared library must load once: '.$library);
         }
     }
 

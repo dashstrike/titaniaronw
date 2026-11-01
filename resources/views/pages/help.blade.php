@@ -3,7 +3,6 @@
 @section('title', 'Titania · Help')
 
 @push('head')
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="{{ asset('js/config.js') }}"></script>
 @endpush
 

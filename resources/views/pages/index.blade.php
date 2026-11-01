@@ -5,13 +5,12 @@
 @section('body-attributes')@endsection
 
 @push('head')
-<link rel="preconnect" href="https://fonts.googleapis.com">
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css">
+  <script src="{{ asset('vendor/chartjs/chart.umd.js') }}"></script>
+
   <link rel="stylesheet" href="{{ asset('css/pages/index.css') }}?v={{ filemtime(public_path('css/pages/index.css')) }}">
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
+
+
   <script src="{{ asset('config.js') }}?v={{ filemtime(public_path('config.js')) }}"></script>
 @endpush
 
