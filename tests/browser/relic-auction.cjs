@@ -35,13 +35,15 @@ const {execFileSync}=require('node:child_process'),{pathToFileURL}=require('node
     const headers=[...document.querySelectorAll('#relicRegistrations .relic-header strong')].map(header=>header.textContent);
     jQuery('#relicType').val('guard').trigger('change');
     const guardIds=[...document.querySelectorAll('#relicCard option')].filter(option=>option.value).map(option=>option.value);
-    const colors=[...document.querySelectorAll('#relicRegistrations .relic-icon')].map(icon=>getComputedStyle(icon).borderTopColor);
-    const glow=[...document.querySelectorAll('#relicRegistrations .relic-icon')].every(icon=>getComputedStyle(icon).boxShadow!=='none');
+    const icons=[...document.querySelectorAll('#relicRegistrations .relic-icon')];
+    const colors=icons.map(icon=>getComputedStyle(icon).getPropertyValue('--relic-color').trim());
+    const glow=icons.every(icon=>getComputedStyle(icon).filter.includes('drop-shadow'));
+    const cleanIcons=icons.every(icon=>{const style=getComputedStyle(icon);return style.borderTopWidth==='0px'&&style.boxShadow==='none'&&style.backgroundColor==='rgba(0, 0, 0, 0)';});
     jQuery('#relicPlayer').val('test-member').trigger('change');jQuery('#relicCard').val('guard_agi').trigger('change');
     document.getElementById('relicRegisterForm').dispatchEvent(new Event('submit',{cancelable:true}));
     for(let attempt=0;attempt<60&&!calls.some(call=>call.name==='register_public_relic_auction');attempt++)await new Promise(resolve=>setTimeout(resolve,50));
     await new Promise(resolve=>setTimeout(resolve,100));Swal.close();
-    const result={ids,guardIds,headers,colors,glow,calls,external,errors,alreadyRegistered,affixes:document.getElementById('relicRegistrations').textContent.includes('random affixes')};
+    const result={ids,guardIds,headers,colors,glow,cleanIcons,calls,external,errors,alreadyRegistered,affixes:document.getElementById('relicRegistrations').textContent.includes('random affixes')};
     const output=document.createElement('pre');output.id='browserResult';output.textContent=JSON.stringify(result);document.body.append(output);
   }catch(error){const output=document.createElement('pre');output.id='browserResult';output.textContent=JSON.stringify({error:error.stack});document.body.append(output);}});
   </script>`;
@@ -58,7 +60,7 @@ const {execFileSync}=require('node:child_process'),{pathToFileURL}=require('node
   const stats=['str','agi','vit','dex','int','luk'];
   assert.deepEqual(result.ids,stats.map(stat=>'bane_'+stat));assert.deepEqual(result.guardIds,stats.map(stat=>'guard_'+stat));
   assert.deepEqual(result.headers,['Bane','Guard'].flatMap(type=>stats.map(stat=>stat.toUpperCase()+' Relic ('+type+')')));
-  assert.equal(new Set(result.colors).size,6);assert.equal(result.glow,true);assert.equal(result.affixes,false);
+  assert.equal(new Set(result.colors).size,6);assert.equal(result.glow,true);assert.equal(result.cleanIcons,true);assert.equal(result.affixes,false);
   const registered=result.calls.find(call=>call.name==='register_public_relic_auction');assert.deepEqual(registered.args,{p_member_id:'test-member',p_relic_ids:['guard_agi']});
   console.log('PASS: 12 typed Relic headers, six-stat type filtering, colors and Guard registration; external requests blocked. Preview: '+directory);
 })().catch(error=>{console.error(error);process.exitCode=1;});

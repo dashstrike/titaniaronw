@@ -1,11 +1,11 @@
-/* One Relic image, with a distinct stat border and glow. */
+/* Transparent Relic type icons with a soft stat-colored glow. */
 .relic-tone-str{--relic-color:#ff5c6c}
 .relic-tone-agi{--relic-color:#facc15}
 .relic-tone-vit{--relic-color:#4ade80}
 .relic-tone-dex{--relic-color:#fb923c}
 .relic-tone-int{--relic-color:#38bdf8}
 .relic-tone-luk{--relic-color:#b78aff}
-.relic-icon{border:1px solid var(--relic-color);border-radius:9px;padding:3px;background:color-mix(in srgb,var(--relic-color) 10%,transparent);box-shadow:0 0 7px color-mix(in srgb,var(--relic-color) 35%,transparent);object-fit:contain}
+.relic-icon{border:0;border-radius:0;padding:0;background:transparent;box-shadow:none;filter:drop-shadow(0 0 3px color-mix(in srgb,var(--relic-color) 30%,transparent));object-fit:contain}
 .relic-label{color:var(--relic-color)}
 .relic-count{background:var(--relic-color);color:#202630}
 #titania-content .card-header.relic-header{background-color:color-mix(in srgb,var(--relic-color) 10%,var(--bs-secondary-bg))}
