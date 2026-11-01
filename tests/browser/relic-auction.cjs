@@ -10,10 +10,27 @@ const {execFileSync}=require('node:child_process'),{pathToFileURL}=require('node
   const calls=[],external=[],errors=[];window.addEventListener('error',event=>errors.push(event.message));
   const realFetch=window.fetch;window.fetch=(url,options)=>{const target=new URL(url,document.baseURI);if(target.origin!==${JSON.stringify(origin)}){external.push(target.href);return Promise.reject(Error('External request blocked'));}return realFetch(url,options);};
   let registrations=[{id:'test-str',member_id:'test-member',member_name:'Test Player',relic_id:'bane_str',created_at:'2026-11-01T00:00:00Z',ducks:2,next_bidder:false}];
-  window.supabase={createClient:()=>({rpc:async(name,args)=>{calls.push({name,args});if(name==='register_public_relic_auction'){registrations.push({id:'test-agi',member_id:args.p_member_id,member_name:'Test Player',relic_id:args.p_relic_ids[0],created_at:'2026-11-01T00:01:00Z',ducks:1});return{data:1};}return{data:{members:[{id:'test-member',name:'Test Player',cls:'Scholar'}],registrations:args?.p_category==='relic'?registrations:[],last_received:{},revision:1,bans:[]}};}})};
+  window.supabase={createClient:()=>({rpc:async(name,args)=>{calls.push({name,args});if(name==='register_public_relic_auction'){registrations.push({id:'test-agi',member_id:args.p_member_id,member_name:'Test Player',relic_id:args.p_relic_ids[0],created_at:'2026-11-01T00:01:00Z',ducks:1});return{data:1};}return{data:{members:[{id:'test-member',name:'Test Player',cls:'Scholar'},{id:'other-member',name:'Other Player',cls:'Stalker'}],registrations:args?.p_category==='relic'?registrations:[{id:'other-category',member_id:'test-member',member_name:'Test Player',card_id:'fh',accessory_id:'56009017',created_at:'2026-11-01T00:00:00Z',ducks:1}],last_received:{},revision:1,bans:[]}};}})};
   window.addEventListener('load',async()=>{try{
     for(let attempt=0;attempt<60&&!document.querySelector('#relicHeading-bane_str');attempt++)await new Promise(resolve=>setTimeout(resolve,50));
     document.getElementById('auctionRelicTab').click();
+    const alreadyRegistered=[];
+    function checkChoice(prefix,id){
+      const select=jQuery('#'+prefix+'Card');
+      const option=[...select[0].options].find(option=>option.value===id);
+      const label=option.dataset.name;
+      select.select2('open');select.select2('close'); // Warm Select2's cache before changing IGN.
+      jQuery('#'+prefix+'Player').val('test-member').trigger('change');select.select2('open');
+      let row=[...document.querySelectorAll('.select2-results__option')].find(row=>row.textContent.startsWith(label));
+      const registered=Boolean(row?.textContent.includes('(Already registered)')&&row.getAttribute('aria-disabled')==='true');
+      select.select2('close');jQuery('#'+prefix+'Player').val('other-member').trigger('change');select.select2('open');
+      row=[...document.querySelectorAll('.select2-results__option')].find(row=>row.textContent.startsWith(label));
+      const reset=Boolean(row&&!row.textContent.includes('(Already registered)')&&row.getAttribute('aria-disabled')!=='true');
+      select.select2('close');alreadyRegistered.push({prefix,registered,reset});
+    }
+    for(const [tab,prefix,id] of [['auctionCardTab','auction','fh'],['auctionAccessoryTab','accessory','56009017'],['auctionRelicTab','relic','bane_str']]){
+      document.getElementById(tab).click();checkChoice(prefix,id);
+    }
     const ids=[...document.querySelectorAll('#relicCard option')].filter(option=>option.value).map(option=>option.value);
     const headers=[...document.querySelectorAll('#relicRegistrations .relic-header strong')].map(header=>header.textContent);
     jQuery('#relicType').val('guard').trigger('change');
@@ -24,7 +41,7 @@ const {execFileSync}=require('node:child_process'),{pathToFileURL}=require('node
     document.getElementById('relicRegisterForm').dispatchEvent(new Event('submit',{cancelable:true}));
     for(let attempt=0;attempt<60&&!calls.some(call=>call.name==='register_public_relic_auction');attempt++)await new Promise(resolve=>setTimeout(resolve,50));
     await new Promise(resolve=>setTimeout(resolve,100));Swal.close();
-    const result={ids,guardIds,headers,colors,glow,calls,external,errors,affixes:document.getElementById('relicRegistrations').textContent.includes('random affixes')};
+    const result={ids,guardIds,headers,colors,glow,calls,external,errors,alreadyRegistered,affixes:document.getElementById('relicRegistrations').textContent.includes('random affixes')};
     const output=document.createElement('pre');output.id='browserResult';output.textContent=JSON.stringify(result);document.body.append(output);
   }catch(error){const output=document.createElement('pre');output.id='browserResult';output.textContent=JSON.stringify({error:error.stack});document.body.append(output);}});
   </script>`;
@@ -37,6 +54,7 @@ const {execFileSync}=require('node:child_process'),{pathToFileURL}=require('node
   const match=dom.slice(dom.lastIndexOf('<pre id="browserResult">')).match(/<pre id="browserResult">([^]*?)<\/pre>/);assert.ok(match,'Missing result: '+directory);
   const result=JSON.parse(match[1].replaceAll('&quot;','"').replaceAll('&amp;','&'));
   assert.equal(result.error,undefined,result.error);assert.deepEqual(result.errors,[]);assert.deepEqual(result.external,[]);
+  for(const check of result.alreadyRegistered){assert.equal(check.registered,true,check.prefix+' must display and disable Already registered');assert.equal(check.reset,true,check.prefix+' must clear the label for a different player');}
   const stats=['str','agi','vit','dex','int','luk'];
   assert.deepEqual(result.ids,stats.map(stat=>'bane_'+stat));assert.deepEqual(result.guardIds,stats.map(stat=>'guard_'+stat));
   assert.deepEqual(result.headers,['Bane','Guard'].flatMap(type=>stats.map(stat=>stat.toUpperCase()+' Relic ('+type+')')));

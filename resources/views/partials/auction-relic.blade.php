@@ -15,7 +15,7 @@
                 <select id="relicCard" class="form-select" required>
                     <option value="">Select relic stat</option>
                     @foreach(config('relic') as $item)
-                    <option value="{{ $item['id'] }}" data-name="{{ $item['name'] }}" data-stat="{{ $item['stat'] }}" data-type="{{ $item['type'] }}" data-color="{{ $item['color'] }}" data-effect="{{ strtoupper($item['stat']) }} +10" data-image="{{ asset('images/relic/icon_zhujiemian_hallows_01.webp') }}">{{ $item['name'] }}</option>
+                    <option value="{{ $item['id'] }}" data-name="{{ $item['name'] }}" data-stat="{{ $item['stat'] }}" data-type="{{ $item['type'] }}" data-color="{{ $item['color'] }}" data-effect="{{ strtoupper($item['stat']) }} +10" data-image="{{ asset($item['image']) }}">{{ $item['name'] }}</option>
                     @endforeach
                 </select>
             </div>

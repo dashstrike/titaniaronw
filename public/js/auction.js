@@ -207,10 +207,18 @@
     if(workflow&&canManage){el('auctionBanForm').hidden=false;el('auctionBanFields').disabled=!loaded||busy;el('auctionActionHistory').hidden=false;}
     const rows=registrations;
     const selectedMember=el('auctionPlayer').value;
+    const itemPicker=window.jQuery?jQuery(el('auctionCard')).data('select2'):null;
     cards.forEach(input=>{
       const registered=rows.some(row=>row.member_id===selectedMember&&row.card_id===input.value);
       input.disabled=registered;
       input.textContent=input.dataset.name+(registered?' (Already registered)':'');
+      // Select2 caches option data after the first open. Keep its label and
+      // disabled state in sync when the IGN or registrations change.
+      if(itemPicker){
+        const optionData=itemPicker.dataAdapter.item(jQuery(input));
+        optionData.text=input.textContent;
+        optionData.disabled=registered;
+      }
       if(registered&&input.selected)el('auctionCard').value='';
     });
     dropdowns();

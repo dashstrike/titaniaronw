@@ -16,6 +16,7 @@ foreach (['bane' => 'Bane', 'guard' => 'Guard'] as $type => $label) {
             'id' => $type.'_'.$stat['id'],
             'stat' => $stat['id'],
             'type' => $type,
+            'image' => 'images/relic/'.$type.'-cutout.png',
             'name' => $stat['name'].' ('.$label.')',
             'color' => $stat['color'],
         ];
