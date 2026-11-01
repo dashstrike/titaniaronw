@@ -64,13 +64,13 @@
     const src=isCard?option.element.dataset.image:file?'./images/job/'+encodeURIComponent(file):'';
     const row=document.createElement('span');
     row.className='select2-player gap-0';
-    if(src){const image=document.createElement('img');image.src=src;image.alt='';image.className='mr-2'+(relic&&isCard?' relic-icon relic-tone-'+option.id:'');row.appendChild(image);}
+    if(src){const image=document.createElement('img');image.src=src;image.alt='';image.className='mr-2'+(relic&&isCard?' relic-icon relic-tone-'+option.element.dataset.stat:'');row.appendChild(image);}
     const text=document.createElement('span');text.textContent=option.text;row.appendChild(text);
     return row;
   }
   function dropdowns(){
     if(!(window.jQuery&&jQuery.fn.select2))return;
-    ['auctionPlayer','auctionCard',...(workflow&&canManage?['auctionBanPlayer']:[])].forEach(id=>{
+    ['auctionPlayer',...(relic?['auctionType']:[]),'auctionCard',...(workflow&&canManage?['auctionBanPlayer']:[])].forEach(id=>{
       const select=jQuery(el(id));
       // Keep the current instance during player changes; destroying it while
       // Select2 is handling that same event leaves a stale change listener.
@@ -80,8 +80,8 @@
       }
       select.prop('disabled',!loaded||busy).select2({
         dropdownParent:jQuery('#titania-content'),
-        placeholder:id==='auctionCard'?`Search ${itemLabel}...`:'Search player...',
-        allowClear:true,width:'100%',templateResult:optionTemplate,templateSelection:optionTemplate
+        placeholder:id==='auctionType'?'Select relic type':id==='auctionCard'?`Search ${itemLabel}...`:'Search player...',
+        allowClear:id!=='auctionType',width:'100%',templateResult:optionTemplate,templateSelection:optionTemplate
       });
     });
   }
@@ -220,16 +220,17 @@
       const dropdown=window.bootstrap?.Dropdown.getInstance(node);
       dropdown?.hide();dropdown?.dispose();
     });
-    el('auctionRegistrations').innerHTML=loaded?cards.map(input=>{
+    el('auctionRegistrations').innerHTML=loaded?cards.map((input,index)=>{
       const name=input.dataset.name;
       const image=input.dataset.image;
+      const section=relic&&(index===0||cards[index-1].dataset.type!==input.dataset.type)?`<div class="col-12"><h3 class="h5 mb-0 mt-2">${input.dataset.type==='bane'?'Bane':'Guard'}</h3></div>`:'';
       const entries=rows.filter(row=>row.card_id===input.value).sort((a,b)=>new Date(a.created_at)-new Date(b.created_at));
       const headerTag=organizerPage?'div':'button';
       const headerAttributes=organizerPage?'':`type="button" data-bs-toggle="collapse" data-bs-target="#auctionList-${esc(input.value)}" aria-expanded="${expanded.get(input.value)!==false}" aria-controls="auctionList-${esc(input.value)}"`;
       const arrow=organizerPage?'':`<i class="fa-solid ${expanded.get(input.value)!==false?'fa-chevron-up':'fa-chevron-down'} flex-shrink-0" aria-hidden="true"></i>`;
       const listClass=organizerPage?'':`collapse ${expanded.get(input.value)!==false?'show':''}`;
       const copyAll=organizerPage&&canManage?`<div class="d-flex w-100 justify-content-start mt-2"><button type="button" class="btn btn-sm btn-light text-dark d-inline-flex align-items-center justify-content-center" data-copy-all-names="${esc(input.value)}" aria-label="Copy all names for ${esc(name)}" data-titania-tooltip="Copy All Names"><i class="fa-regular fa-copy me-2" aria-hidden="true"></i><span data-copy-caption>Copy All Names</span></button></div>`:'';
-      return `<div class="col-12 col-md-6"><div class="card mb-0"><${headerTag} ${headerAttributes} id="auctionHeading-${esc(input.value)}" class="card-header${relic?` relic-header relic-tone-${esc(input.value)}`:""} border-top-0 border-start-0 border-end-0 border-bottom text-start text-body w-100"><span class="d-flex align-items-center mb-2"><img ${accessory?`data-auction-details="${esc(input.value)}"`:""} src="${esc(image)}" width="44" height="44" class="mr-2 flex-shrink-0${relic?` relic-icon relic-tone-${esc(input.value)}`:""}" alt=""><span class="d-inline-flex align-items-center me-2"><strong class="me-2${relic?` relic-label relic-tone-${esc(input.value)}`:""}">${esc(name)}</strong>${!accessory&&input.dataset.slot?`<span class="badge badge-outline-dark rounded-pill text-uppercase flex-shrink-0">${esc(input.dataset.slot)}</span>`:""}</span><span class="badge ${relic?`relic-count relic-tone-${esc(input.value)}`:`bg-${theme} text-white`} ms-auto mr-2 flex-shrink-0">${String(entries.length).padStart(2,'0')}</span>${arrow}</span><span class="d-block small text-muted mb-0">${accessory?"Level 90 · ":""}${esc(input.dataset.effect)}${category==='card'?"<br>Includes up to 2 random affixes.":""}</span><span class="d-block small text-muted fst-italic mt-1">Last received: ${esc(receiptTime(input.value))}</span>${copyAll}</${headerTag}><div id="auctionList-${esc(input.value)}" class="${listClass}" data-auction-card="${esc(input.value)}" role="region" aria-labelledby="auctionHeading-${esc(input.value)}"><div class="card-body">${entries.length?'<ul class="list-unstyled mb-0">'+entries.map((row,index)=>`<li class="d-flex align-items-center justify-content-between ${index?"border-top ":""}py-2">${registeredPlayer(row)}<span class="d-inline-flex align-items-center flex-shrink-0 ms-auto">${workflow&&row.next_bidder?'':`<span class="d-inline-flex align-items-center text-nowrap mx-2" aria-label="${esc(row.ducks??1)} ducks"><iconify-icon icon="mdi:duck" class="text-warning mr-2 fs-28" aria-hidden="true"></iconify-icon>×${esc(row.ducks??1)}</span>`}${rowActions(row)}</span></li>`).join('')+'</ul>':'<p class="text-muted small mb-0">No registrations yet.</p>'}</div></div></div></div>`;
+      return section+`<div class="col-12 col-md-6"><div class="card mb-0"><${headerTag} ${headerAttributes} id="auctionHeading-${esc(input.value)}" class="card-header${relic?` relic-header relic-tone-${esc(input.dataset.stat||input.value)}`:""} border-top-0 border-start-0 border-end-0 border-bottom text-start text-body w-100"><span class="d-flex align-items-center mb-2"><img ${accessory?`data-auction-details="${esc(input.value)}"`:""} src="${esc(image)}" width="44" height="44" class="mr-2 flex-shrink-0${relic?` relic-icon relic-tone-${esc(input.dataset.stat||input.value)}`:""}" alt=""><span class="d-inline-flex align-items-center me-2"><strong class="me-2${relic?` relic-label relic-tone-${esc(input.dataset.stat||input.value)}`:""}">${esc(name)}</strong>${!accessory&&input.dataset.slot?`<span class="badge badge-outline-dark rounded-pill text-uppercase flex-shrink-0">${esc(input.dataset.slot)}</span>`:""}</span><span class="badge ${relic?`relic-count relic-tone-${esc(input.dataset.stat||input.value)}`:`bg-${theme} text-white`} ms-auto mr-2 flex-shrink-0">${String(entries.length).padStart(2,'0')}</span>${arrow}</span><span class="d-block small text-muted mb-0">${accessory?"Level 90 · ":""}${esc(input.dataset.effect)}${category==='card'?"<br>Includes up to 2 random affixes.":""}</span><span class="d-block small text-muted fst-italic mt-1">Last received: ${esc(receiptTime(input.value))}</span>${copyAll}</${headerTag}><div id="auctionList-${esc(input.value)}" class="${listClass}" data-auction-card="${esc(input.value)}" role="region" aria-labelledby="auctionHeading-${esc(input.value)}"><div class="card-body">${entries.length?'<ul class="list-unstyled mb-0">'+entries.map((row,index)=>`<li class="d-flex align-items-center justify-content-between ${index?"border-top ":""}py-2">${registeredPlayer(row)}<span class="d-inline-flex align-items-center flex-shrink-0 ms-auto">${workflow&&row.next_bidder?'':`<span class="d-inline-flex align-items-center text-nowrap mx-2" aria-label="${esc(row.ducks??1)} ducks"><iconify-icon icon="mdi:duck" class="text-warning mr-2 fs-28" aria-hidden="true"></iconify-icon>×${esc(row.ducks??1)}</span>`}${rowActions(row)}</span></li>`).join('')+'</ul>':'<p class="text-muted small mb-0">No registrations yet.</p>'}</div></div></div></div>`;
     }).join('').replaceAll('auctionHeading-',prefix+'Heading-').replaceAll('auctionList-',prefix+'List-'):'';
     if(organizerPage&&window.bootstrap?.Dropdown){
       el('auctionRegistrations').querySelectorAll('[data-bs-toggle="dropdown"]').forEach(node=>{
@@ -265,7 +266,7 @@
   }
   el('auctionRegisterForm').addEventListener('submit',event=>{
     event.preventDefault();
-    const selected=cards.find(option=>option.selected&&!option.disabled);
+    const selected=cards.find(option=>option.value===el('auctionCard').value&&!option.disabled);
     if(!selected){message(`Select a ${itemLabel}.`,true);return;}
     const memberId=el('auctionPlayer').value;
     if(!loaded||!memberId)return;
@@ -277,6 +278,18 @@
     });
   });
   const playerChanged=()=>{el('auctionCard').value='';render();};
+  function syncRelicType(){
+    const select=el('auctionCard');
+    const placeholder=document.createElement('option');placeholder.value='';placeholder.textContent='Select relic stat';
+    cards.forEach(option=>{option.selected=false;});
+    select.replaceChildren(placeholder,...cards.filter(option=>option.dataset.type===el('auctionType').value));
+    select.value='';
+  }
+  if(relic){
+    const typeChanged=()=>{syncRelicType();render();};
+    if(window.jQuery)jQuery(el('auctionType')).on('change',typeChanged);
+    else el('auctionType').addEventListener('change',typeChanged);
+  }
   if(window.jQuery)jQuery(el('auctionPlayer')).on('change',playerChanged);
   else el('auctionPlayer').addEventListener('change',playerChanged);
   el('auctionRefresh').addEventListener('click',()=>action(el('auctionRefresh'),()=>load()));
@@ -404,6 +417,7 @@
   });
   async function boot(){
     try{
+      if(relic)syncRelicType();
       connection ||= connect(organizerPage);
       ({client,canManage,iconMap}=await connection);
       await load();

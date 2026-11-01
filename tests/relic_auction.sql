@@ -7,25 +7,25 @@ begin
   assert exists(select 1 from auth.users where id='10000000-0000-4000-8000-000000000001' and email='dev-admin@titania.test'),'Development fixture required';
   -- Isolate fixture items without changing the developer's current data after rollback.
   delete from public.auction_bans where member_id in ('dev-one','dev-two','dev-three');
-  delete from public.relic_auction_registrations where relic_id='str';
+  delete from public.relic_auction_registrations where relic_id='bane_str';
   delete from public.accessory_auction_registrations where accessory_id='56009017';
   perform set_config('request.jwt.claim.sub','',true);
-  assert public.register_public_relic_auction('dev-one',array['str'])=1;
-  assert public.register_public_relic_auction('dev-two',array['str'])=1;
-  assert public.register_public_relic_auction('dev-three',array['str'])=1;
-  assert public.register_public_relic_auction('dev-one',array['str'])=0,'Duplicate registration';
+  assert public.register_public_relic_auction('dev-one',array['bane_str'])=1;
+  assert public.register_public_relic_auction('dev-two',array['bane_str'])=1;
+  assert public.register_public_relic_auction('dev-three',array['bane_str'])=1;
+  assert public.register_public_relic_auction('dev-one',array['bane_str'])=0,'Duplicate registration';
   begin
     perform public.register_public_relic_auction('dev-one',array['invalid']);
     raise exception 'Invalid relic stat accepted';
-  exception when raise_exception then if sqlerrm<>'Select valid auction relic stats.' then raise; end if; end;
+  exception when raise_exception then if sqlerrm<>'Select a valid relic type (Bane or Guard) and stat.' then raise; end if; end;
   begin
-    perform public.register_public_relic_auction('missing-player',array['str']);
+    perform public.register_public_relic_auction('missing-player',array['bane_str']);
     raise exception 'Unknown player accepted';
   exception when raise_exception then if sqlerrm<>'Select a player from the active Titania roster.' then raise; end if; end;
   assert public.register_public_accessory_auction('dev-one',array['56009017'])=1;
   assert public.register_public_accessory_auction('dev-two',array['56009017'])=1;
-  select id into one_id from public.relic_auction_registrations where member_id='dev-one' and relic_id='str';
-  select id into two_id from public.relic_auction_registrations where member_id='dev-two' and relic_id='str';
+  select id into one_id from public.relic_auction_registrations where member_id='dev-one' and relic_id='bane_str';
+  select id into two_id from public.relic_auction_registrations where member_id='dev-two' and relic_id='bane_str';
   select id into accessory_registration from public.accessory_auction_registrations where member_id='dev-one' and accessory_id='56009017';
   select revision into rev from public.auction_control where id=1;
   begin
@@ -124,7 +124,7 @@ begin
   assert not exists(select 1 from public.accessory_auction_registrations where member_id='dev-one');
   assert (select ducks=3 from public.relic_auction_registrations where id=two_id),'Ban awarded ducks';
   begin
-    perform public.register_public_relic_auction('dev-one',array['str']);
+    perform public.register_public_relic_auction('dev-one',array['bane_str']);
     raise exception 'Ban bypassed in Relic';
   exception when raise_exception then if sqlerrm <> 'This player is banned from all auction registrations.' then raise; end if; end;
   begin
@@ -141,8 +141,8 @@ begin
   ban_id:=gen_random_uuid();
   perform public.ban_auction_player('dev-one','accessory',now()+interval '1 day',rev,ban_id);
   update public.auction_bans set banned_at=now()-interval '2 days',expires_at=now()-interval '1 day' where member_id='dev-one';
-  assert public.register_public_relic_auction('dev-one',array['str'])=1,'Automatic expiry failed';
-  assert (select ducks=1 and not next_bidder from public.relic_auction_registrations where member_id='dev-one' and relic_id='str'),'Ban did not reset ducks';
+  assert public.register_public_relic_auction('dev-one',array['bane_str'])=1,'Automatic expiry failed';
+  assert (select ducks=1 and not next_bidder from public.relic_auction_registrations where member_id='dev-one' and relic_id='bane_str'),'Ban did not reset ducks';
   select revision into rev from public.auction_control where id=1;
   begin
     perform public.undo_auction_action(ban_id,rev);

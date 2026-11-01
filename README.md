@@ -29,7 +29,7 @@ Browser libraries, fonts, and UI icons are served locally from `public/vendor/`;
 | Guild runs | Time Echo, Mirage, and Calamity Zone runs; public registration, registration controls, status updates, and run history. |
 | Guild League battle data | CSV imports retaining both guilds, date/session/battlefield filters, and searchable player statistics. Battle times use GMT+8. |
 | Interactive maps | Guild League main/sub and Siege outer/inner/Emperium-room maps, with backgrounds, icons, labels, resizing, rotation, and saved layouts. |
-| Auctions | Public registration for eight Mirage cards, 14 level-90 Royal accessories, and six Relic stats, with duck counts, receipt history, and administrator controls. |
+| Auctions | Public registration for eight Mirage cards, 14 level-90 Royal accessories, and 12 Relic choices (six stats each for Bane and Guard), with duck counts, receipt history, and administrator controls. |
 | User access and activity | Approved profiles, role management, and restricted online-user/activity views. |
 
 All 39 jobs in the verified SEA reference catalog are supported in Members. Job icons use the reference's exact assets, including a dedicated Scholar icon. See [job catalog notes](docs/job-catalog.txt) for sources and future updates.
@@ -161,8 +161,9 @@ For a backend with the existing card/accessory registration and receipt-history 
 2. `sql/auction_workflow.sql`
 3. `sql/auction_add_duck.sql`
 4. `supabase/migrations/20261101160042_relic_auction.sql` (adds Relic to the shared workflow)
+5. `supabase/migrations/20261101162131_relic_types.sql` (separates Bane and Guard; copies existing untyped registrations into both, preserving ducks and status)
 
-Relic stats appear as STR, AGI, VIT, DEX, INT, LUK. All use the same locally stored icon, with danger, warning, success, orange, info, and purple borders/glows respectively. Relic has the same registration order, duck adjustments, NEXT BIDDER priority, received/outbid/withdraw actions, global bans, action history, undo, and member receipt history as the other categories. The Relic upgrade requires the existing Card/Accessory workflow and preserves its data; it is not a fresh database bootstrap.
+Relic has Bane and Guard sections, each ordered STR, AGI, VIT, DEX, INT, LUK at +10. Registration selects a type first; card headers include it, such as `STR Relic (Bane)`. All use the same locally stored icon, with red, yellow, green, orange, cyan, and purple borders/glows respectively. The tab and Register button are gold. Each type/stat has independent registrations, ducks, NEXT BIDDER priority, receipts, and undo. Global bans still cover all categories. Existing historical receipts are retained without duplication; the type split invalidates older action snapshots to prevent undo from restoring untyped registrations. These upgrades require the existing Card/Accessory workflow; they are not a fresh database bootstrap.
 
 The first requires `card_auction_history.sql` and `accessory_auction_setup.sql`; the workflow also assumes existing auction RPCs. Historical `card_auction_ongoing.sql` and `card_auction_ducks.sql` upgrade older schemas and are not blanket fresh-install steps. Enable `TITANIA_AUCTION_WORKFLOW=true` after matching backend functions are installed. See [auction development notes](docs/auction-development.txt) for workflow behavior and development checks.
 

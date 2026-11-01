@@ -2,20 +2,24 @@
 <form id="relicRegisterForm" class="card p-3 mb-3">
     <fieldset id="relicFields" disabled>
         <div class="row g-3 align-items-end">
-            <div class="col-12 col-xl-4">
+            <div class="col-12 col-md-6 col-xl-3">
                 <label for="relicPlayer" class="form-label">IGN</label>
                 <select id="relicPlayer" class="form-select" required><option value="">Select IGN</option></select>
             </div>
-            <div class="col-12 col-xl-5">
+            <div class="col-12 col-md-6 col-xl-2">
+                <label for="relicType" class="form-label">Relic Type</label>
+                <select id="relicType" class="form-select" required><option value="bane">Bane</option><option value="guard">Guard</option></select>
+            </div>
+            <div class="col-12 col-md-8 col-xl-4">
                 <label for="relicCard" class="form-label">Relic Stat to Bid On</label>
                 <select id="relicCard" class="form-select" required>
                     <option value="">Select relic stat</option>
                     @foreach(config('relic') as $item)
-                    <option value="{{ $item['id'] }}" data-name="{{ $item['name'] }}" data-color="{{ $item['color'] }}" data-effect="{{ strtoupper($item['id']) }} +10" data-image="{{ asset('images/relic/icon_zhujiemian_hallows_01.webp') }}">{{ $item['name'] }}</option>
+                    <option value="{{ $item['id'] }}" data-name="{{ $item['name'] }}" data-stat="{{ $item['stat'] }}" data-type="{{ $item['type'] }}" data-color="{{ $item['color'] }}" data-effect="{{ strtoupper($item['stat']) }} +10" data-image="{{ asset('images/relic/icon_zhujiemian_hallows_01.webp') }}">{{ $item['name'] }}</option>
                     @endforeach
                 </select>
             </div>
-            <div class="col-12 col-xl-3">
+            <div class="col-12 col-md-4 col-xl-3">
                 <button type="submit" id="relicRegister" class="btn btn-relic w-100 d-inline-flex align-items-center justify-content-center"><i class="fa-solid fa-address-card me-2" aria-hidden="true"></i>Register</button>
             </div>
         </div>

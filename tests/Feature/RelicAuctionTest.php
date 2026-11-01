@@ -9,8 +9,10 @@ class RelicAuctionTest extends TestCase
     public function test_relic_stats_have_the_requested_order_colors_and_shared_local_icon(): void
     {
         $items = config('relic');
-        $this->assertSame(['str', 'agi', 'vit', 'dex', 'int', 'luk'], array_column($items, 'id'));
-        $this->assertSame(['danger', 'warning', 'success', 'orange', 'info', 'purple'], array_column($items, 'color'));
+        $this->assertCount(12, $items);
+        $stats = ['str', 'agi', 'vit', 'dex', 'int', 'luk'];
+        $this->assertSame(array_merge(array_map(fn ($stat) => 'bane_'.$stat, $stats), array_map(fn ($stat) => 'guard_'.$stat, $stats)), array_column($items, 'id'));
+        $this->assertSame(['danger', 'warning', 'success', 'orange', 'info', 'purple'], array_column(array_slice($items, 0, 6), 'color'));
         $image = file_get_contents(public_path('images/relic/icon_zhujiemian_hallows_01.webp'));
         $this->assertSame('RIFF', substr($image, 0, 4));
         $this->assertSame('WEBP', substr($image, 8, 4));
@@ -18,10 +20,15 @@ class RelicAuctionTest extends TestCase
         foreach (['/auction', '/titaniaauction'] as $url) {
             $response = $this->get($url)->assertOk()
                 ->assertSee('id="relicRegisterForm"', false)
+                ->assertSee('id="relicType"', false)
                 ->assertSee('id="relicRegistrations"', false)
                 ->assertSee('css/auction-relic.css', false)
                 ->assertDontSee('Coming soon...');
             $response->assertSeeInOrder(array_map(fn ($item) => 'value="'.$item['id'].'" data-name="'.$item['name'].'"', $items), false);
+            foreach ($items as $item) {
+                $this->assertSame(strtoupper($item['stat']).' Relic ('.ucfirst($item['type']).')', $item['name']);
+                $response->assertSee('data-effect="'.strtoupper($item['stat']).' +10"', false);
+            }
             if ($url === '/auction') {
                 $response->assertSee('id="relicBanForm"', false)->assertSee('id="relicActionHistory"', false);
             } else {

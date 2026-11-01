@@ -28,7 +28,7 @@ async function loadCardHistory(memberId,category='card'){
       const id=row[category+'_id'];
       const card=cards.find(item=>item.id===id);
       const name=card?.name||id;
-      const image=card?`<img src="${esc(relic?'images/relic/icon_zhujiemian_hallows_01.webp':accessory?card.image:`images/cards/icon_item_card_${card.id}_01.webp`)}" width="32" height="32" class="mr-2 flex-shrink-0${relic?' relic-icon relic-tone-'+esc(id):''}" alt="">`:'';
+      const image=card?`<img src="${esc(relic?'images/relic/icon_zhujiemian_hallows_01.webp':accessory?card.image:`images/cards/icon_item_card_${card.id}_01.webp`)}" width="32" height="32" class="mr-2 flex-shrink-0${relic?' relic-icon relic-tone-'+esc(card.stat||id):''}" alt="">`:'';
       return `<tr><td><span class="d-inline-flex align-items-center">${image}<span>${esc(name)}</span></span></td><td><span class="badge bg-${row.status==='received'?'success':'primary'}-subtle text-${row.status==='received'?'success':'primary'}">${row.status==='received'?'RECEIVED':'REGISTERED'}</span></td><td data-order="${new Date(row.registered_at).getTime()||0}">${esc(fmtDateTime(row.registered_at))}</td><td data-order="${new Date(row.received_at).getTime()||0}">${row.received_at?esc(fmtDateTime(row.received_at)):'—'}</td><td><span class="d-inline-flex align-items-center text-nowrap"><iconify-icon icon="mdi:duck" class="text-warning mr-2 fs-28" aria-hidden="true"></iconify-icon>×${esc(row.ducks)}</span></td></tr>`;
     }).join('')}</tbody></table>`;
     new DataTable(wrap.querySelector('table'),{pageLength:5,lengthChange:false,order:[],autoWidth:false,searching:false});
