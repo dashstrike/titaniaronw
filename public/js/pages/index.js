@@ -2838,6 +2838,7 @@
   }
 
   function buildPrintContent(){
+    if(currentEvent==='siege'||currentEvent==='guild_league')return buildCompactPrintContent(currentEvent);
     const keys=currentTeamKeys();const assigned=assignedNamesSet(keys).size;const totalSlots=keys.length*CONFIG.teamSize;const eventLabel=currentEventPublicLabel();
     let html=`<div class="print-doc-head"><div><h1>Titania ${eventLabel}</h1><div class="print-sub">Guild lineup summary · Dark Lord Server</div></div><div class="print-doc-meta">${new Date().toLocaleDateString(undefined,{year:'numeric',month:'long',day:'numeric'})}<br>${assigned}/${totalSlots} unique members slotted</div></div>`;
 
@@ -2894,6 +2895,45 @@
       });
     }
     return html+'<div class="print-footer-note">Generated from Titania Guild Management Tool · Dark Lord Server.</div>';
+  }
+
+  function buildCompactPrintContent(event){
+    const siege=event==='siege';
+    const raids=siege?currentSiegeRaids():[...MAIN_RAIDS,...SUB_RAIDS];
+    const keys=currentTeamKeys();
+    const date=new Date().toLocaleDateString(undefined,{year:'numeric',month:'long',day:'numeric'});
+    let html=`<div class="compact-lineup-print ${siege?'siege-print-doc':'guild-print-doc'}"><div class="print-doc-head"><div><h1>TITANIA ${siege?'SIEGE/POLARITY':'GUILD LEAGUE'}</h1><div class="print-sub">Dark Lord Server · Guild lineup</div></div><div class="print-doc-meta">${escapeHtml(date)}<br>${assignedNamesSet(keys).size}/${keys.length*CONFIG.teamSize} unique members slotted</div></div>`;
+    raids.forEach((raid,raidIndex)=>{
+      if(!siege&&(raidIndex===0||raidIndex===MAIN_RAIDS.length))html+=`<div class="print-section-title">${raidIndex===0?'Main':'Sub'} Battlefield</div>`;
+      const teamName=escapeHtml(raidTeamName(raid));
+      const defending=state.raidModes?.[raid.id]==='DEF';
+      const leader=stringValue(state.raidLeaders?.[raid.id]);
+      const subRaid=!siege&&raidIndex>=MAIN_RAIDS.length;
+      const mode=subRaid?(['MID','TOP','BOTTOM'].includes(state.raidModes?.[raid.id])?state.raidModes[raid.id]:'MID'):state.raidModes?.[raid.id]==='MVP'&&!siege?'MVP':defending?'DEF':'ATK';
+      const modeLabel=siege?(defending?'↻ RESPAWN':'♜ CAPTURE'):mode==='BOTTOM'?'BTM':mode;
+      html+=`<section class="print-raid-block"><div class="print-raid-head"><strong>TEAM ${teamName}</strong><span class="print-raid-mode ${mode.toLowerCase()}">${modeLabel}</span></div><div class="print-team-grid print-main-raid-grid${raid.keys.length===5?' five':''}" style="--lineup-print-columns:${raid.keys.length}">`;
+      raid.keys.forEach(key=>{
+        const noHealer=teamHasNoHealer(key);
+        const starSelected=siege&&window.TitaniaPartyStars?.isSelected(key);
+        const star=siege?`<span class="p-polarity-star" title="Star Dungeon" aria-label="Star Dungeon"${starSelected?'':' hidden'}><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="currentColor" d="m12 2 3.09 6.26L22 9.27l-5 4.87L18.18 21 12 17.77 5.82 21 7 14.14 2 9.27l6.91-1.01Z"/></svg></span>`:'';
+        html+=`<article class="print-team-card${siege?' siege-party':''}${noHealer?' no-healer':''}" data-party-key="${escapeAttr(key)}"><div class="print-team-head"><b>${escapeHtml(displayTeamLabel(key))}${star}</b><span>TEAM ${teamName}</span></div>`;
+        for(let index=0;index<CONFIG.teamSize;index++){
+          const name=state.assignments[key]?.[index];
+          const rowClass=`print-slot-row${index===0?' p-party-leader':''}`;
+          if(!name){html+=`<div class="${rowClass} p-empty">${index===0?'Empty team leader':'Empty slot'}</div>`;continue;}
+          const member=memberByName[name]||{cls:'Unknown'};
+          const title=memberTitleById[stringValue(member.id)]||'';
+          const titleSrc=titleAssetPath(title);
+          const titleIcon=titleSrc?`<span class="p-title-icon" style="background-image:url('${titleSrc}')" title="${escapeAttr(title)}" aria-label="${escapeAttr(title)} title icon"></span>`:'<span class="p-title-icon" aria-hidden="true"></span>';
+          const crown=name===leader?'<span class="p-raid-leader" title="Raid Leader" aria-label="Raid Leader">♛</span>':'';
+          html+=`<div class="${rowClass}">${titleIcon}<span class="p-name">${escapeHtml(name)} ${crown}</span><span class="slot-class p-class-source">${escapeHtml(member.cls)}</span><span class="class-dot p-job-icon" style="background-color:${classColor(member.cls)}" title="${escapeAttr(member.cls)}" aria-label="${escapeAttr(member.cls)} job icon"></span></div>`;
+        }
+        if(noHealer)html+='<div class="print-team-warn">⚠ No healer</div>';
+        html+='</article>';
+      });
+      html+='</div></section>';
+    });
+    return html+'<div class="print-footer-note">Titania Guild Management · Dark Lord Server</div></div>';
   }
 
   function activeRoster(){return state.roster.filter(member=>isActiveMember(member));}

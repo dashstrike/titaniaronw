@@ -8,6 +8,7 @@
   <script src="{{ asset('vendor/chartjs/chart.umd.js') }}"></script>
 
   <link rel="stylesheet" href="{{ asset('css/pages/index.css') }}?v={{ filemtime(public_path('css/pages/index.css')) }}">
+  <link rel="stylesheet" href="{{ asset('css/siege-print.css') }}?v={{ filemtime(public_path('css/siege-print.css')) }}">
 
 
 

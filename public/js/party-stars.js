@@ -9,6 +9,9 @@
   let loading=false;
   let queued=false;
 
+  // Print uses the same loaded selection as the roster, without another query.
+  window.TitaniaPartyStars=Object.freeze({isSelected:key=>selected.has(key)});
+
   function isManagement(){return document.documentElement.dataset.titaniaPage==='index';}
   function isPublicSiege(){return document.documentElement.dataset.titaniaPage==='siege';}
   function isSiegeManagement(){
@@ -116,6 +119,10 @@
       card.classList.toggle('party-starred',on);
     });
     updateCounter();
+    document.querySelectorAll('.siege-print-doc [data-party-key]').forEach(card=>{
+      const star=card.querySelector('.p-polarity-star');
+      if(star)star.hidden=!selected.has(card.dataset.partyKey);
+    });
   }
 
   function decoratePublic(){

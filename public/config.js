@@ -20,7 +20,7 @@ document.write('<script src="./js/dashboard-weekly-ranking.js?v=stable-ranking-1
 document.addEventListener('DOMContentLoaded',()=>{
   if(document.querySelector('script[data-titania-party-stars]'))return;
   const script=document.createElement('script');
-  script.src='./js/party-stars.js?v=clean-routes-1';
+  script.src='./js/party-stars.js?v=siege-print-stars-1';
   script.setAttribute('data-titania-party-stars','1');
   document.body.appendChild(script);
 },{once:true});
