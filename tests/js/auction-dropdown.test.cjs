@@ -22,9 +22,9 @@ test('browsers without popover support retain the Bootstrap dropdown',()=>{
   vm.createContext(context);vm.runInContext(setupSource,context);
   context.setupActionDropdown({nextElementSibling:{}});assert.equal(initialized,true);
 });
-test('card and accessory menus keep all existing workflow actions',()=>{
+test('card, accessory and relic menus keep all existing workflow actions',()=>{
   const actions=source.slice(source.indexOf('  function rowActions('),source.indexOf('  function setupActionDropdown('));
-  for(const itemLabel of ['card','accessory']){
+  for(const itemLabel of ['card','accessory','relic']){
     const context={canManage:true,workflow:true,itemLabel,esc:String};
     vm.createContext(context);vm.runInContext(actions,context);
     const html=context.rowActions({id:'player-registration',member_name:'Alex',ducks:2});

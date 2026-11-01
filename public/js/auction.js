@@ -20,9 +20,10 @@
   const root=document.getElementById('auctionPage');
   if(!root)return;
   const accessory=category==='accessory';
-  const prefix=accessory?'accessory':'auction';
-  const itemLabel=accessory?'accessory':'card';
-  const theme=accessory?'danger':'primary';
+  const relic=category==='relic';
+  const prefix=category==='card'?'auction':category;
+  const itemLabel=category;
+  const theme=accessory?'danger':relic?'warning':'primary';
   const workflow=window.TITANIA_CONFIG?.auctionWorkflow===true;
   const el=id=>document.getElementById(id.replace(/^auction/,prefix));
   const organizerPage=root.dataset.organizer==='true';
@@ -63,7 +64,7 @@
     const src=isCard?option.element.dataset.image:file?'./images/job/'+encodeURIComponent(file):'';
     const row=document.createElement('span');
     row.className='select2-player gap-0';
-    if(src){const image=document.createElement('img');image.src=src;image.alt='';image.className='mr-2';row.appendChild(image);}
+    if(src){const image=document.createElement('img');image.src=src;image.alt='';image.className='mr-2'+(relic&&isCard?' relic-icon relic-tone-'+option.id:'');row.appendChild(image);}
     const text=document.createElement('span');text.textContent=option.text;row.appendChild(text);
     return row;
   }
@@ -71,7 +72,12 @@
     if(!(window.jQuery&&jQuery.fn.select2))return;
     ['auctionPlayer','auctionCard',...(workflow&&canManage?['auctionBanPlayer']:[])].forEach(id=>{
       const select=jQuery(el(id));
-      if(select.hasClass('select2-hidden-accessible'))select.select2('destroy');
+      // Keep the current instance during player changes; destroying it while
+      // Select2 is handling that same event leaves a stale change listener.
+      if(select.hasClass('select2-hidden-accessible')){
+        select.prop('disabled',!loaded||busy).trigger('change.select2');
+        return;
+      }
       select.prop('disabled',!loaded||busy).select2({
         dropdownParent:jQuery('#titania-content'),
         placeholder:id==='auctionCard'?`Search ${itemLabel}...`:'Search player...',
@@ -84,7 +90,7 @@
     if(!text)return;
     if(window.Swal){
       Swal.fire({
-        title:error?'Unable to complete request':text.startsWith('Registered for ')?'Registered':accessory?'Accessory Auction':'Card Auction',
+        title:error?'Unable to complete request':text.startsWith('Registered for ')?'Registered':relic?'Relic Auction':accessory?'Accessory Auction':'Card Auction',
         text,
         icon:error?'error':text.startsWith('Registered for ')?'success':'info',
         confirmButtonText:'OK',
@@ -99,9 +105,9 @@
     el('auctionMessage').hidden=!text;
   }
   async function rpc(name,args){
-    if(accessory){
-      name=name.replace('card_auction','accessory_auction');
-      if(args?.p_card_ids){args={p_member_id:args.p_member_id,p_accessory_ids:args.p_card_ids};}
+    if(category!=='card'){
+      name=name.replace('card_auction',category+'_auction');
+      if(args?.p_card_ids){args={p_member_id:args.p_member_id,['p_'+category+'_ids']:args.p_card_ids};}
     }
     const result=await client.rpc(name,args);
     if(result.error)throw result.error;
@@ -223,7 +229,7 @@
       const arrow=organizerPage?'':`<i class="fa-solid ${expanded.get(input.value)!==false?'fa-chevron-up':'fa-chevron-down'} flex-shrink-0" aria-hidden="true"></i>`;
       const listClass=organizerPage?'':`collapse ${expanded.get(input.value)!==false?'show':''}`;
       const copyAll=organizerPage&&canManage?`<div class="d-flex w-100 justify-content-start mt-2"><button type="button" class="btn btn-sm btn-light text-dark d-inline-flex align-items-center justify-content-center" data-copy-all-names="${esc(input.value)}" aria-label="Copy all names for ${esc(name)}" data-titania-tooltip="Copy All Names"><i class="fa-regular fa-copy me-2" aria-hidden="true"></i><span data-copy-caption>Copy All Names</span></button></div>`:'';
-      return `<div class="col-12 col-md-6"><div class="card mb-0"><${headerTag} ${headerAttributes} id="auctionHeading-${esc(input.value)}" class="card-header border-top-0 border-start-0 border-end-0 border-bottom text-start text-body w-100"><span class="d-flex align-items-center mb-2"><img ${accessory?`data-auction-details="${esc(input.value)}"`:""} src="${esc(image)}" width="44" height="44" class="mr-2 flex-shrink-0" alt=""><span class="d-inline-flex align-items-center me-2"><strong class="me-2">${esc(name)}</strong>${!accessory&&input.dataset.slot?`<span class="badge badge-outline-dark rounded-pill text-uppercase flex-shrink-0">${esc(input.dataset.slot)}</span>`:""}</span><span class="badge bg-${theme} text-white ms-auto mr-2 flex-shrink-0">${String(entries.length).padStart(2,'0')}</span>${arrow}</span><span class="d-block small text-muted mb-0">${accessory?"Level 90 · ":""}${esc(input.dataset.effect)}${accessory?"":"<br>Includes up to 2 random affixes."}</span><span class="d-block small text-muted fst-italic mt-1">Last received: ${esc(receiptTime(input.value))}</span>${copyAll}</${headerTag}><div id="auctionList-${esc(input.value)}" class="${listClass}" data-auction-card="${esc(input.value)}" role="region" aria-labelledby="auctionHeading-${esc(input.value)}"><div class="card-body">${entries.length?'<ul class="list-unstyled mb-0">'+entries.map((row,index)=>`<li class="d-flex align-items-center justify-content-between ${index?"border-top ":""}py-2">${registeredPlayer(row)}<span class="d-inline-flex align-items-center flex-shrink-0 ms-auto">${workflow&&row.next_bidder?'':`<span class="d-inline-flex align-items-center text-nowrap mx-2" aria-label="${esc(row.ducks??1)} ducks"><iconify-icon icon="mdi:duck" class="text-warning mr-2 fs-28" aria-hidden="true"></iconify-icon>×${esc(row.ducks??1)}</span>`}${rowActions(row)}</span></li>`).join('')+'</ul>':'<p class="text-muted small mb-0">No registrations yet.</p>'}</div></div></div></div>`;
+      return `<div class="col-12 col-md-6"><div class="card mb-0"><${headerTag} ${headerAttributes} id="auctionHeading-${esc(input.value)}" class="card-header${relic?` relic-header relic-tone-${esc(input.value)}`:""} border-top-0 border-start-0 border-end-0 border-bottom text-start text-body w-100"><span class="d-flex align-items-center mb-2"><img ${accessory?`data-auction-details="${esc(input.value)}"`:""} src="${esc(image)}" width="44" height="44" class="mr-2 flex-shrink-0${relic?` relic-icon relic-tone-${esc(input.value)}`:""}" alt=""><span class="d-inline-flex align-items-center me-2"><strong class="me-2${relic?` relic-label relic-tone-${esc(input.value)}`:""}">${esc(name)}</strong>${!accessory&&input.dataset.slot?`<span class="badge badge-outline-dark rounded-pill text-uppercase flex-shrink-0">${esc(input.dataset.slot)}</span>`:""}</span><span class="badge ${relic?`relic-count relic-tone-${esc(input.value)}`:`bg-${theme} text-white`} ms-auto mr-2 flex-shrink-0">${String(entries.length).padStart(2,'0')}</span>${arrow}</span><span class="d-block small text-muted mb-0">${accessory?"Level 90 · ":""}${esc(input.dataset.effect)}${category==='card'?"<br>Includes up to 2 random affixes.":""}</span><span class="d-block small text-muted fst-italic mt-1">Last received: ${esc(receiptTime(input.value))}</span>${copyAll}</${headerTag}><div id="auctionList-${esc(input.value)}" class="${listClass}" data-auction-card="${esc(input.value)}" role="region" aria-labelledby="auctionHeading-${esc(input.value)}"><div class="card-body">${entries.length?'<ul class="list-unstyled mb-0">'+entries.map((row,index)=>`<li class="d-flex align-items-center justify-content-between ${index?"border-top ":""}py-2">${registeredPlayer(row)}<span class="d-inline-flex align-items-center flex-shrink-0 ms-auto">${workflow&&row.next_bidder?'':`<span class="d-inline-flex align-items-center text-nowrap mx-2" aria-label="${esc(row.ducks??1)} ducks"><iconify-icon icon="mdi:duck" class="text-warning mr-2 fs-28" aria-hidden="true"></iconify-icon>×${esc(row.ducks??1)}</span>`}${rowActions(row)}</span></li>`).join('')+'</ul>':'<p class="text-muted small mb-0">No registrations yet.</p>'}</div></div></div></div>`;
     }).join('').replaceAll('auctionHeading-',prefix+'Heading-').replaceAll('auctionList-',prefix+'List-'):'';
     if(organizerPage&&window.bootstrap?.Dropdown){
       el('auctionRegistrations').querySelectorAll('[data-bs-toggle="dropdown"]').forEach(node=>{
@@ -244,7 +250,7 @@
     const payload=workflow?await rpc('get_public_auction_workflow',{p_category:category}):await rpc('get_public_card_auctions');
     bans=payload.bans||[];revision=payload.revision||0;
     lastReceived=payload.last_received||{};
-    members=payload.members||[];registrations=(payload.registrations||[]).map(row=>accessory?{...row,card_id:row.accessory_id}:row);
+    members=payload.members||[];registrations=(payload.registrations||[]).map(row=>category==='card'?row:{...row,card_id:row[category+'_id']});
     loaded=true;
     players();render();
   }
@@ -315,7 +321,7 @@
       const label={received:'Item received',carry_forward:'Carry Forward',outbid_again:'Outbid Again',clear_next:'Clear Next Bidder',withdraw:'Withdraw',add_duck:'Added 1 Duck',remove_duck:'Removed 1 Duck',ban:'Ban'};
       Swal.fire({...dialogTheme,title:'Auction Action History',width:1100,confirmButtonText:'Close',
         html:'<p class="small text-muted">Undo is available only for the latest action, before any newer registration or admin action. It restores the affected registrations, ducks, status and receipt history.</p>'+ (history.length?`<div class="table-responsive"><table class="table align-middle text-start"><thead><tr><th>Action / Player</th><th>Item</th><th>Recorded / Admin</th><th>Status</th></tr></thead><tbody>${history.map(a=>{
-          const catalog=a.category==='card'?document.getElementById('auctionCard'):document.getElementById('accessoryCard');
+          const catalog=document.getElementById(({card:'auction',accessory:'accessory',relic:'relic'})[a.category]+'Card');
           const item=catalog?[...catalog.options].find(o=>o.value===a.item_id):null;
           return `<tr><td>${esc(label[a.kind]||a.kind)}<br>${esc(a.member_name)}</td><td>${esc(a.kind==='ban'?'All items':item?.dataset.name||a.item_id||'')}</td><td>${esc(formatTime(a.created_at))}<br>${esc(a.admin_name)}</td><td>${a.undone_at?`<span class="badge bg-secondary">UNDONE</span><small class="d-block">${esc(formatTime(a.undone_at))}<br>${esc(a.undone_by_name)}</small>`:a.can_undo?`<button type="button" class="btn btn-sm btn-outline-warning" data-undo="${esc(a.id)}"><i class="fa-solid fa-rotate-left me-2" aria-hidden="true"></i>Undo</button>`:'Recorded'}</td></tr>`;
         }).join('')}</tbody></table></div>`:'<p>No actions recorded yet.</p>'),
@@ -334,7 +340,7 @@
       if(window.flatpickr)window.flatpickr(banUntil,{enableTime:true,dateFormat:'Y-m-d H:i',altInput:true,altFormat:'F j, Y H:i',time_24hr:true,disableMobile:true});
       else banUntil.type='datetime-local';
     }
-    if(!accessory)el('auctionBanList').addEventListener('click',showBans);
+    if(category==='card')el('auctionBanList').addEventListener('click',showBans);
     if(organizerPage){
       el('auctionActionHistory').addEventListener('click',showActionHistory);
       el('auctionBanForm').addEventListener('submit',async event=>{
@@ -407,4 +413,5 @@
   }
   TitaniaAuction('card');
   TitaniaAuction('accessory');
+  TitaniaAuction('relic');
 })();

@@ -1,3 +1,6 @@
+@push('head')
+<link rel="stylesheet" href="{{ asset('css/auction-relic.css') }}?v={{ filemtime(public_path('css/auction-relic.css')) }}">
+@endpush
 <main id="auctionPage" data-organizer="{{ $organizer ? 'true' : 'false' }}">
     <div class="row g-2 align-items-center mb-3">
         <div class="col"><h1 class="h3 mb-0">Auction</h1></div>
@@ -17,7 +20,7 @@
     <ul class="nav nav-underline nav-justified border-bottom mb-3" role="tablist" aria-label="Auction categories">
         <li class="nav-item" role="presentation"><button class="nav-link active text-primary w-100 d-flex align-items-center justify-content-center" id="auctionCardTab" data-bs-toggle="tab" data-bs-target="#auctionCardPane" type="button" role="tab" aria-controls="auctionCardPane" aria-selected="true"><i class="fa-regular fa-id-badge me-2" aria-hidden="true"></i>CARD</button></li>
         <li class="nav-item" role="presentation"><button class="nav-link text-danger w-100 d-flex align-items-center justify-content-center" id="auctionAccessoryTab" data-bs-toggle="tab" data-bs-target="#auctionAccessoryPane" type="button" role="tab" aria-controls="auctionAccessoryPane" aria-selected="false"><i class="fa-solid fa-ring me-2" aria-hidden="true"></i>ACCESSORY</button></li>
-        <li class="nav-item" role="presentation"><button class="nav-link text-warning w-100 d-flex align-items-center justify-content-center" id="auctionRelicTab" data-bs-toggle="tab" data-bs-target="#auctionRelicPane" type="button" role="tab" aria-controls="auctionRelicPane" aria-selected="false"><i class="fa-solid fa-shield-halved me-2" aria-hidden="true"></i>RELIC</button></li>
+        <li class="nav-item" role="presentation"><button class="nav-link w-100 d-flex align-items-center justify-content-center" id="auctionRelicTab" data-bs-toggle="tab" data-bs-target="#auctionRelicPane" type="button" role="tab" aria-controls="auctionRelicPane" aria-selected="false"><i class="fa-solid fa-shield-halved me-2" aria-hidden="true"></i>RELIC</button></li>
     </ul>
     <div class="tab-content">
     <div class="tab-pane fade show active" id="auctionCardPane" role="tabpanel" aria-labelledby="auctionCardTab" tabindex="0">
@@ -62,7 +65,7 @@
         @include('partials.auction-accessory')
     </div>
     <div class="tab-pane fade" id="auctionRelicPane" role="tabpanel" aria-labelledby="auctionRelicTab" tabindex="0">
-        <div class="card p-3"><p class="text-muted mb-0">Coming soon...</p></div>
+        @include('partials.auction-relic')
     </div>
     </div>
 </main>

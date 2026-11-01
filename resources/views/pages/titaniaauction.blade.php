@@ -16,7 +16,7 @@
     <div class="d-flex align-items-center gap-3 flex-wrap">
     <div class="d-flex align-items-center">
         <img src="{{ asset('images/titania-logo.webp') }}" width="46" height="46" class="mr-2" alt="Titania">
-        <div><strong>TITANIA AUCTION</strong><div class="small text-muted">Register for cards and accessories</div></div>
+        <div><strong>TITANIA AUCTION</strong><div class="small text-muted">Register for cards, accessories, and relics</div></div>
     </div>
     @include('partials.discord-button', ['mobile' => false])
     </div>

@@ -119,14 +119,14 @@ test('public page cannot copy a race list', async () => {
   assert.equal(f.calls.errors.length, 0);
 });
 
-function renderedList(organizerPage, accessory = false) {
+function renderedList(organizerPage, accessory = false, relic = false) {
   const nodes = new Map();
   const el = id => {
     if (!nodes.has(id)) nodes.set(id, {value: '', querySelectorAll: () => []});
     return nodes.get(id);
   };
   const context = {
-    organizerPage, accessory, prefix: accessory ? 'accessory' : 'auction',
+    organizerPage, accessory, relic, category: relic ? 'relic' : accessory ? 'accessory' : 'card', prefix: relic ? 'relic' : accessory ? 'accessory' : 'auction',
     loaded: true, busy: false, workflow: true, canManage: true, expanded: new Map(),
     itemLabel: accessory ? 'accessory' : 'card', theme: accessory ? 'danger' : 'primary',
     registrations: [{id: 'registration-1', member_id: 'one', card_id: 'fh', member_name: 'Alex', ducks: 3}],
@@ -140,15 +140,22 @@ function renderedList(organizerPage, accessory = false) {
   return el('auctionRegistrations').innerHTML;
 }
 
-test('management headers are static with copy buttons and always-open bodies for both categories', () => {
-  for (const accessory of [false, true]) {
-    const html = renderedList(true, accessory);
+test('management headers are static with copy buttons and always-open bodies for all categories', () => {
+  for (const [accessory,relic] of [[false,false],[true,false],[false,true]]) {
+    const html = renderedList(true, accessory,relic);
     assert.match(html, /data-copy-all-names="fh"/);
     assert.match(html, /Copy All Names/);
     assert.doesNotMatch(html, /data-bs-toggle="collapse"/);
     assert.doesNotMatch(html, /class="collapse/);
     assert.doesNotMatch(html, /fa-chevron/);
   }
+});
+
+test('Relic cards use their colored icon and label without card-only affix text', () => {
+  const html=renderedList(true,false,true);
+  assert.match(html,/relic-icon relic-tone-fh/);
+  assert.match(html,/relic-label relic-tone-fh/);
+  assert.doesNotMatch(html,/random affixes|Level 90/);
 });
 
 test('public headers retain their accordion and have no bulk-copy control', () => {

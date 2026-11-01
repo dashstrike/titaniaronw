@@ -12,7 +12,7 @@ in that file. Development passwords are independent of production passwords.
 The four TEST players are synthetic. Live users, registrations and receipts
 were not copied. Development data is never included in production deployment.
 
-The local .env selects the development database and enables
+The development .env selects the development database and enables
 TITANIA_AUCTION_WORKFLOW=true. TITANIA_DEVELOPMENT_PROJECT pins the local
 connection. Pages export refuses to publish this development connection.
 The workflow defaults to disabled in application config. The GitHub Pages
@@ -20,7 +20,7 @@ workflow enables it for production after the live SQL is installed. The optional
 Actions variable TITANIA_AUCTION_WORKFLOW=false overrides that build setting.
 
 Testing the workflow
-1. Register TEST players for the same card and an accessory.
+1. Register TEST players for the same card, accessory, and Relic stat.
 2. Use Carry Forward to mark one player NEXT BIDDER and give the others on
    that item +1 duck. Their saved ducks remain hidden while next bidder.
 3. Use Outbid Again for a later auction round to give the others another +1.
