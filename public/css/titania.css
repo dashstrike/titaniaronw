@@ -1,6 +1,7 @@
 /* Darkone theme integration using the planner's existing component selectors. */
 [hidden] { display: none !important; }
 #toastStack { z-index: 1200; }
+.swal2-container { z-index: 1300; }
 #glRosterSearch{z-index:1040}
 #onlineUsersPopup{z-index:1040}
 #onlineUsersPopupPanel{width:min(380px,calc(100vw - 32px));max-height:70vh;overflow-y:auto;border:2px solid var(--bs-info);box-shadow:0 0 12px rgba(var(--bs-info-rgb),.5),0 0 24px rgba(var(--bs-info-rgb),.2)}

@@ -211,7 +211,7 @@ test('member detail form cancellation preserves name/class/notes; confirmed rena
       ALL_KEYS:['main_1','siege_1'],ALL_RAIDS:[{id:'raid_1'}],ALL_GUILD_STYLE_RAIDS:[{id:'raid_1'}],dashboardSelected:new Set(['Player A']),
       stringValue:value=>String(value??''),closeMemberModal(){},
     });
-    const values={memberNameInput:'Renamed',memberClassInput:'Scholar',memberGrInput:'61000',memberNationalityInput:'malaysia',memberNotesInput:'New notes'};
+    const values={memberActionInput:'edit',memberNameInput:'Renamed',memberClassInput:'Scholar',memberGrInput:'61000',memberNationalityInput:'malaysia',memberNotesInput:'New notes'};
     f.context.document={getElementById:id=>({value:values[id]})};
     vm.runInContext(source.slice(source.indexOf('  async function saveMemberFromModal(){'),source.indexOf('  async function deleteMember(')),f.context);
     f.setResult({isConfirmed:confirmed});

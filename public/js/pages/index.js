@@ -693,10 +693,9 @@
     document.getElementById('memberModal').addEventListener('click',event=>{if(event.target.id==='memberModal') closeMemberModal();});
     document.getElementById('memberNameInput').addEventListener('keydown',event=>{if(event.key==='Enter') saveMemberFromModal();});
 
-    document.getElementById('statusModalClose').addEventListener('click',closeStatusModal);
-    document.getElementById('statusModalCancel').addEventListener('click',closeStatusModal);
+    document.getElementById('memberActionInput').addEventListener('change',event=>setMemberAction(event.target.value));
+    document.getElementById('memberModalDelete').addEventListener('click',()=>{if(editingMemberName)deleteMember(editingMemberName);});
     document.getElementById('statusModalSave').addEventListener('click',saveStatusModal);
-    document.getElementById('statusModal').addEventListener('click',event=>{if(event.target.id==='statusModal') closeStatusModal();});
     document.getElementById('statusReasonInput').addEventListener('change',syncStatusOtherReason);
 
 
@@ -712,8 +711,8 @@
 
     document.addEventListener('keydown',event=>{
       if(event.key!=='Escape') return;
+      if(window.Swal&&Swal.isVisible())return;
       if(!document.getElementById('memberModal').hidden) closeMemberModal();
-      else if(!document.getElementById('statusModal').hidden) closeStatusModal();
       else if(!document.getElementById('printOverlay').hidden) closePrintView();
       else clearSelections();
     });
@@ -1852,7 +1851,10 @@
     editingMemberName=name;
     const saved=name?memberByName[name]:null;
     const member=saved?{...saved,...memberDrafts.get(saved.id)}:null;
-    document.getElementById('memberModalTitle').textContent=member?'Edit member':'Add member';
+    document.getElementById('memberModalTitle').textContent=member?'Manage Member':'Add member';
+    document.getElementById('memberActionField').hidden=!member;
+    document.getElementById('memberActionInput').innerHTML='<option value="edit">Edit Member</option>'+`<option value="${member&&member.status==='inactive'?'reactivate':'inactive'}">${member&&member.status==='inactive'?'Reactivate Member':'Mark Inactive'}</option>`+'<option value="delete">Delete Member</option>';
+    setMemberAction('edit');
     document.getElementById('memberNameInput').value=member?member.name:'';
     populateClassOptions(document.getElementById('memberClassInput'),member?member.cls:'Hunter');
     document.getElementById('memberGrInput').value=member?member.gr:'';
@@ -1863,13 +1865,32 @@
     const notice=document.getElementById('memberStatusNotice');
     if(member&&member.status==='inactive'){
       notice.hidden=false;
-      notice.textContent=`Inactive since ${formatDate(member.inactiveSince)||'date not recorded'}${member.inactiveReason?` · ${member.inactiveReason}`:''}. Reactivate this member from Dashboard.`;
+      notice.textContent=`Inactive since ${formatDate(member.inactiveSince)||'date not recorded'}${member.inactiveReason?` · ${member.inactiveReason}`:''}. Choose Reactivate Member from the Action menu to reactivate.`;
     }else notice.hidden=true;
     document.getElementById('memberModal').hidden=false;
     setTimeout(()=>document.getElementById('memberNameInput').focus(),0);
   }
 
-  function closeMemberModal(){document.getElementById('memberModal').hidden=true;document.getElementById('memberStatusNotice').hidden=true;editingMemberName=null;}
+  function closeMemberModal(){document.getElementById('statusDateInput')._flatpickr?.close();document.getElementById('memberModal').hidden=true;document.getElementById('memberStatusNotice').hidden=true;document.getElementById('statusModal').hidden=true;editingMemberName=null;statusModalMemberName=null;statusModalMode='inactive';}
+
+  function setMemberAction(action){
+    document.getElementById('statusDateInput')._flatpickr?.close();
+    const member=memberByName[editingMemberName];
+    const allowed=member?['edit','delete',isActiveMember(member)?'inactive':'reactivate']:['edit'];
+    if(!allowed.includes(action))action='edit';
+    document.getElementById('memberActionInput').value=action;
+    document.getElementById('memberEditPanel').hidden=action!=='edit';
+    document.getElementById('memberModalSave').hidden=action!=='edit';
+    document.getElementById('memberDeletePanel').hidden=action!=='delete';
+    document.getElementById('memberModalDelete').hidden=action!=='delete';
+    document.getElementById('statusModal').hidden=true;
+    document.getElementById('statusModalSave').hidden=true;
+    statusModalMemberName=null;statusModalMode='inactive';
+    if(action==='inactive'||action==='reactivate'){
+      prepareMemberStatus(member.name,action);
+      document.getElementById('statusModalSave').hidden=false;
+    }
+  }
 
   function nationalitySelectTemplate(option){
     if(!option.id)return 'Not set';
@@ -1900,6 +1921,7 @@
 
   async function saveMemberFromModal(){
     if(!userCanEdit())return;
+    if(document.getElementById('memberActionInput').value!=='edit')return;
     const wasEditing=Boolean(editingMemberName);
     const name=document.getElementById('memberNameInput').value.trim();
     const cls=document.getElementById('memberClassInput').value;
@@ -1961,10 +1983,17 @@
     state.roster=state.roster.filter(item=>item.id!==member.id);
     dashboardSelected.delete(name);
     if(selectedMember===name)selectedMember=null;
+    if(editingMemberName===name)closeMemberModal();
     commitMutation('Member permanently deleted');
   }
 
   function openStatusModal(name,mode){
+    if(!memberByName[name])return;
+    openMemberModal(name);
+    setMemberAction(mode==='reactivate'?'reactivate':'inactive');
+  }
+
+  function prepareMemberStatus(name,mode){
     const member=memberByName[name];
     if(!member)return;
     const requestedMode=mode==='reactivate'?'reactivate':'inactive';
@@ -1981,7 +2010,14 @@
     const reactivating=statusModalMode==='reactivate';
     document.getElementById('statusModalTitle').textContent=reactivating?'Reactivate member':'Mark member inactive';
     document.getElementById('statusDateLabel').textContent=reactivating?'Return date':'Inactive since';
-    document.getElementById('statusDateInput').value=todayIso();
+    const dateInput=document.getElementById('statusDateInput');
+    if(window.flatpickr&&!dateInput._flatpickr){
+      const picker=window.flatpickr(dateInput,{dateFormat:'Y-m-d',altInput:true,altFormat:'F j, Y',disableMobile:true});
+      picker.altInput.id='statusDateDisplay';
+      document.getElementById('statusDateLabel').htmlFor='statusDateDisplay';
+    }
+    if(dateInput._flatpickr)dateInput._flatpickr.setDate(todayIso(),false);
+    else dateInput.value=todayIso();
     document.getElementById('statusMemberSummary').innerHTML=`<b>${escapeHtml(member.name)}</b><span>${escapeHtml(member.cls)} · ${formatNumber(member.gr)} GR · ${member.status==='inactive'?'Currently inactive':'Currently active'}</span>`;
     const reasons=reactivating?REACTIVATE_REASONS:INACTIVE_REASONS;
     const select=document.getElementById('statusReasonInput');
@@ -1999,9 +2035,7 @@
   }
 
   function closeStatusModal(){
-    document.getElementById('statusModal').hidden=true;
-    statusModalMemberName=null;
-    statusModalMode='inactive';
+    closeMemberModal();
   }
 
   function syncStatusOtherReason(){
@@ -2020,6 +2054,7 @@
     if(reason==='Other')reason=document.getElementById('statusOtherReasonInput').value.trim();
     if(!reason){showToast('Reason required','Enter the reason for this status change.','warn');return;}
     const mode=statusModalMode;
+    document.getElementById('statusDateInput')._flatpickr?.close();
     if(!await confirmPlannerAction(mode==='reactivate'?`Reactivate ${member.name}?`:`Mark ${member.name} inactive?`,mode==='reactivate'?'The member will become available for assignment again. Previous parties and team positions will not be restored.':'The member will be removed from saved parties and all event teams.',mode==='reactivate'?'Save and reactivate':'Save inactive status',mode!=='reactivate')||!userCanEdit())return;
     if(memberById[member.id]!==member||statusModalMemberName!==member.name||statusModalMode!==mode){showToast('Member changed','Review the latest member status before saving.','warn');return;}
     closeStatusModal();

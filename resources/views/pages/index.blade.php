@@ -79,7 +79,8 @@
         <button class="icon-btn btn btn-outline-secondary btn-sm" id="memberModalClose" aria-label="Close">✕</button>
       </div>
       <div class="modal-body">
-        <div class="form-grid">
+        <div class="form-field mb-3" id="memberActionField" hidden><label for="memberActionInput">Action</label><select class="form-select" id="memberActionInput"><option value="edit">Edit Member</option><option value="inactive">Mark Inactive</option><option value="delete">Delete Member</option></select></div>
+        <div id="memberEditPanel"><div class="form-grid">
           <div class="form-field full"><label for="memberNameInput">Member name</label><input id="memberNameInput" maxlength="120" autocomplete="off" class="form-control"></div>
           <div class="form-field"><label for="memberClassInput">Class</label><select id="memberClassInput" class="form-select"></select></div>
           <div class="form-field"><label for="memberGrInput">Gear rating</label><input id="memberGrInput" type="number" min="0" max="999999999" step="1" class="form-control"></div>
@@ -87,32 +88,24 @@
           <div class="form-field full"><label for="memberNotesInput">Notes</label><textarea id="memberNotesInput" maxlength="500" class="form-control"></textarea></div>
         </div>
         <div class="guide-note member-status-notice" id="memberStatusNotice" hidden></div>
-      </div>
-      <div class="modal-foot">
-        <button class="btn btn-outline-secondary" id="memberModalCancel">Cancel</button>
-        <button class="btn primary btn-primary" id="memberModalSave">Save member</button>
-      </div>
-    </div>
-  </div>
-
-  <div class="overlay" id="statusModal" hidden>
-    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="statusModalTitle">
-      <div class="modal-head">
-        <h3 id="statusModalTitle">Mark member inactive</h3>
-        <button class="icon-btn btn btn-outline-secondary btn-sm" id="statusModalClose" aria-label="Close">✕</button>
-      </div>
-      <div class="modal-body">
+        </div>
+        <div id="statusModal" hidden>
+        <h5 id="statusModalTitle">Mark member inactive</h5>
         <div class="status-member-summary" id="statusMemberSummary"></div>
         <div class="form-grid">
-          <div class="form-field full"><label for="statusDateInput" id="statusDateLabel">Inactive since</label><input id="statusDateInput" type="date" class="form-control"></div>
+          <div class="form-field full"><label for="statusDateInput" id="statusDateLabel">Inactive since</label><input id="statusDateInput" type="text" class="form-control" placeholder="Select date" autocomplete="off"></div>
           <div class="form-field full"><label for="statusReasonInput">Reason</label><select id="statusReasonInput" class="form-select"></select></div>
           <div class="form-field full" id="statusOtherReasonField" hidden><label for="statusOtherReasonInput">Other reason</label><input id="statusOtherReasonInput" maxlength="300" autocomplete="off" class="form-control"></div>
         </div>
         <div class="status-impact" id="statusImpactText"></div>
+        </div>
+        <div id="memberDeletePanel" class="alert alert-danger mb-0" hidden><strong>Permanent deletion</strong><p class="mb-0">This removes the member from every team and deletes their membership history. For a normal guild departure, use Mark Inactive instead.</p></div>
       </div>
       <div class="modal-foot">
-        <button class="btn btn-outline-secondary" id="statusModalCancel">Cancel</button>
-        <button class="btn primary btn-primary" id="statusModalSave">Mark Inactive</button>
+        <button class="btn btn-outline-secondary" id="memberModalCancel">Cancel</button>
+        <button class="btn primary btn-primary" id="memberModalSave">Save member</button>
+        <button class="btn primary btn-primary" id="statusModalSave" hidden>Mark Inactive</button>
+        <button class="btn btn-danger" id="memberModalDelete" hidden><i class="fa-solid fa-trash me-2" aria-hidden="true"></i>Delete Member</button>
       </div>
     </div>
   </div>
