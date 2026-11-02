@@ -27,6 +27,14 @@
     if(type==='date')return '<span class="run-picker-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"></rect><path d="M16 3v4M8 3v4M3 11h18"></path></svg></span>';
     return '<span class="run-picker-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 2"></path></svg></span>';
   }
+  function initRunPickers(root){
+    if(!window.flatpickr)return;
+    root.querySelectorAll('#runDate,#runTime,[data-run-edit="run_date"],[data-run-edit="run_time"]').forEach(input=>{
+      if(input._flatpickr)return;
+      const time=input.id==='runTime'||input.dataset.runEdit==='run_time';
+      window.flatpickr(input,time?{enableTime:true,noCalendar:true,dateFormat:'H:i',time_24hr:true,disableMobile:true}:{dateFormat:'Y-m-d',altInput:true,altFormat:'F j, Y',disableMobile:true});
+    });
+  }
   function showError(message){if(loading)loading.hidden=true;if(errorBox){errorBox.hidden=false;errorBox.textContent=message;}}
   function clearError(){if(errorBox)errorBox.hidden=true;}
 
@@ -78,6 +86,7 @@
     const runs=(runsResult.data||[]).filter(run=>run.status!=='ended');
     const regs=regsResult.data||[];
     runCount.textContent=`${runs.length} run${runs.length===1?'':'s'}`;
+    runsList.querySelectorAll('input').forEach(input=>input._flatpickr?.destroy());
     runsList.innerHTML=runs.length?runs.map(run=>{
       const runRegs=regs.filter(r=>r.run_id===run.id);
       const sortedRunRegs=[...runRegs].sort((a,b)=>{
@@ -110,9 +119,9 @@
         </div>
         <div class="run-edit-row">
           <input class="run-title-input form-control" type="text" maxlength="200" value="${esc(run.note||'')}" placeholder="Untitled Run" data-run-edit="note" data-run-id="${esc(run.id)}" ${locked?'disabled':''}>
-          <span class="run-picker-wrap"><input class="run-date-input form-control" type="date" value="${esc(run.run_date||'')}" data-run-edit="run_date" data-run-id="${esc(run.id)}" ${locked?'disabled':''}>${pickerIcon('date')}</span>
+          <span class="run-picker-wrap"><input class="run-date-input form-control" type="text" value="${esc(run.run_date||'')}" data-run-edit="run_date" data-run-id="${esc(run.id)}" autocomplete="off" ${locked?'disabled':''}>${pickerIcon('date')}</span>
           <span class="run-edit-separator">·</span>
-          <span class="run-picker-wrap"><input class="run-time-input form-control" type="time" value="${esc(run.run_time?String(run.run_time).slice(0,5):'')}" data-run-edit="run_time" data-run-id="${esc(run.id)}" ${locked?'disabled':''}>${pickerIcon('time')}</span>
+          <span class="run-picker-wrap"><input class="run-time-input form-control" type="text" value="${esc(run.run_time?String(run.run_time).slice(0,5):'')}" data-run-edit="run_time" data-run-id="${esc(run.id)}" autocomplete="off" ${locked?'disabled':''}>${pickerIcon('time')}</span>
           <span class="autosave-state" data-autosave-state="${esc(run.id)}"></span>
         </div>
         ${detail}
@@ -253,8 +262,9 @@
     }));
 
     document.querySelectorAll('[data-run-edit]').forEach(input=>{
-      input.addEventListener(input.type==='text'?'input':'change',()=>queueRunSave(input));
+      input.addEventListener(input.dataset.runEdit==='note'?'input':'change',()=>queueRunSave(input));
     });
+    initRunPickers(document.getElementById('runsList'));
 
     document.querySelectorAll('.carry-switch [data-carry-status]').forEach(button=>button.addEventListener('click',async()=>{
       const wrap=button.closest('.carry-switch');
@@ -289,6 +299,7 @@
       if(page==='organizer'){
         const dateInput=document.getElementById('runDate');
         if(dateInput&&!dateInput.value)dateInput.value=new Date().toISOString().slice(0,10);
+        initRunPickers(document.getElementById('createRunForm'));
         const form=document.getElementById('createRunForm');if(form)form.addEventListener('submit',createRun);
         await loadRuns();
       }else if(page==='history'){

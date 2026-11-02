@@ -84,7 +84,7 @@
   if(datepicker){
     datepicker.altInput.id='pvpImportDateDisplay';
     document.querySelector('label[for="pvpImportDate"]').htmlFor='pvpImportDateDisplay';
-  }else battleDate.type='date';
+  }
   const battleTime=el('pvpImportTime');
   function updateSessions(){
     const previous=battleTime.value,sessions=glSessions(battleDate.value);
@@ -112,7 +112,6 @@
     viewDatepicker.altInput.id='pvpViewDateDisplay';
     document.querySelector('label[for="pvpViewDate"]').htmlFor='pvpViewDateDisplay';
   }else{
-    viewDate.type='date';
     viewDate.addEventListener('change',()=>{
       if(!availableDates.has(viewDate.value))viewDate.value=selected?.battle_date||'';
       updateViewSessions();

@@ -359,7 +359,6 @@
     if(organizerPage){
       const banUntil=el('auctionBanUntil');
       if(window.flatpickr)window.flatpickr(banUntil,{enableTime:true,dateFormat:'Y-m-d H:i',altInput:true,altFormat:'F j, Y H:i',time_24hr:true,disableMobile:true});
-      else banUntil.type='datetime-local';
     }
     if(category==='card')el('auctionBanList').addEventListener('click',showBans);
     if(organizerPage){

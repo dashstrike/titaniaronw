@@ -21,6 +21,9 @@ class PagesExportTest extends TestCase
             $html = File::get($file);
             $this->assertStringNotContainsString('127.0.0.1', $html);
             $this->assertStringNotContainsString('localhost', $html);
+            if (str_contains($html, '<base ')) {
+                $this->assertStringContainsString('<base href="'.$base.'"', $html);
+            }
             $dom = new DOMDocument;
             @$dom->loadHTML($html);
             foreach (['script' => 'src', 'link' => 'href', 'img' => 'src', 'a' => 'href'] as $tag => $attribute) {
@@ -57,5 +60,22 @@ class PagesExportTest extends TestCase
     {
         config(['titania.supabase_url' => 'https://example.supabase.co', 'titania.supabase_publishable_key' => 'sb_secret_do_not_publish']);
         $this->artisan('pages:export', ['--url' => 'https://example.github.io/titaniaronw'])->assertFailed();
+    }
+
+    public function test_http_github_pages_base_is_upgraded_to_https_for_all_exported_pages(): void
+    {
+        config(['titania.supabase_url' => 'https://example.supabase.co', 'titania.supabase_publishable_key' => 'sb_publishable_test']);
+        $this->artisan('pages:export', ['--url' => 'http://example.github.io/titaniaronw'])->assertSuccessful();
+
+        foreach (File::allFiles(storage_path('app/pages')) as $file) {
+            if ($file->getExtension() !== 'html') {
+                continue;
+            }
+            $html = File::get($file);
+            $this->assertStringNotContainsString('http://example.github.io', $html, $file->getPathname());
+            if (str_contains($html, '<base ')) {
+                $this->assertStringContainsString('<base href="https://example.github.io/titaniaronw/"', $html);
+            }
+        }
     }
 }

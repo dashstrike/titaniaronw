@@ -168,13 +168,6 @@ const TITANIA_IS_MEMBER_PAGE = document.documentElement.dataset.titaniaPage==='m
   else loadScript();
 })();
 
-/* Open native date/time pickers when the input itself is clicked. */
-document.addEventListener('click', event => {
-  const input = event.target.closest('input[type="date"],input[type="time"]');
-  if (!input || typeof input.showPicker !== 'function') return;
-  try { input.showPicker(); } catch (_error) {}
-});
-
 /*
  * Reversible Polarity Zone hide switch.
  * This only hides UI/public access; saved Supabase Polarity data remains untouched.

@@ -34,8 +34,6 @@
       .titania-att-create-field label{font-size:11px;color:var(--bs-secondary-color);text-transform:uppercase;letter-spacing:.75px;font-weight:700}
       .titania-att-create-field select:not(.form-select),.titania-att-create-field input:not(.form-control){width:100%;height:42px;background:var(--bs-body-bg);border:1px solid var(--bs-border-color);border-radius:8px;color:var(--bs-body-color);padding:9px 11px;font:600 14px var(--bs-body-font-family);outline:none}
       .titania-att-create-field select:not(.form-select):focus,.titania-att-create-field input:not(.form-control):focus{border-color:var(--bs-primary);box-shadow:0 0 0 2px rgba(var(--bs-primary-rgb),0.333)}
-      .titania-att-create-field input:not(.form-control)[type="date"]{padding-right:42px;color-scheme:dark;background-color:var(--bs-body-bg);background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23e9ecf7' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='3' y='5' width='18' height='16' rx='2'/%3E%3Cpath d='M16 3v4M8 3v4M3 11h18'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;background-size:19px 19px}
-      .titania-att-create-field input:not(.form-control)[type="date"]::-webkit-calendar-picker-indicator{width:28px;height:28px;padding:0;cursor:pointer;opacity:0}
       @media(max-width:800px){
         .att-page-head{flex-direction:row!important;align-items:center!important}
         .att-create-top-btn{width:auto}
@@ -64,11 +62,12 @@
       return;
     }
 
+    let datepicker;
     const result=await Swal.fire({
       title:'Create Attendance',
       html:`<div class="titania-att-create-form">
         <div class="titania-att-create-field"><label for="swalAttType">Event Type</label><select id="swalAttType" class="form-select">${eventTypeOptions(type)}</select></div>
-        <div class="titania-att-create-field"><label for="swalAttDate">Date</label><input id="swalAttDate" type="date" value="${String(date.value||'').replace(/"/g,'&quot;')}" class="form-control"></div>
+        <div class="titania-att-create-field"><label for="swalAttDate">Date</label><input id="swalAttDate" type="text" value="${String(date.value||'').replace(/"/g,'&quot;')}" class="form-control"></div>
       </div>`,
       icon:'info',
       showCancelButton:true,
@@ -81,6 +80,15 @@
       background:'var(--bs-secondary-bg)',
       color:'var(--bs-body-color)',
       customClass:{popup:'titania-att-create-popup'},
+      didOpen:()=>{
+        const input=document.getElementById('swalAttDate');
+        if(window.flatpickr){
+          datepicker=window.flatpickr(input,{dateFormat:'Y-m-d',altInput:true,altFormat:'F j, Y',disableMobile:true});
+          datepicker.altInput.id='swalAttDateDisplay';
+          document.querySelector('label[for="swalAttDate"]').htmlFor='swalAttDateDisplay';
+        }
+      },
+      willClose:()=>datepicker?.destroy(),
       preConfirm:()=>{
         const modalType=document.getElementById('swalAttType');
         const modalDate=document.getElementById('swalAttDate');
@@ -95,7 +103,7 @@
 
     type.value=result.value.type;
     type.dispatchEvent(new Event('change',{bubbles:true}));
-    date.value=result.value.date;
+    if(date._flatpickr)date._flatpickr.setDate(result.value.date,false);else date.value=result.value.date;
     submit.click();
   }
 

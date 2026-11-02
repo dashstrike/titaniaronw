@@ -35,8 +35,8 @@
             <option value="calamity_zone">Calamity Zone</option>
           </select>
         </label>
-        <label>Date<input id="runDate" type="date" required class="form-control"></label>
-        <label>Time<input id="runTime" type="time" class="form-control"></label>
+        <label>Date<input id="runDate" type="text" required class="form-control" placeholder="Select date" autocomplete="off"></label>
+        <label>Time<input id="runTime" type="text" class="form-control" placeholder="Select time" autocomplete="off"></label>
         <button class="btn primary btn-primary" type="submit">Create Run</button>
       </form>
     </section>

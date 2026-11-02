@@ -18,6 +18,11 @@ class ExportPages extends Command
     public function handle(): int
     {
         $base = rtrim($this->option('url') ?: config('app.url'), '/');
+        // configure-pages can report an HTTP base URL; Pages assets must use HTTPS.
+        $host = strtolower((string) parse_url($base, PHP_URL_HOST));
+        if (str_ends_with($host, '.github.io')) {
+            $base = preg_replace('~^http://~i', 'https://', $base);
+        }
         $key = config('titania.supabase_publishable_key');
         $parts = explode('.', $key);
         if (config('titania.development_project') && parse_url(config('titania.supabase_url'), PHP_URL_HOST) === config('titania.development_project').'.supabase.co') {
