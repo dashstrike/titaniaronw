@@ -29,7 +29,14 @@
     malaysia:{label:'Malaysia',flag:'images/flags/malaysia.svg'},
     indonesia:{label:'Indonesia',flag:'images/flags/indonesia.svg'},
     thailand:{label:'Thailand',flag:'images/flags/thailand.svg'},
-    philippines:{label:'Philippines',flag:'images/flags/philippines.svg'}
+    philippines:{label:'Philippines',flag:'images/flags/philippines.svg'},
+    singapore:{label:'Singapore',flag:'images/flags/singapore.svg'},
+    brunei:{label:'Brunei',flag:'images/flags/brunei.svg'},
+    cambodia:{label:'Cambodia',flag:'images/flags/cambodia.svg'},
+    laos:{label:'Laos',flag:'images/flags/laos.svg'},
+    myanmar:{label:'Myanmar',flag:'images/flags/myanmar.svg'},
+    vietnam:{label:'Vietnam',flag:'images/flags/vietnam.svg'},
+    timor_leste:{label:'Timor-Leste',flag:'images/flags/timor-leste.svg'}
   });
   /*
    * Job-family colors follow the supplied in-game class icon palette.
