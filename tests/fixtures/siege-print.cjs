@@ -15,7 +15,7 @@ module.exports=function render(starParties=['party_0_0','party_3_2'],event='sieg
   state.assignments.party_6_3=[null,'<script>unsafe</script>',null,null,null];
   const context={window:{TitaniaPartyStars:{isSelected:key=>starParties.includes(key)}},state,memberByName:members,memberTitleById:titles,CONFIG:{teamSize:5},
     TITLE_ICON_BASE:'./images/title/',TITLE_ICON_SERIES:{pathfinder:'pathfinder_purple'},TITLE_ICON_LEVELS:{iii:3},
-    MAIN_RAIDS:raids.slice(0,3),SUB_RAIDS:raids.slice(3),currentSiegeRaids:()=>raids,currentTeamKeys:()=>raids.flatMap(raid=>raid.keys),
+    MAIN_RAIDS:raids.slice(0,3),SUB_RAIDS:raids.slice(3),currentGuildRaids:(_source,kind)=>kind==='main'?raids.slice(0,3):kind==='sub'?raids.slice(3):raids,currentSiegeRaids:()=>raids,currentTeamKeys:()=>raids.flatMap(raid=>raid.keys),
     assignedNamesSet:keys=>new Set(keys.flatMap(key=>state.assignments[key]).filter(Boolean)),
     raidTeamName:raid=>`Team ${raids.indexOf(raid)+1}`,
     displayTeamLabel:key=>`Party ${raids.flatMap(raid=>raid.keys).indexOf(key)+1}`,

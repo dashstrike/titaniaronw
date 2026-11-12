@@ -30,7 +30,7 @@ for(const page of ['guild-league','siege'])test(`${page} public headers and part
   assert.equal((html.match(/&lt;Dragon &amp; Friends&gt;/g)||[]).length,2);assert.doesNotMatch(html,/TEAM.*Commander/);
 });
 test('team names participate in snapshots and concurrent per-raid merge',()=>{
-  const context={state:{},cloneJson:value=>JSON.parse(JSON.stringify(value)),ALL_KEYS:[],ALL_RAIDS:[],ALL_GUILD_STYLE_RAIDS:raids,MAIN_RAIDS:[],SUB_RAIDS:[],ALL_SIEGE_RAIDS:[],sameJson:(a,b)=>JSON.stringify(a)===JSON.stringify(b),createEmptyAssignments:()=>({}),createDefaultRaidCommanders:()=>({}),createDefaultRaidLeaders:()=>({}),createDefaultRaidModes:()=>({}),createDefaultSiegeRaidGroups:()=>({}),mergeRosterThreeWay:()=>[],mergeHistoryThreeWay:()=>[],normalizeClientState:x=>x,stringValue};
+  const context={state:{},GUILD_KEYS:[],createDefaultGuildRaidGroups:()=>({}),cloneJson:value=>JSON.parse(JSON.stringify(value)),ALL_KEYS:[],ALL_RAIDS:[],ALL_GUILD_STYLE_RAIDS:raids,MAIN_RAIDS:[],SUB_RAIDS:[],ALL_SIEGE_RAIDS:[],sameJson:(a,b)=>JSON.stringify(a)===JSON.stringify(b),createEmptyAssignments:()=>({}),createDefaultRaidCommanders:()=>({}),createDefaultRaidLeaders:()=>({}),createDefaultRaidModes:()=>({}),createDefaultSiegeRaidGroups:()=>({}),mergeRosterThreeWay:()=>[],mergeHistoryThreeWay:()=>[],normalizeClientState:x=>x,stringValue};
   vm.createContext(context);
   vm.runInContext(source.slice(source.indexOf('  function plannerSnapshot('),source.indexOf('  function mergeRosterThreeWay(')),context);
   vm.runInContext(source.slice(source.indexOf('  function mergePlannerSnapshots('),source.indexOf('\n  function ',source.indexOf('  function mergePlannerSnapshots(')+5)),context);

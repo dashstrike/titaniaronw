@@ -87,6 +87,7 @@ function normalize(raw){
     published:raw.published===true,
     roster,
     assignments,
+    guildRaidGroups:raw.guildRaidGroups??undefined,
     raidCommanders:raw.raidCommanders||{},
     raidTeamNames:raw.raidTeamNames||{},
     raidLeaders:raw.raidLeaders||{},
@@ -128,9 +129,21 @@ function render(){
 
 function renderGuild(){
   return section('⚔ Main Battlefield','main')+
-    MAIN_RAIDS.map(r=>raidBlock(r,'main',false)).join('')+
+    guildRaids('main').filter(raidHasMembers).map(r=>raidBlock(r,'main',false)).join('')+
     section('<i class="fa-solid fa-shield-cat mr-2" aria-hidden="true"></i>Sub Battlefield','sub')+
-    SUB_RAIDS.map(r=>raidBlock(r,'sub',r.keys.length===5)).join('');
+    guildRaids('sub').filter(raidHasMembers).map(r=>raidBlock(r,'sub',r.keys.length===5)).join('');
+}
+
+function guildRaids(kind){
+  const defaults=kind==='main'?MAIN_RAIDS:SUB_RAIDS;
+  if(state.guildRaidGroups===undefined)return defaults;
+  const prefix=kind==='main'?'raid_':'sub_raid_';
+  return Array.from({length:5},(_,index)=>({id:prefix+(index+1),label:`Raid ${index+1}`,keys:state.guildRaidGroups?.[prefix+(index+1)]}))
+    .filter(raid=>Array.isArray(raid.keys)&&raid.keys.length>0);
+}
+
+function raidHasMembers(raid){
+  return raid.keys.some(key=>slots(key).some(Boolean));
 }
 
 function renderPolarity(){
@@ -155,7 +168,7 @@ function raidBlock(raid,kind,five){
   const commander=raidTeamName(raid);
   const position=kind==='sub'?(['MID','TOP','BOTTOM'].includes(state.raidModes[raid.id])?state.raidModes[raid.id]:'MID'):'';
   const savedMode=str(state.raidModes[raid.id]).toUpperCase();
-  const mode=MAIN_RAIDS.some(r=>r.id===raid.id)?(['ATK','DEF','MVP'].includes(savedMode)?savedMode:'ATK'):'';
+  const mode=/^raid_[1-5]$/.test(raid.id)?(['ATK','DEF','MVP'].includes(savedMode)?savedMode:'ATK'):'';
   const raidTitle=`TEAM <b>${esc(commander)}</b>`;
   return `<div class="raid-block card" data-kind="${kind}">
     <div class="raid-head card-header">
@@ -211,7 +224,7 @@ function titleIconHtml(member){
 }
 
 function raidForParty(key){
-  return [...MAIN_RAIDS,...SUB_RAIDS].find(item=>item.keys.includes(key))||null;
+  return [...guildRaids('main'),...guildRaids('sub')].find(item=>item.keys.includes(key))||null;
 }
 
 function slotHtml(name,index,key){
@@ -245,9 +258,9 @@ function teamNoHealer(key){
 }
 
 function teamLabel(key){
-  if(key.startsWith('sub_')||key.startsWith('siege_sub_')){
-    const orderedKeys=SUB_RAIDS.flatMap(raid=>raid.keys);
-    const index=orderedKeys.indexOf(key);
+  if(key.startsWith('main_')||key.startsWith('sub_')){
+    const sub=key.startsWith('sub_');
+    const index=guildRaids(sub?'sub':'main').flatMap(raid=>raid.keys).indexOf(key);
     if(index>=0)return `Party ${index+1}`;
   }
   const m=/_([0-9]+)$/.exec(key);

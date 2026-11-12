@@ -59,16 +59,49 @@
   const MAIN_RAIDS = Object.freeze([
     Object.freeze({id:'raid_1',label:'Raid 1',keys:Object.freeze(['main_1','main_2','main_3','main_4']),defaultLeaderTeam:'main_1'}),
     Object.freeze({id:'raid_2',label:'Raid 2',keys:Object.freeze(['main_5','main_6','main_7','main_8']),defaultLeaderTeam:'main_5'}),
-    Object.freeze({id:'raid_3',label:'Raid 3',keys:Object.freeze(['main_9','main_10','main_11','main_12']),defaultLeaderTeam:'main_9'})
+    Object.freeze({id:'raid_3',label:'Raid 3',keys:Object.freeze(['main_9','main_10','main_11','main_12']),defaultLeaderTeam:'main_9'}),
+    Object.freeze({id:'raid_4',label:'Raid 4',keys:Object.freeze([])}),
+    Object.freeze({id:'raid_5',label:'Raid 5',keys:Object.freeze([])})
   ]);
   const SUB_KEYS = Object.freeze(Array.from({length:CONFIG.subTeams},(_,i)=>`sub_${i+1}`));
   const SUB_RAIDS = Object.freeze([
     Object.freeze({id:'sub_raid_1',label:'Raid 1',keys:Object.freeze(['sub_1','sub_2','sub_3','sub_4','sub_17']),defaultLeaderTeam:'sub_1'}),
     Object.freeze({id:'sub_raid_2',label:'Raid 2',keys:Object.freeze(['sub_5','sub_6','sub_7','sub_8','sub_18']),defaultLeaderTeam:'sub_5'}),
     Object.freeze({id:'sub_raid_3',label:'Raid 3',keys:Object.freeze(['sub_9','sub_10','sub_11','sub_12']),defaultLeaderTeam:'sub_9'}),
-    Object.freeze({id:'sub_raid_4',label:'Raid 4',keys:Object.freeze(['sub_13','sub_14','sub_15','sub_16']),defaultLeaderTeam:'sub_13'})
+    Object.freeze({id:'sub_raid_4',label:'Raid 4',keys:Object.freeze(['sub_13','sub_14','sub_15','sub_16']),defaultLeaderTeam:'sub_13'}),
+    Object.freeze({id:'sub_raid_5',label:'Raid 5',keys:Object.freeze([])})
   ]);
   const ALL_GUILD_RAIDS = Object.freeze([...MAIN_RAIDS,...SUB_RAIDS]);
+
+  function createDefaultGuildRaidGroups(){
+    return Object.fromEntries(ALL_GUILD_RAIDS.filter(raid=>raid.keys.length).map(raid=>[raid.id,raid.keys.slice()]));
+  }
+
+  function normalizeGuildRaidGroups(raw){
+    if(raw===undefined)return createDefaultGuildRaidGroups();
+    if(!raw||typeof raw!=='object'||Array.isArray(raw))throw new Error('Invalid Guild League raid layout.');
+    const out={},used=new Set();
+    for(const [id,keys] of Object.entries(raw)){
+      const raid=ALL_GUILD_RAIDS.find(item=>item.id===id);
+      const allowed=id.startsWith('sub_')?SUB_KEYS:MAIN_KEYS;
+      if(!raid||!Array.isArray(keys)||keys.length<1||keys.length>8)throw new Error('Each Guild League raid needs 1–8 parties.');
+      out[id]=keys.map(key=>{
+        if(!allowed.includes(key)||used.has(key))throw new Error('A party must belong to exactly one raid in its battlefield.');
+        used.add(key);return key;
+      });
+    }
+    for(const raids of [MAIN_RAIDS,SUB_RAIDS]){
+      const count=raids.filter(raid=>out[raid.id]).length;
+      if(count<1||count>5)throw new Error('Each battlefield needs 1–5 raids.');
+    }
+    return out;
+  }
+
+  function currentGuildRaids(source=state,kind){
+    const groups=source.guildRaidGroups||createDefaultGuildRaidGroups();
+    const raids=kind==='main'?MAIN_RAIDS:kind==='sub'?SUB_RAIDS:ALL_GUILD_RAIDS;
+    return raids.filter(raid=>Array.isArray(groups[raid.id])).map(raid=>({...raid,keys:groups[raid.id].slice()}));
+  }
   const SIEGE_MAIN_KEYS = Object.freeze(Array.from({length:CONFIG.mainTeams},(_,i)=>`siege_main_${i+1}`));
   const SIEGE_MAIN_RAIDS = Object.freeze([
     Object.freeze({id:'siege_raid_1',label:'Raid 1',keys:Object.freeze(['siege_main_1','siege_main_2','siege_main_3','siege_main_4']),defaultLeaderTeam:'siege_main_1',siege:true}),
@@ -119,13 +152,14 @@
     return out;
   }
 
-  function raidKeysForGroups(raid,groups){
+  function raidKeysForGroups(raid,groups,guildGroups=state.guildRaidGroups){
     if(!raid)return[];
     if(raid.siege){
       const source=groups&&typeof groups==='object'?groups:{};
       const keys=source[raid.id];
       return Array.isArray(keys)?keys:raid.keys;
     }
+    if(ALL_GUILD_RAIDS.some(item=>item.id===raid.id))return (guildGroups||createDefaultGuildRaidGroups())[raid.id]||[];
     return raid.keys||[];
   }
 
@@ -136,7 +170,8 @@
 
   function raidById(id){
     const raid=ALL_RAIDS.find(item=>item.id===id)||null;
-    if(!raid||!raid.siege)return raid;
+    if(!raid)return null;
+    if(!raid.siege)return ALL_GUILD_RAIDS.some(item=>item.id===id)?currentGuildRaids().find(item=>item.id===id)||null:raid;
     return {...raid,keys:raidKeysForGroups(raid,state.siegeRaidGroups).slice()};
   }
   const ALL_GUILD_STYLE_RAIDS = Object.freeze([...ALL_GUILD_RAIDS,...ALL_SIEGE_RAIDS]);
@@ -171,6 +206,7 @@
     raidLeaders:createDefaultRaidLeaders(),
     raidModes:createDefaultRaidModes(),
     siegeRaidGroups:createDefaultSiegeRaidGroups(),
+    guildRaidGroups:createDefaultGuildRaidGroups(),
     membershipHistory:[],
     publicVisibility:{guildLeague:false,siege:false,polarityZone:false},
     eventUpdates:{
@@ -825,36 +861,36 @@
     return out;
   }
 
-  function raidMemberNames(raid,assignments=state.assignments,siegeRaidGroups=state.siegeRaidGroups){
+  function raidMemberNames(raid,assignments=state.assignments,siegeRaidGroups=state.siegeRaidGroups,guildRaidGroups=state.guildRaidGroups){
     const names=new Set();
-    raidKeysForGroups(raid,siegeRaidGroups).forEach(key=>(assignments[key]||[]).forEach(name=>{if(name)names.add(name);}));
+    raidKeysForGroups(raid,siegeRaidGroups,guildRaidGroups).forEach(key=>(assignments[key]||[]).forEach(name=>{if(name)names.add(name);}));
     return names;
   }
 
-  function normalizeRaidCommanders(raw,assignments,siegeRaidGroups){
+  function normalizeRaidCommanders(raw,assignments,siegeRaidGroups,guildRaidGroups){
     const source=raw&&typeof raw==='object'?raw:{};
     const out=createDefaultRaidCommanders();
     ALL_RAIDS.forEach(raid=>{
       const candidate=stringValue(source[raid.id]).trim();
       if(!candidate)return;
-      const keys=raidKeysForGroups(raid,siegeRaidGroups);
+      const keys=raidKeysForGroups(raid,siegeRaidGroups,guildRaidGroups);
       // Backward compatibility: older versions stored a team key. Convert it to that team's current leader.
       if(keys.includes(candidate)){
         const legacyCommander=assignments[candidate]&&assignments[candidate][0]?assignments[candidate][0]:'';
         if(legacyCommander)out[raid.id]=legacyCommander;
         return;
       }
-      if(raidMemberNames(raid,assignments,siegeRaidGroups).has(candidate))out[raid.id]=candidate;
+      if(raidMemberNames(raid,assignments,siegeRaidGroups,guildRaidGroups).has(candidate))out[raid.id]=candidate;
     });
     return out;
   }
 
-  function normalizeRaidLeaders(raw,assignments,siegeRaidGroups){
+  function normalizeRaidLeaders(raw,assignments,siegeRaidGroups,guildRaidGroups){
     const source=raw&&typeof raw==='object'?raw:{};
     const out=createDefaultRaidLeaders();
     ALL_GUILD_STYLE_RAIDS.forEach(raid=>{
       const candidate=stringValue(source[raid.id]).trim();
-      if(candidate&&raidMemberNames(raid,assignments,siegeRaidGroups).has(candidate))out[raid.id]=candidate;
+      if(candidate&&raidMemberNames(raid,assignments,siegeRaidGroups,guildRaidGroups).has(candidate))out[raid.id]=candidate;
     });
     return out;
   }
@@ -933,11 +969,14 @@
     const rawFinished=Array.isArray(input.finishedDungeons)?input.finishedDungeons:(Array.isArray(input.fd)?input.fd:[]);
     const finishedDungeons=[...new Set(rawFinished.map(v=>toInt(v,0,999)).filter(v=>v>=1&&v<=CONFIG.dungeonCount))].sort((a,b)=>a-b);
     const siegeRaidGroups=normalizeSiegeRaidGroups(input.siegeRaidGroups||(input.srg&&typeof input.srg==='object'?input.srg:{}));
-    const raidCommanders=normalizeRaidCommanders(input.raidCommanders||(input.rc&&typeof input.rc==='object'?input.rc:(input.rl&&typeof input.rl==='object'?input.rl:{})),assignments,siegeRaidGroups);
+    const guildRaidGroups=normalizeGuildRaidGroups(input.guildRaidGroups);
+    const guildKeys=new Set(Object.values(guildRaidGroups).flat());
+    if(GUILD_KEYS.some(key=>!guildKeys.has(key)&&assignments[key].some(Boolean)))throw new Error("The Guild League layout omits an occupied party. Reload the roster before editing.");
+    const raidCommanders=normalizeRaidCommanders(input.raidCommanders||(input.rc&&typeof input.rc==='object'?input.rc:(input.rl&&typeof input.rl==='object'?input.rl:{})),assignments,siegeRaidGroups,guildRaidGroups);
     const raidTeamNames={};
     const rawTeamNames=input.raidTeamNames&&typeof input.raidTeamNames==='object'?input.raidTeamNames:{};
     ALL_GUILD_STYLE_RAIDS.forEach(raid=>{raidTeamNames[raid.id]=stringValue(Object.hasOwn(rawTeamNames,raid.id)?rawTeamNames[raid.id]:raidCommanders[raid.id]).trim().slice(0,60);});
-    const raidLeaders=normalizeRaidLeaders(input.raidLeaders||(input.rlead&&typeof input.rlead==='object'?input.rlead:{}),assignments,siegeRaidGroups);
+    const raidLeaders=normalizeRaidLeaders(input.raidLeaders||(input.rlead&&typeof input.rlead==='object'?input.rlead:{}),assignments,siegeRaidGroups,guildRaidGroups);
     const raidModes=normalizeRaidModes(input.raidModes||(input.rm&&typeof input.rm==='object'?input.rm:{}));
     const rawHistory=Array.isArray(input.membershipHistory)?input.membershipHistory:(Array.isArray(input.mh)?input.mh:[]);
     const usedHistoryIds=new Set();
@@ -976,7 +1015,7 @@
       siege:normalizeEventUpdate(rawEventUpdates.siege,false),
       polarityZone:normalizeEventUpdate(rawEventUpdates.polarityZone)
     };
-    return {roster,assignments,finishedDungeons,raidCommanders,raidTeamNames,raidLeaders,raidModes,siegeRaidGroups,membershipHistory:membershipHistory.slice(-CONFIG.maxHistory),publicVisibility,eventUpdates,revision:0,updatedAt:'',spreadsheetName:''};
+    return {roster,assignments,finishedDungeons,raidCommanders,raidTeamNames,raidLeaders,raidModes,siegeRaidGroups,guildRaidGroups,membershipHistory:membershipHistory.slice(-CONFIG.maxHistory),publicVisibility,eventUpdates,revision:0,updatedAt:'',spreadsheetName:''};
   }
 
   function enforceUnique(assignments,keys){
@@ -1357,9 +1396,12 @@
     }else if(currentEvent==='siege'){
       wrap.innerHTML=`<div class="main-raids siege-raids">${currentSiegeRaids().map(mainRaidHtml).join('')}</div>`;
     }else{
-      wrap.innerHTML=sectionHeader('⚔ Main Battlefield','main-bf',`3 raids · 4 teams each`)+`<div class="main-raids">${MAIN_RAIDS.map(mainRaidHtml).join('')}</div>`+sectionHeader('<i class="fa-solid fa-shield-cat mr-2" aria-hidden="true"></i>Sub Battlefield','sub-bf',`4 raids · Parties 1–${CONFIG.subTeams}`)+`<div class="main-raids sub-raids">${SUB_RAIDS.map(mainRaidHtml).join('')}</div>`;
+      const main=currentGuildRaids(state,'main'),sub=currentGuildRaids(state,'sub');
+      const note=(raids,max)=>`${raids.length}/5 raids · ${raids.reduce((sum,raid)=>sum+raid.keys.length,0)}/${max} parties`;
+      wrap.innerHTML=sectionHeader('⚔ Main Battlefield','main-bf',note(main,12))+'<div class="main-raids">'+main.map(mainRaidHtml).join('')+guildNewRaidHtml('main')+'</div>'+sectionHeader('<i class="fa-solid fa-shield-cat mr-2" aria-hidden="true"></i>Sub Battlefield','sub-bf',note(sub,18))+'<div class="main-raids sub-raids">'+sub.map(mainRaidHtml).join('')+guildNewRaidHtml('sub')+'</div>';
     }
     wireTeamInteractions();
+    if(currentEvent==='guild_league')wireGuildRaidInteractions(wrap);
   }
 
   function mainRaidHtml(raid){
@@ -1398,15 +1440,15 @@
     return stringValue(state.raidCommanders?.[raid.id]).trim()||'Not assigned';
   }
 
-  function raidForTeam(key){if(key.startsWith('siege_'))return currentSiegeRaids().find(raid=>raid.keys.includes(key))||null;return ALL_RAIDS.find(raid=>!raid.siege&&raid.keys.includes(key))||null;}
+  function raidForTeam(key){if(/^(main_|sub_)/.test(key))return currentGuildRaids().find(raid=>raid.keys.includes(key))||null;if(key.startsWith('siege_'))return currentSiegeRaids().find(raid=>raid.keys.includes(key))||null;return ALL_RAIDS.find(raid=>!raid.siege&&raid.keys.includes(key))||null;}
 
   function sectionHeader(title,kind,note){return `<div class="section-head"><div class="section-title ${kind}">${title}</div><div class="section-line"></div><div class="section-note">${note}</div></div>`;}
 
   function teamCardHtml(key){
     const slots=state.assignments[key];const filled=slots.filter(Boolean).length;const kind=teamKind(key);const noHealer=teamHasNoHealer(key);const dungeon=dungeonNumber(key);const finished=dungeon&&state.finishedDungeons.includes(dungeon);
     const matches=kind==='elite-bf'?dungeonMatches(key):[];const sent=matches.length>0;
-    const wholePartyDraggable=currentEvent==='siege'||(currentEvent==='polarity_zone'&&filled);
-    const handle=wholePartyDraggable?`<span class="team-drag-handle ${selectedTeamSource===key?'team-selected':''}" draggable="true" data-team-drag="${key}" title="${currentEvent==='siege'?'Drag this whole Party to another Raid':'Drag or tap to move/copy this whole team'}">⠿</span>`:'';
+    const wholePartyDraggable=(currentEvent==='guild_league'&&userCanEdit())||currentEvent==='siege'||(currentEvent==='polarity_zone'&&filled);
+    const handle=wholePartyDraggable?`<span class="team-drag-handle ${selectedTeamSource===key?'team-selected':''}" draggable="true" data-team-drag="${key}" title="${(currentEvent==='siege'||currentEvent==='guild_league')?'Drag this whole Party to another Raid':'Drag or tap to move/copy this whole team'}">⠿</span>`:'';
     const dot=filled===CONFIG.teamSize?'full':filled?'partial':'empty';
     return `<div class="team-card ${kind} ${sent?'sent':''} ${finished?'run-finished':''} card" data-team-key="${key}">
       <div class="team-head"><div class="team-name">${handle}<span>${escapeHtml(displayTeamLabel(key))}</span></div><div class="team-meta"><span class="team-fill-dot ${dot}"></span>${filled}/${CONFIG.teamSize}</div></div>
@@ -1583,7 +1625,7 @@
       });
       drop.addEventListener('dragleave',()=>{drop.classList.remove('dragover');drop.classList.remove('invalid');});
       drop.addEventListener('drop',event=>{
-        if(dragTeamSource&&dragTeamSource.startsWith('siege_'))return;
+        if(dragTeamSource&&(currentEvent==='guild_league'||dragTeamSource.startsWith('siege_')))return;
         event.preventDefault();event.stopPropagation();drop.classList.remove('dragover');drop.classList.remove('invalid');
         const source=sourceFromDragEvent(event);
         chooseFromSlot(source);
@@ -1655,7 +1697,7 @@
       });
       drop.addEventListener('dragleave',()=>{drop.classList.remove('dragover');drop.classList.remove('invalid');});
       drop.addEventListener('drop',event=>{
-        if(dragTeamSource&&dragTeamSource.startsWith('siege_'))return;
+        if(dragTeamSource&&(currentEvent==='guild_league'||dragTeamSource.startsWith('siege_')))return;
         event.preventDefault();event.stopPropagation();drop.classList.remove('dragover');drop.classList.remove('invalid');
         chooseFromSlot(sourceFromDragEvent(event));
       });
@@ -1673,10 +1715,11 @@
 
     wrap.querySelectorAll('.team-drag-handle').forEach(handle=>{
       const key=handle.dataset.teamDrag;
-      handle.addEventListener('dragstart',event=>{event.stopPropagation();dragTeamSource=key;event.dataTransfer.effectAllowed=key.startsWith('elite_')?'copy':'move';event.dataTransfer.setData('text/plain','TEAM:'+key);const card=handle.closest('.team-card');if(card)card.classList.add('team-dragging');});
+      handle.addEventListener('dragstart',event=>{if(currentEvent==='guild_league'&&!userCanEdit()){event.preventDefault();return;}event.stopPropagation();dragSourceSlot=null;dragMemberName=null;dragTeamSource=key;event.dataTransfer.effectAllowed=key.startsWith('elite_')?'copy':'move';event.dataTransfer.setData('text/plain','TEAM:'+key);const card=handle.closest('.team-card');if(card)card.classList.add('team-dragging');});
       handle.addEventListener('dragend',()=>{const card=handle.closest('.team-card');if(card)card.classList.remove('team-dragging');dragTeamSource=null;clearSiegeRaidDropStates();});
       handle.addEventListener('click',event=>{
         event.stopPropagation();
+        if(currentEvent==='guild_league'){if(!userCanEdit())return;selectedMember=null;selectedSlot=null;selectedTeamSource=selectedTeamSource===key?null:key;renderTeams();return;}
         if(key.startsWith('siege_')){showToast('Move Party','Drag the ⠿ handle into another Siege raid.');return;}
         selectedMember=null;selectedSlot=null;selectedTeamSource=selectedTeamSource===key?null:key;renderMemberList();renderTeams();
       });
@@ -2561,6 +2604,7 @@
       raidTeamNames:value.raidTeamNames&&typeof value.raidTeamNames==='object'?value.raidTeamNames:{},
       raidLeaders:value.raidLeaders&&typeof value.raidLeaders==='object'?value.raidLeaders:createDefaultRaidLeaders(),
       raidModes:value.raidModes&&typeof value.raidModes==='object'?value.raidModes:createDefaultRaidModes(),
+      guildRaidGroups:value.guildRaidGroups||createDefaultGuildRaidGroups(),
       siegeRaidGroups:value.siegeRaidGroups&&typeof value.siegeRaidGroups==='object'?value.siegeRaidGroups:createDefaultSiegeRaidGroups(),
       membershipHistory:Array.isArray(value.membershipHistory)?value.membershipHistory:[],
       publicVisibility:value.publicVisibility&&typeof value.publicVisibility==='object'?value.publicVisibility:{guildLeague:false,siege:false,polarityZone:false},
@@ -2656,6 +2700,11 @@
       const id=raid.id;
       if(!sameJson(local.raidModes[id],base.raidModes[id]))merged.raidModes[id]=local.raidModes[id];
     });
+    const layoutChanged=!sameJson(local.guildRaidGroups,base.guildRaidGroups);
+    const remoteLayoutChanged=!sameJson(remote.guildRaidGroups,base.guildRaidGroups);
+    const glAssignmentsChanged=(a,b)=>GUILD_KEYS.some(key=>!sameJson(a.assignments[key],b.assignments[key]))||ALL_GUILD_RAIDS.some(raid=>['raidCommanders','raidLeaders','raidModes','raidTeamNames'].some(field=>!sameJson(a[field][raid.id],b[field][raid.id])));
+    if((layoutChanged&&(remoteLayoutChanged||glAssignmentsChanged(remote,base)))||(remoteLayoutChanged&&glAssignmentsChanged(local,base)))throw new Error('Guild League changed while you were editing. Export your draft if needed, then reload and try again.');
+    if(layoutChanged)merged.guildRaidGroups=cloneJson(local.guildRaidGroups);
     if(!sameJson(local.siegeRaidGroups,base.siegeRaidGroups))merged.siegeRaidGroups=cloneJson(local.siegeRaidGroups);
 
     merged.membershipHistory=mergeHistoryThreeWay(base.membershipHistory,local.membershipHistory,remote.membershipHistory);
@@ -2775,6 +2824,7 @@
     let baseRevision=state.revision;
     let result=null;
     let mergedOtherUserChanges=false;
+    let layoutConflict=false;
 
     try{
       for(let attempt=0;attempt<5;attempt++){
@@ -2817,13 +2867,14 @@
     }catch(error){
       dirty=true;setSaveFlag('err','Save failed');
       const message=errorMessage(error);
+      layoutConflict=/GL_LAYOUT_INVALID|Guild League changed/.test(message);
       showToast('Save failed',message,'err');
       if(revisionConflict(error)){
         showToast('Sync conflict','The data changed repeatedly while saving. Wait a moment, then try your edit again.','warn');
       }
     }finally{
       saveInFlight=false;
-      if(saveQueued||dirty){setTimeout(flushSave,80);}
+      if(!layoutConflict&&(saveQueued||dirty)){setTimeout(flushSave,80);}
     }
   }
 
@@ -2843,7 +2894,7 @@
   }
 
   function exportLineup(){
-    const payload={type:'tempest-lineup-export',version:10,exportedAt:new Date().toISOString(),source:'Titania Supabase website',m:state.roster,a:state.assignments,fd:state.finishedDungeons,rc:state.raidCommanders,raidTeamNames:state.raidTeamNames,rlead:state.raidLeaders,rm:state.raidModes,siegeRaidGroups:state.siegeRaidGroups,mh:state.membershipHistory,eu:state.eventUpdates};
+    const payload={type:'tempest-lineup-export',version:11,exportedAt:new Date().toISOString(),source:'Titania Supabase website',m:state.roster,a:state.assignments,fd:state.finishedDungeons,rc:state.raidCommanders,raidTeamNames:state.raidTeamNames,rlead:state.raidLeaders,rm:state.raidModes,siegeRaidGroups:state.siegeRaidGroups,guildRaidGroups:state.guildRaidGroups,mh:state.membershipHistory,eu:state.eventUpdates};
     const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});const url=URL.createObjectURL(blob);const link=document.createElement('a');link.href=url;link.download=`guild-lineup-${new Date().toISOString().slice(0,10)}.json`;document.body.appendChild(link);link.click();link.remove();URL.revokeObjectURL(url);showToast('Lineup exported','Roster status, membership history, Guild League, Siege, Polarity Zone, and finished-dungeon marks were included.');
   }
 
@@ -2855,7 +2906,7 @@
       const imported=normalizeClientState(data);
       const when=data.exportedAt?new Date(data.exportedAt).toLocaleString():'an unknown time';
       if(!userCanEdit()||!await confirmPlannerAction(`Import the lineup exported on ${when}?`,'This will replace the current roster, Guild Status records, membership history, and all event lineups in the Titania database.','Replace data',true)||!userCanEdit())return;
-      state.roster=imported.roster;state.assignments=imported.assignments;state.finishedDungeons=imported.finishedDungeons;state.raidCommanders=imported.raidCommanders;state.raidTeamNames=imported.raidTeamNames;state.raidLeaders=imported.raidLeaders;state.raidModes=imported.raidModes;state.siegeRaidGroups=imported.siegeRaidGroups;state.membershipHistory=imported.membershipHistory;dashboardSelected.clear();clearSelections(false);commitMutation('Lineup imported','all');showToast('Lineup imported','The roster, raid commanders, status history, and event data are being saved to Supabase.');
+      state.roster=imported.roster;state.assignments=imported.assignments;state.finishedDungeons=imported.finishedDungeons;state.raidCommanders=imported.raidCommanders;state.raidTeamNames=imported.raidTeamNames;state.raidLeaders=imported.raidLeaders;state.raidModes=imported.raidModes;state.siegeRaidGroups=imported.siegeRaidGroups;state.guildRaidGroups=imported.guildRaidGroups;state.membershipHistory=imported.membershipHistory;dashboardSelected.clear();clearSelections(false);commitMutation('Lineup imported','all');showToast('Lineup imported','The roster, raid commanders, status history, and event data are being saved to Supabase.');
     };
     reader.onerror=()=>showToast('Import failed','The file could not be read.','err');reader.readAsText(file);
   }
@@ -2922,7 +2973,7 @@
       });
     }else{
       html+=`<div class="print-section-title">Main Battlefield</div>`;
-      MAIN_RAIDS.forEach(raid=>{
+      currentGuildRaids(state,'main').forEach(raid=>{
         const commanderName=raidTeamName(raid);
         const raidMode=state.raidModes&&state.raidModes[raid.id]==='DEF'?'DEF':'ATK';
         const guildMode=state.raidModes?.[raid.id]==='MVP'?'MVP':raidMode;
@@ -2930,7 +2981,7 @@
         html+=`<div class="print-raid-block"><div class="print-raid-head"><span>${escapeHtml(raid.label.toUpperCase())} · TEAM ${escapeHtml(commanderName)} <span class="print-raid-mode ${guildMode==='MVP'?'text-danger bg-danger-subtle border border-danger gap-0':guildMode.toLowerCase()}">${modeIcon}${guildMode==='MVP'?'':' '}${guildMode}</span></span></div><div class="print-team-grid print-main-raid-grid">${raid.keys.map(appendTeamCard).join('')}</div></div>`;
       });
       html+=`<div class="print-section-title"><i class="fa-solid fa-shield-cat mr-2" aria-hidden="true"></i>Sub Battlefield</div>`;
-      SUB_RAIDS.forEach(raid=>{
+      currentGuildRaids(state,'sub').forEach(raid=>{
         const commanderName=raidTeamName(raid);
         const printGridClass=raid.keys.length===5?'print-main-raid-grid five':'print-main-raid-grid';
         html+=`<div class="print-raid-block"><div class="print-raid-head"><span>${escapeHtml(raid.label.toUpperCase())} · TEAM ${escapeHtml(commanderName)}</span></div><div class="print-team-grid ${printGridClass}">${raid.keys.map(appendTeamCard).join('')}</div></div>`;
@@ -2941,19 +2992,20 @@
 
   function buildCompactPrintContent(event){
     const siege=event==='siege';
-    const raids=siege?currentSiegeRaids():[...MAIN_RAIDS,...SUB_RAIDS];
+    const mainRaids=siege?[]:currentGuildRaids(state,'main');
+    const raids=siege?currentSiegeRaids():currentGuildRaids();
     const keys=currentTeamKeys();
     const date=new Date().toLocaleDateString(undefined,{year:'numeric',month:'long',day:'numeric'});
     let html=`<div class="compact-lineup-print ${siege?'siege-print-doc':'guild-print-doc'}"><div class="print-doc-head"><div><h1>TITANIA ${siege?'SIEGE/POLARITY':'GUILD LEAGUE'}</h1><div class="print-sub">Dark Lord Server · Guild lineup</div></div><div class="print-doc-meta">${escapeHtml(date)}<br>${assignedNamesSet(keys).size}/${keys.length*CONFIG.teamSize} unique members slotted</div></div>`;
     raids.forEach((raid,raidIndex)=>{
-      if(!siege&&(raidIndex===0||raidIndex===MAIN_RAIDS.length))html+=`<div class="print-section-title">${raidIndex===0?'Main':'Sub'} Battlefield</div>`;
+      if(!siege&&(raidIndex===0||raidIndex===mainRaids.length))html+=`<div class="print-section-title">${raidIndex===0?'Main':'Sub'} Battlefield</div>`;
       const teamName=escapeHtml(raidTeamName(raid));
       const defending=state.raidModes?.[raid.id]==='DEF';
       const leader=stringValue(state.raidLeaders?.[raid.id]);
-      const subRaid=!siege&&raidIndex>=MAIN_RAIDS.length;
+      const subRaid=!siege&&raidIndex>=mainRaids.length;
       const mode=subRaid?(['MID','TOP','BOTTOM'].includes(state.raidModes?.[raid.id])?state.raidModes[raid.id]:'MID'):state.raidModes?.[raid.id]==='MVP'&&!siege?'MVP':defending?'DEF':'ATK';
       const modeLabel=siege?(defending?'↻ RESPAWN':'♜ CAPTURE'):mode==='BOTTOM'?'BTM':mode;
-      html+=`<section class="print-raid-block"><div class="print-raid-head"><strong>TEAM ${teamName}</strong><span class="print-raid-mode ${mode.toLowerCase()}">${modeLabel}</span></div><div class="print-team-grid print-main-raid-grid${raid.keys.length===5?' five':''}" style="--lineup-print-columns:${raid.keys.length}">`;
+      html+=`<section class="print-raid-block"><div class="print-raid-head"><strong>TEAM ${teamName}</strong><span class="print-raid-mode ${mode.toLowerCase()}">${modeLabel}</span></div><div class="print-team-grid print-main-raid-grid${raid.keys.length===5?' five':''}" style="--lineup-print-columns:${raid.keys.length>5?Math.ceil(raid.keys.length/2):raid.keys.length}">`;
       raid.keys.forEach(key=>{
         const noHealer=teamHasNoHealer(key);
         const starSelected=siege&&window.TitaniaPartyStars?.isSelected(key);
@@ -2999,7 +3051,7 @@
   function formatDate(value){const iso=normalizeDateValue(value);if(!iso)return '';const date=new Date(`${iso}T00:00:00`);return date.toLocaleDateString(undefined,{year:'numeric',month:'short',day:'numeric'});}
   function formatMemberUpdate(value){const date=new Date(value);if(Number.isNaN(date.getTime()))return 'No edit recorded';return date.toLocaleString(undefined,{year:'numeric',month:'short',day:'numeric',hour:'numeric',minute:'2-digit'});}
 
-  function currentTeamKeys(){if(currentEvent==='polarity_zone')return POLARITY_KEYS;if(currentEvent==='siege')return SIEGE_KEYS;return GUILD_KEYS;}
+  function currentTeamKeys(){if(currentEvent==='polarity_zone')return POLARITY_KEYS;if(currentEvent==='siege')return SIEGE_KEYS;return currentGuildRaids().flatMap(raid=>raid.keys);}
   function scopeKeys(key){if(key.startsWith('elite_'))return ELITE_KEYS;if(key.startsWith('dungeon'))return DUNGEON_KEYS;if(key.startsWith('siege_'))return SIEGE_KEYS;return GUILD_KEYS;}
   function scopeId(key){if(key.startsWith('elite_'))return'elite';if(key.startsWith('dungeon'))return'dungeon';if(key.startsWith('siege_'))return'siege';return'guild';}
   function assignedNamesSet(keys){const set=new Set();(keys||currentTeamKeys()).forEach(key=>state.assignments[key].forEach(name=>{if(name)set.add(name);}));return set;}
@@ -3020,6 +3072,11 @@
       const index=currentSiegeRaids().flatMap(raid=>raid.keys).indexOf(key);
       return index>=0?`Party ${index+1}`:teamLabel(key);
     }
+    if(currentEvent==='guild_league'&&(key.startsWith('main_')||key.startsWith('sub_'))){
+      const sub=key.startsWith('sub_');
+      const index=currentGuildRaids(state,sub?'sub':'main').flatMap(raid=>raid.keys).indexOf(key);
+      if(index>=0)return `Party ${index+1}`;
+    }
     if(key.startsWith('sub_'))return subDisplayTeamLabel(key);
     if(currentEvent==='polarity_zone'&&key.startsWith('dungeon')){
       const index=DUNGEON_KEYS.indexOf(key);
@@ -3028,7 +3085,7 @@
     return teamLabel(key);
   }
   function dungeonNumber(key){const match=/^dungeon(\d+)_/.exec(key);return match?Number.parseInt(match[1],10):null;}
-  function teamLongLabel(key){if(key.startsWith('siege_'))return displayTeamLabel(key);if(key.startsWith('main_'))return`Main ${teamLabel(key)}`;if(key.startsWith('sub_'))return`Sub ${subDisplayTeamLabel(key)}`;if(key.startsWith('elite_'))return`Star ${teamLabel(key)}`;return`Normal Dungeon ${dungeonNumber(key)} ${teamLabel(key)}`;}
+  function teamLongLabel(key){if(key.startsWith('siege_'))return displayTeamLabel(key);if(key.startsWith('main_'))return`Main ${displayTeamLabel(key)}`;if(key.startsWith('sub_'))return`Sub ${displayTeamLabel(key)}`;if(key.startsWith('elite_'))return`Star ${teamLabel(key)}`;return`Normal Dungeon ${dungeonNumber(key)} ${teamLabel(key)}`;}
   function teamsMatch(a,b){const first=state.assignments[a].filter(Boolean).slice().sort();const second=state.assignments[b].filter(Boolean).slice().sort();return first.length>0&&first.length===second.length&&first.every((value,index)=>value===second[index]);}
   function dungeonMatches(eliteKey){return DUNGEON_KEYS.filter(key=>teamsMatch(eliteKey,key));}
   function classColor(cls){return CLASS_COLORS[cls]||CLASS_COLORS.Unknown;}

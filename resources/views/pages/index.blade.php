@@ -174,6 +174,7 @@
   </div>
 
 <script src="{{ asset('js/pages/index.js') }}?v={{ filemtime(public_path('js/pages/index.js')) }}"></script>
+<script src="{{ asset('js/guild-raid-controls.js') }}?v={{ filemtime(public_path('js/guild-raid-controls.js')) }}"></script>
 <script src="{{ asset('js/roster-search.js') }}?v={{ filemtime(public_path('js/roster-search.js')) }}" defer></script>
 @endsection
 

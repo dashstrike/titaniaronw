@@ -78,6 +78,8 @@
     const key=found[0];
     const n=Number(key.match(/(\d+)$/)?.[1]||0);
     let raid='—';
+    const guildGroup=Object.entries(state.guildRaidGroups||{}).find(([,keys])=>Array.isArray(keys)&&keys.includes(key));
+    if(guildGroup)return {teamKey:key,raid:`Raid ${Number(guildGroup[0].match(/(\d+)$/)?.[1])}`,party:`Party ${n}`};
     if(key.startsWith('main_')) raid=`Raid ${Math.ceil(n/4)}`;
     else if([1,2,3,4,17].includes(n)) raid='Raid 1';
     else if([5,6,7,8,18].includes(n)) raid='Raid 2';

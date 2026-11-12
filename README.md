@@ -38,6 +38,8 @@ Members uses explicit saves: class selection uses an inline searchable Select2 d
 
 Party Management stores reusable templates independently of event lineups. Editing or saving a template does not change an existing GL/Siege roster. Reload GL/Siege to load the latest templates into its Party Pool, then drag a template onto a team to apply it. With `sql/party_inactive_cleanup.sql` installed, inactive members are removed from saved templates at the database level and cannot be restored by stale saves.
 
+Guild League supports dragging whole parties between raids directly on the roster, like Siege. Drop one party onto another in the same raid to swap their positions. Each battlefield allows 1–5 raids, each raid 1–8 parties, and each party five players. Main is limited to 12 parties/60 players; Sub to 18 parties/90 players. Drag a party onto **Add raid** to create a raid. Moving the last party to another raid removes its empty source raid. Moves and swaps save automatically; removing a raid requires confirmation. Public view, member placement, exports, and A4 landscape printing follow the saved grouping; wholly empty raids are hidden publicly. Manage Party and Siege organization remain independent. See [Guild League layout deployment and rollback](docs/guild-raid-layout.md).
+
 **Current limitations:** Siege battle statistics (`/pvp-siege`) is a “Coming soon” page awaiting a Siege CSV format. Polarity Zone code and saved data remain present, but its UI/public access is hidden by `TITANIA_FEATURES.polarityZone: false` in `public/js/config.js`.
 
 ### Access roles
