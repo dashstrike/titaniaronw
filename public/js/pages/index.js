@@ -1431,6 +1431,7 @@
     const raidLeaderControl=isPolarityRaid?'':`<label class="raid-leader-control"><b>Raid Leader</b><span class="raid-leader-drop ${selectedLeader?'':'empty'}" data-raid-leader-drop="${raid.id}" role="button" tabindex="0" title="Drag the member who created this raid party here">${raidLeaderIcon()}<span class="raid-leader-drop-name">${escapeHtml(leaderDropText)}</span></span></label>`;
     let gridClass=raid.kind==='star'?'pz-star-raid-grid':raid.kind==='normal'?'pz-normal-raid-grid':'main-raid-grid';
     if(!isPolarityRaid&&raid.keys.length===5)gridClass+=' five';
+    if(currentEvent==='guild_league'&&raid.keys.length===1)gridClass+=' single-party';
     return `<div class="main-raid-block card mb-0" data-raid="${raid.id}"><div class="main-raid-head card-header ${currentEvent==='guild_league'&&SUB_RAIDS.some(item=>item.id===raid.id)?'': 'bg-primary-subtle'}"><div class="main-raid-title">${title}</div>${modeToggle}<div class="main-raid-line"></div><label class="raid-commander-control"><b>Raid Commander</b><span class="raid-commander-drop ${selectedCommander?'':'empty'}" data-raid-commander-drop="${raid.id}" role="button" tabindex="0" title="Drag any member from this raid here to make them Raid Commander">${raidCommanderIcon()}<span class="raid-commander-drop-name">${escapeHtml(dropText)}</span></span></label>${raidLeaderControl}</div><div class="${gridClass} card-body">${raid.keys.map(teamCardHtml).join('')}</div></div>`;
   }
 

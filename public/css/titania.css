@@ -275,6 +275,11 @@ body[data-titania-public="true"] .page-content { margin-left: 0; }
   max-width: 100%;
   overflow-x: auto;
 }
+@media (min-width: 768px) {
+  body[data-event="guild_league"] #titania-content .main-raid-grid {
+    grid-auto-columns: 390px;
+  }
+}
 body[data-view="guild"] #titania-content .lineup-sheet,
 body[data-view="siege"] #titania-content .lineup-sheet {
   padding: 0;

@@ -35,12 +35,16 @@ const drag=(key,selector)=>{
   drag('main_12','[data-raid="raid_2"]');
   expect(saves===4,'Drag did not save each move');
   expect(currentGuildRaids(state,'main').map(r=>r.keys.length).join(',')==='6,6','Six-party layout not saved');
+  const partyWidths=[...document.querySelectorAll('[data-raid="raid_1"] .team-card')].map(card=>card.getBoundingClientRect().width);
+  if(innerWidth>=768)expect(partyWidths.length===6&&partyWidths.every(width=>width>=340&&width<=400),'Party cards should stay compact in a multi-party raid: '+partyWidths.join(','));
   expect(document.querySelector('[data-team-key="main_9"] .team-name span:last-child').textContent==='Party 5','Moved party number did not follow its position');
   expect(assignedNamesSet().size===150,'Moving parties lost members');
   expect(state.raidLeaders.raid_3===''&&state.raidCommanders.raid_3==='','Removed raid roles survived');
   const print=buildCompactPrintContent('guild_league');expect((print.match(/<article /g)||[]).length===30&&print.includes('--lineup-print-columns:3'),'Print lost parties');
   const grid=document.querySelector('[data-raid="raid_1"] .main-raid-grid');grid.scrollLeft=grid.scrollWidth;expect(grid.scrollLeft>0,'Raid not scrollable');
   drag('main_1','[data-guild-new-raid="main"]');expect(currentGuildRaids(state,'main').length===3,'Cannot create raid by drop');
+  const singleGrid=document.querySelector('[data-raid="raid_3"] .main-raid-grid');
+  if(innerWidth>=768)expect(singleGrid.classList.contains('single-party')&&singleGrid.querySelector('.team-card').getBoundingClientRect().width<=400,'Single party stretched across raid');
   drag('main_1','[data-raid="raid_1"]');expect(currentGuildRaids(state,'main').length===2,'Last-party move did not remove empty raid');
   drag('main_5','[data-raid="raid_1"]');drag('main_6','[data-raid="raid_1"]');
   const full=JSON.stringify(plannerSnapshot(state)),before=saves;
