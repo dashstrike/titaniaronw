@@ -276,7 +276,7 @@ body[data-titania-public="true"] .page-content { margin-left: 0; }
   overflow-x: auto;
 }
 @media (min-width: 768px) {
-  body[data-event="guild_league"] #titania-content .main-raid-grid {
+  body:is([data-event="guild_league"],[data-event="siege"]) #titania-content .main-raid-grid {
     grid-auto-columns: 390px;
   }
 }

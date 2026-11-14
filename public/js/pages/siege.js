@@ -14,40 +14,30 @@ const SUB_RAIDS = [
   {id:'siege_sub_raid_3',label:'Raid 6',keys:['siege_sub_9','siege_sub_10','siege_sub_11','siege_sub_12']},
   {id:'siege_sub_raid_4',label:'Raid 7',keys:['siege_sub_13','siege_sub_14','siege_sub_15','siege_sub_16']}
 ];
-const DEFAULT_SIEGE_RAIDS = [...MAIN_RAIDS,...SUB_RAIDS];
+const DEFAULT_SIEGE_RAIDS = [...MAIN_RAIDS,...SUB_RAIDS,
+  ...Array.from({length:3},(_,i)=>({id:`siege_raid_${i+8}`,label:`Raid ${i+8}`,keys:[]}))
+];
 const SIEGE_PARTY_ORDER = DEFAULT_SIEGE_RAIDS.flatMap(raid=>raid.keys);
 const SIEGE_KEY_SET = new Set(SIEGE_PARTY_ORDER);
 
 function normalizeSiegeRaidGroups(raw){
+  if(raw===undefined||raw===null||!Object.keys(raw).length)return Object.fromEntries(DEFAULT_SIEGE_RAIDS.filter(raid=>raid.keys.length).map(raid=>[raid.id,raid.keys.slice()]));
   const source=raw&&typeof raw==='object'?raw:{};
-  const out={};const used=new Set();
-  DEFAULT_SIEGE_RAIDS.forEach(raid=>{
-    out[raid.id]=[];
-    const values=Array.isArray(source[raid.id])?source[raid.id]:[];
-    values.forEach(value=>{
-      const key=str(value).trim();
-      if(!SIEGE_KEY_SET.has(key)||used.has(key)||out[raid.id].length>=5)return;
-      used.add(key);out[raid.id].push(key);
+  const out={};
+  const used=new Set();
+  Object.entries(source).forEach(([id,values])=>{
+    if(!DEFAULT_SIEGE_RAIDS.some(raid=>raid.id===id)||!Array.isArray(values)||values.length<1||values.length>8)throw new Error('Invalid Siege raid layout: each raid needs 1-8 parties.');
+    out[id]=values.map(key=>{
+      if(!SIEGE_PARTY_ORDER.includes(key)||used.has(key))throw new Error('Invalid or duplicate Siege party.');
+      used.add(key);return key;
     });
-  });
-  SIEGE_PARTY_ORDER.forEach(key=>{
-    if(used.has(key))return;
-    const preferred=DEFAULT_SIEGE_RAIDS.find(raid=>raid.keys.includes(key));
-    let target=preferred&&out[preferred.id].length<5?preferred:null;
-    if(!target)target=DEFAULT_SIEGE_RAIDS.find(raid=>out[raid.id].length<5);
-    if(target){out[target.id].push(key);used.add(key);}
-  });
-  DEFAULT_SIEGE_RAIDS.forEach(emptyRaid=>{
-    if(out[emptyRaid.id].length)return;
-    const donor=DEFAULT_SIEGE_RAIDS.find(raid=>out[raid.id].length>1);
-    if(donor)out[emptyRaid.id].push(out[donor.id].pop());
   });
   return out;
 }
 
 function currentSiegeRaids(){
   const groups=state&&state.siegeRaidGroups?state.siegeRaidGroups:normalizeSiegeRaidGroups({});
-  return DEFAULT_SIEGE_RAIDS.map(raid=>({...raid,keys:(groups[raid.id]||raid.keys).slice()}));
+  return DEFAULT_SIEGE_RAIDS.filter(raid=>Object.hasOwn(groups,raid.id)).map(raid=>({...raid,keys:groups[raid.id].slice()}));
 }
 
 function siegeRaidForParty(key){return currentSiegeRaids().find(raid=>raid.keys.includes(key))||null;}
@@ -165,7 +155,7 @@ function render(){
 }
 
 function renderGuild(){
-  return currentSiegeRaids().map(r=>raidBlock(r,'siege',r.keys.length===5)).join('');
+  return currentSiegeRaids().filter(raid=>raid.keys.some(key=>slots(key).some(Boolean))).map(r=>raidBlock(r,'siege',r.keys.length===5)).join('');
 }
 
 function renderPolarity(){
@@ -281,7 +271,7 @@ function teamNoHealer(key){
 
 function teamLabel(key){
   if(key.startsWith('siege_')){
-    const index=SIEGE_PARTY_ORDER.indexOf(key);
+    const index=currentSiegeRaids().flatMap(raid=>raid.keys).indexOf(key);
     if(index>=0)return `Party ${index+1}`;
   }
   const m=/_([0-9]+)$/.exec(key);

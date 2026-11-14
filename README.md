@@ -42,6 +42,10 @@ Guild League supports dragging whole parties between raids directly on the roste
 
 **Current limitations:** Siege battle statistics (`/pvp-siege`) is a “Coming soon” page awaiting a Siege CSV format. Polarity Zone code and saved data remain present, but its UI/public access is hidden by `TITANIA_FEATURES.polarityZone: false` in `public/js/config.js`.
 
+Siege raid organization uses one roster with no Main/Sub sections. Its 30 five-player parties can be arranged into 1–10 raids, with 1–8 parties per raid. Drag a party onto another raid to move it, onto another party in the same raid to swap positions, or onto **Add raid** to create a raid. Tap a party handle then its destination for touch use. Moving the last party into an existing raid removes its empty source raid. **Remove raid** asks for confirmation and returns its players to the pool without deleting members. **Add raid** uses an unallocated empty party; when all parties are allocated, drag an existing party onto that area. Saves, public views, sequential party numbering, exports, and printing follow the saved layout. Existing lineups retain their grouping until edited. Deploy the management and public assets together and refresh existing browser tabs before editing; older clients do not support the new Siege layouts. This feature reuses the existing `siegeRaidGroups` field and backend functions, with no schema change.
+
+Offline Siege checks: `node --test tests/js/siege-raid-layout.test.cjs`, `node tests/browser/siege-raid-drag.cjs`, and `node tests/browser/siege-raid-drag.cjs --mobile`.
+
 ### Access roles
 
 Management data requires an approved Supabase profile. Main capabilities:
