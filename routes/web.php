@@ -26,6 +26,16 @@ foreach (['guild-league', 'siege', 'polarity-zone', 'member', 'parties', 'users'
         ->name($page);
 }
 
+Route::get('/public/siege/{code}', [PageController::class, 'show'])
+    ->where('code', '[A-Za-z0-9]{15}')
+    ->defaults('page', 'siege')
+    ->name('public.siege.code');
+
+Route::get('/public/guild-league/{code}', [PageController::class, 'show'])
+    ->where('code', '[A-Za-z0-9]{15}')
+    ->defaults('page', 'guild-league')
+    ->name('public.guild-league.code');
+
 // Old bookmarks retain their query parameters; browsers retain URL fragments.
 foreach (['index', 'guild-league', 'siege', 'polarity-zone', 'member', 'parties', 'users',
     'member-import-preview', 'guild-runs', 'guild-runs-history', 'titaniaruns', 'maps-gl', 'maps-siege'] as $page) {

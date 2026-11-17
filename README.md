@@ -73,7 +73,7 @@ Public lineups, run registration, and auction registration use dedicated Supabas
 | `/pvp-guild-league`, `/pvp-siege` | Guild League statistics and Siege placeholder. |
 | `/maps-gl`, `/maps-siege` | Interactive map editors. |
 | `/auction`, `/users`, `/help` | Auction management, user access, and planner usage guide. |
-| `/public/guild-league`, `/public/siege` | Published lineups. |
+| `/public/guild-league/{15-character-code}`, `/public/siege/{15-character-code}` | Published lineups. Each gets a new code when hidden and published again. |
 | `/titaniaruns`, `/titaniaauction` | Public runs/auctions and registration. |
 | `/public/polarity-zone` | Retained page, subject to the feature flag. |
 
@@ -190,6 +190,10 @@ php artisan pages:export --url=https://dashstrike.github.io/titaniaronw
 ```
 
 Each export replaces `storage/app/pages`. Output contains rendered route directories such as `login/index.html` and `public/siege/index.html`, browser assets, compatibility redirects, `.nojekyll`, and a custom `404.html`. PHP source, `.env`, SQL, logs, and server dependencies are excluded. The exporter rejects privileged keys and the configured development connection.
+
+For Siege, turn **Public View** off before the next weekly publication, then turn it on. The planner generates a new 15-character link; use **Copy Siege link** after the save finishes. The previous code stops returning the roster. GitHub Pages uses the exported `404.html` to forward a direct coded link to the static Siege page, which restores the coded URL in the browser. The Supabase migration `supabase/migrations/20261117114907_siege_public_weekly_link.sql` gates the public lineup RPC; deploy it before using coded links.
+
+Guild League works the same way: hide and republish to generate a new link, then use **Copy Guild League link** after saving. Its earlier links stop returning the roster. The migration `supabase/migrations/20261117120121_guild_public_weekly_link.sql` extends the public RPC gate to Guild League.
 
 Static hosting cannot execute PHP endpoints. Features requiring server execution need Laravel hosting or a backend function.
 

@@ -33,7 +33,8 @@
     try{
       const c=cfgClient();if(!c)return;
       const view=document.body.dataset.view;
-      const {data,error}=await c.rpc('get_public_lineup',{p_view:view});
+      const code=view==='siege'&&typeof siegePublicCode==='function'?siegePublicCode():view==='guild'&&typeof guildPublicCode==='function'?guildPublicCode():null;
+      const {data,error}=await c.rpc('get_public_lineup',{p_view:view,p_code:code});
       if(error)throw error;
       if(!data||data.published!==true){statusByName=new Map();cachedSignature='';scheduleDecorate();return;}
       const signature=`${data.attendanceEventType||''}:${data.attendanceEventDate||''}:${JSON.stringify(data.preAttendance||{})}`;

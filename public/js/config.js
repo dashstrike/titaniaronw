@@ -159,7 +159,7 @@ const TITANIA_IS_MEMBER_PAGE = document.documentElement.dataset.titaniaPage==='m
   const loadScript = () => {
     if (document.querySelector('script[data-titania-public-attendance]')) return;
     const script = document.createElement('script');
-    script.src = './js/public-attendance.js?v=clean-routes-1';
+    script.src = './js/public-attendance.js?v=coded-lineups-2';
     script.setAttribute('data-titania-public-attendance', '1');
     document.body.appendChild(script);
   };

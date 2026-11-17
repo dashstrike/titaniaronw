@@ -143,6 +143,8 @@
           <div class="event-action-row" id="eventActionRow" hidden>
             <button class="btn btn-outline-secondary" id="poolToggleBtn" type="button" aria-controls="sidebar" aria-expanded="true" title="Hide Member/Party Pool"><i class="fa-solid fa-angles-left" id="poolToggleIcon" aria-hidden="true"></i><span id="poolToggleText">Hide Pool</span></button>
             <button class="btn public-toggle off btn-outline-secondary" id="publicToggleBtn" type="button" title="Publish or hide this event on the public lineup page"><span class="publish-switch" aria-hidden="true"></span><span id="publicToggleText">Public View: OFF</span></button>
+            <button class="btn btn-outline-danger" id="siegePublicLinkBtn" type="button" hidden>Copy Siege link</button>
+            <button class="btn btn-outline-primary" id="guildPublicLinkBtn" type="button" hidden>Copy Guild League link</button>
             <button class="btn btn-outline-secondary" id="autoFillBtn" type="button">Auto-fill</button>
             <button class="btn btn-outline-secondary" id="printBtn">🖨 Print/Share</button>
             <button class="btn btn-outline-secondary" id="exportBtn">⬇ Export</button>

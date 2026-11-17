@@ -58,7 +58,7 @@ class ExportPages extends Command
 
         $count = 0;
         foreach (Route::getRoutes() as $route) {
-            if (! isset($route->defaults['page'])) {
+            if (! isset($route->defaults['page']) || str_contains($route->uri(), '{')) {
                 continue;
             }
             $request = Request::create('/'.$route->uri());
@@ -86,7 +86,10 @@ class ExportPages extends Command
             $encoded = json_encode($url, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT);
             File::put($output.'/'.$file, '<!doctype html><html lang="en"><meta charset="utf-8"><title>Titania</title><script>location.replace('.$encoded.'+location.search+location.hash);</script><a href="'.e($url).'">Continue to Titania</a></html>');
         }
-        File::put($output.'/404.html', view('errors.404')->render());
+        $fallback = view('errors.404')->render();
+        $lineupBases = json_encode([$base.'/public/siege/', $base.'/public/guild-league/'], JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT);
+        $fallbackScript = '<script>(function(){for(const base of '.$lineupBases.'){const prefix=new URL(base).pathname;const path=location.pathname;if(!path.startsWith(prefix))continue;const code=path.slice(prefix.length).replace(/\\/$/,\'\');if(/^[A-Za-z0-9]{15}$/.test(code)){location.replace(base+\'?code=\'+encodeURIComponent(code));return;}}})();</script>';
+        File::put($output.'/404.html', str_replace('</head>', $fallbackScript.'</head>', $fallback));
         $this->info("Exported {$count} pages to storage/app/pages.");
 
         return self::SUCCESS;

@@ -44,6 +44,11 @@ class PagesExportTest extends TestCase
         $this->assertFileDoesNotExist($output.'/.env');
         $this->assertFileDoesNotExist($output.'/composer.json');
         $this->assertStringContainsString('location.search+location.hash', File::get($output.'/index.html'));
+        $this->assertStringContainsString('public/siege/', str_replace('\\/', '/', File::get($output.'/404.html')));
+        $this->assertStringContainsString('public/guild-league/', str_replace('\\/', '/', File::get($output.'/404.html')));
+        $this->assertStringContainsString('code=', File::get($output.'/404.html'));
+        $this->assertFileDoesNotExist($output.'/public/siege/{code}/index.html');
+        $this->assertFileDoesNotExist($output.'/public/guild-league/{code}/index.html');
 
         // Pages resolves /guild-league and /siege through the matching .html alias.
         foreach (['guild-league', 'siege'] as $page) {

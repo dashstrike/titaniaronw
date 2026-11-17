@@ -710,6 +710,8 @@
     document.getElementById('printBtn').addEventListener('click',async()=>{if(await confirmPlannerAction('Open Print/Share?','Open the print and share preview for this event.','Open preview'))openPrintView();});
     document.getElementById('poolToggleBtn').addEventListener('click',togglePoolVisibility);
     document.getElementById('publicToggleBtn').addEventListener('click',togglePublicVisibility);
+    document.getElementById('siegePublicLinkBtn').addEventListener('click',copySiegePublicLink);
+    document.getElementById('guildPublicLinkBtn').addEventListener('click',copyGuildPublicLink);
     document.getElementById('exportBtn').addEventListener('click',async()=>{if(await confirmPlannerAction('Export lineup?','Download the roster, membership history and all event lineups as a JSON file.','Export'))exportLineup();});
     document.getElementById('importBtn').addEventListener('click',async()=>{if(await confirmPlannerAction('Import lineup?','Choose an exported JSON file. You will confirm replacing the data after the file is checked.','Choose file')&&userCanEdit())document.getElementById('importFileInput').click();});
     document.getElementById('importFileInput').addEventListener('change',event=>{
@@ -906,7 +908,7 @@
 
   function normalizePublicVisibility(raw){
     const source=raw&&typeof raw==='object'?raw:{};
-    return {guildLeague:source.guildLeague===true,siege:source.siege===true,polarityZone:source.polarityZone===true};
+    return {guildLeague:source.guildLeague===true,siege:source.siege===true,polarityZone:source.polarityZone===true,siegeCode:/^[A-Za-z0-9]{15}$/.test(stringValue(source.siegeCode))?source.siegeCode:'',guildLeagueCode:/^[A-Za-z0-9]{15}$/.test(stringValue(source.guildLeagueCode))?source.guildLeagueCode:''};
   }
 
   function normalizeClientState(input){
@@ -1186,6 +1188,30 @@
     return Boolean(state.publicVisibility&&state.publicVisibility[currentPublicVisibilityKey()]);
   }
 
+  function newPublicCode(){
+    const alphabet='ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    let code='';
+    while(code.length<15){
+      const bytes=crypto.getRandomValues(new Uint8Array(15));
+      for(const byte of bytes){if(byte<248&&code.length<15)code+=alphabet[byte%alphabet.length];}
+    }
+    return code;
+  }
+
+  async function copySiegePublicLink(){
+    const code=state.publicVisibility?.siegeCode;
+    if(currentEvent!=='siege'||!state.publicVisibility?.siege||!code||syncedStateSnapshot?.publicVisibility?.siegeCode!==code)return;
+    const link=new URL(`public/siege/${code}/`,document.baseURI).href;
+    try{await navigator.clipboard.writeText(link);showToast('Siege link copied',link);}catch(_e){showToast('Siege link',link);}
+  }
+
+  async function copyGuildPublicLink(){
+    const code=state.publicVisibility?.guildLeagueCode;
+    if(currentEvent!=='guild_league'||!state.publicVisibility?.guildLeague||!code||syncedStateSnapshot?.publicVisibility?.guildLeagueCode!==code)return;
+    const link=new URL(`public/guild-league/${code}/`,document.baseURI).href;
+    try{await navigator.clipboard.writeText(link);showToast('Guild League link copied',link);}catch(_e){showToast('Guild League link',link);}
+  }
+
   function renderPublicToggle(){
     const button=document.getElementById('publicToggleBtn');
     const text=document.getElementById('publicToggleText');
@@ -1198,6 +1224,18 @@
     button.title=published
       ?`${currentEventPublicLabel()} is visible on the public lineup page. Click to hide it.`
       :`${currentEventPublicLabel()} is private. Click to publish it publicly.`;
+    const linkButton=document.getElementById('siegePublicLinkBtn');
+    if(linkButton){
+      linkButton.hidden=currentEvent!=='siege'||!published||!state.publicVisibility?.siegeCode;
+      linkButton.disabled=linkButton.hidden||syncedStateSnapshot?.publicVisibility?.siegeCode!==state.publicVisibility.siegeCode;
+      linkButton.title=linkButton.disabled?'Saving the new public link…':'Copy the current 15-character Siege link';
+    }
+    const guildLinkButton=document.getElementById('guildPublicLinkBtn');
+    if(guildLinkButton){
+      guildLinkButton.hidden=currentEvent!=='guild_league'||!published||!state.publicVisibility?.guildLeagueCode;
+      guildLinkButton.disabled=guildLinkButton.hidden||syncedStateSnapshot?.publicVisibility?.guildLeagueCode!==state.publicVisibility.guildLeagueCode;
+      guildLinkButton.title=guildLinkButton.disabled?'Saving the new public link…':'Copy the current 15-character Guild League link';
+    }
   }
 
   async function togglePublicVisibility(){
@@ -1213,8 +1251,10 @@
       next?'Publish lineup':'Hide lineup'
     )||!userCanEdit()||key!==currentPublicVisibilityKey())return;
     state.publicVisibility[key]=next;
+    if(key==='siege'&&next)state.publicVisibility.siegeCode=newPublicCode();
+    if(key==='guildLeague'&&next)state.publicVisibility.guildLeagueCode=newPublicCode();
     commitMutation(`${label} public lineup ${next?'published':'hidden'}`,'none');
-    showToast(next?'Public view published':'Public view hidden',next?`${label} is now visible on the public page.`:`${label} is now private. Public visitors will see that no lineup is published.`);
+    showToast(next?'Public view published':'Public view hidden',next&&(key==='siege'||key==='guildLeague')?`The new ${label} link is ready after saving. Use Copy ${label} link.`:next?`${label} is now visible on the public page.`:`${label} is now private. Public visitors will see that no lineup is published.`);
   }
 
   function renderHint(){
@@ -2662,6 +2702,8 @@
       if(!sameJson(local.publicVisibility[key],base.publicVisibility[key]))merged.publicVisibility[key]=local.publicVisibility[key]===true;
       if(!sameJson(local.eventUpdates[key],base.eventUpdates[key]))merged.eventUpdates[key]=cloneJson(local.eventUpdates[key]);
     });
+    if(!sameJson(local.publicVisibility.siegeCode,base.publicVisibility.siegeCode))merged.publicVisibility.siegeCode=local.publicVisibility.siegeCode;
+    if(!sameJson(local.publicVisibility.guildLeagueCode,base.publicVisibility.guildLeagueCode))merged.publicVisibility.guildLeagueCode=local.publicVisibility.guildLeagueCode;
 
     const baseRosterById=new Map((base.roster||[]).map(member=>[stringValue(member&&member.id),member]));
     const mergedRosterById=new Map((merged.roster||[]).map(member=>[stringValue(member&&member.id),member]));
@@ -2807,6 +2849,7 @@
       }
       rebuildIndex();
       if(mergedOtherUserChanges)renderAll();
+      else renderPublicToggle();
       renderEventLastUpdated();
       setSaveFlag('ok',mergedOtherUserChanges?'Merged & saved':'Saved');
       if(mergedOtherUserChanges)showToast('Changes merged','A newer edit from another user was found. Both sets of changes were merged and saved.');

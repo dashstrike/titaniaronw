@@ -53,6 +53,15 @@ document.addEventListener('DOMContentLoaded',()=>{
   setInterval(loadLineup,60000);
 });
 
+function guildPublicCode(){
+  if(VIEW!=='guild')return null;
+  const path=location.pathname.match(/\/public\/guild-league\/([A-Za-z0-9]{15})\/?$/);
+  const query=new URLSearchParams(location.search).get('code');
+  const code=path?.[1]||(/^[A-Za-z0-9]{15}$/.test(query||'')?query:null);
+  if(code&&query){history.replaceState(null,'',new URL(`public/guild-league/${code}/`,document.baseURI).pathname);}
+  return code;
+}
+
 function setupTheme(){
   document.documentElement.dataset.theme=document.documentElement.dataset.bsTheme||'dark';
 }
@@ -68,7 +77,7 @@ async function loadLineup(){
     if(!url||!key) throw new Error('Supabase configuration is missing.');
     if(!window.supabase) throw new Error('Supabase library did not load.');
     if(!client) client=window.supabase.createClient(url,key,{auth:{persistSession:false,autoRefreshToken:false,detectSessionInUrl:false}});
-    const {data,error}=await client.rpc('get_public_lineup',{p_view:VIEW});
+    const {data,error}=await client.rpc('get_public_lineup',{p_view:VIEW,p_code:guildPublicCode()});
     if(error) throw error;
     state=normalize(data||{});
     members=new Map(state.roster.map(m=>[m.name,m]));

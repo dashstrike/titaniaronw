@@ -24,18 +24,14 @@
       @include('partials.discord-button', ['mobile' => false])
     </div>
     <nav class="nav gap-2">
-      <a class="btn btn-outline-primary" href="public/guild-league"><i class="fa-solid fa-shield-halved mr-2" aria-hidden="true"></i>Guild League</a>
-      <a class="btn btn-danger active" href="public/siege"><i class="fa-regular fa-chess-rook mr-2" aria-hidden="true"></i>Siege/Polarity</a>
       @include('partials.theme-toggle')
       <button class="tool-btn btn btn-outline-secondary" id="refreshBtn" aria-label="Refresh" title="Refresh"><i class="fa-solid fa-arrows-rotate mr-2" aria-hidden="true"></i><span class="refresh-label">Refresh</span></button>
     </nav>
     <nav class="mobile-event-nav" aria-label="Public lineup pages">
-      <a class="btn btn-outline-primary" href="public/guild-league"><i class="fa-solid fa-shield-halved mr-2" aria-hidden="true"></i>Guild League</a>
-      <a class="btn btn-danger active" href="public/siege"><i class="fa-regular fa-chess-rook mr-2" aria-hidden="true"></i>Siege/Polarity</a>
       @include('partials.discord-button', ['mobile' => true])
     </nav>
   </header>
   <main class="content w-100 mw-100" id="content"><div class="loading"><div class="spinner"></div>Loading lineup…</div></main>
 </div>
-<script src="config.js?v=icon-font-fix-1"></script><script src="{{ asset('js/pages/siege.js') }}?v={{ filemtime(public_path('js/pages/siege.js')) }}"></script>
+<script src="config.js?v=siege-public-link-1"></script><script src="{{ asset('js/pages/siege.js') }}?v={{ filemtime(public_path('js/pages/siege.js')) }}"></script>
 @endsection
