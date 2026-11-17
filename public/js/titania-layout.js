@@ -9,6 +9,20 @@
   const events = new Set(['dashboard', 'manage_members', 'guild_league', 'siege', 'attendance']);
   let requestedEvent = null;
 
+  function setPublicPageLinks(visibility) {
+    const source = visibility && typeof visibility === 'object' ? visibility : {};
+    for (const [key, slug, codeKey] of [['guildLeague', 'guild-league', 'guildLeagueCode'], ['siege', 'siege', 'siegeCode']]) {
+      const item = document.querySelector('[data-public-lineup="' + key + '"]');
+      if (!item) continue;
+      const link = item.querySelector('a');
+      const code = typeof source[codeKey] === 'string' && /^[A-Za-z0-9]{15}$/.test(source[codeKey]) ? source[codeKey] : '';
+      if (link) link.href = new URL('public/' + slug + '/' + (code ? code + '/' : ''), document.baseURI).href;
+      item.hidden = source[key] !== true;
+    }
+  }
+
+  window.addEventListener('titania:public-visibility', event => setPublicPageLinks(event.detail));
+
   function updateNavigation() {
     if (isPlanner && app) {
       navigation.hidden = app.hidden;
@@ -107,6 +121,14 @@
       if (!user) return;
       const profile = await client.from('profiles').select('role,approved,display_name').eq('id', user.id).single();
       if (!profile.error) setAccount(profile.data);
+      if (profile.error || !profile.data?.approved) return;
+      const loadPublicPageLinks = async () => {
+        const {data,error} = await client.from('planner_state').select('visibility:state->publicVisibility').eq('id',1).single();
+        if (!error) setPublicPageLinks(data?.visibility);
+      };
+      await loadPublicPageLinks();
+      setInterval(() => { if (!document.hidden) loadPublicPageLinks(); }, 60000);
+      document.addEventListener('visibilitychange', () => { if (!document.hidden) loadPublicPageLinks(); });
     }).catch(() => {});
   }
 })();

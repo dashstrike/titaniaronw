@@ -69,8 +69,8 @@
                 </a>
             </li>
             <li class="menu-title">Public Pages</li>
-            @foreach([['guild-league', 'Guild League'], ['siege', 'Siege'], ['titaniaruns', 'Titania Runs'], ['titaniaauction', 'Auction']] as [$routeName, $label])
-                <li class="nav-item">
+            @foreach([['guild-league', 'Guild League', 'guildLeague'], ['siege', 'Siege', 'siege'], ['titaniaruns', 'Titania Runs', null], ['titaniaauction', 'Auction', null]] as [$routeName, $label, $publicKey])
+                <li class="nav-item" @if($publicKey) data-public-lineup="{{ $publicKey }}" hidden @endif>
                     <a class="nav-link" href="{{ route($routeName) }}" target="_blank" rel="noopener noreferrer">
                         <span class="nav-icon"><iconify-icon icon="bx:link-external"></iconify-icon></span>
                         <span class="nav-text">{{ $label }}</span>

@@ -1030,6 +1030,7 @@
 
   function renderAll(){
     rebuildIndex();
+    window.dispatchEvent(new CustomEvent('titania:public-visibility',{detail:syncedStateSnapshot?.publicVisibility||null}));
     if(currentEvent==='attendance'){
       renderTabs();
       renderHeaderStats();
@@ -1236,6 +1237,7 @@
       guildLinkButton.disabled=guildLinkButton.hidden||syncedStateSnapshot?.publicVisibility?.guildLeagueCode!==state.publicVisibility.guildLeagueCode;
       guildLinkButton.title=guildLinkButton.disabled?'Saving the new public link…':'Copy the current 15-character Guild League link';
     }
+    window.dispatchEvent(new CustomEvent('titania:public-visibility',{detail:syncedStateSnapshot?.publicVisibility||null}));
   }
 
   async function togglePublicVisibility(){
