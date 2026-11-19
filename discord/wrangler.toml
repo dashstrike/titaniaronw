@@ -1,0 +1,24 @@
+name = "titania-attendance"
+account_id = "398f45efc9e77c23c4f1f4014e1e5bea"
+main = "worker.mjs"
+compatibility_date = "2026-11-19"
+workers_dev = true
+preview_urls = false
+
+[observability]
+enabled = true
+
+[vars]
+DISCORD_APPLICATION_ID = "1562532538847596776"
+DISCORD_GUILD_ID = "505382879983960064"
+DISCORD_ATTENDANCE_CHANNEL_ID = "1572811638560522321"
+SUPABASE_URL = "https://dczcesmpbfurpllqpkml.supabase.co"
+
+[[durable_objects.bindings]]
+name = "ATTENDANCE"
+class_name = "AttendanceStore"
+
+# Creates Cloudflare's private Free-plan storage, not a Laravel/database migration.
+[[migrations]]
+tag = "v1"
+new_sqlite_classes = ["AttendanceStore"]

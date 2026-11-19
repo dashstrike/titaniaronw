@@ -22,6 +22,7 @@
   let loadingKey='';
   let observer=null;
   let decorateQueued=false;
+  let statusRevision=0;
 
   function canUseAttendance(){
     return typeof supabaseClient!=='undefined'&&supabaseClient&&typeof state!=='undefined'&&state&&Array.isArray(state.roster);
@@ -143,22 +144,28 @@
     if(loadingKey===key)return;
 
     loadingKey=key;
-    cachedEventKey=key;
-    cachedEventId='';
-    statusByMemberId=new Map();
+    const revision=statusRevision;
+    const nextStatuses=new Map();
+    let nextEventId='';
+    if(key!==cachedEventKey){cachedEventId='';statusByMemberId=new Map();}
     const [eventType,eventDate]=key.split(':');
 
     try{
       const eventRes=await supabaseClient.from('attendance_events').select('id').eq('event_type',eventType).eq('event_date',eventDate).maybeSingle();
       if(eventRes.error)throw eventRes.error;
       if(eventRes.data&&eventRes.data.id){
-        cachedEventId=eventRes.data.id;
-        const recordRes=await supabaseClient.from('attendance_records').select('member_id,pre_status').eq('event_id',cachedEventId);
+        nextEventId=eventRes.data.id;
+        const recordRes=await supabaseClient.from('attendance_records').select('member_id,pre_status').eq('event_id',eventRes.data.id);
         if(recordRes.error)throw recordRes.error;
+        if(revision!==statusRevision||key!==currentKey())return;
         (recordRes.data||[]).forEach(row=>{
-          statusByMemberId.set(String(row.member_id),STATUS_META[row.pre_status]?row.pre_status:'no_response');
+          nextStatuses.set(String(row.member_id),STATUS_META[row.pre_status]?row.pre_status:'no_response');
         });
       }
+      if(revision!==statusRevision||key!==currentKey())return;
+      cachedEventKey=key;
+      cachedEventId=nextEventId;
+      statusByMemberId=nextStatuses;
     }catch(error){
       if(String(error&&error.code||'')==='42P01'){
         toast('Attendance setup required','Run attendance_setup.sql in Supabase first.','warn');
@@ -166,7 +173,7 @@
         console.warn('Attendance load failed',error);
       }
     }finally{
-      loadingKey='';
+      if(loadingKey===key)loadingKey='';
       ensureResetButton();
       scheduleDecorate();
     }
@@ -274,6 +281,7 @@
     const next=STATUS_META[current].next;
 
     badge.classList.add('pre-saving');
+    statusRevision++;
     badge.disabled=true;
     try{
       const eventId=await ensureEventRow(eventType,eventDate);
@@ -307,6 +315,7 @@
     if(!await window.confirmPlannerAction(`Reset all pre-attendance for ${label} on ${eventDate}?`,'All members will return to PRE ?. The party lineup and actual attendance will stay unchanged.','Reset pre-attendance',true)||!canEdit()||key!==currentKey())return;
 
     const btn=document.getElementById('preResetAllBtn');
+    statusRevision++;
     if(btn){btn.disabled=true;btn.textContent='Resetting…';}
     try{
       const eventRes=await supabaseClient.from('attendance_events').select('id').eq('event_type',eventType).eq('event_date',eventDate).maybeSingle();
@@ -388,6 +397,15 @@
         ensureResetButton();
         startObserver();
         loadStatuses(true);
+        // Pick up Discord responses without changing management's click permissions.
+        const refresh=()=>{
+          if(document.hidden||loadingKey||document.querySelector('.pre-saving'))return;
+          if(typeof currentProfile==='undefined'||!currentProfile?.approved)return;
+          if(canUseAttendance()&&plannerEventType())loadStatuses(true);
+        };
+        window.addEventListener('focus',refresh);
+        document.addEventListener('visibilitychange',refresh);
+        setInterval(refresh,20000);
       }else if(attempts>120){
         clearInterval(wait);
       }

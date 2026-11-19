@@ -247,6 +247,8 @@ Before release, verify sign-in/sign-out, email recovery, public views/registrati
 
 ## Repository layout
 
+The optional Discord pre-attendance Worker is in [`discord/`](discord/README.md). It matches management-controlled server nicknames to active Titania members, keeps stable account links, and records Going/Not going without removing website manual ticks. Deployment, secrets, commands and free-plan limits are documented there. The Worker is deployed separately from GitHub Pages.
+
 ```text
 app/Http/Controllers/PageController.php   Page rendering and browser configuration
 app/Console/Commands/ExportPages.php      Static exporter

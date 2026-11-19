@@ -1,0 +1,13 @@
+{
+  "name": "titania-attendance-worker",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --test tests/*.test.mjs",
+    "deploy": "wrangler deploy --keep-vars",
+    "register": "node register-commands.mjs"
+  },
+  "devDependencies": {
+    "wrangler": "4.165.0"
+  }
+}
