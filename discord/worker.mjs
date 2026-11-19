@@ -40,6 +40,16 @@ export function eventDate(type,date,now=new Date()){
   return date;
 }
 
+export function nextAttendanceEvent(source,now=new Date()){
+  if(!EVENTS[source.event_type]||!/^\d{4}-\d{2}-\d{2}$/.test(source.event_date||''))fail('Unsupported attendance event.');
+  const today=new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Kuala_Lumpur',year:'numeric',month:'2-digit',day:'2-digit'}).format(now);
+  const date=new Date((source.event_date>today?source.event_date:today)+'T00:00:00Z');
+  if(date.toISOString().slice(0,10)===source.event_date)date.setUTCDate(date.getUTCDate()+1);
+  const days=[0,2,4];
+  while(!days.includes(date.getUTCDay()))date.setUTCDate(date.getUTCDate()+1);
+  return {type:date.getUTCDay()===0?'siege':date.getUTCDay()===2?'guild_league_tuesday':'guild_league_thursday',date:date.toISOString().slice(0,10)};
+}
+
 export function matchMember(roster,nickname,linkedId){
   if(linkedId){
     const member=roster.find(row=>String(row.id)===linkedId);
@@ -112,10 +122,11 @@ export class Backend {
   }
 }
 
-export function attendanceMessage(posted,counts){
+export function attendanceMessage(posted,counts,notifyEveryone=false){
   const date=posted.date.split('-').reverse().join('/');
   const event=EVENTS[posted.type].label.replace(/[()]/g,'').toUpperCase();
   return {
+    ...(notifyEveryone?{content:'@everyone'}:{}),
     embeds:[{
       title:'PRE-ATTENDANCE FOR '+event+' '+date,
       description:'Choose your attendance below. You can change your response.',
@@ -128,14 +139,15 @@ export function attendanceMessage(posted,counts){
 }
 
 async function discord(env,path,method,body,bot=true){
-  return requestJson(API+path,{method,headers:{'Content-Type':'application/json',...(bot?{Authorization:'Bot '+env.DISCORD_BOT_TOKEN}:{})},body:JSON.stringify({...body,allowed_mentions:{parse:[]}})});
+  const notifyEveryone=bot&&method==='POST'&&path==='/channels/'+env.DISCORD_ATTENDANCE_CHANNEL_ID+'/messages'&&body.content==='@everyone';
+  return requestJson(API+path,{method,headers:{'Content-Type':'application/json',...(bot?{Authorization:'Bot '+env.DISCORD_BOT_TOKEN}:{})},body:JSON.stringify({...body,allowed_mentions:{parse:notifyEveryone?['everyone']:[]}})});
 }
 const commandOptions=interaction=>Object.fromEntries((interaction.data?.options?.[0]?.options||[]).map(option=>[option.name,option.value]));
 
 // One object per guild: private, strongly consistent links and interaction receipts.
 // SQLite-backed storage is supported on Cloudflare's Free plan.
 export class AttendanceStore {
-  constructor(ctx,env){this.ctx=ctx;this.env=env;this.refreshes=new Map();}
+  constructor(ctx,env){this.ctx=ctx;this.env=env;this.refreshes=new Map();this.nextPosts=new Map();}
   async refreshMessage(messageId,posted,backend,roster){
     // Serialize counter updates, not attendance writes, so older edits cannot
     // finish after newer ones when several members respond together.
@@ -148,6 +160,12 @@ export class AttendanceStore {
     try{await update;}finally{if(this.refreshes.get(messageId)===update)this.refreshes.delete(messageId);}
   }
   async fetch(request){
+    if(new URL(request.url).pathname==='/attendance-next'){
+      try{
+        const input=await request.json();
+        return json(await this.publishNext(input.closedEventId));
+      }catch(error){return json({error:error instanceof UserError?error.message:'Attendance is closed, but the next Discord post could not be confirmed.'},error instanceof UserError?409:502);}
+    }
     if(new URL(request.url).pathname==='/member-profile'){
       try{return json(await this.memberProfile(await request.json()));}
       catch(error){return json({error:error instanceof UserError?error.message:'Could not load Discord account details.'},error instanceof UserError?409:502);}
@@ -204,6 +222,41 @@ export class AttendanceStore {
       await transaction.put('user:'+userId,{memberId:String(member.id),automatic:existing?.automatic??automatic,matchSource:existing?.matchSource||matchSource,linkedAt:existing?.linkedAt||new Date().toISOString()});
       await transaction.put('member:'+member.id,userId);
     });
+  }
+  async publishNext(closedEventId){
+    const backend=new Backend(this.env);
+    const rows=await backend.call('attendance_events?id=eq.'+encodeURIComponent(closedEventId)+'&select=id,event_type,event_date,status');
+    const source=rows[0];
+    if(!source||source.status!=='closed')fail('Finish and close the attendance event before posting the next pre-attendance.');
+    const next=nextAttendanceEvent(source),key='published-event:'+next.type+':'+next.date;
+    const existingTask=this.nextPosts.get(key);if(existingTask)return existingTask;
+    const task=this.publishNextOnce(key,next,backend);
+    this.nextPosts.set(key,task);
+    try{return await task;}finally{if(this.nextPosts.get(key)===task)this.nextPosts.delete(key);}
+  }
+  async publishNextOnce(key,next,backend){
+    const previous=await this.ctx.storage.get(key);
+    const result=messageId=>({posted:true,eventType:next.type,eventDate:next.date,messageUrl:'https://discord.com/channels/'+this.env.DISCORD_GUILD_ID+'/'+this.env.DISCORD_ATTENDANCE_CHANNEL_ID+'/'+messageId});
+    if(previous?.messageId)return {...result(previous.messageId),alreadyPosted:true};
+    if(previous)fail('A previous posting attempt could not be confirmed. Check Discord before using /attendance post to avoid a duplicate.');
+    const event=await backend.event(next.type,next.date),posted={eventId:event.id,...next};
+    const counts=await backend.counts(event.id,await backend.roster());
+    await this.ctx.storage.put(key,{startedAt:Date.now(),eventId:event.id});
+    let message;
+    try{
+      message=await discord(this.env,'/channels/'+this.env.DISCORD_ATTENDANCE_CHANNEL_ID+'/messages','POST',{
+        ...attendanceMessage(posted,counts,true),nonce:'pre-'+next.type.replace('guild_league_','gl_')+'-'+next.date.replaceAll('-',''),enforce_nonce:true
+      });
+    }catch(error){
+      // A definite HTTP error created no message; an interrupted request may have.
+      if(error.status)await this.ctx.storage.delete(key);
+      throw error;
+    }
+    await this.ctx.storage.transaction(async transaction=>{
+      await transaction.put('message:'+message.id,posted);
+      await transaction.put(key,{messageId:message.id,eventId:event.id});
+    });
+    return result(message.id);
   }
   async guildMember(userId){
     let member;
@@ -263,7 +316,8 @@ export class AttendanceStore {
       await backend.save(posted.eventId,member,match[2]);
       try{await this.refreshMessage(interaction.message.id,posted,backend,roster);}
       catch{console.error('Attendance saved but message counts could not refresh',{messageId:interaction.message.id});}
-      return member.name+': '+(match[2]==='going'?'Going ✅':'Not going ❌')+' saved for '+EVENTS[posted.type].label+' on '+posted.date+'.';
+      const response=match[2]==='going'?'<:going_tick_circle:1572867047379963947>\u2002Going':'<:not_going_x_circle:1572867073267343380>\u2002Not going';
+      return member.name+': '+response+' saved for '+EVENTS[posted.type].label+' on '+posted.date.split('-').reverse().join('/')+'.';
     }
     if(interaction.type!==2||interaction.data?.name!=='attendance')fail('Unknown command.');
     if(!isManager(interaction))fail('Only Discord administrators or members with Manage Server can manage attendance messages and links.');
@@ -272,8 +326,9 @@ export class AttendanceStore {
       const date=eventDate(options.event,options.date),event=await backend.event(options.event,date);
       const posted={eventId:event.id,type:options.event,date};
       const counts=await backend.counts(event.id,await backend.roster());
-      const message=await discord(env,'/channels/'+env.DISCORD_ATTENDANCE_CHANNEL_ID+'/messages','POST',attendanceMessage(posted,counts));
+      const message=await discord(env,'/channels/'+env.DISCORD_ATTENDANCE_CHANNEL_ID+'/messages','POST',attendanceMessage(posted,counts,true));
       await this.ctx.storage.put('message:'+message.id,{eventId:event.id,type:options.event,date});
+      await this.ctx.storage.put('published-event:'+options.event+':'+date,{messageId:message.id,eventId:event.id});
       return 'Attendance posted: https://discord.com/channels/'+env.DISCORD_GUILD_ID+'/'+env.DISCORD_ATTENDANCE_CHANNEL_ID+'/'+message.id;
     }
     if(subcommand==='link'){
@@ -325,6 +380,13 @@ export async function websiteRequest(request,env){
     if(!profiles[0]?.approved)return reply({error:'Approved Titania access is required.'},403);
     const canManage=['admin','party_organizer'].includes(profiles[0].role);
     let input;try{input=await request.json();}catch{return reply({error:'Invalid request.'},400);}
+    if(new URL(request.url).pathname==='/attendance-next'){
+      if(!['admin','party_organizer','attendance_auditor'].includes(profiles[0].role))return reply({error:'Attendance management access is required.'},403);
+      if(!input||typeof input.closedEventId!=='string'||! /^[0-9a-f-]{36}$/i.test(input.closedEventId))return reply({error:'Invalid attendance event.'},400);
+      const store=env.ATTENDANCE.get(env.ATTENDANCE.idFromName(env.DISCORD_GUILD_ID));
+      const result=await store.fetch('https://attendance.internal/attendance-next',{method:'POST',body:JSON.stringify({closedEventId:input.closedEventId})});
+      return reply(await result.json(),result.status);
+    }
     if(!input||typeof input.memberId!=='string'||!input.memberId||input.memberId.length>120||!['read','link','unlink'].includes(input.action))return reply({error:'Invalid member request.'},400);
     if(input.action!=='read'&&!canManage)return reply({error:'Only administrators and party organizers can change account links.'},403);
     const store=env.ATTENDANCE.get(env.ATTENDANCE.idFromName(env.DISCORD_GUILD_ID));
@@ -335,7 +397,7 @@ export async function websiteRequest(request,env){
 
 export default {
   async fetch(request,env,ctx){
-    if(new URL(request.url).pathname==='/member-discord')return websiteRequest(request,env);
+    if(['/member-discord','/attendance-next'].includes(new URL(request.url).pathname))return websiteRequest(request,env);
     if(request.method==='GET')return new Response('Titania attendance endpoint is running.');
     if(request.method!=='POST')return new Response('Method not allowed',{status:405});
     const interaction=await verifyRequest(request,env.DISCORD_PUBLIC_KEY);

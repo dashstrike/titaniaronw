@@ -61,6 +61,8 @@ The registration script creates/updates only `/attendance` for this server and d
 
 ## Use in the configured attendance channel
 
+On the website, **Finish Attendance** closes the selected event and requests the next Discord pre-attendance in the cycle **Tuesday GL → Thursday GL → Sunday Siege → Tuesday GL** (GMT+8). Closing an older historical event selects the next current calendar event rather than posting a past date. The server verifies the source is closed and requires approved `admin`, `party_organizer`, or `attendance_auditor` access. A stored target-event receipt prevents duplicate auto-posts and reuses posts made by `/attendance post`. Existing responses on the target event are retained. If Discord fails, the original event remains closed and the website displays a warning. If a network outcome is uncertain, automatic retries are blocked: check Discord before manually posting. Posting is triggered only by this explicit finish action; opening member profiles does not trigger it. Deploy the website's updated `attendance-page.js` and its loader after deploying the Worker.
+
 Management with **Administrator** or **Manage Server** can run:
 
 ```text

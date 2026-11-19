@@ -44,7 +44,7 @@ const send=async(store,data)=>(await store.fetch(new Request('https://internal/'
 
 test('first click links exact normalized server nickname; updates pre-attendance only',async()=>{
   const f=fixture(),result=await send(f.store,interaction());
-  assert.match(result.content,/Going ✅ saved/);assert.equal(f.record.pre_status,'going');
+  assert.match(result.content,/going_tick_circle:1572867047379963947>\s+Going saved/);assert.equal(f.record.pre_status,'going');
   assert.equal(f.record.actual_status,'present');assert.equal(f.record.note,'Management note');
   assert.equal((await f.storage.get('user:'+actor)).memberId,'member_1');
   assert.deepEqual(f.calls.find(call=>call.options.method==='PATCH').body,{pre_status:'going',member_name:'Player One'});
@@ -52,11 +52,11 @@ test('first click links exact normalized server nickname; updates pre-attendance
 test('CSV rename and later Discord nickname changes retain the saved member ID',async()=>{
   const f=fixture();await f.store.link(actor,roster[0],true);
   f.state.roster[0].name='Renamed Character';const i=interaction();i.member.nick='Unrelated Nick';i.data.custom_id='titania:'+eventId+':not_going';
-  assert.match((await send(f.store,i)).content,/Renamed Character: Not going/);assert.equal(f.record.member_id,'member_1');
+  assert.match((await send(f.store,i)).content,/Renamed Character:.*Not going/);assert.equal(f.record.member_id,'member_1');
 });
 test('display name links automatically when no server nickname is set',async()=>{
   const f=fixture(),i=interaction();i.member.nick=null;i.member.user.global_name='Player One';
-  assert.match((await send(f.store,i)).content,/Going ✅ saved/);
+  assert.match((await send(f.store,i)).content,/going_tick_circle:1572867047379963947>\s+Going saved/);
   assert.equal((await f.storage.get('user:'+actor)).memberId,'member_1');
 });
 test('an explicitly set server nickname takes precedence over the global display name',async()=>{
@@ -105,11 +105,12 @@ test('posting is management-only and produces exactly Going / Not going buttons'
   assert.match(posted.embeds[0].fields[1].name,/<:going_tick_circle:1572867047379963947>/);
   assert.match(posted.embeds[0].fields[2].name,/<:not_going_x_circle:1572867073267343380>/);
   assert.match(posted.embeds[0].thumbnail.url,/1564620820838351008\.png$/);
-  assert.deepEqual(posted.allowed_mentions,{parse:[]});assert.equal((await f.storage.get('message:new_message')).eventId,eventId);
+  assert.equal(posted.content,'@everyone');assert.deepEqual(posted.allowed_mentions,{parse:['everyone']});assert.equal((await f.storage.get('message:new_message')).eventId,eventId);
 });
 test('message counts change when a member switches response without double counting',async()=>{
   const f=fixture(),i=interaction();await send(f.store,i);
   let message=f.calls.filter(call=>call.url.pathname.includes('/channels/')&&call.options.method==='PATCH').at(-1).body;
+  assert.deepEqual(message.allowed_mentions,{parse:[]});assert.equal(message.content,undefined);
   assert.deepEqual(message.components[0].components.map(button=>button.label),['Going (1)','Not going (0)']);
   i.id=crypto.randomUUID();i.data.custom_id='titania:'+eventId+':not_going';await send(f.store,i);
   message=f.calls.filter(call=>call.url.pathname.includes('/channels/')&&call.options.method==='PATCH').at(-1).body;

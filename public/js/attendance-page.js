@@ -151,7 +151,40 @@
       renderShell();
     }
   }
-  async function finishAttendance(){if(!selectedEvent||!canEdit())return;if(!window.confirm('Finish and close this attendance record? Members with no status will stay unmarked.'))return;const close=await supabaseClient.from('attendance_events').update({status:'closed',closed_at:new Date().toISOString()}).eq('id',selectedEvent.id);if(close.error){toast('Finish attendance failed',close.error.message,'err');return;}selectedEvent.status='closed';await fetchRecords(selectedEvent.id);await fetchEvents();renderShell();}
+  let finishingAttendance=false;
+  async function publishNextAttendance(closedEventId){
+    const session=await supabaseClient.auth.getSession();
+    if(session.error||!session.data?.session?.access_token)throw new Error('Sign in again before posting to Discord.');
+    const response=await fetch('https://titania-attendance.dashstrike.workers.dev/attendance-next',{
+      method:'POST',headers:{Authorization:'Bearer '+session.data.session.access_token,'Content-Type':'application/json'},
+      body:JSON.stringify({closedEventId}),signal:AbortSignal.timeout(25000)
+    });
+    const result=await response.json();
+    if(!response.ok)throw new Error(result.error||'Could not publish the next pre-attendance.');
+    return result;
+  }
+  async function finishAttendance(){
+    if(!selectedEvent||!canEdit()||finishingAttendance)return;
+    if(!window.confirm('Finish and close this attendance record, then publish the next pre-attendance in Discord? Members with no status will stay unmarked.'))return;
+    const event=selectedEvent,button=document.getElementById('attFinishBtn');
+    finishingAttendance=true;
+    if(button)button.disabled=true;
+    try{
+      const close=await supabaseClient.from('attendance_events').update({status:'closed',closed_at:new Date().toISOString()}).eq('id',event.id);
+      if(close.error)throw close.error;
+      event.status='closed';
+      try{
+        const posted=await publishNextAttendance(event.id);
+        const date=posted.eventDate.split('-').reverse().join('/');
+        toast('Attendance finished',`${posted.alreadyPosted?'Next pre-attendance is already in Discord':'Next pre-attendance published in Discord'}: ${EVENT_META[posted.eventType].label} — ${date}.`);
+      }catch(error){
+        toast('Attendance closed; Discord post needs attention',String(error.message||error)+' Check Discord first, then use /attendance post if needed.','warn');
+      }
+      if(selectedEvent?.id===event.id)await fetchRecords(event.id);
+      await fetchEvents();renderShell();
+    }catch(error){toast('Finish attendance failed',String(error.message||error),'err');}
+    finally{finishingAttendance=false;if(button)button.disabled=false;}
+  }
   async function reopenAttendance(){if(!selectedEvent||!canEdit()||!window.confirm('Reopen this attendance record?'))return;const r=await supabaseClient.from('attendance_events').update({status:'open',closed_at:null}).eq('id',selectedEvent.id);if(r.error){toast('Reopen failed',r.error.message,'err');return;}selectedEvent.status='open';renderShell();}
   function updateHeader(){const stats=document.getElementById('statsRow');if(!stats)return;const rows=selectedEvent?membersForEvent():[],c=counts(rows);stats.innerHTML=statChip(rows.length,'Members')+statChip(c.going,'Pre Going')+statChip(c.present,'Present')+statChip(c.absent,'Absent',c.absent>0);}
   function showAttendance(){currentEvent='attendance';attendanceActive=true;document.body.classList.add('attendance-view');document.body.dataset.event='attendance';const body=document.getElementById('bodyWrap');if(body){body.classList.add('dashboard-mode');body.dataset.event='attendance';}const hint=document.getElementById('hintBar');if(hint)hint.hidden=true;const action=document.getElementById('eventActionRow');if(action)action.hidden=true;const auto=document.getElementById('autoFillBtn');if(auto)auto.hidden=true;document.querySelectorAll('.event-tab').forEach(t=>t.classList.toggle('active',t.dataset.event==='attendance'));renderShell();if(!events.length&&!loading){loading=true;fetchEvents().then(()=>{const today=dateInputValue(new Date());selectedEvent=events.find(e=>e.event_date<=today)||events[0]||null;return selectedEvent?fetchRecords(selectedEvent.id):null;}).catch(e=>toast('Attendance load failed',String(e.message||e),'err')).finally(()=>{loading=false;renderShell();});}}
