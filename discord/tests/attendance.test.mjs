@@ -100,16 +100,20 @@ test('posting is management-only and produces exactly Going / Not going buttons'
   assert.match((await send(f.store,i)).content,/Only Discord administrators/);assert.equal(f.calls.length,0);
   i.id=crypto.randomUUID();i.member.permissions='32';await send(f.store,i);
   const posted=f.calls.find(call=>call.url.pathname.includes('/channels/')).body;
-  assert.deepEqual(posted.components[0].components.map(button=>button.label),['✅ Going (0)','❌ Not going (1)']);
+  assert.deepEqual(posted.components[0].components.map(button=>button.label),['Going (0)','Not going (1)']);
+  assert.deepEqual(posted.components[0].components.map(button=>button.emoji.id),['1572867047379963947','1572867073267343380']);
+  assert.match(posted.embeds[0].fields[1].name,/<:going_tick_circle:1572867047379963947>/);
+  assert.match(posted.embeds[0].fields[2].name,/<:not_going_x_circle:1572867073267343380>/);
+  assert.match(posted.embeds[0].thumbnail.url,/1564620820838351008\.png$/);
   assert.deepEqual(posted.allowed_mentions,{parse:[]});assert.equal((await f.storage.get('message:new_message')).eventId,eventId);
 });
 test('message counts change when a member switches response without double counting',async()=>{
   const f=fixture(),i=interaction();await send(f.store,i);
   let message=f.calls.filter(call=>call.url.pathname.includes('/channels/')&&call.options.method==='PATCH').at(-1).body;
-  assert.deepEqual(message.components[0].components.map(button=>button.label),['✅ Going (1)','❌ Not going (0)']);
+  assert.deepEqual(message.components[0].components.map(button=>button.label),['Going (1)','Not going (0)']);
   i.id=crypto.randomUUID();i.data.custom_id='titania:'+eventId+':not_going';await send(f.store,i);
   message=f.calls.filter(call=>call.url.pathname.includes('/channels/')&&call.options.method==='PATCH').at(-1).body;
-  assert.deepEqual(message.components[0].components.map(button=>button.label),['✅ Going (0)','❌ Not going (1)']);
+  assert.deepEqual(message.components[0].components.map(button=>button.label),['Going (0)','Not going (1)']);
   assert.equal(f.record.note,'Management note');assert.equal(f.record.actual_status,'present');
 });
 test('counters exclude inactive members, missing members and no-response rows',async()=>{
