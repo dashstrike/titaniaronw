@@ -120,7 +120,7 @@ export function attendanceMessage(posted,counts){
       title:'PRE-ATTENDANCE FOR '+event+' '+date,
       description:'Choose your attendance below. You can change your response.',
       color:0x8064cf,
-      fields:[{name:'📅 EVENT DATE ',value:date+' (GMT+8)',inline:false},{name:'<:going_tick_circle:1572867047379963947> Going',value:String(counts.going),inline:true},{name:'<:not_going_x_circle:1572867073267343380> Not going',value:String(counts.notGoing),inline:true}],
+      fields:[{name:'📅\u2002EVENT DATE',value:date+' (GMT+8)',inline:false},{name:'<:going_tick_circle:1572867047379963947>\u2002Going',value:String(counts.going),inline:true},{name:'<:not_going_x_circle:1572867073267343380>\u2002Not going',value:String(counts.notGoing),inline:true}],
       thumbnail:{url:'https://cdn.discordapp.com/emojis/1564620820838351008.png'},footer:{text:'Titania Guild • Pre-Attendance'}
     }],
     components:[{type:1,components:[{type:2,style:3,emoji:{id:'1572867047379963947',name:'going_tick_circle'},label:'Going ('+counts.going+')',custom_id:'titania:'+posted.eventId+':going'},{type:2,style:4,emoji:{id:'1572867073267343380',name:'not_going_x_circle'},label:'Not going ('+counts.notGoing+')',custom_id:'titania:'+posted.eventId+':not_going'}]}]
