@@ -5,7 +5,7 @@ document.write('<script src="./js/job-icons-global.js?v=clean-routes-1"><\/scrip
 document.write('<link rel="stylesheet" href="./css/crowns.css?v=clean-routes-1">');
 document.write('<link rel="stylesheet" href="./css/party-stars.css?v=gold-star-1">');
 document.write('<link rel="stylesheet" href="./css/ui-polish.css?v=sub-teal-border-1">');
-document.write('<script src="./js/member-profile-enhancements.js?v=clean-routes-1"><\/script>');
+document.write('<script src="./js/member-profile-enhancements.js?v=profile-history-fix-1"><\/script>');
 document.write('<script src="./js/member-csv-import-link.js?v=info-button-1"><\/script>');
 document.write('<script src="./js/user-management-link.js?v=clean-routes-1"><\/script>');
 document.write('<script src="./js/guild-runs-link.js?v=siege-rook-1"><\/script>');

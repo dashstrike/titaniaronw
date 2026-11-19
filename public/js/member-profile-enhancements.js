@@ -71,7 +71,8 @@
     return `<span class="class-change">${file?`<img src="${ICON_BASE}${esc(file)}" alt="${esc(name)} job icon">`:''}<span>${esc(name)}</span></span>`;
   }
 
-  function glPlacement(assignments,name){
+  function glPlacement(state,name){
+    const assignments=state.assignments||{};
     const entries=Object.entries(assignments||{});
     const found=entries.find(([key,slots])=>/^(main|sub)_\d+$/.test(key)&&Array.isArray(slots)&&slots.includes(name));
     if(!found)return null;
@@ -153,7 +154,7 @@
   function renderInfo(member,state,stars,csvData){
     const wrap=document.getElementById('memberInfo');
     if(!wrap)return;
-    const gl=glPlacement(state.assignments||{},member.name||'');
+    const gl=glPlacement(state,member.name||'');
     const siege=siegePlacement(state,member.name||'');
     const starYes=Boolean(siege&&stars.has(siege.teamKey));
     const imported=csvData||null;
