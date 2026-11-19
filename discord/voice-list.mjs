@@ -1,4 +1,4 @@
-const GATEWAY='wss://gateway.discord.gg/?v=10&encoding=json';
+const GATEWAY='https://gateway.discord.gg/?v=10&encoding=json';
 const intents=1|128; // GUILDS and GUILD_VOICE_STATES; neither is privileged.
 
 export function voiceRows(guild,channelId){
@@ -44,7 +44,7 @@ export async function captureVoice(guildId,channelId,token,{connect=()=>fetch(GA
         finish(null,voiceRows(packet.d,channelId));
       }
     });
-    socket.addEventListener('close',()=>finish(new Error('Discord Gateway closed before the voice snapshot')));
+    socket.addEventListener('close',event=>finish(new Error('Discord Gateway closed before the voice snapshot (code '+event.code+')')));
     socket.addEventListener('error',()=>finish(new Error('Discord Gateway connection failed')));
   });
 }

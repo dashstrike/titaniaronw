@@ -41,7 +41,8 @@ test('command posts CSV attachment without writing attendance',async()=>{
   const env={DISCORD_GUILD_ID:guild,DISCORD_ATTENDANCE_CHANNEL_ID:'333333333333333333',DISCORD_BOT_TOKEN:'test'};
   const store=new AttendanceStore({storage},env);
   globalThis.fetch=async(url,options)=>{
-    if(String(url).startsWith('wss://')){
+    if(String(url).startsWith('https://gateway.discord.gg/')){
+      assert.equal(options.headers.Upgrade,'websocket');
       const listeners={};
       const socket={accept(){queueMicrotask(()=>listeners.message({data:JSON.stringify({op:10})}));},addEventListener(name,fn){listeners[name]=fn;},send(packet){if(JSON.parse(packet).op===2)queueMicrotask(()=>listeners.message({data:JSON.stringify({op:0,t:'GUILD_CREATE',d:{id:guild,members:[{user:{id:'444444444444444444',username:'Test Player'}}],voice_states:[{user_id:'444444444444444444',channel_id:voice}]}})}));},close(){}};
       return {webSocket:socket};

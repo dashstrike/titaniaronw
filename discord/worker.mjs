@@ -329,7 +329,7 @@ export class AttendanceStore {
       const channels=interaction.data.resolved?.channels||{};
       if(!/^\d{17,20}$/.test(voice||'')||!/^\d{17,20}$/.test(destination||'')||![2,13].includes(channels[voice]?.type)||![0,5].includes(channels[destination]?.type))fail('Choose a voice channel and a text channel in this server.');
       let rows;
-      try{rows=await captureVoice(env.DISCORD_GUILD_ID,voice,env.DISCORD_BOT_TOKEN);}catch{fail('Could not capture the voice channel. Try again shortly.');}
+      try{rows=await captureVoice(env.DISCORD_GUILD_ID,voice,env.DISCORD_BOT_TOKEN);}catch(error){console.error('Discord voice capture failed',{message:error.message});fail('Could not capture the voice channel. Try again shortly.');}
       const form=new FormData();
       form.set('payload_json',JSON.stringify({content:'Voice channel snapshot: <#'+voice+'> · '+rows.length+' user'+(rows.length===1?'':'s')+' · <t:'+Math.floor(Date.now()/1000)+':F>',allowed_mentions:{parse:[]},attachments:[{id:0,filename:'voice-list.csv'}]}));
       form.set('files[0]',new Blob([voiceCsv(rows)],{type:'text/csv;charset=utf-8'}),'voice-list.csv');
