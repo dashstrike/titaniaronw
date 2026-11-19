@@ -167,12 +167,12 @@ test('Worker acknowledges quickly, delegates processing and sends a private conf
   assert.deepEqual(await (await worker.fetch(s.request,runtime,{waitUntil:task=>tasks.push(task)})).json(),{type:5,data:{flags:64}});
   await Promise.all(tasks);assert.ok(f.calls.some(call=>call.url.pathname.includes('/webhooks/')&&/saved/.test(call.body.content)));
 });
-test('signed Discord verification registers the command once without exposing the bot token',async()=>{
-  const f=fixture(),tasks=[];let registrations=0;
+test('signed Discord verification registers both commands once without exposing the bot token',async()=>{
+  const f=fixture(),tasks=[],registrations=[];
   globalThis.fetch=async(url,options)=>{
     assert.match(String(url),/\/applications\/1562532538847596776\/guilds\/505382879983960064\/commands$/);
     assert.equal(options.headers.Authorization,'Bot test-only');
-    assert.equal(JSON.parse(options.body).name,'attendance');registrations++;return Response.json({id:'command'});
+    registrations.push(JSON.parse(options.body).name);return Response.json({id:'command'});
   };
   const runtime={...env,ATTENDANCE:{idFromName:id=>id,get:()=>({fetch:(url,opts)=>f.store.fetch(new Request(url,opts))})}};
   for(let count=0;count<2;count++){
@@ -180,7 +180,7 @@ test('signed Discord verification registers the command once without exposing th
     assert.deepEqual(await (await worker.fetch(s.request,{...runtime,DISCORD_PUBLIC_KEY:s.publicKey},{waitUntil:task=>tasks.push(task)})).json(),{type:1});
     await Promise.all(tasks);
   }
-  assert.equal(registrations,1);assert.equal(await f.storage.get('commandVersion'),1);
+  assert.deepEqual(registrations,['attendance','voice-list']);assert.equal(await f.storage.get('commandVersion'),2);
   const health=await worker.fetch(new Request('https://worker/'),runtime,{waitUntil(){throw new Error('Public GET must not run setup');}});
   assert.equal(health.status,200);
 });

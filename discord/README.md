@@ -1,6 +1,10 @@
 # Titania Discord attendance
 
-Cloudflare Free Worker for Guild League Tuesday/Thursday and Siege. Only **Going** and **Not going** buttons are posted. Nonresponders keep No response. No voice tracking or paid hosting is configured.
+Cloudflare Free Worker for Guild League Tuesday/Thursday and Siege. Only **Going** and **Not going** buttons are posted. Nonresponders keep No response. A separate on-demand voice snapshot command exports a CSV; no continuous voice tracking or paid hosting is configured.
+
+## Voice channel CSV
+
+Management can run `/voice-list voice_channel:#Bengkel-Pintar-Titania post_in:#your-text-channel` in the configured attendance command channel. The bot connects to Discord Gateway when the command runs, reads the current members of the selected voice channel, and posts `voice-list.csv` in the selected text channel. The CSV has one name column: server nickname, falling back to display name or username. It is a one-time snapshot: people joining or leaving afterward do not change the file. This command does not change attendance, member links, or the guild roster. The private command reply confirms the count and destination; the CSV post is visible to members who can view that destination. The bot needs **View Channel**, **Send Messages**, and **Attach Files** in the destination. If Gateway is unavailable, retry the command; no CSV is posted from an incomplete snapshot.
 
 The website retains its existing management permissions and manual ticks. Discord writes the same `attendance_records.pre_status` field; it never sets actual attendance or notes. The latest deliberate website edit or Discord click wins. Repeated delivery of the same Discord interaction does not write again. Visible planner badges refresh every 20 seconds and on focus. Deploy the website change separately through its existing GitHub Pages workflow.
 
@@ -45,7 +49,7 @@ This CLI deployment creates the required `ATTENDANCE` binding. Copying just `wor
 
 ## Register the server command once
 
-After deploying, set Discord's Interactions Endpoint URL to **`https://titania-attendance.dashstrike.workers.dev/interactions`** and Save Changes. The signed Discord verification request registers `/attendance` automatically using the token already stored privately at Cloudflare. The Worker records that setup completed and leaves other commands unchanged. If registration fails, check Cloudflare logs for the setup error, correct the token/installation, then save the endpoint again (switch between the root and `/interactions` URLs to trigger verification). The public GET health page does not register commands.
+After deploying, set Discord's Interactions Endpoint URL to **`https://titania-attendance.dashstrike.workers.dev/interactions`** and Save Changes. The signed Discord verification request registers `/attendance` and `/voice-list` automatically using the token already stored privately at Cloudflare. The Worker records that setup completed and leaves other commands unchanged. If registration fails, check Cloudflare logs for the setup error, correct the token/installation, then save the endpoint again (switch between the root and `/interactions` URLs to trigger verification). The public GET health page does not register commands.
 
 The local registration script below is an optional fallback; it is not needed when automatic setup succeeds.
 
@@ -57,7 +61,7 @@ $env:DISCORD_BOT_TOKEN = [System.Net.NetworkCredential]::new('', $discordToken).
 try { npm run register } finally { Remove-Item Env:DISCORD_BOT_TOKEN; $discordToken.Dispose() }
 ```
 
-The registration script creates/updates only `/attendance` for this server and does not overwrite unrelated commands. Bot needs View Channel, Send Messages, Embed Links and the `bot` / `applications.commands` install scopes. It may look offline because this bot uses HTTP interactions, not a persistent Gateway connection.
+The registration script creates/updates only `/attendance` and `/voice-list` for this server and does not overwrite unrelated commands. Bot needs View Channel, Send Messages, Embed Links, Attach Files and the `bot` / `applications.commands` install scopes. It may look offline because this bot uses HTTP interactions and connects to Gateway only briefly for a voice snapshot.
 
 ## Use in the configured attendance channel
 

@@ -1,5 +1,6 @@
 // Cloudflare Worker. Credentials belong in Cloudflare secrets, never in public/.
-import {command} from './commands.mjs';
+import {command,voiceCommand} from './commands.mjs';
+import {captureVoice,voiceCsv} from './voice-list.mjs';
 const API='https://discord.com/api/v10';
 const EVENTS={guild_league_tuesday:{label:'Guild League (Tuesday)',day:2},guild_league_thursday:{label:'Guild League (Thursday)',day:4},siege:{label:'Siege',day:0}};
 const object=value=>value&&typeof value==='object'&&!Array.isArray(value)?value:{};
@@ -171,11 +172,11 @@ export class AttendanceStore {
       catch(error){return json({error:error instanceof UserError?error.message:'Could not load Discord account details.'},error instanceof UserError?409:502);}
     }
     if(new URL(request.url).pathname==='/register'){
-      if(await this.ctx.storage.get('commandVersion')!==1){
-        await requestJson(API+'/applications/'+this.env.DISCORD_APPLICATION_ID+'/guilds/'+this.env.DISCORD_GUILD_ID+'/commands',{
-          method:'POST',headers:{Authorization:'Bot '+this.env.DISCORD_BOT_TOKEN,'Content-Type':'application/json'},body:JSON.stringify(command)
+      if(await this.ctx.storage.get('commandVersion')!==2){
+        for(const item of [command,voiceCommand])await requestJson(API+'/applications/'+this.env.DISCORD_APPLICATION_ID+'/guilds/'+this.env.DISCORD_GUILD_ID+'/commands',{
+          method:'POST',headers:{Authorization:'Bot '+this.env.DISCORD_BOT_TOKEN,'Content-Type':'application/json'},body:JSON.stringify(item)
         });
-        await this.ctx.storage.put('commandVersion',1);
+        await this.ctx.storage.put('commandVersion',2);
       }
       return json({registered:true});
     }
@@ -319,8 +320,22 @@ export class AttendanceStore {
       const response=match[2]==='going'?'<:going_tick_circle:1572867047379963947>\u2002Going':'<:not_going_x_circle:1572867073267343380>\u2002Not going';
       return member.name+': '+response+' saved for '+EVENTS[posted.type].label+' on '+posted.date.split('-').reverse().join('/')+'.';
     }
-    if(interaction.type!==2||interaction.data?.name!=='attendance')fail('Unknown command.');
+    if(interaction.type!==2||!['attendance','voice-list'].includes(interaction.data?.name))fail('Unknown command.');
     if(!isManager(interaction))fail('Only Discord administrators or members with Manage Server can manage attendance messages and links.');
+    if(interaction.data.name==='voice-list'){
+      const options=Object.fromEntries((interaction.data.options||[]).map(option=>[option.name,String(option.value)]));
+      const voice=options.voice_channel,destination=options.post_in;
+      const channels=interaction.data.resolved?.channels||{};
+      if(!/^\d{17,20}$/.test(voice||'')||!/^\d{17,20}$/.test(destination||'')||![2,13].includes(channels[voice]?.type)||![0,5].includes(channels[destination]?.type))fail('Choose a voice channel and a text channel in this server.');
+      let rows;
+      try{rows=await captureVoice(env.DISCORD_GUILD_ID,voice,env.DISCORD_BOT_TOKEN);}catch{fail('Could not capture the voice channel. Try again shortly.');}
+      const form=new FormData();
+      form.set('payload_json',JSON.stringify({content:'Voice channel snapshot: <#'+voice+'> · '+rows.length+' user'+(rows.length===1?'':'s')+' · <t:'+Math.floor(Date.now()/1000)+':F>',allowed_mentions:{parse:[]},attachments:[{id:0,filename:'voice-list.csv'}]}));
+      form.set('files[0]',new Blob([voiceCsv(rows)],{type:'text/csv;charset=utf-8'}),'voice-list.csv');
+      try{await requestJson(API+'/channels/'+destination+'/messages',{method:'POST',headers:{Authorization:'Bot '+env.DISCORD_BOT_TOKEN},body:form});}
+      catch(error){if(error.status===403)fail('I cannot post in that text channel. Give the bot View Channel, Send Messages, and Attach Files.');throw error;}
+      return 'Posted '+rows.length+' name'+(rows.length===1?'':'s')+' from <#'+voice+'> to <#'+destination+'>.';
+    }
     const subcommand=interaction.data.options?.[0]?.name,options=commandOptions(interaction);
     if(subcommand==='post'){
       const date=eventDate(options.event,options.date),event=await backend.event(options.event,date);
