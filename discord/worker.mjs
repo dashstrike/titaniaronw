@@ -146,6 +146,10 @@ export class AttendanceStore {
     try{await update;}finally{if(this.refreshes.get(messageId)===update)this.refreshes.delete(messageId);}
   }
   async fetch(request){
+    if(new URL(request.url).pathname==='/member-profile'){
+      try{return json(await this.memberProfile(await request.json()));}
+      catch(error){return json({error:error instanceof UserError?error.message:'Could not load Discord account details.'},error instanceof UserError?409:502);}
+    }
     if(new URL(request.url).pathname==='/register'){
       if(await this.ctx.storage.get('commandVersion')!==1){
         await requestJson(API+'/applications/'+this.env.DISCORD_APPLICATION_ID+'/guilds/'+this.env.DISCORD_GUILD_ID+'/commands',{
@@ -195,9 +199,50 @@ export class AttendanceStore {
       const existing=await transaction.get('user:'+userId),owner=await transaction.get('member:'+member.id);
       if(owner&&owner!==userId)fail('That Titania character is already linked to another Discord account. Ask management to resolve it.');
       if(existing&&existing.memberId!==String(member.id))fail('This Discord account is already linked. Management must unlink it before changing the character.');
-      await transaction.put('user:'+userId,{memberId:String(member.id),automatic,linkedAt:existing?.linkedAt||new Date().toISOString()});
+      await transaction.put('user:'+userId,{memberId:String(member.id),automatic:existing?.automatic??automatic,linkedAt:existing?.linkedAt||new Date().toISOString()});
       await transaction.put('member:'+member.id,userId);
     });
+  }
+  async guildMember(userId){
+    let member;
+    try{member=await requestJson(API+'/guilds/'+this.env.DISCORD_GUILD_ID+'/members/'+userId,{headers:{Authorization:'Bot '+this.env.DISCORD_BOT_TOKEN}});}
+    catch(error){if(error.status===404)fail('This Discord account is not in the Titania server.');throw error;}
+    if(!member.user||member.user.bot)fail('Choose a human member of the Titania Discord server.');
+    return member;
+  }
+  async memberProfile(input){
+    const {memberId,action,userId,expectedUserId,actorId}=input;
+    const member=(await new Backend(this.env).roster()).find(row=>String(row.id)===memberId);
+    if(!member)fail('This Titania member no longer exists.');
+    if(action!=='read'){
+      if(!['link','unlink'].includes(action))fail('Unknown account action.');
+      if(action==='link'&&(typeof userId!=='string'||!/^\d{17,20}$/.test(userId)||member.status==='inactive'))fail('Enter a Discord user ID for an active Titania member.');
+      if(action==='link')await this.guildMember(userId);
+      await this.ctx.storage.transaction(async transaction=>{
+        const current=await transaction.get('member:'+memberId)||null;
+        if(current!==(expectedUserId||null))fail('The account link changed. Refresh the card and try again.');
+        if(action==='link'){
+          const existing=await transaction.get('user:'+userId);
+          if(existing&&existing.memberId!==memberId)fail('That Discord account is already linked to another Titania character.');
+          if(current&&current!==userId)await transaction.delete('user:'+current);
+          await transaction.put('user:'+userId,{memberId,automatic:false,linkedAt:new Date().toISOString(),linkedBy:actorId});
+          await transaction.put('member:'+memberId,userId);
+        }else if(current){
+          await transaction.delete('user:'+current);await transaction.delete('member:'+memberId);
+        }
+      });
+    }
+    const linkedUserId=await this.ctx.storage.get('member:'+memberId);
+    if(!linkedUserId)return {linked:false};
+    const link=await this.ctx.storage.get('user:'+linkedUserId);
+    if(!link||link.memberId!==memberId)fail('Account link is inconsistent. Ask management to check it.');
+    let profile=null;
+    try{
+      const discordMember=await this.guildMember(linkedUserId),user=discordMember.user;
+      const hash=/^(a_)?[a-f0-9]+$/i.test(user.avatar||'')?user.avatar:null;
+      profile={username:user.username,nickname:discordMember.nick||null,avatarUrl:hash?'https://cdn.discordapp.com/avatars/'+linkedUserId+'/'+hash+'.png?size=128':'https://cdn.discordapp.com/embed/avatars/'+((BigInt(linkedUserId)>>22n)%6n)+'.png'};
+    }catch{/* Keep the link visible if Discord is temporarily unavailable or the user left. */}
+    return {linked:true,userId:linkedUserId,linkedAt:link.linkedAt,method:link.automatic?'Automatic nickname match':'Management',profile};
   }
   async handle(interaction){
     const env=this.env;
@@ -259,8 +304,36 @@ export async function finishInteraction(interaction,env){
   catch{console.error('Could not deliver private attendance confirmation',{interactionId:interaction.id});}
 }
 
+export async function websiteRequest(request,env){
+  const origin=request.headers.get('Origin');
+  const allowed=['https://dashstrike.github.io','http://titaniaronw.test','http://127.0.0.1:8015','http://localhost:8015'];
+  if(!allowed.includes(origin))return json({error:'Origin not allowed.'},403);
+  const headers={'Access-Control-Allow-Origin':origin,'Access-Control-Allow-Methods':'POST, OPTIONS','Access-Control-Allow-Headers':'Authorization, Content-Type','Vary':'Origin','Cache-Control':'no-store'};
+  const reply=(body,status=200)=>Response.json(body,{status,headers});
+  if(request.method==='OPTIONS')return new Response(null,{status:204,headers});
+  if(request.method!=='POST')return reply({error:'Method not allowed.'},405);
+  const authorization=request.headers.get('Authorization');
+  if(!/^Bearer \S+$/.test(authorization||''))return reply({error:'Sign in to Titania first.'},401);
+  let user;
+  try{user=await requestJson(env.SUPABASE_URL+'/auth/v1/user',{headers:{apikey:env.SUPABASE_SERVICE_ROLE_KEY,Authorization:authorization}});}
+  catch{return reply({error:'Your session could not be verified. Sign in again.'},401);}
+  if(!user?.id)return reply({error:'Sign in to Titania first.'},401);
+  try{
+    const profiles=await new Backend(env).call('profiles?id=eq.'+encodeURIComponent(user.id)+'&select=approved,role');
+    if(!profiles[0]?.approved)return reply({error:'Approved Titania access is required.'},403);
+    const canManage=['admin','party_organizer'].includes(profiles[0].role);
+    let input;try{input=await request.json();}catch{return reply({error:'Invalid request.'},400);}
+    if(!input||typeof input.memberId!=='string'||!input.memberId||input.memberId.length>120||!['read','link','unlink'].includes(input.action))return reply({error:'Invalid member request.'},400);
+    if(input.action!=='read'&&!canManage)return reply({error:'Only administrators and party organizers can change account links.'},403);
+    const store=env.ATTENDANCE.get(env.ATTENDANCE.idFromName(env.DISCORD_GUILD_ID));
+    const result=await store.fetch('https://attendance.internal/member-profile',{method:'POST',body:JSON.stringify({memberId:input.memberId,action:input.action,userId:input.userId,expectedUserId:input.expectedUserId,actorId:user.id})});
+    return reply({...await result.json(),canManage},result.status);
+  }catch{return reply({error:'Discord account details are unavailable. Try again shortly.'},502);}
+}
+
 export default {
   async fetch(request,env,ctx){
+    if(new URL(request.url).pathname==='/member-discord')return websiteRequest(request,env);
     if(request.method==='GET')return new Response('Titania attendance endpoint is running.');
     if(request.method!=='POST')return new Response('Method not allowed',{status:405});
     const interaction=await verifyRequest(request,env.DISCORD_PUBLIC_KEY);

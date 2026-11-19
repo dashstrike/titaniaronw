@@ -1,0 +1,54 @@
+// Real member-card script, local styles and dialogs; mocked backend only.
+const fs=require('node:fs'),path=require('node:path'),assert=require('node:assert/strict');
+const {execFileSync}=require('node:child_process'),{pathToFileURL}=require('node:url');
+const mobile=process.argv.includes('--mobile'),dir=path.resolve('storage/app/member-discord-preview'+(mobile?'-mobile':''));fs.mkdirSync(dir,{recursive:true});
+const asset=file=>pathToFileURL(path.resolve('public',file)).href;
+const script=`
+const errors=[],calls=[];window.addEventListener('error',e=>errors.push(e.message));
+window.Swal=Swal.mixin({showClass:{popup:''},hideClass:{popup:''}});
+let data={linked:false,canManage:false},copied;
+const id='111111111111111111',other='222222222222222222';
+Object.defineProperty(navigator,'clipboard',{value:{writeText:async value=>{copied=value;}}});
+const client={auth:{getSession:async()=>({data:{session:{access_token:'synthetic-session'}}})}};
+const makeProfile=userId=>({linked:true,canManage:true,userId,linkedAt:'2026-11-19T08:00:00Z',method:'Management',profile:{username:'<img id=evil src=x>Player',nickname:'Player Nick',avatarUrl:'${asset('images/titania-logo.webp')}'}});
+window.fetch=async(url,options)=>{
+  if(url!=='https://titania-attendance.dashstrike.workers.dev/member-discord')throw Error('Unexpected external request');
+  if(options.headers.Authorization!=='Bearer synthetic-session')throw Error('Missing session');
+  const body=JSON.parse(options.body);calls.push(body);
+  if(body.action==='link')data=makeProfile(body.userId);
+  if(body.action==='unlink')data={linked:false,canManage:true};
+  return Response.json(data);
+};
+const expect=(value,message)=>{if(!value)throw Error(message);};
+const wait=async predicate=>{for(let i=0;i<100;i++){if(predicate())return;await new Promise(resolve=>setTimeout(resolve,20));}throw Error('UI timeout');};
+(async()=>{try{
+  await TitaniaMemberDiscord(client,'m1');
+  expect(!document.getElementById('discordLink'),'Viewer can edit');
+  expect(document.getElementById('memberDiscordContent').textContent.includes('Not linked'),'Unlinked state missing');
+  data={linked:false,canManage:true};document.getElementById('discordRefresh').click();await wait(()=>document.getElementById('discordLink'));
+  document.getElementById('discordLink').click();await wait(()=>Swal.isVisible());Swal.getInput().value=id;Swal.clickConfirm();
+  await wait(()=>document.getElementById('discordUnlink'));
+  expect(document.getElementById('memberDiscordContent').textContent.includes('Player Nick'),'Nickname missing');
+  expect(!document.getElementById('evil'),'Username injected HTML');
+  expect(document.querySelector('a').href==='https://discord.com/users/'+id,'Wrong profile URL');
+  document.getElementById('discordCopyId').click();await wait(()=>copied===id);
+  document.getElementById('discordLink').click();await wait(()=>Swal.isVisible());Swal.getInput().value=other;Swal.clickConfirm();
+  await wait(()=>document.querySelector('a')?.href==='https://discord.com/users/'+other);
+  expect(calls.findLast(c=>c.action==='link').expectedUserId===id,'Change did not check previous link');
+  document.getElementById('discordUnlink').click();await wait(()=>Swal.isVisible());Swal.clickCancel();await wait(()=>!Swal.isVisible());
+  expect(data.linked,'Cancelled unlink changed account');
+  document.getElementById('discordUnlink').click();await wait(()=>Swal.isVisible());Swal.clickConfirm();await wait(()=>!document.getElementById('discordUnlink'));
+  expect(calls.findLast(c=>c.action==='unlink').expectedUserId===other,'Unlink lost account guard');
+  data=makeProfile(id);document.getElementById('discordRefresh').click();await wait(()=>document.getElementById('discordUnlink'));
+  expect(errors.length===0,'Browser errors: '+errors.join(','));
+  document.getElementById('result').textContent=JSON.stringify({passed:true,errors,calls:calls.length});
+}catch(error){document.getElementById('result').textContent=JSON.stringify({error:error.stack,errors});}})();
+`;
+const html=`<!doctype html><html data-bs-theme="dark"><head><base href="${asset('')}/"><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="stylesheet" href="${asset('vendor/darkone/css/style.min.css')}"><link rel="stylesheet" href="${asset('css/member-page.css')}"><link rel="stylesheet" href="${asset('css/titania.css')}"></head><body data-titania-page="member"><div id="titania-content" class="container-fluid py-3"><section class="panel card mb-3"><header class="card-head"><h2>Discord Account</h2><p>Linked Discord identity for attendance</p></header><div id="memberDiscordContent"></div></section></div><pre id="result" hidden></pre><script src="${asset('vendor/sweetalert2/sweetalert2.all.min.js')}"></script><script src="${asset('js/member-discord.js')}"></script><script>${script}</script></body></html>`;
+const file=path.join(dir,'index.html');fs.writeFileSync(file,html);
+const chrome=process.env.CHROME_PATH||'C:/Program Files/Google/Chrome/Application/chrome.exe';
+const output=execFileSync(chrome,['--headless','--disable-gpu','--no-first-run','--allow-file-access-from-files','--user-data-dir='+path.join(dir,'profile'),'--window-size='+(mobile?'500,850':'1440,1000'),'--virtual-time-budget=10000','--screenshot='+path.join(dir,'preview.png'),'--dump-dom',pathToFileURL(file).href],{encoding:'utf8',stdio:['ignore','pipe','ignore'],timeout:30000,maxBuffer:4*1024*1024});
+fs.writeFileSync(path.join(dir,'rendered.html'),output);
+const result=JSON.parse(output.match(/<pre id="result"[^>]*>([^]*?)<\/pre>/)?.[1]?.replaceAll('&quot;','"').replaceAll('&amp;','&')||'{}');
+assert.equal(result.error,undefined,JSON.stringify(result));assert.equal(result.passed,true);assert.deepEqual(result.errors,[]);
+console.log('PASS: Discord member card, viewer controls, link/change/unlink confirmations, safe profile text and copying. '+dir);
