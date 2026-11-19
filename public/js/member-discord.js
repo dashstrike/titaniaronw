@@ -50,6 +50,7 @@
       catch(error){await Swal.fire({...dialog,icon:'error',title:'Discord link not changed',text:error.message});}
       finally{busy=false;wrap.querySelectorAll('button').forEach(button=>button.disabled=false);}
     }
-    await load();
+    wrap.innerHTML='<p class="text-muted">Click Refresh to load Discord account details.</p><button type="button" class="btn btn-outline-secondary btn-sm" id="discordRefresh">Refresh</button>';
+    wrap.querySelector('#discordRefresh').onclick=load;
   };
 })();

@@ -23,6 +23,11 @@ const expect=(value,message)=>{if(!value)throw Error(message);};
 const wait=async predicate=>{for(let i=0;i<100;i++){if(predicate())return;await new Promise(resolve=>setTimeout(resolve,20));}throw Error('UI timeout');};
 (async()=>{try{
   await TitaniaMemberDiscord(client,'m1');
+  expect(calls.length===0,'Opening profile requested Cloudflare');
+  expect(document.getElementById('memberDiscordContent').textContent.includes('Click Refresh'),'Manual refresh prompt missing');
+  document.getElementById('discordRefresh').click();
+  await wait(()=>document.getElementById('memberDiscordContent').textContent.includes('Not linked'));
+  expect(calls.length===1&&calls[0].action==='read','Refresh should fetch once');
   expect(!document.getElementById('discordLink'),'Viewer can edit');
   expect(document.getElementById('memberDiscordContent').textContent.includes('Not linked'),'Unlinked state missing');
   data={linked:false,canManage:true};document.getElementById('discordRefresh').click();await wait(()=>document.getElementById('discordLink'));

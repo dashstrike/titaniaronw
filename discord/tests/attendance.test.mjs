@@ -54,6 +54,16 @@ test('CSV rename and later Discord nickname changes retain the saved member ID',
   f.state.roster[0].name='Renamed Character';const i=interaction();i.member.nick='Unrelated Nick';i.data.custom_id='titania:'+eventId+':not_going';
   assert.match((await send(f.store,i)).content,/Renamed Character: Not going/);assert.equal(f.record.member_id,'member_1');
 });
+test('display name links automatically when no server nickname is set',async()=>{
+  const f=fixture(),i=interaction();i.member.nick=null;i.member.user.global_name='Player One';
+  assert.match((await send(f.store,i)).content,/Going ✅ saved/);
+  assert.equal((await f.storage.get('user:'+actor)).memberId,'member_1');
+});
+test('an explicitly set server nickname takes precedence over the global display name',async()=>{
+  const f=fixture(),i=interaction();i.member.nick='Unmatched';i.member.user.global_name='Player One';
+  assert.doesNotMatch((await send(f.store,i)).content,/saved for/);
+  assert.equal(await f.storage.get('user:'+actor),undefined);
+});
 test('missing, duplicate or inactive roster entries never create members or mark attendance',async()=>{
   for(const nickname of ['Nobody','Inactive','']){
     const f=fixture(),i=interaction();i.member.nick=nickname;const result=await send(f.store,i);

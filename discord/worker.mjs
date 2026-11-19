@@ -47,10 +47,10 @@ export function matchMember(roster,nickname,linkedId){
     return member;
   }
   const name=normalizeName(nickname);
-  if(!name)fail('Ask management to set your Discord server nickname to your Titania character name.');
+  if(!name)fail('Set your Discord server nickname or display name to your Titania character name, or ask management to link your account.');
   const matches=roster.filter(member=>member.status!=='inactive'&&normalizeName(member.name)===name);
   if(matches.length!==1)fail(matches.length?'More than one active character matches your nickname. Ask management to link your account.':'Your server nickname does not match an active Titania member. Ask management to check your nickname and roster.');
-  if(!matches[0].id)fail('This character has no member ID. Ask management to check the roster.');
+    if(!matches[0].id)fail('This character has no member ID. Ask management to check the roster.');
   return matches[0];
 }
 
@@ -113,13 +113,15 @@ export class Backend {
 }
 
 export function attendanceMessage(posted,counts){
+  const date=posted.date.split('-').reverse().join('/');
+  const event=EVENTS[posted.type].label.replace(/[()]/g,'').toUpperCase();
   return {
     embeds:[{
-      title:EVENTS[posted.type].label,
+      title:'PRE-ATTENDANCE FOR '+event+' '+date,
       description:'Choose your attendance below. You can change your response.',
       color:0x8064cf,
-      fields:[{name:'📅 Event date',value:posted.date+' (GMT+8)',inline:false},{name:'✅ Going',value:String(counts.going),inline:true},{name:'❌ Not going',value:String(counts.notGoing),inline:true}],
-      footer:{text:'Titania Guild • Attendance'}
+      fields:[{name:'📅 EVENT DATE',value:date+' (GMT+8)',inline:false},{name:'✅ Going',value:String(counts.going),inline:true},{name:'❌ Not going',value:String(counts.notGoing),inline:true}],
+      footer:{text:'Titania Guild • Pre-Attendance'}
     }],
     components:[{type:1,components:[{type:2,style:3,label:'✅ Going ('+counts.going+')',custom_id:'titania:'+posted.eventId+':going'},{type:2,style:4,label:'❌ Not going ('+counts.notGoing+')',custom_id:'titania:'+posted.eventId+':not_going'}]}]
   };
@@ -194,12 +196,12 @@ export class AttendanceStore {
     }while(start);
     if((await this.ctx.storage.list({prefix:'delivery:',limit:1})).size)await this.ctx.storage.setAlarm(Date.now()+86400000);
   }
-  async link(userId,member,automatic){
+  async link(userId,member,automatic,matchSource='nickname'){
     return this.ctx.storage.transaction(async transaction=>{
       const existing=await transaction.get('user:'+userId),owner=await transaction.get('member:'+member.id);
       if(owner&&owner!==userId)fail('That Titania character is already linked to another Discord account. Ask management to resolve it.');
       if(existing&&existing.memberId!==String(member.id))fail('This Discord account is already linked. Management must unlink it before changing the character.');
-      await transaction.put('user:'+userId,{memberId:String(member.id),automatic:existing?.automatic??automatic,linkedAt:existing?.linkedAt||new Date().toISOString()});
+      await transaction.put('user:'+userId,{memberId:String(member.id),automatic:existing?.automatic??automatic,matchSource:existing?.matchSource||matchSource,linkedAt:existing?.linkedAt||new Date().toISOString()});
       await transaction.put('member:'+member.id,userId);
     });
   }
@@ -242,7 +244,7 @@ export class AttendanceStore {
       const hash=/^(a_)?[a-f0-9]+$/i.test(user.avatar||'')?user.avatar:null;
       profile={username:user.username,nickname:discordMember.nick||null,avatarUrl:hash?'https://cdn.discordapp.com/avatars/'+linkedUserId+'/'+hash+'.png?size=128':'https://cdn.discordapp.com/embed/avatars/'+((BigInt(linkedUserId)>>22n)%6n)+'.png'};
     }catch{/* Keep the link visible if Discord is temporarily unavailable or the user left. */}
-    return {linked:true,userId:linkedUserId,linkedAt:link.linkedAt,method:link.automatic?'Automatic nickname match':'Management',profile};
+    return {linked:true,userId:linkedUserId,linkedAt:link.linkedAt,method:link.automatic?(link.matchSource==='display'?'Automatic display-name match':'Automatic nickname match'):'Management',profile};
   }
   async handle(interaction){
     const env=this.env;
@@ -256,8 +258,8 @@ export class AttendanceStore {
       const posted=await this.ctx.storage.get('message:'+interaction.message.id);
       if(!posted||posted.eventId!==match[1])fail('This message is not registered. Ask management to post a new attendance message.');
       const roster=await backend.roster(),link=await this.ctx.storage.get('user:'+userId);
-      const member=matchMember(roster,interaction.member.nick,link?.memberId);
-      await this.link(userId,member,!link);
+      const member=matchMember(roster,interaction.member.nick||interaction.member.user.global_name,link?.memberId);
+      await this.link(userId,member,!link,interaction.member.nick?'nickname':'display');
       await backend.save(posted.eventId,member,match[2]);
       try{await this.refreshMessage(interaction.message.id,posted,backend,roster);}
       catch{console.error('Attendance saved but message counts could not refresh',{messageId:interaction.message.id});}

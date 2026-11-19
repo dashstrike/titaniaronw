@@ -32,7 +32,7 @@
       </section>
       <section class="panel card mt-3 mb-3" id="memberDiscordAccount" aria-labelledby="memberDiscordTitle">
         <header class="card-head"><h2 id="memberDiscordTitle"><i class="fa-brands fa-discord me-2" aria-hidden="true"></i>Discord Account</h2><p>Linked Discord identity for attendance</p></header>
-        <div id="memberDiscordContent" aria-live="polite">Loading Discord account...</div>
+        <div id="memberDiscordContent" aria-live="polite">Click Refresh to load Discord account details.</div>
       </section>
       <section class="metrics">
         <div class="metric card"><header class="card-head"><h2><i class="fa-solid fa-arrow-trend-up mr-2" aria-hidden="true"></i>7 Day Gain</h2><p>Gear Rating growth</p></header><strong id="gain7">&#8212;</strong></div>
