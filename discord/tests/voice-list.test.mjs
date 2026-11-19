@@ -49,7 +49,7 @@ test('command posts CSV attachment without writing attendance',async()=>{
     calls.push({url:String(url),options});return Response.json({id:'posted'});
   };
   try{
-    const interaction={id:'555555555555555555',type:2,guild_id:guild,channel_id:env.DISCORD_ATTENDANCE_CHANNEL_ID,member:{user:{id:'666666666666666666'},permissions:'32'},data:{name:'voice-list',options:[{name:'voice_channel',value:voice},{name:'post_in',value:destination}],resolved:{channels:{[voice]:{type:2},[destination]:{type:0}}}}};
+    const interaction={id:'555555555555555555',type:2,guild_id:guild,channel_id:'777777777777777777',member:{user:{id:'666666666666666666'},permissions:'32'},data:{name:'voice-list',options:[{name:'voice_channel',value:voice},{name:'post_in',value:destination}],resolved:{channels:{[voice]:{type:2},[destination]:{type:0}}}}};
     const response=await store.process(interaction);
     assert.match((await response.json()).content,/Posted 1 name/);
     assert.equal(calls.length,1);

@@ -302,7 +302,8 @@ export class AttendanceStore {
   }
   async handle(interaction){
     const env=this.env;
-    if(interaction.guild_id!==env.DISCORD_GUILD_ID||interaction.channel_id!==env.DISCORD_ATTENDANCE_CHANNEL_ID)fail('Use the configured Titania attendance channel.');
+    if(interaction.guild_id!==env.DISCORD_GUILD_ID)fail('Use this command in the Titania server.');
+    if(interaction.data?.name!=='voice-list'&&interaction.channel_id!==env.DISCORD_ATTENDANCE_CHANNEL_ID)fail('Use the configured Titania attendance channel.');
     const userId=interaction.member?.user?.id;
     if(!userId||interaction.member.user.bot)fail('A Discord server member is required.');
     const backend=new Backend(env);
@@ -430,7 +431,7 @@ export default {
     const privateReply=content=>json({type:4,data:{content,flags:64,allowed_mentions:{parse:[]}}});
     if(interaction.guild_id!==env.DISCORD_GUILD_ID)return privateReply('This bot is restricted to the Titania server.');
     if(interaction.application_id!==env.DISCORD_APPLICATION_ID)return new Response('Wrong application',{status:401});
-    if(interaction.channel_id!==env.DISCORD_ATTENDANCE_CHANNEL_ID)return privateReply('Use the configured Titania attendance channel.');
+    if(interaction.data?.name!=='voice-list'&&interaction.channel_id!==env.DISCORD_ATTENDANCE_CHANNEL_ID)return privateReply('Use the configured Titania attendance channel.');
     if(![2,3].includes(interaction.type))return new Response('Unsupported interaction',{status:400});
     if(interaction.type===2&&!isManager(interaction))return privateReply('Only management can use this command. Members can use the Going and Not going buttons.');
     ctx.waitUntil(finishInteraction(interaction,env));
