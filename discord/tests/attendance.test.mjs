@@ -105,7 +105,7 @@ test('posting is management-only and produces exactly Going / Not going buttons'
   assert.match(posted.embeds[0].fields[1].name,/<:going_tick_circle:1572867047379963947>/);
   assert.match(posted.embeds[0].fields[2].name,/<:not_going_x_circle:1572867073267343380>/);
   assert.match(posted.embeds[0].thumbnail.url,/1564620820838351008\.png$/);
-  assert.equal(posted.content,'@everyone');assert.deepEqual(posted.allowed_mentions,{parse:['everyone']});assert.equal((await f.storage.get('message:new_message')).eventId,eventId);
+  assert.equal(posted.content,'<@&1559578395564843069>');assert.deepEqual(posted.allowed_mentions,{parse:[],roles:['1559578395564843069']});assert.equal((await f.storage.get('message:new_message')).eventId,eventId);
 });
 test('message counts change when a member switches response without double counting',async()=>{
   const f=fixture(),i=interaction();await send(f.store,i);

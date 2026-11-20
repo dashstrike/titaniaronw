@@ -123,11 +123,12 @@ export class Backend {
   }
 }
 
-export function attendanceMessage(posted,counts,notifyEveryone=false){
+const ATTENDANCE_ROLE_ID='1559578395564843069';
+export function attendanceMessage(posted,counts,notifyRole=false){
   const date=posted.date.split('-').reverse().join('/');
   const event=EVENTS[posted.type].label.replace(/[()]/g,'').toUpperCase();
   return {
-    ...(notifyEveryone?{content:'@everyone'}:{}),
+    ...(notifyRole?{content:'<@&'+ATTENDANCE_ROLE_ID+'>'}:{}),
     embeds:[{
       title:'PRE-ATTENDANCE FOR '+event+' '+date,
       description:'Choose your attendance below. You can change your response.',
@@ -140,8 +141,8 @@ export function attendanceMessage(posted,counts,notifyEveryone=false){
 }
 
 async function discord(env,path,method,body,bot=true){
-  const notifyEveryone=bot&&method==='POST'&&path==='/channels/'+env.DISCORD_ATTENDANCE_CHANNEL_ID+'/messages'&&body.content==='@everyone';
-  return requestJson(API+path,{method,headers:{'Content-Type':'application/json',...(bot?{Authorization:'Bot '+env.DISCORD_BOT_TOKEN}:{})},body:JSON.stringify({...body,allowed_mentions:{parse:notifyEveryone?['everyone']:[]}})});
+  const notifyRole=bot&&method==='POST'&&path==='/channels/'+env.DISCORD_ATTENDANCE_CHANNEL_ID+'/messages'&&body.content==='<@&'+ATTENDANCE_ROLE_ID+'>';
+  return requestJson(API+path,{method,headers:{'Content-Type':'application/json',...(bot?{Authorization:'Bot '+env.DISCORD_BOT_TOKEN}:{})},body:JSON.stringify({...body,allowed_mentions:notifyRole?{parse:[],roles:[ATTENDANCE_ROLE_ID]}:{parse:[]}})});
 }
 const commandOptions=interaction=>Object.fromEntries((interaction.data?.options?.[0]?.options||[]).map(option=>[option.name,option.value]));
 

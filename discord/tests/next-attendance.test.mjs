@@ -49,7 +49,7 @@ test('finish posts the next event once and retains existing pre-attendance count
   assert.equal(first.posted,true);assert.equal(second.alreadyPosted,true);
   const posts=f.calls.filter(call=>call.path.includes('/channels/'));assert.equal(posts.length,1);
   assert.equal(posts[0].body.enforce_nonce,true);assert.ok(posts[0].body.nonce.length<=25);
-  assert.equal(posts[0].body.content,'@everyone');assert.deepEqual(posts[0].body.allowed_mentions,{parse:['everyone']});
+  assert.equal(posts[0].body.content,'<@&1559578395564843069>');assert.deepEqual(posts[0].body.allowed_mentions,{parse:[],roles:['1559578395564843069']});
   assert.equal(posts[0].body.embeds[0].fields[1].value,'1');
   assert.equal((await f.storage.get('message:new_post')).eventId,nextId);
   assert.equal(f.calls.filter(call=>call.path.includes('attendance_records')&&['POST','PATCH','DELETE'].includes(call.options.method)).length,0);
