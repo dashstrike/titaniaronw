@@ -121,6 +121,10 @@ export class Backend {
     }
     return {going:going.size,notGoing:notGoing.size};
   }
+  async setDiscordLinked(memberId,linked){
+    return this.call('member_discord_link_status?on_conflict=member_id','POST',
+      {member_id:String(memberId),linked,updated_at:new Date().toISOString()},'resolution=merge-duplicates,return=minimal');
+  }
 }
 
 const ATTENDANCE_ROLE_ID='1559578395564843069';
@@ -149,7 +153,7 @@ const commandOptions=interaction=>Object.fromEntries((interaction.data?.options?
 // One object per guild: private, strongly consistent links and interaction receipts.
 // SQLite-backed storage is supported on Cloudflare's Free plan.
 export class AttendanceStore {
-  constructor(ctx,env){this.ctx=ctx;this.env=env;this.refreshes=new Map();this.nextPosts=new Map();}
+  constructor(ctx,env){this.ctx=ctx;this.env=env;this.refreshes=new Map();this.nextPosts=new Map();this.linkSyncs=new Map();}
   async refreshMessage(messageId,posted,backend,roster){
     // Serialize counter updates, not attendance writes, so older edits cannot
     // finish after newer ones when several members respond together.
@@ -172,6 +176,7 @@ export class AttendanceStore {
       try{return json(await this.memberProfile(await request.json()));}
       catch(error){return json({error:error instanceof UserError?error.message:'Could not load Discord account details.'},error instanceof UserError?409:502);}
     }
+    if(new URL(request.url).pathname==='/sync-link-status')return json(await this.backfillLinkStatus());
     if(new URL(request.url).pathname==='/register'){
       if(await this.ctx.storage.get('commandVersion')!==2){
         for(const item of [command,voiceCommand])await requestJson(API+'/applications/'+this.env.DISCORD_APPLICATION_ID+'/guilds/'+this.env.DISCORD_GUILD_ID+'/commands',{
@@ -214,16 +219,49 @@ export class AttendanceStore {
       start=[...entries.keys()].at(-1);
       if(entries.size<500)break;
     }while(start);
-    if((await this.ctx.storage.list({prefix:'delivery:',limit:1})).size)await this.ctx.storage.setAlarm(Date.now()+86400000);
+    const pending=await this.ctx.storage.list({prefix:'link-status-pending:',limit:500});
+    for(const key of pending.keys())await this.syncLinkStatus(key.slice('link-status-pending:'.length));
+    if((await this.ctx.storage.list({prefix:'link-status-pending:',limit:1})).size)await this.ctx.storage.setAlarm(Date.now()+60000);
+    else if((await this.ctx.storage.list({prefix:'delivery:',limit:1})).size)await this.ctx.storage.setAlarm(Date.now()+86400000);
+  }
+  async syncLinkStatus(memberId){
+    const previous=this.linkSyncs.get(memberId)||Promise.resolve();
+    const task=previous.catch(()=>{}).then(async()=>{
+      const linked=Boolean(await this.ctx.storage.get('member:'+memberId));
+      try{
+        await new Backend(this.env).setDiscordLinked(memberId,linked);
+        await this.ctx.storage.delete('link-status-pending:'+memberId);
+      }catch(error){
+        console.error('Discord link status mirror failed',{memberId,status:error.status||null});
+        await this.ctx.storage.put('link-status-pending:'+memberId,Date.now());
+        await this.ctx.storage.setAlarm(Date.now()+60000);
+      }
+    });
+    this.linkSyncs.set(memberId,task);
+    try{await task;}finally{if(this.linkSyncs.get(memberId)===task)this.linkSyncs.delete(memberId);}
+  }
+  async backfillLinkStatus(){
+    let start,count=0;
+    do{
+      const entries=await this.ctx.storage.list({prefix:'member:',limit:500,...(start?{startAfter:start}:{})});
+      if(!entries.size)break;
+      const rows=[...entries].filter(([,userId])=>Boolean(userId)).map(([key])=>({member_id:key.slice(7),linked:true,updated_at:new Date().toISOString()}));
+      if(rows.length)await new Backend(this.env).call('member_discord_link_status?on_conflict=member_id','POST',rows,'resolution=merge-duplicates,return=minimal');
+      count+=rows.length;start=[...entries.keys()].at(-1);
+      if(entries.size<500)break;
+    }while(start);
+    return {synced:count};
   }
   async link(userId,member,automatic,matchSource='nickname'){
-    return this.ctx.storage.transaction(async transaction=>{
+    const created=await this.ctx.storage.transaction(async transaction=>{
       const existing=await transaction.get('user:'+userId),owner=await transaction.get('member:'+member.id);
       if(owner&&owner!==userId)fail('That Titania character is already linked to another Discord account. Ask management to resolve it.');
       if(existing&&existing.memberId!==String(member.id))fail('This Discord account is already linked. Management must unlink it before changing the character.');
       await transaction.put('user:'+userId,{memberId:String(member.id),automatic:existing?.automatic??automatic,matchSource:existing?.matchSource||matchSource,linkedAt:existing?.linkedAt||new Date().toISOString()});
       await transaction.put('member:'+member.id,userId);
+      return !existing;
     });
+    if(created)await this.syncLinkStatus(String(member.id));
   }
   async publishNext(closedEventId){
     const backend=new Backend(this.env);
@@ -288,6 +326,7 @@ export class AttendanceStore {
           await transaction.delete('user:'+current);await transaction.delete('member:'+memberId);
         }
       });
+      await this.syncLinkStatus(memberId);
     }
     const linkedUserId=await this.ctx.storage.get('member:'+memberId);
     if(!linkedUserId)return {linked:false};
@@ -357,10 +396,12 @@ export class AttendanceStore {
     }
     if(subcommand==='unlink'){
       const id=String(options.user||'');
+      let unlinkedMemberId=null;
       await this.ctx.storage.transaction(async transaction=>{
         const link=await transaction.get('user:'+id);
-        if(link){await transaction.delete('member:'+link.memberId);await transaction.delete('user:'+id);}
+        if(link){unlinkedMemberId=link.memberId;await transaction.delete('member:'+link.memberId);await transaction.delete('user:'+id);}
       });
+      if(unlinkedMemberId)await this.syncLinkStatus(unlinkedMemberId);
       return 'Account link removed. No attendance records were deleted.';
     }
     fail('Choose post, link, or unlink.');

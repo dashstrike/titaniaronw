@@ -23,11 +23,12 @@ function fixture(){
   const storage=new Storage(),store=new AttendanceStore({storage},env),calls=[];
   storage.data.set('message:message_1',{eventId,type:'siege',date:'2026-11-22'});
   const record={id:'record_1',event_id:eventId,member_id:'member_1',member_name:'Player One',pre_status:'not_going',actual_status:'present',note:'Management note'};
-  const state={roster:structuredClone(roster),closed:false,record};
+  const state={roster:structuredClone(roster),closed:false,record,linkStatusError:false};
   globalThis.fetch=async (input,options={})=>{
     const url=new URL(input),body=options.body?JSON.parse(options.body):undefined;
     calls.push({url,options,body});
     if(url.pathname.endsWith('/planner_state'))return Response.json([{state:{roster:state.roster}}]);
+    if(url.pathname.endsWith('/member_discord_link_status'))return state.linkStatusError?Response.json({code:'temporary'},{status:503}):new Response(null,{status:201});
     if(url.pathname.endsWith('/attendance_events'))return Response.json([{id:eventId,status:state.closed?'closed':'upcoming'}]);
     if(url.pathname.endsWith('/attendance_records')){
       if(options.method==='PATCH'){Object.assign(record,body);return new Response(null,{status:204});}
@@ -129,13 +130,34 @@ test('event date uses GMT+8, validates weekday and rejects past/invalid dates',(
 });
 test('new attendance insert contains no actual-status or note overwrite',async()=>{
   const f=fixture();f.state.exists=false;await new Backend(env).save(eventId,roster[0],'going');
-  assert.deepEqual(f.calls.find(call=>call.options.method==='POST').body,{event_id:eventId,member_id:'member_1',member_name:'Player One',pre_status:'going'});
+  assert.deepEqual(f.calls.find(call=>call.options.method==='POST'&&call.url.pathname.endsWith('/attendance_records')).body,{event_id:eventId,member_id:'member_1',member_name:'Player One',pre_status:'going'});
 });
 test('management unlink removes both directions and keeps attendance records',async()=>{
   const f=fixture();await f.store.link(actor,roster[0],true);
   const i=interaction(2);i.member.permissions='32';i.data={name:'attendance',options:[{name:'unlink',options:[{name:'user',value:actor}]}]};
   assert.match((await send(f.store,i)).content,/No attendance records were deleted/);
-  assert.equal(await f.storage.get('user:'+actor),undefined);assert.equal(await f.storage.get('member:member_1'),undefined);assert.equal(f.calls.length,0);
+  assert.equal(await f.storage.get('user:'+actor),undefined);assert.equal(await f.storage.get('member:member_1'),undefined);
+  assert.deepEqual(f.calls.filter(call=>call.url.pathname.endsWith('/member_discord_link_status')).map(call=>call.body.linked),[true,false]);
+  assert.equal(f.calls.filter(call=>call.url.pathname.endsWith('/attendance_records')).length,0);
+});
+test('existing Durable Object links can be backfilled into the database marker',async()=>{
+  const f=fixture();
+  await f.storage.put('member:member_1',actor);
+  await f.storage.put('member:member_2',other);
+  const result=await f.store.fetch(new Request('https://attendance.internal/sync-link-status',{method:'POST'}));
+  assert.deepEqual(await result.json(),{synced:2});
+  const upload=f.calls.find(call=>call.url.pathname.endsWith('/member_discord_link_status'));
+  assert.deepEqual(upload.body.map(row=>row.member_id),['member_1','member_2']);
+});
+test('failed link-status mirror is retried without losing the Discord link',async()=>{
+  const f=fixture();f.state.linkStatusError=true;
+  await f.store.link(actor,roster[0],true);
+  assert.equal(await f.storage.get('member:member_1'),actor);
+  assert.ok(await f.storage.get('link-status-pending:member_1'));
+  f.state.linkStatusError=false;
+  await f.store.alarm();
+  assert.equal(await f.storage.get('link-status-pending:member_1'),undefined);
+  assert.equal(f.calls.filter(call=>call.url.pathname.endsWith('/member_discord_link_status')).length,2);
 });
 test('receipt cleanup removes expired deliveries and retains permanent links',async()=>{
   const f=fixture();await f.store.link(actor,roster[0],true);

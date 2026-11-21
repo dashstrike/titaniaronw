@@ -2,7 +2,7 @@
   'use strict';
   const endpoint='https://titania-attendance.dashstrike.workers.dev/member-discord';
   const esc=value=>String(value??'').replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
-  window.TitaniaMemberDiscord=async function(client,memberId){
+  window.TitaniaMemberDiscord=async function(client,memberId,linkedHint=null){
     const wrap=document.getElementById('memberDiscordContent');if(!wrap)return;
     let account=null,busy=false;
     const dialog={background:'var(--bs-secondary-bg)',color:'var(--bs-body-color)',confirmButtonColor:'var(--bs-primary)'};
@@ -50,7 +50,10 @@
       catch(error){await Swal.fire({...dialog,icon:'error',title:'Discord link not changed',text:error.message});}
       finally{busy=false;wrap.querySelectorAll('button').forEach(button=>button.disabled=false);}
     }
-    wrap.innerHTML='<p class="text-muted">Click Refresh to load Discord account details.</p><button type="button" class="btn btn-outline-secondary btn-sm" id="discordRefresh">Refresh</button>';
+    const known=typeof linkedHint==='boolean';
+    wrap.innerHTML=(known?'<span class="badge '+(linkedHint?'bg-success':'bg-secondary')+' mb-3">'+(linkedHint?'Linked':'Not linked')+'</span>':'')+
+      '<p class="text-muted">'+(linkedHint===true?'Discord account linked. Load details to view the account.':linkedHint===false?'No Discord account is linked to this character. Load details to manage the link.':'Link status is unavailable. Load details to check the account.')+'</p>'+
+      '<button type="button" class="btn btn-outline-secondary btn-sm" id="discordRefresh">Load details</button>';
     wrap.querySelector('#discordRefresh').onclick=load;
   };
 })();
