@@ -174,7 +174,7 @@ test('Members table omits class and GR columns, shows Discord status, and keeps 
   Object.assign(f.context,{dashboardSelected:new Set(),dashboardVisibleMembers:()=>f.state.roster,
     activeRoster:()=>f.state.roster,dashboardSearch:'',dashboardGuildStatusFilter:'Active',dashboardSortBy:'name',dashboardSortDir:'asc',dashboardClassFilter:'All',
     dashboardAvailableClasses:()=>[],sectionHeader:()=>'',escapeHtml:String,escapeAttr:String,classColor:()=> '#579ed3',formatMemberUpdate:String,
-    discordLinkedMemberIds:new Set(['one']),
+    discordLinkedMemberIds:new Set(['one']),memberJobIcons:{'High Priest':'high-priest.webp','Paladin':'paladin.webp'},
   });
   vm.runInContext(source.slice(source.indexOf('  function renderManageMembersHtml(){'),source.indexOf('  function rerenderManageMembers(')),f.context);
   const original=f.context.renderManageMembersHtml();
@@ -183,6 +183,7 @@ test('Members table omits class and GR columns, shows Discord status, and keeps 
   assert.doesNotMatch(original,/<th>Class<\/th>|<th>Gear Rating<\/th>|dash-row-class|dash-row-gr/);
   assert.match(original,/data-member-id="one" src="\.\/images\/discord-symbol-blurple\.svg" alt="Discord linked"/);
   assert.match(original,/data-member-id="two" src="\.\/images\/discord-symbol-white\.svg" alt="Discord not linked"/);
+  assert.match(original,/class="dash-member-job-icon" data-job-class="High Priest" src="\.\/images\/job\/high-priest\.webp"/);
   f.context.stageMemberDraft('one',{cls:'Scholar',gr:60000});
   const draft=f.context.renderManageMembersHtml();
   assert.match(draft,/dash-row-save" data-member-id="one" >/);

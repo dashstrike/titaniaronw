@@ -33,6 +33,7 @@
 #titania-content button:not(.btn){color:inherit;}
 #titania-content .dash-discord-status{display:inline-block;width:17px;height:13px;object-fit:contain;opacity:.35;vertical-align:middle;}
 #titania-content .dash-discord-status.is-linked{opacity:1;}
+#titania-content .dash-member-job-icon{width:22px;height:22px;object-fit:contain;flex:none;}
 #titania-content .member-class-cell{min-width:170px;}
 #titania-content .member-class-cell .select2-container{max-width:240px;}
 #titania-content .member-class-selection{height:32px;background:var(--bs-body-bg);border-color:var(--bs-border-color);border-radius:var(--bs-border-radius-sm);font-size:.875rem;}
