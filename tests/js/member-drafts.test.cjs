@@ -169,21 +169,24 @@ test('inline GR events show Save/Discard in Actions without saving on input or b
   assert.equal(f.member.gr,61000);assert.equal(f.commits.length,1);
 });
 
-test('rendering uses draft values and shows explicit row Save buttons while keeping saved data intact',()=>{
+test('Members table omits class and GR columns, shows Discord status, and keeps draft Save actions',()=>{
   const f=fixture();
   Object.assign(f.context,{dashboardSelected:new Set(),dashboardVisibleMembers:()=>f.state.roster,
     activeRoster:()=>f.state.roster,dashboardSearch:'',dashboardGuildStatusFilter:'Active',dashboardSortBy:'name',dashboardSortDir:'asc',dashboardClassFilter:'All',
     dashboardAvailableClasses:()=>[],sectionHeader:()=>'',escapeHtml:String,escapeAttr:String,classColor:()=> '#579ed3',formatMemberUpdate:String,
+    discordLinkedMemberIds:new Set(['one']),
   });
   vm.runInContext(source.slice(source.indexOf('  function renderManageMembersHtml(){'),source.indexOf('  function rerenderManageMembers(')),f.context);
   const original=f.context.renderManageMembersHtml();
   assert.match(original,/dash-row-save"[^>]*hidden/);
+  assert.match(original,/<th>Status<\/th><th>Last Updated<\/th>/);
+  assert.doesNotMatch(original,/<th>Class<\/th>|<th>Gear Rating<\/th>|dash-row-class|dash-row-gr/);
+  assert.match(original,/data-member-id="one" src="\.\/images\/discord-symbol-blurple\.svg" alt="Discord linked"/);
+  assert.match(original,/data-member-id="two" src="\.\/images\/discord-symbol-white\.svg" alt="Discord not linked"/);
   f.context.stageMemberDraft('one',{cls:'Scholar',gr:60000});
   const draft=f.context.renderManageMembersHtml();
-  assert.match(draft,/value="Scholar" selected/);
-  assert.match(draft,/<select class="form-select form-select-sm dash-row-class"/);
   assert.match(draft,/dash-row-save" data-member-id="one" >/);
-  assert.match(draft,/value="60000"/);
+  assert.doesNotMatch(draft,/dash-row-class|dash-row-gr/);
   assert.equal(f.member.cls,'High Priest');
 });
 
