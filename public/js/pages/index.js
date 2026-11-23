@@ -229,6 +229,11 @@
   let dashboardSortDir = 'asc';
   let dashboardClassFilter = 'All';
   let dashboardSelected = new Set();
+  let discordLinkedMemberIds = null;
+  let discordLinkStatusRequest = null;
+  let discordLinkStatusFailed = false;
+  let memberJobIcons = null;
+  let memberJobIconsRequest = null;
   const memberDrafts = new Map();
   let statusModalMemberName = null;
   let statusModalMode = 'inactive';
@@ -1078,6 +1083,7 @@
     if(eventName!==currentEvent&&!await resolveMemberDraftNavigation())return;
     if(currentEvent==='manage_members'&&eventName!=='manage_members')destroyMemberClassSelects(document.getElementById('teamsWrap'));
     currentEvent=eventName;
+    if(eventName==='manage_members'){discordLinkedMemberIds=null;discordLinkStatusFailed=false;}
     try{localStorage.setItem('roworld_sheets_event_v1',eventName);}catch(error){}
     statusFilter='All';
     clearSelections(false);
@@ -2199,6 +2205,45 @@
     destroyMemberClassSelects(wrap);
     wrap.innerHTML=renderManageMembersHtml()+renderMembershipHistoryHtml();
     wireDashboard();
+    loadMemberDiscordLinkStatus();
+    loadMemberJobIcons();
+  }
+
+  async function loadMemberJobIcons(){
+    if(memberJobIcons||memberJobIconsRequest)return;
+    memberJobIconsRequest=fetch('./images/job/job-icons.json?v=sea-jobs-20261101')
+      .then(response=>{if(!response.ok)throw new Error('Job icons unavailable');return response.json();})
+      .then(icons=>{memberJobIcons=icons;document.querySelectorAll('#dashManageTable .dash-member-job-icon').forEach(icon=>{
+        const file=memberJobIcons[icon.dataset.jobClass];
+        if(file){icon.src='./images/job/'+encodeURIComponent(file);icon.hidden=false;}
+      });})
+      .catch(error=>console.warn('Could not load member job icons:',error))
+      .finally(()=>{memberJobIconsRequest=null;});
+    await memberJobIconsRequest;
+  }
+
+  async function loadMemberDiscordLinkStatus(){
+    if(discordLinkedMemberIds||discordLinkStatusRequest||discordLinkStatusFailed||!supabaseClient)return;
+    discordLinkStatusRequest=(async()=>{
+      try{
+        const {data,error}=await supabaseClient.from('member_discord_link_status').select('member_id').eq('linked',true);
+        if(error)throw error;
+        discordLinkedMemberIds=new Set((data||[]).map(row=>String(row.member_id)));
+      }catch(error){
+        discordLinkStatusFailed=true;
+        console.warn('Could not load member Discord link status:',error);
+      }finally{
+        discordLinkStatusRequest=null;
+        if(currentEvent==='manage_members')document.querySelectorAll('#dashManageTable .dash-discord-status').forEach(icon=>{
+          const linked=discordLinkedMemberIds?.has(icon.dataset.memberId);
+          icon.src=linked?'./images/discord-symbol-blurple.svg':'./images/discord-symbol-white.svg';
+          icon.classList.toggle('is-linked',Boolean(linked));
+          icon.alt=linked?'Discord linked':discordLinkedMemberIds?'Discord not linked':'Discord link status unavailable';
+          icon.title=icon.alt;
+        });
+      }
+    })();
+    await discordLinkStatusRequest;
   }
 
   function dashCard(label,value,sub,icon){return `<div class="dash-card card"><div class="card-body"><div class="dash-card-main"><div class="dash-card-copy"><p class="dash-card-label text-muted mb-0 text-truncate">${label}</p><h3 class="dash-card-value text-dark mt-2 mb-0">${value}</h3>${sub?`<p class="dash-card-sub mb-0">${sub}</p>`:''}</div><div class="dash-card-icon ms-auto avatar-md bg-soft-primary rounded"><iconify-icon icon="${icon}" class="fs-32 avatar-title text-primary" aria-hidden="true"></iconify-icon></div></div></div></div>`;}
@@ -2518,13 +2563,13 @@
       <div class="d-flex flex-wrap align-items-center gap-2 mb-3"><input class="edit-input form-control" id="dashSearch" placeholder="Search members…" value="${escapeAttr(dashboardSearch)}" style="width:210px"><div class="d-flex flex-wrap align-items-center gap-2">${['Active','Inactive','All'].map(status=>`<button class="pill ${dashboardGuildStatusFilter===status?'active':''} btn btn-outline-primary btn-sm" data-dashboard-status="${status}">${status}</button>`).join('')}</div><div class="d-flex flex-wrap align-items-center gap-2"><span class="dash-manage-sort-label">Sort</span><button class="pill ${dashboardSortBy==='name'?'active':''} btn btn-outline-primary btn-sm" data-dashboard-sort="name">Name${dashboardSortBy==='name'?(dashboardSortDir==='asc'?' ↑':' ↓'):''}</button><button class="pill ${dashboardSortBy==='gear'?'active':''} btn btn-outline-primary btn-sm" data-dashboard-sort="gear">Gear Rating${dashboardSortBy==='gear'?(dashboardSortDir==='asc'?' ↑':' ↓'):''}</button><button class="pill ${dashboardSortBy==='updated'?'active':''} btn btn-outline-primary btn-sm" data-dashboard-sort="updated">Last Update${dashboardSortBy==='updated'?(dashboardSortDir==='asc'?' ↑':' ↓'):''}</button><select class="form-select w-auto" id="dashClassFilter" title="Filter members by class"><option value="All" ${dashboardClassFilter==='All'?'selected':''}>All Classes</option>${dashboardAvailableClasses().map(([cls,count])=>`<option value="${escapeAttr(cls)}" ${dashboardClassFilter===cls?'selected':''}>${escapeHtml(cls)} (${count})</option>`).join('')}</select></div><label class="d-flex align-items-center gap-2 ms-lg-auto"><input type="checkbox" id="dashSelectAll" ${allVisible?'checked':''} class="form-check-input"> Select all shown</label><span class="text-muted small">${selectedCount} selected</span><button class="btn primary small btn-primary btn-sm" id="dashAddMember">+ Add member</button></div>
       ${selectedCount?`<div class="dash-bulk-bar"><span class="dash-bulk-label">Class</span><select class="edit-input form-select" id="dashBulkClass">${CLASSES.map(cls=>`<option value="${escapeAttr(cls)}">${escapeHtml(cls)}</option>`).join('')}</select><button class="btn small btn-outline-secondary btn-sm" id="dashBulkClassBtn">Apply to ${selectedCount}</button><span class="dash-bulk-label">Set GR</span><input type="number" class="edit-input form-control" id="dashBulkSet" min="0" placeholder="25000"><button class="btn small btn-outline-secondary btn-sm" id="dashBulkSetBtn">Set for ${selectedCount}</button><span class="dash-bulk-label">Adjust GR</span><input type="number" class="edit-input form-control" id="dashBulkAdjust" placeholder="500 or -500"><button class="btn small btn-outline-secondary btn-sm" id="dashBulkAdjustBtn">Adjust ${selectedCount}</button><button class="btn small danger btn-outline-danger btn-sm" id="dashBulkDeleteBtn">Permanently delete ${selectedCount}</button></div>`:''}
       <div class="alert alert-warning d-flex align-items-center flex-wrap gap-2" id="dashDraftNotice" ${memberDrafts.size?'':'hidden'}><span><b data-draft-count>${memberDrafts.size}</b> member(s) have unsaved changes. Review and save to apply them.</span><button type="button" class="btn btn-primary btn-sm ms-auto" id="dashSaveDrafts">Save all changes</button><button type="button" class="btn btn-danger btn-sm" id="dashDiscardDrafts">Discard all</button></div>
-      <div class="card"><div class="table-responsive" id="dashManageTable"><table class="table table-centered table-hover align-middle mb-0"><thead><tr><th aria-label="Select"></th><th>Player</th><th>Status</th><th>Class</th><th>Gear Rating</th><th>Last Updated</th><th class="text-end">Actions</th></tr></thead><tbody>${rows.length?rows.map(member=>{
+      <div class="card"><div class="table-responsive" id="dashManageTable"><table class="table table-centered table-hover align-middle mb-0"><thead><tr><th aria-label="Select"></th><th>Player</th><th>Status</th><th>Last Updated</th><th class="text-end">Actions</th></tr></thead><tbody>${rows.length?rows.map(member=>{
         const draft=memberDrafts.get(member.id)||{},shown={...member,...draft},pending=Object.keys(draft).length>0;
         const inactive=member.status==='inactive';
         const detail=inactive?`Since ${formatDate(member.inactiveSince)||'date not recorded'}${member.inactiveReason?` · ${member.inactiveReason}`:''}`:(member.lastReturned?`Returned ${formatDate(member.lastReturned)}`:'Available for teams');
         const updateValue=member.updatedAt?formatMemberUpdate(member.updatedAt):'No edit recorded';
-        return `<tr data-member-row="${escapeAttr(member.id)}" class="dash-manage-row ${dashboardSelected.has(member.name)?'table-active':''}"><td><input type="checkbox" class="form-check-input dash-row-check" aria-label="Select ${escapeAttr(member.name)}" data-name="${escapeAttr(member.name)}" ${dashboardSelected.has(member.name)?'checked':''}></td><td><div class="d-flex align-items-center gap-2"><span class="class-dot" style="background:${classColor(shown.cls)};color:${classColor(shown.cls)}"></span><span class="dash-manage-name fw-semibold" title="${escapeAttr(member.name)}">${escapeHtml(member.name)}</span></div></td><td><span class="badge bg-${inactive?'danger':'success'}-subtle text-${inactive?'danger':'success'}">${inactive?'Inactive':'Active'}</span><div class="text-muted small mt-1">${escapeHtml(detail)}</div></td><td class="member-class-cell"><select class="form-select form-select-sm dash-row-class" aria-label="Class for ${escapeAttr(member.name)}" data-member-id="${escapeAttr(member.id)}" ${userCanEdit()?'':'disabled'}>${CLASSES.map(cls=>`<option value="${escapeAttr(cls)}" ${cls===shown.cls?'selected':''}>${escapeHtml(cls)}</option>`).join('')}</select></td><td><input type="number" class="form-control form-control-sm dash-row-gr" aria-label="Gear rating for ${escapeAttr(member.name)}" data-name="${escapeAttr(member.name)}" value="${shown.gr}" min="0" data-member-id="${escapeAttr(member.id)}" ${userCanEdit()?'':'disabled'}></td><td class="text-nowrap"><div>${escapeHtml(updateValue)}</div>${member.updatedBy?`<div class="text-muted small">${escapeHtml(member.updatedBy)}</div>`:''}</td><td><div class="d-flex justify-content-end align-items-center gap-2"><button type="button" class="btn btn-primary btn-sm dash-row-save" data-member-id="${escapeAttr(member.id)}" ${pending?'':'hidden'}><i class="bx bx-save me-1" aria-hidden="true"></i>Save</button><button type="button" class="btn btn-outline-secondary btn-sm dash-row-discard" data-member-id="${escapeAttr(member.id)}" ${pending?'':'hidden'}>Discard</button><button type="button" class="btn btn-primary btn-sm dash-row-edit d-inline-flex align-items-center gap-1" data-name="${escapeAttr(member.name)}" title="Edit member details" aria-label="Edit ${escapeAttr(member.name)}"><i class="bx bx-pencil fs-16" aria-hidden="true"></i><span>Edit</span></button>${inactive?`<button class="btn btn-soft-success btn-sm text-nowrap" data-reactivate-member="${escapeAttr(member.name)}">Reactivate</button>`:`<button class="btn btn-soft-warning btn-sm text-nowrap" data-inactivate-member="${escapeAttr(member.name)}">Mark Inactive</button>`}<button class="btn btn-soft-danger btn-sm dash-row-del" data-name="${escapeAttr(member.name)}" title="Permanently delete member" aria-label="Delete ${escapeAttr(member.name)}"><i class="bx bx-trash"></i></button></div></td></tr>`;
-      }).join(''):'<tr><td colspan="7" class="text-center text-muted py-4">No members match this search and status filter.</td></tr>'}</tbody></table></div></div>`;
+        return `<tr data-member-row="${escapeAttr(member.id)}" class="dash-manage-row ${dashboardSelected.has(member.name)?'table-active':''}"><td><input type="checkbox" class="form-check-input dash-row-check" aria-label="Select ${escapeAttr(member.name)}" data-name="${escapeAttr(member.name)}" ${dashboardSelected.has(member.name)?'checked':''}></td><td><div class="d-flex align-items-center gap-2"><img class="dash-member-job-icon" data-job-class="${escapeAttr(shown.cls)}" src="${memberJobIcons?.[shown.cls]?'./images/job/'+encodeURIComponent(memberJobIcons[shown.cls]):''}" alt="" title="${escapeAttr(shown.cls)}" ${memberJobIcons?.[shown.cls]?'':'hidden'}><span class="dash-manage-name fw-semibold" title="${escapeAttr(member.name)}">${escapeHtml(member.name)}</span></div></td><td><div class="d-inline-flex align-items-center gap-2"><span class="badge bg-${inactive?'danger':'success'}-subtle text-${inactive?'danger':'success'}">${inactive?'Inactive':'Active'}</span><img class="dash-discord-status ${discordLinkedMemberIds?.has(String(member.id))?'is-linked':''}" data-member-id="${escapeAttr(member.id)}" src="${discordLinkedMemberIds?.has(String(member.id))?'./images/discord-symbol-blurple.svg':'./images/discord-symbol-white.svg'}" alt="${discordLinkedMemberIds?.has(String(member.id))?'Discord linked':discordLinkedMemberIds?'Discord not linked':'Discord link status loading'}" title="${discordLinkedMemberIds?.has(String(member.id))?'Discord linked':discordLinkedMemberIds?'Discord not linked':'Discord link status loading'}"></div><div class="text-muted small mt-1">${escapeHtml(detail)}</div></td><td class="text-nowrap"><div>${escapeHtml(updateValue)}</div>${member.updatedBy?`<div class="text-muted small">${escapeHtml(member.updatedBy)}</div>`:''}</td><td><div class="d-flex justify-content-end align-items-center gap-2"><button type="button" class="btn btn-primary btn-sm dash-row-save" data-member-id="${escapeAttr(member.id)}" ${pending?'':'hidden'}><i class="bx bx-save me-1" aria-hidden="true"></i>Save</button><button type="button" class="btn btn-outline-secondary btn-sm dash-row-discard" data-member-id="${escapeAttr(member.id)}" ${pending?'':'hidden'}>Discard</button><button type="button" class="btn btn-primary btn-sm dash-row-edit d-inline-flex align-items-center gap-1" data-name="${escapeAttr(member.name)}" title="Edit member details" aria-label="Edit ${escapeAttr(member.name)}"><i class="bx bx-pencil fs-16" aria-hidden="true"></i><span>Edit</span></button>${inactive?`<button class="btn btn-soft-success btn-sm text-nowrap" data-reactivate-member="${escapeAttr(member.name)}">Reactivate</button>`:`<button class="btn btn-soft-warning btn-sm text-nowrap" data-inactivate-member="${escapeAttr(member.name)}">Mark Inactive</button>`}<button class="btn btn-soft-danger btn-sm dash-row-del" data-name="${escapeAttr(member.name)}" title="Permanently delete member" aria-label="Delete ${escapeAttr(member.name)}"><i class="bx bx-trash"></i></button></div></td></tr>`;
+      }).join(''):'<tr><td colspan="5" class="text-center text-muted py-4">No members match this search and status filter.</td></tr>'}</tbody></table></div></div>`;
   }
 
   function rerenderManageMembers(){

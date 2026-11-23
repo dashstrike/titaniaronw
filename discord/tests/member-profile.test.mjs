@@ -19,6 +19,7 @@ function fixture(){
     if(String(url).includes('/auth/v1/user'))return Response.json(state.auth?{id:'verified-manager'}:{error:'invalid'},{status:state.auth?200:401});
     if(String(url).includes('/profiles?'))return Response.json([{approved:state.approved,role:state.role}]);
     if(String(url).includes('/planner_state?'))return Response.json([{state:{roster:[{id:'m1',name:'Player',status:state.inactive?'inactive':'active'},{id:'m2',name:'Another'}]}}]);
+    if(String(url).includes('/member_discord_link_status?'))return new Response(null,{status:201});
     if(String(url).includes('/guilds/'))return Response.json(state.left?{error:'missing'}:{nick:'Player Nick',user:{id:userId,username:'player_user',avatar:'abcdef123'}},{status:state.left?404:200});
     throw Error('Unexpected request '+url);
   };
@@ -77,7 +78,7 @@ test('website unlink removes only the account relationship and never writes atte
   const f=fixture();f.state.role='admin';await f.store.link(userId,{id:'m1'},true);
   const response=await websiteRequest(request({memberId:'m1',action:'unlink',expectedUserId:userId}),f.runtime);
   assert.equal(response.status,200);assert.equal((await response.json()).linked,false);assert.equal(await f.storage.get('user:'+userId),undefined);
-  assert.equal(f.calls.filter(call=>call.options.method==='PATCH'||call.options.method==='POST').length,0);
+  assert.equal(f.calls.filter(call=>call.url.includes('/attendance_records')&&['PATCH','POST'].includes(call.options.method)).length,0);
 });
 test('users outside the server and inactive characters cannot be newly linked',async()=>{
   for(const mode of ['left','inactive']){
