@@ -136,7 +136,7 @@ export function attendanceMessage(posted,counts,notifyRole=false){
       fields:[{name:'📅\u2002EVENT DATE',value:date+' (GMT+8)',inline:false},{name:'<:going_tick_circle:1572867047379963947>\u2002Going',value:String(counts.going),inline:true},{name:'<:not_going_x_circle:1572867073267343380>\u2002Not going',value:String(counts.notGoing),inline:true}],
       thumbnail:{url:'https://cdn.discordapp.com/emojis/1564620820838351008.png'},footer:{text:'Titania Guild • Pre-Attendance'}
     }],
-    components:[{type:1,components:[{type:2,style:3,emoji:{id:'1572867047379963947',name:'going_tick_circle'},label:'Going ('+counts.going+')',custom_id:'titania:'+posted.eventId+':going'},{type:2,style:4,emoji:{id:'1572867073267343380',name:'not_going_x_circle'},label:'Not going ('+counts.notGoing+')',custom_id:'titania:'+posted.eventId+':not_going'}]}]
+    components:[{type:1,components:[{type:2,style:2,emoji:{id:'1572867047379963947',name:'going_tick_circle'},label:'Going ('+counts.going+')',custom_id:'titania:'+posted.eventId+':going'},{type:2,style:2,emoji:{id:'1572867073267343380',name:'not_going_x_circle'},label:'Not going ('+counts.notGoing+')',custom_id:'titania:'+posted.eventId+':not_going'},{type:2,style:2,label:'My Status',custom_id:'titania:'+posted.eventId+':status'}]}]
   };
 }
 
@@ -309,12 +309,18 @@ export class AttendanceStore {
     if(!userId||interaction.member.user.bot)fail('A Discord server member is required.');
     const backend=new Backend(env);
     if(interaction.type===3){
-      const match=/^titania:([0-9a-f-]{36}):(going|not_going)$/.exec(interaction.data?.custom_id||'');
+      const match=/^titania:([0-9a-f-]{36}):(going|not_going|status)$/.exec(interaction.data?.custom_id||'');
       if(!match||interaction.message?.author?.id!==interaction.application_id)fail('This is not a valid Titania attendance button.');
       const posted=await this.ctx.storage.get('message:'+interaction.message.id);
       if(!posted||posted.eventId!==match[1])fail('This message is not registered. Ask management to post a new attendance message.');
       const roster=await backend.roster(),link=await this.ctx.storage.get('user:'+userId);
       const member=matchMember(roster,interaction.member.nick||interaction.member.user.global_name,link?.memberId);
+      if(match[2]==='status'){
+        const rows=await backend.call('attendance_records?event_id=eq.'+encodeURIComponent(posted.eventId)+'&member_id=eq.'+encodeURIComponent(member.id)+'&select=pre_status');
+        const status=rows[0]?.pre_status;
+        const response=status==='going'?'<:going_tick_circle:1572867047379963947> GOING':status==='not_going'?'<:not_going_x_circle:1572867073267343380> NOT GOING':"You haven't responded yet.";
+        return '**YOUR RESPONSE: '+response+'**\n'+EVENTS[posted.type].label+' · '+posted.date.split('-').reverse().join('/');
+      }
       await this.link(userId,member,!link,interaction.member.nick?'nickname':'display');
       await backend.save(posted.eventId,member,match[2]);
       try{await this.refreshMessage(interaction.message.id,posted,backend,roster);}

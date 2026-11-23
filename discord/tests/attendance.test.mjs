@@ -42,6 +42,20 @@ function fixture(){
 }
 const send=async(store,data)=>(await store.fetch(new Request('https://internal/',{method:'POST',body:JSON.stringify(data)}))).json();
 
+test('My Status reads the latest response without linking or writing attendance, including closed events',async()=>{
+  for(const status of ['going','not_going',null]){
+    const f=fixture(),i=interaction();f.state.closed=true;f.record.pre_status=status;
+    i.data.custom_id='titania:'+eventId+':status';
+    const result=await send(f.store,i);
+    assert.match(result.content,status==='going'?/GOING/:status==='not_going'?/NOT GOING/:/haven't responded yet/);
+    assert.match(result.content,/22\/11\/2026/);
+    assert.equal(f.calls.some(call=>['POST','PATCH','DELETE'].includes(call.options.method)),false);
+    assert.equal(await f.storage.get('user:'+actor),undefined);
+    f.record.pre_status='going';i.id=crypto.randomUUID();
+    assert.match((await send(f.store,i)).content,/YOUR RESPONSE:.*GOING/);
+  }
+});
+
 test('first click links exact normalized server nickname; updates pre-attendance only',async()=>{
   const f=fixture(),result=await send(f.store,interaction());
   assert.match(result.content,/going_tick_circle:1572867047379963947>\s+Going saved/);assert.equal(f.record.pre_status,'going');
@@ -100,8 +114,8 @@ test('posting is management-only and produces exactly Going / Not going buttons'
   assert.match((await send(f.store,i)).content,/Only Discord administrators/);assert.equal(f.calls.length,0);
   i.id=crypto.randomUUID();i.member.permissions='32';await send(f.store,i);
   const posted=f.calls.find(call=>call.url.pathname.includes('/channels/')).body;
-  assert.deepEqual(posted.components[0].components.map(button=>button.label),['Going (0)','Not going (1)']);
-  assert.deepEqual(posted.components[0].components.map(button=>button.emoji.id),['1572867047379963947','1572867073267343380']);
+  assert.deepEqual(posted.components[0].components.map(button=>button.label),['Going (0)','Not going (1)','My Status']);
+  assert.deepEqual(posted.components[0].components.map(button=>button.emoji?.id),['1572867047379963947','1572867073267343380',undefined]);
   assert.match(posted.embeds[0].fields[1].name,/<:going_tick_circle:1572867047379963947>/);
   assert.match(posted.embeds[0].fields[2].name,/<:not_going_x_circle:1572867073267343380>/);
   assert.match(posted.embeds[0].thumbnail.url,/1564620820838351008\.png$/);
@@ -111,10 +125,10 @@ test('message counts change when a member switches response without double count
   const f=fixture(),i=interaction();await send(f.store,i);
   let message=f.calls.filter(call=>call.url.pathname.includes('/channels/')&&call.options.method==='PATCH').at(-1).body;
   assert.deepEqual(message.allowed_mentions,{parse:[]});assert.equal(message.content,undefined);
-  assert.deepEqual(message.components[0].components.map(button=>button.label),['Going (1)','Not going (0)']);
+  assert.deepEqual(message.components[0].components.map(button=>button.label),['Going (1)','Not going (0)','My Status']);
   i.id=crypto.randomUUID();i.data.custom_id='titania:'+eventId+':not_going';await send(f.store,i);
   message=f.calls.filter(call=>call.url.pathname.includes('/channels/')&&call.options.method==='PATCH').at(-1).body;
-  assert.deepEqual(message.components[0].components.map(button=>button.label),['Going (0)','Not going (1)']);
+  assert.deepEqual(message.components[0].components.map(button=>button.label),['Going (0)','Not going (1)','My Status']);
   assert.equal(f.record.note,'Management note');assert.equal(f.record.actual_status,'present');
 });
 test('counters exclude inactive members, missing members and no-response rows',async()=>{
