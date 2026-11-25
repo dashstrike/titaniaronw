@@ -9,7 +9,7 @@
   let profile=null;
   let roster=[];
   let iconMap={};
-  const saveTimers=new Map();
+  let confirmationQueue=Promise.resolve();
 
   function esc(v){return String(v==null?'':v).replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));}
   function isOrganizer(){return Boolean(profile&&profile.approved&&['party_organizer','admin'].includes(profile.role));}
@@ -37,6 +37,26 @@
   }
   function showError(message){if(loading)loading.hidden=true;if(errorBox){errorBox.hidden=false;errorBox.textContent=message;}}
   function clearError(){if(errorBox)errorBox.hidden=true;}
+
+  async function confirmRunChange(title,text,confirmButtonText='Save',danger=false){
+    if(!window.Swal){showError('Confirmation is unavailable. Refresh the page and try again.');return false;}
+    const options={
+      title,text,icon:'question',showCancelButton:true,
+      confirmButtonText,cancelButtonText:'Cancel',
+      confirmButtonColor:danger?'var(--bs-danger)':'var(--bs-primary)',
+      background:'var(--bs-secondary-bg)',color:'var(--bs-body-color)'
+    };
+    const pending=confirmationQueue.then(()=>window.Swal.fire(options));
+    confirmationQueue=pending.then(()=>{},()=>{});
+    try{return (await pending).isConfirmed===true;}
+    catch{showError('Could not open the confirmation. Refresh the page and try again.');return false;}
+  }
+
+  function restoreRunField(input){
+    const original=input.dataset.original||'';
+    if(input._flatpickr)input._flatpickr.setDate(original,false);
+    else input.value=original;
+  }
 
   async function loadBase(){
     if(!window.supabase||!cfg.supabaseUrl||!cfg.supabasePublishableKey)throw new Error('Supabase configuration is missing.');
@@ -118,10 +138,10 @@
           <div class="run-actions">${actionControls}<button type="button" class="btn danger-solid btn-danger" data-run-delete="${esc(run.id)}" data-run-title="${esc(run.note||runLabel(run.run_type))}">Delete Run</button></div>
         </div>
         <div class="run-edit-row">
-          <input class="run-title-input form-control" type="text" maxlength="200" value="${esc(run.note||'')}" placeholder="Untitled Run" data-run-edit="note" data-run-id="${esc(run.id)}" ${locked?'disabled':''}>
-          <span class="run-picker-wrap"><input class="run-date-input form-control" type="text" value="${esc(run.run_date||'')}" data-run-edit="run_date" data-run-id="${esc(run.id)}" autocomplete="off" ${locked?'disabled':''}>${pickerIcon('date')}</span>
+          <input class="run-title-input form-control" type="text" maxlength="200" value="${esc(run.note||'')}" data-original="${esc(run.note||'')}" placeholder="Untitled Run" data-run-edit="note" data-run-id="${esc(run.id)}" ${locked?'disabled':''}>
+          <span class="run-picker-wrap"><input class="run-date-input form-control" type="text" value="${esc(run.run_date||'')}" data-original="${esc(run.run_date||'')}" data-run-edit="run_date" data-run-id="${esc(run.id)}" autocomplete="off" ${locked?'disabled':''}>${pickerIcon('date')}</span>
           <span class="run-edit-separator">·</span>
-          <span class="run-picker-wrap"><input class="run-time-input form-control" type="text" value="${esc(run.run_time?String(run.run_time).slice(0,5):'')}" data-run-edit="run_time" data-run-id="${esc(run.id)}" autocomplete="off" ${locked?'disabled':''}>${pickerIcon('time')}</span>
+          <span class="run-picker-wrap"><input class="run-time-input form-control" type="text" value="${esc(run.run_time?String(run.run_time).slice(0,5):'')}" data-original="${esc(run.run_time?String(run.run_time).slice(0,5):'')}" data-run-edit="run_time" data-run-id="${esc(run.id)}" autocomplete="off" ${locked?'disabled':''}>${pickerIcon('time')}</span>
           <span class="autosave-state" data-autosave-state="${esc(run.id)}"></span>
         </div>
         ${detail}
@@ -201,22 +221,27 @@
     const field=input.dataset.runEdit;
     if(!runId||!field)return;
     const state=document.querySelector(`[data-autosave-state="${runId}"]`);
-    const value=field==='run_time'?(input.value||null):field==='note'?input.value.trim():input.value;
+    const original=input.dataset.original||'';
+    const edited=field==='note'?input.value.trim():input.value;
+    if(edited===original)return;
+    const label={note:'title',run_date:'date',run_time:'time'}[field]||field;
+    input.disabled=true;
+    const confirmed=await confirmRunChange(`Save run ${label}?`,`Change ${label} from “${original||'empty'}” to “${edited||'empty'}”?`,'Save Change');
+    if(!confirmed){restoreRunField(input);input.disabled=false;return;}
     if(state)state.textContent='Saving…';
+    const value=field==='run_time'?(edited||null):edited;
     const {error}=await client.from('guild_runs').update({[field]:value}).eq('id',runId);
-    if(error){if(state)state.textContent='Save failed';showError(error.message||'Could not save run details.');return;}
+    if(error){restoreRunField(input);input.disabled=false;if(state)state.textContent='Save failed';showError(error.message||'Could not save run details.');return;}
+    input.dataset.original=edited;
+    input.disabled=false;
     if(state)state.textContent='Saved';
     setTimeout(()=>{if(state&&state.textContent==='Saved')state.textContent='';},1200);
   }
 
-  function queueRunSave(input){
-    const key=`${input.dataset.runId}:${input.dataset.runEdit}`;
-    clearTimeout(saveTimers.get(key));
-    saveTimers.set(key,setTimeout(()=>saveRunField(input),450));
-  }
-
   function wireRunControls(){
     document.querySelectorAll('[data-run-toggle]').forEach(button=>button.addEventListener('click',async()=>{
+      const opening=button.dataset.nextStatus==='open';
+      if(!await confirmRunChange(`${opening?'Open':'Close'} registration?`,`This will ${opening?'allow':'stop'} public registrations for this run.`,opening?'Open Registration':'Close Registration'))return;
       button.disabled=true;
       const {error}=await client.from('guild_runs').update({status:button.dataset.nextStatus}).eq('id',button.dataset.runToggle);
       if(error){button.disabled=false;showError(error.message||'Could not update registration status.');return;}
@@ -224,7 +249,7 @@
     }));
 
     document.querySelectorAll('[data-run-end]').forEach(button=>button.addEventListener('click',async()=>{
-      if(!confirm('End this run? It will no longer appear on the public registration page.'))return;
+      if(!await confirmRunChange('End this run?','It will no longer appear on the public registration page.','End Run',true))return;
       button.disabled=true;
       const {error}=await client.from('guild_runs').update({status:'ended'}).eq('id',button.dataset.runEnd);
       if(error){button.disabled=false;showError(error.message||'Could not end run.');return;}
@@ -233,25 +258,7 @@
 
     document.querySelectorAll('[data-run-delete]').forEach(button=>button.addEventListener('click',async()=>{
       const title=button.dataset.runTitle||'this run';
-      let confirmed=false;
-      if(window.Swal){
-        const result=await Swal.fire({
-          title:'Delete this run?',
-          text:`${title} and all of its registrations will be permanently deleted.`,
-          icon:'warning',
-          showCancelButton:true,
-          confirmButtonText:'Delete Run',
-          cancelButtonText:'Cancel',
-          confirmButtonColor:'var(--bs-danger)',
-          cancelButtonColor:'var(--bs-border-color)',
-          background:'var(--bs-secondary-bg)',
-          color:'var(--bs-body-color)'
-        });
-        confirmed=result.isConfirmed;
-      }else{
-        confirmed=confirm(`Delete ${title}? This will also delete all registrations for this run.`);
-      }
-      if(!confirmed)return;
+      if(!await confirmRunChange('Delete this run?',`${title} and all of its registrations will be permanently deleted.`,'Delete Run',true))return;
 
       button.disabled=true;
       const {error}=await client.from('guild_runs').delete().eq('id',button.dataset.runDelete);
@@ -262,13 +269,17 @@
     }));
 
     document.querySelectorAll('[data-run-edit]').forEach(input=>{
-      input.addEventListener(input.dataset.runEdit==='note'?'input':'change',()=>queueRunSave(input));
+      input.addEventListener('change',()=>saveRunField(input));
     });
     initRunPickers(document.getElementById('runsList'));
 
     document.querySelectorAll('.carry-switch [data-carry-status]').forEach(button=>button.addEventListener('click',async()=>{
       const wrap=button.closest('.carry-switch');
       if(!wrap)return;
+      if(button.classList.contains('active'))return;
+      const member=button.closest('tr')?.querySelector('.player-cell span')?.textContent||'this player';
+      const label=button.dataset.carryStatus.toUpperCase();
+      if(!await confirmRunChange(`Set ${label} status?`,`Set ${member} to ${label}?`,'Save Status'))return;
       wrap.querySelectorAll('button').forEach(b=>b.disabled=true);
       const {error}=await client.from('guild_run_registrations').update({carry_status:button.dataset.carryStatus}).eq('id',wrap.dataset.regId);
       if(error){wrap.querySelectorAll('button').forEach(b=>b.disabled=false);showError(error.message||'Could not update status.');return;}
@@ -285,6 +296,7 @@
     const runTime=document.getElementById('runTime').value||null;
     const note=document.getElementById('runNote').value.trim();
     if(!runDate)return;
+    if(!await confirmRunChange('Create this run?',`${note||runLabel(runType)} on ${runDate}${runTime?' at '+runTime:''}.`,'Create Run'))return;
     button.disabled=true;button.textContent='Creating…';
     const {error}=await client.from('guild_runs').insert({run_type:runType,run_date:runDate,run_time:runTime,note,status:'open'});
     button.disabled=false;button.textContent='Create Run';
