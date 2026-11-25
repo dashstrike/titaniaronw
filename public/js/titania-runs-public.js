@@ -26,7 +26,8 @@
   function memberHtml(member,status){
     if(!member)return '<span>Unknown member</span>';
     const src=iconFor(member);
-    return `<span class="player-cell">${src?`<img class="job-icon" src="${esc(src)}" alt="">`:''}<span>${esc(member.name)}</span>${statusIcon(status)}</span>`;
+    const discord=member.discord_linked===true?'':'<span class="badge bg-danger" title="Discord account is not linked"><i class="fa-brands fa-discord me-1" aria-hidden="true"></i>No Discord</span>';
+    return `<span class="player-cell flex-wrap">${src?`<img class="job-icon" src="${esc(src)}" alt="">`:''}<span>${esc(member.name)}</span>${discord}${statusIcon(status)}</span>`;
   }
   function showError(message){loading.hidden=true;errorBox.hidden=false;errorBox.textContent=message;}
   function clearError(){errorBox.hidden=true;}
@@ -39,6 +40,10 @@
     const row=document.createElement('span');row.className='select2-player';
     if(src){const img=document.createElement('img');img.src=src;img.alt='';row.appendChild(img);}
     const text=document.createElement('span');text.textContent=member.name;row.appendChild(text);
+    if(member.discord_linked!==true){
+      row.classList.add('text-muted');
+      const badge=document.createElement('span');badge.className='badge bg-danger ms-auto';badge.textContent='No Discord';row.appendChild(badge);
+    }
     return row;
   }
 
@@ -70,14 +75,15 @@
           <div class="public-run-datetime">${esc(formatDate(run.run_date))}${time?` · ${esc(time)}`:''}</div>
         </div>
 
-        <div class="public-run-title">${esc(title)}</div>
+        <div class="public-run-title"><strong class="fs-4">${esc(title)}</strong></div>
 
-        ${isOpen?`<form class="register-grid public-register-form" data-register-form="${esc(run.id)}">
-          <label>Player<select class="public-member-select form-select" data-member-select="${esc(run.id)}" required><option value=""></option>${available.map(m=>`<option value="${esc(m.id)}">${esc(m.name)}</option>`).join('')}</select></label>
-          <label>Register As<select data-registration-type="${esc(run.id)}" required class="form-select"><option value="need_carry">Need Carry</option><option value="carrier">Can Carry</option></select></label>
-          <button class="btn primary btn-primary" type="submit">Register</button>
+        ${isOpen?`<form class="row g-3 align-items-end public-register-form" data-register-form="${esc(run.id)}">
+          <div class="col-md-4"><label class="form-label" for="public-player-${esc(run.id)}">Player</label><select id="public-player-${esc(run.id)}" class="public-member-select form-select" data-member-select="${esc(run.id)}" required><option value=""></option>${available.map(m=>`<option value="${esc(m.id)}"${m.discord_linked===true?'':' disabled'}>${esc(m.name)}${m.discord_linked===true?'':' — No Discord'}</option>`).join('')}</select></div>
+          <div class="col-md-5"><label class="form-label" for="public-registration-${esc(run.id)}">Register As</label><select id="public-registration-${esc(run.id)}" data-registration-type="${esc(run.id)}" required class="form-select"><option value="need_carry">Need Carry</option><option value="carrier">Can Carry</option></select></div>
+          <div class="col-md-3"><button class="btn primary btn-primary w-100" type="submit">Register</button></div>
         </form>`:'<div class="notice public-closed-note">Registration is currently closed.</div>'}
 
+        <hr class="border-secondary opacity-100 mt-4 mb-2">
         <div class="registration-columns">
           <div><h3>Can Carry <span class="count">(${carriers.length})</span></h3><div class="player-list">${carriers.length?carriers.map(r=>`<div class="player-row">${memberHtml(memberById(r.member_id),r.carry_status)}</div>`).join(''):'<div class="empty">No players yet.</div>'}</div></div>
           <div><h3>Need Carry <span class="count">(${needCarry.length})</span></h3><div class="player-list">${needCarry.length?needCarry.map(r=>`<div class="player-row">${memberHtml(memberById(r.member_id),r.carry_status)}</div>`).join(''):'<div class="empty">No players yet.</div>'}</div></div>
@@ -145,6 +151,7 @@
     const memberId=memberSelect&&memberSelect.value;
     const registrationType=typeSelect&&typeSelect.value;
     if(!runId||!memberId)return;
+    if(memberById(memberId)?.discord_linked!==true){showError('No Discord link. Link your Discord account before registering.');return;}
 
     button.disabled=true;
     button.textContent='Registering…';

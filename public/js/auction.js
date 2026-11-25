@@ -66,6 +66,10 @@
     row.className='select2-player gap-0';
     if(src){const image=document.createElement('img');image.src=src;image.alt='';image.className='mr-2'+(relic&&isCard?' relic-icon relic-tone-'+option.element.dataset.stat:'');row.appendChild(image);}
     const text=document.createElement('span');text.textContent=option.text;row.appendChild(text);
+    if(option.element?.parentElement?.id===el('auctionPlayer').id&&member?.discord_linked!==true){
+      row.classList.add('text-muted');
+      const badge=document.createElement('span');badge.className='badge bg-danger ms-auto';badge.textContent='No Discord';row.appendChild(badge);
+    }
     return row;
   }
   function dropdowns(){
@@ -117,8 +121,8 @@
     const selected=el('auctionPlayer').value;
     const banned=new Set(bans.filter(b=>b.active).map(b=>b.member_id));
     const options='<option value="">Select IGN</option>'+members.map(m=>`<option value="${esc(m.id)}" ${banned.has(m.id)?'disabled':''}>${esc(m.name)}${banned.has(m.id)?' (BANNED)':''}</option>`).join('');
-    el('auctionPlayer').innerHTML=options;
-    el('auctionPlayer').value=banned.has(selected)?'':selected;
+    el('auctionPlayer').innerHTML='<option value="">Select IGN</option>'+members.map(m=>`<option value="${esc(m.id)}" ${banned.has(m.id)||m.discord_linked!==true?'disabled':''}>${esc(m.name)}${banned.has(m.id)?' (BANNED)':''}</option>`).join('');
+    el('auctionPlayer').value=banned.has(selected)||!members.some(m=>String(m.id)===selected&&m.discord_linked===true)?'':selected;
     if(workflow&&canManage){
       const selectedBan=el('auctionBanPlayer').value;
       el('auctionBanPlayer').innerHTML=options;
@@ -278,6 +282,7 @@
     if(!selected){message(`Select a ${itemLabel}.`,true);return;}
     const memberId=el('auctionPlayer').value;
     if(!loaded||!memberId)return;
+    if(!members.some(m=>String(m.id)===memberId&&m.discord_linked===true)){message('No Discord link. Link your Discord account before registering.',true);return;}
     action(el('auctionRegister'),async()=>{
       const count=await rpc('register_public_card_auction',{p_member_id:memberId,p_card_ids:[selected.value]});
       el('auctionCard').value='';
