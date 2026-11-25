@@ -16,11 +16,8 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  deploy:
+  build:
     runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - uses: actions/checkout@v4
       - uses: shivammathur/setup-php@v2
@@ -48,23 +45,13 @@ jobs:
       - uses: actions/upload-pages-artifact@v3
         with:
           path: storage/app/pages
-      - name: Wait for Pages artifact to become visible
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          for attempt in {1..30}; do
-            count=$(curl -fsS -H "Authorization: Bearer $GH_TOKEN" -H "Accept: application/vnd.github+json" "$GITHUB_API_URL/repos/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID/artifacts?name=github-pages" | jq -r '.total_count')
-            if [ "$count" = "1" ]; then
-              exit 0
-            fi
-            if [ "$count" != "0" ]; then
-              echo "Expected one github-pages artifact, found $count" >&2
-              exit 1
-            fi
-            sleep 2
-          done
-          echo "Pages artifact did not become visible within 60 seconds" >&2
-          exit 1
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
       - name: Deploy
         id: deployment
         uses: actions/deploy-pages@v4
