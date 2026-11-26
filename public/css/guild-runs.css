@@ -87,7 +87,7 @@
 #titania-content .carry-switch button:not(.btn).active.mia{color:var(--bs-danger);border-color:rgba(var(--bs-danger-rgb),.45);background:rgba(var(--bs-danger-rgb),.1)}
 #titania-content .run-status-icon{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;min-width:22px;border-radius:50%;padding:0;font-family:var(--bs-body-font-family);font-size:15px;font-weight:900;line-height:1;vertical-align:middle;cursor:help}
 #titania-content .run-status-icon.done{color:var(--bs-success);border:1px solid rgba(var(--bs-success-rgb),.65);background:rgba(var(--bs-success-rgb),.12)}
-#titania-content .public-run-card .player-row.is-done{background:var(--bs-success);color:#fff}
+#titania-content .public-run-card .player-row.is-done{background:#246344;color:#fff}
 #titania-content .public-run-card .player-row.is-done .run-status-icon.done{color:#fff;border-color:#fff;background:transparent}
 #titania-content .run-status-icon.cancel{color:var(--bs-danger);border:1px solid rgba(var(--bs-danger-rgb),.65);background:rgba(var(--bs-danger-rgb),.12)}
 #titania-content .run-status-icon.mia{color:var(--bs-warning);border:1px solid rgba(var(--bs-warning-rgb),.65);background:rgba(var(--bs-warning-rgb),.12)}
