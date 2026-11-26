@@ -922,3 +922,17 @@ body.readonly-mode #titania-content #dashSelectAll{pointer-events:none;opacity:.
 
 
   
+/* Keep Members button icons and labels on the same vertical center. */
+body[data-planner-event="manage_members"] #titania-content .btn:not([hidden]){
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+}
+body[data-planner-event="manage_members"] #titania-content .btn > i{
+  line-height:1;
+  flex-shrink:0;
+}
+body[data-planner-event="manage_members"] #titania-content .btn > img{
+  display:block;
+  flex-shrink:0;
+}
