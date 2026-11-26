@@ -230,6 +230,7 @@
   let dashboardClassFilter = 'All';
   let dashboardSelected = new Set();
   let discordLinkedMemberIds = null;
+  let discordKnownMemberIds = null;
   let discordLinkStatusRequest = null;
   let discordLinkStatusFailed = false;
   let memberJobIcons = null;
@@ -1083,7 +1084,7 @@
     if(eventName!==currentEvent&&!await resolveMemberDraftNavigation())return;
     if(currentEvent==='manage_members'&&eventName!=='manage_members')destroyMemberClassSelects(document.getElementById('teamsWrap'));
     currentEvent=eventName;
-    if(eventName==='manage_members'){discordLinkedMemberIds=null;discordLinkStatusFailed=false;}
+    if(eventName==='manage_members'){discordLinkedMemberIds=null;discordKnownMemberIds=null;discordLinkStatusFailed=false;}
     try{localStorage.setItem('roworld_sheets_event_v1',eventName);}catch(error){}
     statusFilter='All';
     clearSelections(false);
@@ -2226,9 +2227,10 @@
     if(discordLinkedMemberIds||discordLinkStatusRequest||discordLinkStatusFailed||!supabaseClient)return;
     discordLinkStatusRequest=(async()=>{
       try{
-        const {data,error}=await supabaseClient.from('member_discord_link_status').select('member_id').eq('linked',true);
+        const {data,error}=await supabaseClient.from('member_discord_link_status').select('member_id,linked');
         if(error)throw error;
-        discordLinkedMemberIds=new Set((data||[]).map(row=>String(row.member_id)));
+        discordLinkedMemberIds=new Set((data||[]).filter(row=>row.linked).map(row=>String(row.member_id)));
+        discordKnownMemberIds=new Set((data||[]).map(row=>String(row.member_id)));
       }catch(error){
         discordLinkStatusFailed=true;
         console.warn('Could not load member Discord link status:',error);
@@ -2238,7 +2240,7 @@
           const linked=discordLinkedMemberIds?.has(icon.dataset.memberId);
           icon.src=linked?'./images/discord-symbol-blurple.svg':'./images/discord-symbol-white.svg';
           icon.classList.toggle('is-linked',Boolean(linked));
-          icon.alt=linked?'Discord linked':discordLinkedMemberIds?'Discord not linked':'Discord link status unavailable';
+          icon.alt=linked?'Discord linked':discordKnownMemberIds?.has(icon.dataset.memberId)?'Discord not linked':'Discord link status unverified';
           icon.title=icon.alt;
         });
       }
@@ -2568,7 +2570,7 @@
         const inactive=member.status==='inactive';
         const detail=inactive?`Since ${formatDate(member.inactiveSince)||'date not recorded'}${member.inactiveReason?` · ${member.inactiveReason}`:''}`:(member.lastReturned?`Returned ${formatDate(member.lastReturned)}`:'Available for teams');
         const updateValue=member.updatedAt?formatMemberUpdate(member.updatedAt):'No edit recorded';
-        return `<tr data-member-row="${escapeAttr(member.id)}" class="dash-manage-row ${dashboardSelected.has(member.name)?'table-active':''}"><td><input type="checkbox" class="form-check-input dash-row-check" aria-label="Select ${escapeAttr(member.name)}" data-name="${escapeAttr(member.name)}" ${dashboardSelected.has(member.name)?'checked':''}></td><td><div class="d-flex align-items-center gap-2"><img class="dash-member-job-icon" data-job-class="${escapeAttr(shown.cls)}" src="${memberJobIcons?.[shown.cls]?'./images/job/'+encodeURIComponent(memberJobIcons[shown.cls]):''}" alt="" title="${escapeAttr(shown.cls)}" ${memberJobIcons?.[shown.cls]?'':'hidden'}><span class="dash-manage-name fw-semibold" title="${escapeAttr(member.name)}">${escapeHtml(member.name)}</span></div></td><td><div class="d-inline-flex align-items-center gap-2"><span class="badge bg-${inactive?'danger':'success'}-subtle text-${inactive?'danger':'success'}">${inactive?'Inactive':'Active'}</span><img class="dash-discord-status ${discordLinkedMemberIds?.has(String(member.id))?'is-linked':''}" data-member-id="${escapeAttr(member.id)}" src="${discordLinkedMemberIds?.has(String(member.id))?'./images/discord-symbol-blurple.svg':'./images/discord-symbol-white.svg'}" alt="${discordLinkedMemberIds?.has(String(member.id))?'Discord linked':discordLinkedMemberIds?'Discord not linked':'Discord link status loading'}" title="${discordLinkedMemberIds?.has(String(member.id))?'Discord linked':discordLinkedMemberIds?'Discord not linked':'Discord link status loading'}"></div><div class="text-muted small mt-1">${escapeHtml(detail)}</div></td><td class="text-nowrap"><div>${escapeHtml(updateValue)}</div>${member.updatedBy?`<div class="text-muted small">${escapeHtml(member.updatedBy)}</div>`:''}</td><td><div class="d-flex justify-content-end align-items-center gap-2"><button type="button" class="btn btn-primary btn-sm dash-row-save" data-member-id="${escapeAttr(member.id)}" ${pending?'':'hidden'}><i class="bx bx-save me-1" aria-hidden="true"></i>Save</button><button type="button" class="btn btn-outline-secondary btn-sm dash-row-discard" data-member-id="${escapeAttr(member.id)}" ${pending?'':'hidden'}>Discard</button><button type="button" class="btn btn-primary btn-sm dash-row-edit d-inline-flex align-items-center gap-1" data-name="${escapeAttr(member.name)}" title="Edit member details" aria-label="Edit ${escapeAttr(member.name)}"><i class="bx bx-pencil fs-16" aria-hidden="true"></i><span>Edit</span></button>${inactive?`<button class="btn btn-soft-success btn-sm text-nowrap" data-reactivate-member="${escapeAttr(member.name)}">Reactivate</button>`:`<button class="btn btn-soft-warning btn-sm text-nowrap" data-inactivate-member="${escapeAttr(member.name)}">Mark Inactive</button>`}<button class="btn btn-soft-danger btn-sm dash-row-del" data-name="${escapeAttr(member.name)}" title="Permanently delete member" aria-label="Delete ${escapeAttr(member.name)}"><i class="bx bx-trash"></i></button></div></td></tr>`;
+        return `<tr data-member-row="${escapeAttr(member.id)}" class="dash-manage-row ${dashboardSelected.has(member.name)?'table-active':''}"><td><input type="checkbox" class="form-check-input dash-row-check" aria-label="Select ${escapeAttr(member.name)}" data-name="${escapeAttr(member.name)}" ${dashboardSelected.has(member.name)?'checked':''}></td><td><div class="d-flex align-items-center gap-2"><img class="dash-member-job-icon" data-job-class="${escapeAttr(shown.cls)}" src="${memberJobIcons?.[shown.cls]?'./images/job/'+encodeURIComponent(memberJobIcons[shown.cls]):''}" alt="" title="${escapeAttr(shown.cls)}" ${memberJobIcons?.[shown.cls]?'':'hidden'}><span class="dash-manage-name fw-semibold" title="${escapeAttr(member.name)}">${escapeHtml(member.name)}</span></div></td><td><div class="d-inline-flex align-items-center gap-2"><span class="badge bg-${inactive?'danger':'success'}-subtle text-${inactive?'danger':'success'}">${inactive?'Inactive':'Active'}</span><img class="dash-discord-status ${discordLinkedMemberIds?.has(String(member.id))?'is-linked':''}" data-member-id="${escapeAttr(member.id)}" src="${discordLinkedMemberIds?.has(String(member.id))?'./images/discord-symbol-blurple.svg':'./images/discord-symbol-white.svg'}" alt="${discordLinkedMemberIds?.has(String(member.id))?'Discord linked':discordKnownMemberIds?.has(String(member.id))?'Discord not linked':'Discord link status unverified'}" title="${discordLinkedMemberIds?.has(String(member.id))?'Discord linked':discordKnownMemberIds?.has(String(member.id))?'Discord not linked':'Discord link status unverified'}"></div><div class="text-muted small mt-1">${escapeHtml(detail)}</div></td><td class="text-nowrap"><div>${escapeHtml(updateValue)}</div>${member.updatedBy?`<div class="text-muted small">${escapeHtml(member.updatedBy)}</div>`:''}</td><td><div class="d-flex justify-content-end align-items-center gap-2"><button type="button" class="btn btn-primary btn-sm dash-row-save" data-member-id="${escapeAttr(member.id)}" ${pending?'':'hidden'}><i class="bx bx-save me-1" aria-hidden="true"></i>Save</button><button type="button" class="btn btn-outline-secondary btn-sm dash-row-discard" data-member-id="${escapeAttr(member.id)}" ${pending?'':'hidden'}>Discard</button><button type="button" class="btn btn-primary btn-sm dash-row-edit d-inline-flex align-items-center gap-1" data-name="${escapeAttr(member.name)}" title="Edit member details" aria-label="Edit ${escapeAttr(member.name)}"><i class="bx bx-pencil fs-16" aria-hidden="true"></i><span>Edit</span></button>${inactive?`<button class="btn btn-soft-success btn-sm text-nowrap" data-reactivate-member="${escapeAttr(member.name)}">Reactivate</button>`:`<button class="btn btn-soft-warning btn-sm text-nowrap" data-inactivate-member="${escapeAttr(member.name)}">Mark Inactive</button>`}<button class="btn btn-soft-danger btn-sm dash-row-del" data-name="${escapeAttr(member.name)}" title="Permanently delete member" aria-label="Delete ${escapeAttr(member.name)}"><i class="bx bx-trash"></i></button></div></td></tr>`;
       }).join(''):'<tr><td colspan="5" class="text-center text-muted py-4">No members match this search and status filter.</td></tr>'}</tbody></table></div></div>`;
   }
 

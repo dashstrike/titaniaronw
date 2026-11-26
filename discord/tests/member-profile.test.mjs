@@ -42,6 +42,15 @@ test('unlinked profile is reported only after authenticated backend lookup',asyn
   const f=fixture();assert.deepEqual(await (await websiteRequest(request(),f.runtime)).json(),{linked:false,canManage:false});
   assert.ok(f.calls.some(call=>call.url.includes('/auth/v1/user')));
 });
+test('reading an existing link repairs its missing badge status',async()=>{
+  const f=fixture();await f.store.link(userId,{id:'m1'},true);
+  f.calls.length=0;
+  const response=await websiteRequest(request(),f.runtime);
+  assert.equal((await response.json()).linked,true);
+  const statusWrite=f.calls.find(call=>call.url.includes('/member_discord_link_status?'));
+  assert.equal(JSON.parse(statusWrite.options.body).linked,true);
+  assert.equal(JSON.parse(statusWrite.options.body).member_id,'m1');
+});
 test('missing/invalid sessions, unapproved users and foreign origins cannot read links',async()=>{
   for(const mode of ['missing','invalid','unapproved','origin']){
     const f=fixture();if(mode==='invalid')f.state.auth=false;if(mode==='unapproved')f.state.approved=false;

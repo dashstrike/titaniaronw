@@ -329,6 +329,8 @@ export class AttendanceStore {
       await this.syncLinkStatus(memberId);
     }
     const linkedUserId=await this.ctx.storage.get('member:'+memberId);
+    // Repair the status mirror during an existing profile read request.
+    if(action==='read')await this.syncLinkStatus(memberId);
     if(!linkedUserId)return {linked:false};
     const link=await this.ctx.storage.get('user:'+linkedUserId);
     if(!link||link.memberId!==memberId)fail('Account link is inconsistent. Ask management to check it.');
