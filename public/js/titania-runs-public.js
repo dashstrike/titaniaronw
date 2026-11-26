@@ -85,8 +85,8 @@
 
         <hr class="border-secondary opacity-100 mt-4 mb-2">
         <div class="registration-columns">
-          <div><h3>Can Carry <span class="count">(${carriers.length})</span></h3><div class="player-list">${carriers.length?carriers.map(r=>`<div class="player-row">${memberHtml(memberById(r.member_id),r.carry_status)}</div>`).join(''):'<div class="empty">No players yet.</div>'}</div></div>
-          <div><h3>Need Carry <span class="count">(${needCarry.length})</span></h3><div class="player-list">${needCarry.length?needCarry.map(r=>`<div class="player-row">${memberHtml(memberById(r.member_id),r.carry_status)}</div>`).join(''):'<div class="empty">No players yet.</div>'}</div></div>
+          <div><h3>Can Carry <span class="count">(${carriers.length})</span></h3><div class="player-list">${carriers.length?carriers.map(r=>`<div class="player-row${r.carry_status==='done'?' is-done':''}">${memberHtml(memberById(r.member_id),r.carry_status)}</div>`).join(''):'<div class="empty">No players yet.</div>'}</div></div>
+          <div><h3>Need Carry <span class="count">(${needCarry.length})</span></h3><div class="player-list">${needCarry.length?needCarry.map(r=>`<div class="player-row${r.carry_status==='done'?' is-done':''}">${memberHtml(memberById(r.member_id),r.carry_status)}</div>`).join(''):'<div class="empty">No players yet.</div>'}</div></div>
         </div>
       </article>`;
     }).join('');
