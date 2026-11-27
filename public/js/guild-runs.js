@@ -18,10 +18,38 @@
   function typeLabel(type){return type==='carrier'?'Can Carry':'Need Carry';}
   function iconFor(member){const file=iconMap[member&&member.cls];return file?`./images/job/${encodeURIComponent(file)}`:'';}
   function memberById(id){return roster.find(m=>String(m.id)===String(id));}
-  function memberHtml(member){
+  function memberHtml(member,copyActions=false){
     if(!member)return '<span>Unknown member</span>';
     const src=iconFor(member);
-    return `<span class="player-cell">${src?`<img class="job-icon" src="${esc(src)}" alt="">`:''}<span>${esc(member.name)}</span></span>`;
+    const actions=copyActions?`<span class="player-copy-actions"><button type="button" class="btn btn-sm btn-outline-secondary" data-copy-name="${esc(member.name)}" title="Copy player name" aria-label="Copy player name: ${esc(member.name)}">Copy name</button><button type="button" class="btn btn-sm btn-outline-secondary" data-copy-discord="${esc(member.id)}" title="Copy Discord mention to tag this player" aria-label="Copy Discord mention for ${esc(member.name)}">Copy Discord</button></span>`:'';
+    return `<span class="player-cell${copyActions?' player-cell-copy':''}">${src?`<img class="job-icon" src="${esc(src)}" alt="">`:''}<span class="player-name">${esc(member.name)}</span>${actions}</span>`;
+  }
+  async function copyPlayer(button){
+    const label=button.textContent;
+    button.disabled=true;
+    try{
+      let value=button.dataset.copyName;
+      if(button.dataset.copyDiscord){
+        button.textContent='Loading…';
+        const session=await client.auth.getSession();
+        const token=session.data?.session?.access_token;
+        if(session.error||!token)throw new Error('Sign in to Titania again.');
+        const response=await fetch('https://titania-attendance.dashstrike.workers.dev/member-discord',{method:'POST',headers:{Authorization:'Bearer '+token,'Content-Type':'application/json'},body:JSON.stringify({memberId:button.dataset.copyDiscord,action:'read'}),signal:AbortSignal.timeout(15000)});
+        const account=await response.json();
+        if(!response.ok)throw new Error(account.error||'Could not load the Discord account.');
+        if(!account.linked||!/^\d{17,20}$/.test(account.userId))throw new Error('This player has no linked Discord account.');
+        value=`<@${account.userId}>`;
+      }
+      try{await navigator.clipboard.writeText(value);}
+      catch{
+        if(!window.Swal)throw new Error('Clipboard unavailable. Please try again in a supported browser.');
+        await window.Swal.fire({title:label,input:'text',inputValue:value,inputAttributes:{readonly:'readonly'},confirmButtonText:'Close',background:'var(--bs-secondary-bg)',color:'var(--bs-body-color)'});
+        return;
+      }
+      button.textContent='Copied!';
+      await new Promise(resolve=>setTimeout(resolve,1200));
+    }catch(error){showError(error.message||'Could not copy this player.');}
+    finally{button.textContent=label;button.disabled=false;}
   }
   function pickerIcon(type){
     if(type==='date')return '<span class="run-picker-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"></rect><path d="M16 3v4M8 3v4M3 11h18"></path></svg></span>';
@@ -125,7 +153,7 @@
       const actionControls=locked
         ? ''
         : `<button type="button" class="btn btn-outline-secondary" data-run-toggle="${esc(run.id)}" data-next-status="${run.status==='open'?'closed':'open'}">${run.status==='open'?'Close Registration':'Open Registration'}</button><button type="button" class="btn danger btn-outline-danger" data-run-end="${esc(run.id)}">End Run</button>`;
-      const table=runRegs.length?`<div class="table-wrap table-responsive"><table><thead><tr><th>Player</th><th>Class</th><th>GR</th><th>Type</th><th>Status</th></tr></thead><tbody>${sortedRunRegs.map(reg=>{const member=memberById(reg.member_id);return `<tr><td>${memberHtml(member)}</td><td>${esc(member&&member.cls||'—')}</td><td>${esc(member&&member.gr!=null?Number(member.gr).toLocaleString():'—')}</td><td>${esc(typeLabel(reg.registration_type))}</td><td>${carryStatusControl(reg,locked)}</td></tr>`;}).join('')}</tbody></table></div>`:'<div class="empty">No registrations yet.</div>';
+      const table=runRegs.length?`<div class="table-wrap table-responsive"><table><thead><tr><th>Player</th><th>Class</th><th>GR</th><th>Type</th><th>Status</th></tr></thead><tbody>${sortedRunRegs.map(reg=>{const member=memberById(reg.member_id);return `<tr><td>${memberHtml(member,isOrganizer()&&reg.registration_type==='need_carry')}</td><td>${esc(member&&member.cls||'—')}</td><td>${esc(member&&member.gr!=null?Number(member.gr).toLocaleString():'—')}</td><td>${esc(typeLabel(reg.registration_type))}</td><td>${carryStatusControl(reg,locked)}</td></tr>`;}).join('')}</tbody></table></div>`:'<div class="empty">No registrations yet.</div>';
       const detail=isOrganizer()?`<div class="run-summary"><div class="summary-counts"><span>Need Carry: <b>${need}</b></span><span>Can Carry: <b>${carry}</b></span></div>${table}</div>`:'';
       return `<article class="run-card card">
         <div class="run-card-top">
@@ -239,6 +267,7 @@
   }
 
   function wireRunControls(){
+    document.querySelectorAll('[data-copy-name],[data-copy-discord]').forEach(button=>button.addEventListener('click',()=>copyPlayer(button)));
     document.querySelectorAll('[data-run-toggle]').forEach(button=>button.addEventListener('click',async()=>{
       const opening=button.dataset.nextStatus==='open';
       if(!await confirmRunChange(`${opening?'Open':'Close'} registration?`,`This will ${opening?'allow':'stop'} public registrations for this run.`,opening?'Open Registration':'Close Registration'))return;

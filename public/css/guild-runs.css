@@ -80,6 +80,12 @@
 #titania-content .player-cell,
 #titania-content .player-row{display:flex;align-items:center;gap:9px}
 #titania-content .job-icon{width:28px;height:28px;object-fit:contain;flex:none}
+#titania-content .player-cell-copy{min-width:320px}
+#titania-content .player-cell-copy .player-name{overflow-wrap:anywhere;min-width:0}
+#titania-content .player-copy-actions{display:inline-flex;align-items:center;gap:5px;margin-left:auto;flex:none;padding-left:8px}
+#titania-content .player-copy-actions .btn{display:inline-flex;align-items:center;justify-content:center;height:32px;white-space:nowrap}
+#titania-content .player-copy-actions [data-copy-name]{width:82px}
+#titania-content .player-copy-actions [data-copy-discord]{width:104px}
 #titania-content .carry-switch{display:inline-flex;gap:5px;flex-wrap:wrap}
 #titania-content .carry-switch button:not(.btn){border:1px solid var(--line);background:var(--bs-body-bg);color:var(--muted);border-radius:7px;padding:6px 9px;font-size:12px;font-weight:800;cursor:pointer}
 #titania-content .carry-switch button:not(.btn).active.done{color:var(--bs-success);border-color:rgba(var(--bs-success-rgb),.45);background:rgba(var(--bs-success-rgb),.1)}
