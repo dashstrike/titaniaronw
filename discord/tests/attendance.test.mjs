@@ -27,6 +27,8 @@ function fixture(){
   globalThis.fetch=async (input,options={})=>{
     const url=new URL(input),body=options.body?JSON.parse(options.body):undefined;
     calls.push({url,options,body});
+    if(String(url).includes('/member_discord_accounts?'))return new Response(null,{status:201});
+    if(String(url).includes('/users/'))return state.usernameError?Response.json({error:'unavailable'},{status:503}):Response.json({username:'player_user'});
     if(url.pathname.endsWith('/planner_state'))return Response.json([{state:{roster:state.roster}}]);
     if(url.pathname.endsWith('/member_discord_link_status'))return state.linkStatusError?Response.json({code:'temporary'},{status:503}):new Response(null,{status:201});
     if(url.pathname.endsWith('/attendance_events'))return Response.json([{id:eventId,status:state.closed?'closed':'upcoming'}]);
@@ -42,6 +44,34 @@ function fixture(){
   return {storage,store,state,calls,record};
 }
 const send=async(store,data)=>(await store.fetch(new Request('https://internal/',{method:'POST',body:JSON.stringify(data)}))).json();
+
+test('daily account backfill queues once and mirrors existing links through alarms',async()=>{
+  const f=fixture();
+  await f.storage.put('member:member_1',actor);
+  const request=()=>new Request('https://internal/ensure-account-mirror');
+  await f.store.fetch(request());
+  assert.ok(await f.storage.get('link-status-pending:member_1'));
+  await f.store.alarm();
+  const mirror=f.calls.find(call=>call.url.pathname.endsWith('/member_discord_accounts'));
+  assert.equal(mirror.body.discord_user_id,actor);
+  assert.equal(mirror.body.discord_username,'player_user');
+  assert.equal(await f.storage.get('link-status-pending:member_1'),undefined);
+  await f.store.fetch(request());
+  assert.equal(await f.storage.get('link-status-pending:member_1'),undefined);
+});
+
+test('Discord outage keeps the mention ID available and retries the username',async()=>{
+  const f=fixture();f.state.usernameError=true;
+  await f.store.link(actor,roster[0],true);
+  const rows=()=>f.calls.filter(call=>call.url.pathname.endsWith('/member_discord_accounts')).map(call=>call.body);
+  assert.equal(rows().at(-1).discord_user_id,actor);
+  assert.equal(rows().at(-1).discord_username,null);
+  assert.ok(await f.storage.get('link-status-pending:member_1'));
+  f.state.usernameError=false;
+  await f.store.alarm();
+  assert.equal(rows().at(-1).discord_username,'player_user');
+  assert.equal(await f.storage.get('link-status-pending:member_1'),undefined);
+});
 
 test('My Status reads the latest response without linking or writing attendance, including closed events',async()=>{
   for(const status of ['going','not_going',null]){

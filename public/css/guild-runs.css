@@ -80,12 +80,18 @@
 #titania-content .player-cell,
 #titania-content .player-row{display:flex;align-items:center;gap:9px}
 #titania-content .job-icon{width:28px;height:28px;object-fit:contain;flex:none}
-#titania-content .player-cell-copy{min-width:320px}
+#titania-content .player-cell-copy{min-width:0}
 #titania-content .player-cell-copy .player-name{overflow-wrap:anywhere;min-width:0}
-#titania-content .player-copy-actions{display:inline-flex;align-items:center;gap:5px;margin-left:auto;flex:none;padding-left:8px}
-#titania-content .player-copy-actions .btn{display:inline-flex;align-items:center;justify-content:center;height:32px;white-space:nowrap}
-#titania-content .player-copy-actions [data-copy-name]{width:82px}
-#titania-content .player-copy-actions [data-copy-discord]{width:104px}
+#titania-content .player-copy-actions{display:inline-flex;align-items:center;gap:2px;flex:none;margin-left:2px}
+#titania-content .player-copy{display:inline-flex;align-items:center;justify-content:center;position:relative;width:30px;height:30px;padding:6px;border:0;border-radius:6px;background:transparent;color:var(--bs-body-color);opacity:.75;cursor:pointer;transition:background .15s,opacity .15s}
+#titania-content .player-copy:hover{background:rgba(var(--bs-primary-rgb),.14);opacity:1}
+#titania-content .player-copy:focus-visible{outline:2px solid var(--bs-primary);outline-offset:2px;opacity:1}
+#titania-content .player-copy:disabled{opacity:.3;cursor:default}
+#titania-content .player-copy svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+#titania-content .player-copy img{width:18px;height:18px}
+#titania-content .player-copy.is-copied{color:var(--bs-success);background:rgba(var(--bs-success-rgb),.14);opacity:1}
+#titania-content .player-copy.is-copied::after{content:'✓';position:absolute;inset:0;display:grid;place-items:center;font-size:19px}
+#titania-content .player-copy.is-copied :is(svg,img){visibility:hidden}
 #titania-content .carry-switch{display:inline-flex;gap:5px;flex-wrap:wrap}
 #titania-content .carry-switch button:not(.btn){border:1px solid var(--line);background:var(--bs-body-bg);color:var(--muted);border-radius:7px;padding:6px 9px;font-size:12px;font-weight:800;cursor:pointer}
 #titania-content .carry-switch button:not(.btn).active.done{color:var(--bs-success);border-color:rgba(var(--bs-success-rgb),.45);background:rgba(var(--bs-success-rgb),.1)}

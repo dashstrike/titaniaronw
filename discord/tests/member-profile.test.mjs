@@ -16,6 +16,8 @@ function fixture(){
   const state={approved:true,role:'viewer',auth:true,left:false,inactive:false};
   globalThis.fetch=async(url,options={})=>{
     calls.push({url:String(url),options});
+    if(String(url).includes('/member_discord_accounts?'))return new Response(null,{status:201});
+    if(String(url).includes('/users/'))return Response.json({username:'player_user'});
     if(String(url).includes('/auth/v1/user'))return Response.json(state.auth?{id:'verified-manager'}:{error:'invalid'},{status:state.auth?200:401});
     if(String(url).includes('/profiles?'))return Response.json([{approved:state.approved,role:state.role}]);
     if(String(url).includes('/planner_state?'))return Response.json([{state:{roster:[{id:'m1',name:'Player',status:state.inactive?'inactive':'active'},{id:'m2',name:'Another'}]}}]);
@@ -76,6 +78,8 @@ test('management can change a link atomically and old account is released',async
   const f=fixture();f.state.role='admin';await f.store.link(userId,{id:'m1'},true);
   const response=await websiteRequest(request({memberId:'m1',action:'link',userId:otherId,expectedUserId:userId}),f.runtime);
   assert.equal(response.status,200);assert.equal(await f.storage.get('user:'+userId),undefined);assert.equal(await f.storage.get('member:m1'),otherId);
+  const mirror=f.calls.filter(call=>call.url.includes('/member_discord_accounts?')).at(-1);
+  assert.equal(JSON.parse(mirror.options.body).discord_user_id,otherId);
 });
 test('changing a claimed account or a stale link never removes either owner',async()=>{
   const f=fixture();f.state.role='admin';await f.store.link(userId,{id:'m1'},true);await f.store.link(otherId,{id:'m2'},true);
@@ -88,6 +92,11 @@ test('website unlink removes only the account relationship and never writes atte
   const response=await websiteRequest(request({memberId:'m1',action:'unlink',expectedUserId:userId}),f.runtime);
   assert.equal(response.status,200);assert.equal((await response.json()).linked,false);assert.equal(await f.storage.get('user:'+userId),undefined);
   assert.equal(f.calls.filter(call=>call.url.includes('/attendance_records')&&['PATCH','POST'].includes(call.options.method)).length,0);
+  const mirror=f.calls.filter(call=>call.url.includes('/member_discord_accounts?')).map(call=>JSON.parse(call.options.body));
+  assert.equal(mirror[0].discord_user_id,userId);
+  assert.equal(mirror[0].discord_username,'player_user');
+  assert.equal(mirror.at(-1).discord_user_id,null);
+  assert.equal(mirror.at(-1).discord_username,null);
 });
 test('users outside the server and inactive characters cannot be newly linked',async()=>{
   for(const mode of ['left','inactive']){

@@ -166,6 +166,20 @@ export class AttendanceStore {
     try{await update;}finally{if(this.refreshes.get(messageId)===update)this.refreshes.delete(messageId);}
   }
   async fetch(request){
+    if(new URL(request.url).pathname==='/ensure-account-mirror'){
+      const today=new Date().toISOString().slice(0,10);
+      if(await this.ctx.storage.get('account-mirror-v1')!==today){
+        let start;
+        do{
+          const entries=await this.ctx.storage.list({prefix:'member:',limit:500,...(start?{startAfter:start}:{})});
+          for(const key of entries.keys())await this.ctx.storage.put('link-status-pending:'+key.slice(7),Date.now());
+          start=entries.size===500?[...entries.keys()].at(-1):null;
+        }while(start);
+        await this.ctx.storage.setAlarm(Date.now()+1000);
+        await this.ctx.storage.put('account-mirror-v1',today);
+      }
+      return json({queued:true});
+    }
     if(new URL(request.url).pathname==='/attendance-next'){
       try{
         const input=await request.json();
@@ -220,16 +234,26 @@ export class AttendanceStore {
       if(entries.size<500)break;
     }while(start);
     const pending=await this.ctx.storage.list({prefix:'link-status-pending:',limit:500});
-    for(const key of pending.keys())await this.syncLinkStatus(key.slice('link-status-pending:'.length));
-    if((await this.ctx.storage.list({prefix:'link-status-pending:',limit:1})).size)await this.ctx.storage.setAlarm(Date.now()+60000);
+    for(const [key] of [...pending].sort((a,b)=>a[1]-b[1]).slice(0,10))await this.syncLinkStatus(key.slice('link-status-pending:'.length));
+    if((await this.ctx.storage.list({prefix:'link-status-pending:',limit:1})).size)await this.ctx.storage.setAlarm(Date.now()+10000);
     else if((await this.ctx.storage.list({prefix:'delivery:',limit:1})).size)await this.ctx.storage.setAlarm(Date.now()+86400000);
   }
   async syncLinkStatus(memberId){
     const previous=this.linkSyncs.get(memberId)||Promise.resolve();
     const task=previous.catch(()=>{}).then(async()=>{
-      const linked=Boolean(await this.ctx.storage.get('member:'+memberId));
+      const userId=await this.ctx.storage.get('member:'+memberId)||null;
+      const linked=Boolean(userId);
       try{
         await new Backend(this.env).setDiscordLinked(memberId,linked);
+        const backend=new Backend(this.env);
+        let username=null,profileError=null;
+        if(userId){
+          try{username=(await requestJson(API+'/users/'+userId,{headers:{Authorization:'Bot '+this.env.DISCORD_BOT_TOKEN}})).username||null;}
+          catch(error){profileError=error;}
+        }
+        await backend.call('member_discord_accounts?on_conflict=member_id','POST',
+          {member_id:String(memberId),discord_user_id:userId,discord_username:username,updated_at:new Date().toISOString()},'resolution=merge-duplicates,return=minimal');
+        if(profileError)throw profileError;
         await this.ctx.storage.delete('link-status-pending:'+memberId);
       }catch(error){
         console.error('Discord link status mirror failed',{memberId,status:error.status||null});
@@ -462,6 +486,9 @@ export async function websiteRequest(request,env){
 }
 
 export default {
+  async scheduled(_event,env,ctx){
+    ctx.waitUntil(env.ATTENDANCE.get(env.ATTENDANCE.idFromName(env.DISCORD_GUILD_ID)).fetch('https://attendance.internal/ensure-account-mirror'));
+  },
   async fetch(request,env,ctx){
     if(['/member-discord','/attendance-next'].includes(new URL(request.url).pathname))return websiteRequest(request,env);
     if(request.method==='GET')return new Response('Titania attendance endpoint is running.');

@@ -10,6 +10,8 @@
   let roster=[];
   let iconMap={};
   let confirmationQueue=Promise.resolve();
+  const discordMentions=new Map();
+  const copyIcon='<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="8" y="8" width="12" height="13" rx="2"/><path d="M16 8V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h3"/></svg>';
 
   function esc(v){return String(v==null?'':v).replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));}
   function isOrganizer(){return Boolean(profile&&profile.approved&&['party_organizer','admin'].includes(profile.role));}
@@ -21,35 +23,25 @@
   function memberHtml(member,copyActions=false){
     if(!member)return '<span>Unknown member</span>';
     const src=iconFor(member);
-    const actions=copyActions?`<span class="player-copy-actions"><button type="button" class="btn btn-sm btn-outline-secondary" data-copy-name="${esc(member.name)}" title="Copy player name" aria-label="Copy player name: ${esc(member.name)}">Copy name</button><button type="button" class="btn btn-sm btn-outline-secondary" data-copy-discord="${esc(member.id)}" title="Copy Discord mention to tag this player" aria-label="Copy Discord mention for ${esc(member.name)}">Copy Discord</button></span>`:'';
+    const actions=copyActions?`<span class="player-copy-actions"><button type="button" class="player-copy" data-copy-name="${esc(member.name)}" title="Copy player name" aria-label="Copy player name: ${esc(member.name)}">${copyIcon}</button><button type="button" class="player-copy player-copy-discord" data-copy-discord="${esc(member.id)}" title="${discordMentions.has(String(member.id))?'Copy Discord mention':'No linked Discord account'}" aria-label="Copy Discord mention for ${esc(member.name)}" ${discordMentions.has(String(member.id))?'':'disabled'}><img src="./images/discord-symbol-blurple.svg" alt="" aria-hidden="true"></button></span>`:'';
     return `<span class="player-cell${copyActions?' player-cell-copy':''}">${src?`<img class="job-icon" src="${esc(src)}" alt="">`:''}<span class="player-name">${esc(member.name)}</span>${actions}</span>`;
   }
   async function copyPlayer(button){
-    const label=button.textContent;
-    button.disabled=true;
+    const label=button.dataset.copyDiscord?'Copy Discord mention':'Copy player name';
     try{
-      let value=button.dataset.copyName;
-      if(button.dataset.copyDiscord){
-        button.textContent='Loading…';
-        const session=await client.auth.getSession();
-        const token=session.data?.session?.access_token;
-        if(session.error||!token)throw new Error('Sign in to Titania again.');
-        const response=await fetch('https://titania-attendance.dashstrike.workers.dev/member-discord',{method:'POST',headers:{Authorization:'Bearer '+token,'Content-Type':'application/json'},body:JSON.stringify({memberId:button.dataset.copyDiscord,action:'read'}),signal:AbortSignal.timeout(15000)});
-        const account=await response.json();
-        if(!response.ok)throw new Error(account.error||'Could not load the Discord account.');
-        if(!account.linked||!/^\d{17,20}$/.test(account.userId))throw new Error('This player has no linked Discord account.');
-        value=`<@${account.userId}>`;
-      }
+      const value=button.dataset.copyDiscord?discordMentions.get(button.dataset.copyDiscord):button.dataset.copyName;
+      if(typeof value!=='string')return;
       try{await navigator.clipboard.writeText(value);}
       catch{
         if(!window.Swal)throw new Error('Clipboard unavailable. Please try again in a supported browser.');
         await window.Swal.fire({title:label,input:'text',inputValue:value,inputAttributes:{readonly:'readonly'},confirmButtonText:'Close',background:'var(--bs-secondary-bg)',color:'var(--bs-body-color)'});
         return;
       }
-      button.textContent='Copied!';
-      await new Promise(resolve=>setTimeout(resolve,1200));
+      button.classList.add('is-copied');
+      button.title='Copied!';
+      clearTimeout(button.copyFeedbackTimer);
+      button.copyFeedbackTimer=setTimeout(()=>{button.classList.remove('is-copied');button.title=label;},1200);
     }catch(error){showError(error.message||'Could not copy this player.');}
-    finally{button.textContent=label;button.disabled=false;}
   }
   function pickerIcon(type){
     if(type==='date')return '<span class="run-picker-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"></rect><path d="M16 3v4M8 3v4M3 11h18"></path></svg></span>';
@@ -97,14 +89,20 @@
     if(profileResult.error||!profileResult.data||!profileResult.data.approved)throw new Error('Approved Titania access is required.');
     profile=profileResult.data;
 
-    const [plannerResult,iconsResult]=await Promise.all([
+    const [plannerResult,iconsResult,accountsResult]=await Promise.all([
       client.from('planner_state').select('state').eq('id',1).single(),
-      fetch('./images/job/job-icons.json?v=sea-jobs-20261101').then(r=>r.ok?r.json():{}).catch(()=>({}))
+      fetch('./images/job/job-icons.json?v=sea-jobs-20261101').then(r=>r.ok?r.json():{}).catch(()=>({})),
+      isOrganizer()?client.from('member_discord_accounts').select('member_id,discord_user_id,discord_username'):Promise.resolve({data:[]})
     ]);
     if(plannerResult.error)throw plannerResult.error;
     roster=Array.isArray(plannerResult.data&&plannerResult.data.state&&plannerResult.data.state.roster)?plannerResult.data.state.roster:[];
     roster=roster.filter(m=>m&&m.id&&m.name&&m.status!=='inactive').sort((a,b)=>String(a.name).localeCompare(String(b.name),undefined,{sensitivity:'base'}));
     iconMap=iconsResult||{};
+    if(accountsResult.error)throw new Error('Could not load Discord links. Refresh and try again.');
+    discordMentions.clear();
+    for(const account of accountsResult.data||[]){
+      if(/^\d{17,20}$/.test(account.discord_user_id))discordMentions.set(String(account.member_id),'<@'+account.discord_user_id+'>');
+    }
   }
 
   function carryStatusControl(reg,locked){

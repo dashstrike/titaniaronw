@@ -5,6 +5,10 @@ compatibility_date = "2026-11-19"
 workers_dev = true
 preview_urls = false
 
+# Refresh usernames daily at 04:00 Malaysia time, in bounded alarm batches.
+[triggers]
+crons = ["0 20 * * *"]
+
 [observability]
 enabled = true
 
