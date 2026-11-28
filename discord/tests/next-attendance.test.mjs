@@ -20,6 +20,7 @@ class Storage {
   async get(key){return structuredClone(this.data.get(key));}
   async put(key,value){this.data.set(key,structuredClone(value));}
   async delete(key){this.data.delete(key);}
+  async list({prefix=''}){return new Map([...this.data].filter(([key])=>key.startsWith(prefix)));}
   transaction(fn){const result=this.tail.then(()=>fn(this));this.tail=result.catch(()=>{});return result;}
 }
 function fixture(){
@@ -34,6 +35,7 @@ function fixture(){
     if(path.includes('planner_state?'))return Response.json([{state:{roster:[{id:'m1',status:'active'}]}}]);
     if(path.includes('attendance_records?'))return Response.json([{member_id:'m1',pre_status:'going'}]);
     if(path.includes('/channels/')){
+      if(options.method==='DELETE')return new Response(null,{status:204});
       if(state.timeout)throw new Error('network timeout');
       if(state.postError)return Response.json({message:'Missing permissions'},{status:403});
       return Response.json({id:'new_post'});
@@ -53,6 +55,16 @@ test('finish posts the next event once and retains existing pre-attendance count
   assert.equal(posts[0].body.embeds[0].fields[1].value,'1');
   assert.equal((await f.storage.get('message:new_post')).eventId,nextId);
   assert.equal(f.calls.filter(call=>call.path.includes('attendance_records')&&['POST','PATCH','DELETE'].includes(call.options.method)).length,0);
+});
+test('finish deletes the previously published attendance after registering the new post',async()=>{
+  const f=fixture();
+  await f.storage.put('published-event:siege:2026-11-22',{messageId:'old_post',eventId:sourceId});
+  await f.storage.put('message:old_post',{eventId:sourceId,type:'siege',date:'2026-11-22'});
+  await f.store.publishNext(sourceId);
+  const deletion=f.calls.find(call=>call.options.method==='DELETE');
+  assert.match(deletion.path,/\/messages\/old_post$/);
+  assert.equal(await f.storage.get('message:old_post'),undefined);
+  assert.equal((await f.storage.get('current-attendance-message')).messageId,'new_post');
 });
 test('concurrent finish requests for the same target produce only one Discord post',async()=>{
   const f=fixture();await Promise.all([f.store.publishNext(sourceId),f.store.publishNext(sourceId)]);

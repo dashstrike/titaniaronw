@@ -145,8 +145,8 @@ export function attendanceMessage(posted,counts,notifyRole=false){
 }
 
 async function discord(env,path,method,body,bot=true){
-  const notifyRole=bot&&method==='POST'&&path==='/channels/'+env.DISCORD_ATTENDANCE_CHANNEL_ID+'/messages'&&body.content==='<@&'+ATTENDANCE_ROLE_ID+'>';
-  return requestJson(API+path,{method,headers:{'Content-Type':'application/json',...(bot?{Authorization:'Bot '+env.DISCORD_BOT_TOKEN}:{})},body:JSON.stringify({...body,allowed_mentions:notifyRole?{parse:[],roles:[ATTENDANCE_ROLE_ID]}:{parse:[]}})});
+  const notifyRole=bot&&method==='POST'&&path==='/channels/'+env.DISCORD_ATTENDANCE_CHANNEL_ID+'/messages'&&body?.content==='<@&'+ATTENDANCE_ROLE_ID+'>';
+  return requestJson(API+path,{method,headers:{...(body===undefined?{}:{'Content-Type':'application/json'}),...(bot?{Authorization:'Bot '+env.DISCORD_BOT_TOKEN}:{})},...(body===undefined?{}:{body:JSON.stringify({...body,allowed_mentions:notifyRole?{parse:[],roles:[ATTENDANCE_ROLE_ID]}:{parse:[]}})})});
 }
 const commandOptions=interaction=>Object.fromEntries((interaction.data?.options?.[0]?.options||[]).map(option=>[option.name,option.value]));
 
@@ -154,6 +154,30 @@ const commandOptions=interaction=>Object.fromEntries((interaction.data?.options?
 // SQLite-backed storage is supported on Cloudflare's Free plan.
 export class AttendanceStore {
   constructor(ctx,env){this.ctx=ctx;this.env=env;this.refreshes=new Map();this.nextPosts=new Map();this.linkSyncs=new Map();}
+  async latestAttendanceMessage(){
+    const current=await this.ctx.storage.get('current-attendance-message');
+    if(current?.messageId)return current;
+    const published=await this.ctx.storage.list({prefix:'published-event:'});
+    return [...published].map(([key,value])=>({key,value,date:key.slice(-10)}))
+      .filter(item=>item.value?.messageId&&/^\d{4}-\d{2}-\d{2}$/.test(item.date))
+      .sort((a,b)=>b.date.localeCompare(a.date))[0]?.value||null;
+  }
+  async registerAttendanceMessage(message,posted,publishedKey){
+    const previous=await this.latestAttendanceMessage();
+    await this.ctx.storage.transaction(async transaction=>{
+      await transaction.put('message:'+message.id,posted);
+      await transaction.put(publishedKey,{messageId:message.id,eventId:posted.eventId});
+      await transaction.put('current-attendance-message',{messageId:message.id,eventId:posted.eventId});
+    });
+    if(!previous?.messageId||previous.messageId===message.id)return;
+    try{
+      await discord(this.env,'/channels/'+this.env.DISCORD_ATTENDANCE_CHANNEL_ID+'/messages/'+previous.messageId,'DELETE');
+      await this.ctx.storage.delete('message:'+previous.messageId);
+    }catch(error){
+      if(error.status===404){await this.ctx.storage.delete('message:'+previous.messageId);return;}
+      console.error('New attendance posted but the previous message could not be deleted',{messageId:previous.messageId,status:error.status||null});
+    }
+  }
   async refreshMessage(messageId,posted,backend,roster){
     // Serialize counter updates, not attendance writes, so older edits cannot
     // finish after newer ones when several members respond together.
@@ -316,10 +340,7 @@ export class AttendanceStore {
       if(error.status)await this.ctx.storage.delete(key);
       throw error;
     }
-    await this.ctx.storage.transaction(async transaction=>{
-      await transaction.put('message:'+message.id,posted);
-      await transaction.put(key,{messageId:message.id,eventId:event.id});
-    });
+    await this.registerAttendanceMessage(message,posted,key);
     return result(message.id);
   }
   async guildMember(userId){
@@ -415,8 +436,7 @@ export class AttendanceStore {
       const posted={eventId:event.id,type:options.event,date};
       const counts=await backend.counts(event.id,await backend.roster());
       const message=await discord(env,'/channels/'+env.DISCORD_ATTENDANCE_CHANNEL_ID+'/messages','POST',attendanceMessage(posted,counts,true));
-      await this.ctx.storage.put('message:'+message.id,{eventId:event.id,type:options.event,date});
-      await this.ctx.storage.put('published-event:'+options.event+':'+date,{messageId:message.id,eventId:event.id});
+      await this.registerAttendanceMessage(message,posted,'published-event:'+options.event+':'+date);
       return 'Attendance posted: https://discord.com/channels/'+env.DISCORD_GUILD_ID+'/'+env.DISCORD_ATTENDANCE_CHANNEL_ID+'/'+message.id;
     }
     if(subcommand==='link'){

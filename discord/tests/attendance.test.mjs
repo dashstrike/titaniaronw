@@ -152,6 +152,16 @@ test('posting is management-only and produces exactly Going / Not going buttons'
   assert.match(posted.embeds[0].thumbnail.url,/1564620820838351008\.png$/);
   assert.equal(posted.content,'<@&1559578395564843069>');assert.deepEqual(posted.allowed_mentions,{parse:[],roles:['1559578395564843069']});assert.equal((await f.storage.get('message:new_message')).eventId,eventId);
 });
+test('manual posting deletes the previous attendance message after the new post succeeds',async()=>{
+  const f=fixture(),i=interaction(2);i.member.permissions='32';i.data={name:'attendance',options:[{name:'post',options:[{name:'event',value:'siege'}]}]};
+  await f.storage.put('current-attendance-message',{messageId:'old_message',eventId:'old_event'});
+  await f.storage.put('message:old_message',{eventId:'old_event',type:'guild_league_thursday',date:'2026-11-26'});
+  await send(f.store,i);
+  const deletion=f.calls.find(call=>call.options.method==='DELETE');
+  assert.equal(deletion.url.pathname,'/api/v10/channels/'+env.DISCORD_ATTENDANCE_CHANNEL_ID+'/messages/old_message');
+  assert.equal(await f.storage.get('message:old_message'),undefined);
+  assert.equal((await f.storage.get('current-attendance-message')).messageId,'new_message');
+});
 test('message counts change when a member switches response without double counting',async()=>{
   const f=fixture(),i=interaction();await send(f.store,i);
   let message=f.calls.filter(call=>call.url.pathname.includes('/channels/')&&call.options.method==='PATCH').at(-1).body;
